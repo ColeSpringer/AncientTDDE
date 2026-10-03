@@ -3,11 +3,6 @@
 Python tooling for migrating DRAX's Ancient Tower Defense v5.3 to a self-contained
 Age of Empires II: Definitive Edition scenario using stock assets.
 
-Milestone 1 is the legacy audit, behavior catalog and explicit migration inventory.
-Start with the [reviewed catalog](docs/catalog/README.md), the
-[project structure](docs/project-structure.md), and [modernization plan](ANCIENT_TD_DE_PLAN.md).
-The repository does not yet contain a migrated playable scenario.
-
 ## Development
 
 Use Python 3.14.4 and [uv](https://docs.astral.sh/uv/). The parser is pinned to
