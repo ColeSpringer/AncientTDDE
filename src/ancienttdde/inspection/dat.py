@@ -2,11 +2,12 @@
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 from ancienttdde.provenance import project_path
 
 
-def read_json(path: Path):
+def read_json(path: Path) -> Any:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except (UnicodeError, json.JSONDecodeError) as error:
@@ -15,15 +16,15 @@ def read_json(path: Path):
         ) from error
 
 
-def graphic_ids(value, key="") -> set[int]:
+def graphic_ids(value: object, key: str = "") -> set[int]:
     """Collect graphic references including moving, combat, building and deltas."""
     if isinstance(value, dict):
-        result = set()
-        for name, child in value.items():
+        result: set[int] = set()
+        for name, child in cast(dict[str, object], value).items():
             result.update(graphic_ids(child, name if "graphic" in name.lower() else key))
         return result
     if isinstance(value, list):
-        return set().union(*(graphic_ids(child, key) for child in value))
+        return set[int]().union(*(graphic_ids(child, key) for child in cast(list[object], value)))
     if type(value) is int and value >= 0 and "graphic" in key.lower():
         # Coordinates/displacements are not IDs.
         if not any(word in key.lower() for word in ("displacement", "angle", "damagegraphics")):
@@ -44,20 +45,21 @@ LINKED_UNITS = {
 }
 
 
-def linked_units(value) -> set[int]:
+def linked_units(value: object) -> set[int]:
     if isinstance(value, dict):
-        result = {v for k, v in value.items() if k in LINKED_UNITS and type(v) is int and v >= 0}
-        for child in value.values():
+        values = cast(dict[str, object], value)
+        result = {v for k, v in values.items() if k in LINKED_UNITS and type(v) is int and v >= 0}
+        for child in values.values():
             result.update(linked_units(child))
         return result
     if isinstance(value, list):
-        return set().union(*(linked_units(child) for child in value))
+        return set[int]().union(*(linked_units(child) for child in cast(list[object], value)))
     return set()
 
 
 def inspect_dat(
     directory: Path, object_ids: set[int], technology_ids: set[int], graphics_directory: Path
-) -> dict:
+) -> dict[str, Any]:
     manifest = read_json(directory / "manifest.json")
     index = read_json(directory / "civilizations.json")
     graphics = read_json(directory / "graphics.json")
@@ -71,8 +73,8 @@ def inspect_dat(
         if g.get("FileName", "").casefold() in assets
     }
 
-    def expand_graphics(seeds):
-        seen = set()
+    def expand_graphics(seeds: set[int]) -> set[int]:
+        seen: set[int] = set()
         pending = list(seeds)
         while pending:
             identifier = pending.pop()
@@ -86,8 +88,10 @@ def inspect_dat(
             )
         return seen
 
-    objects = {i: {"id": i, "civilizations": {}} for i in sorted(object_ids)}
-    civs = []
+    objects: dict[int, dict[str, Any]] = {
+        i: {"id": i, "civilizations": {}} for i in sorted(object_ids)
+    }
+    civs: list[dict[str, Any]] = []
     all_techs = set(technology_ids)
     for entry in index:
         civ = read_json(project_path(directory, entry["file"]))
@@ -112,7 +116,7 @@ def inspect_dat(
                 raise ValueError(f"Object {i} is missing from civilization {cid}")
             unit = civ["Units"][i]
             pending = list(linked_units(unit))
-            linked = set()
+            linked: set[int] = set()
             seeds = graphic_ids(unit)
             while pending:
                 uid = pending.pop()

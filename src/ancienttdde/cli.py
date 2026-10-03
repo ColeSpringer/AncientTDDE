@@ -21,7 +21,7 @@ Root = Annotated[Path, typer.Option(help="Project root containing content/audit.
 def audit(
     root: Root = Path("."),
     output: Annotated[Path | None, typer.Option(help="Generated report directory.")] = None,
-):
+) -> None:
     """Inventory original behavior and DAT dependencies; generate JSON and Markdown."""
     try:
         result = run_audit(root, output)
@@ -42,7 +42,7 @@ def audit(
 def validate(
     root: Root = Path("."),
     report: Annotated[Path | None, typer.Option(help="Audit report to check as well.")] = None,
-):
+) -> None:
     """Check current content, source provenance, and optionally an audit report."""
     try:
         root = root.resolve()
@@ -65,14 +65,14 @@ def validate(
 
 
 @app.command()
-def build():
+def build() -> None:
     """Generate the playable scenario (starts with milestone 2)."""
     typer.echo("Scenario generation starts with milestone 2; use audit for milestone 1.", err=True)
     raise typer.Exit(2)
 
 
 @app.command()
-def probe():
+def probe() -> None:
     """Generate focused in-game probes (milestone 3)."""
     typer.echo("In-game probe generation is scheduled for milestone 3.", err=True)
     raise typer.Exit(2)

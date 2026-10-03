@@ -4,7 +4,7 @@ from typing import Any
 
 
 class ReferenceRegistry:
-    def __init__(self, mappings: list[dict[str, Any]]):
+    def __init__(self, mappings: list[dict[str, Any]]) -> None:
         self._objects: dict[str, dict[str, Any]] = {}
         self._legacy: dict[tuple[int, int], dict[str, Any]] = {}
         self._references: dict[tuple[str, str], int] = {}

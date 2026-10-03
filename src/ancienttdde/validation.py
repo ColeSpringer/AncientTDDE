@@ -3,13 +3,14 @@
 import json
 import tomllib
 from pathlib import Path
+from typing import Any
 
 from ancienttdde.inspection.dat import read_json
 from ancienttdde.provenance import hash_file, project_path, verify_provenance
 from ancienttdde.registry import ReferenceRegistry
 
 
-def load_config(root: Path) -> dict:
+def load_config(root: Path) -> dict[str, Any]:
     path = root / "content/audit.toml"
     if not path.is_file():
         raise ValueError(f"Missing audit configuration: {path}")
@@ -19,7 +20,7 @@ def load_config(root: Path) -> dict:
     return config
 
 
-def input_paths(config: dict) -> list[str]:
+def input_paths(config: dict[str, Any]) -> list[str]:
     return [
         "content/audit.toml",
         *(
@@ -30,10 +31,10 @@ def input_paths(config: dict) -> list[str]:
 
 
 def validate_inventory(
-    classification: dict,
-    mappings: dict,
-    scenario: dict | None = None,
-    dat: dict | None = None,
+    classification: dict[str, Any],
+    mappings: dict[str, Any],
+    scenario: dict[str, Any] | None = None,
+    dat: dict[str, Any] | None = None,
 ) -> None:
     """Check reviewed decisions, then coverage when extracted evidence is available."""
     if classification["schema_version"] != 1 or mappings["schema_version"] != 1:
@@ -41,8 +42,8 @@ def validate_inventory(
     if not classification["mechanics"] or not mappings["objects"]:
         raise ValueError("Mechanic and object inventories must be nonempty")
     registry = ReferenceRegistry(mappings["objects"])
-    keys = set()
-    assigned = []
+    keys: set[str] = set()
+    assigned: list[int] = []
     for row in classification["mechanics"]:
         if not row.get("key") or row["key"] in keys:
             raise ValueError("Every mechanic needs a unique nonempty key")
@@ -68,7 +69,7 @@ def validate_inventory(
     if scenario is not None and set(assigned) != {t["id"] for t in scenario["triggers"]}:
         raise ValueError("Mechanic inventory must classify every trigger exactly once")
     if dat is not None:
-        missing = []
+        missing: list[tuple[int, int]] = []
         for obj in dat["objects"]:
             for cid in obj["civilizations"]:
                 try:
@@ -79,7 +80,7 @@ def validate_inventory(
             raise ValueError(f"Missing civilization-aware migration mappings: {missing[:10]}")
 
 
-def validate_inputs(root: Path) -> tuple[dict, dict, dict]:
+def validate_inputs(root: Path) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     config = load_config(root)
     provenance = read_json(project_path(root, config["provenance"]))
     verify_provenance(root, provenance)
@@ -89,7 +90,7 @@ def validate_inputs(root: Path) -> tuple[dict, dict, dict]:
     return config, classification, mappings
 
 
-def validate_references(scenario: dict) -> list[dict]:
+def validate_references(scenario: dict[str, Any]) -> list[dict[str, Any]]:
     known = {
         "trigger": {t["id"] for t in scenario["triggers"]},
         "instance": {u["reference_id"] for u in scenario["units"]},
@@ -103,7 +104,7 @@ def validate_references(scenario: dict) -> list[dict]:
     ]
 
 
-def validate_report(directory: Path, root: Path) -> dict:
+def validate_report(directory: Path, root: Path) -> dict[str, Any]:
     """Validate report integrity, current inputs and complete evidence coverage."""
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
     if manifest["schema_version"] != 1:

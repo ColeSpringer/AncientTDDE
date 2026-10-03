@@ -8,9 +8,12 @@ import sys
 from collections import Counter
 from enum import Enum
 from pathlib import Path
+from typing import Any, cast
+
+type JSONValue = str | int | float | bool | None | list[JSONValue] | dict[str, JSONValue]
 
 
-def inspect_scenario(path: Path) -> dict:
+def inspect_scenario(path: Path) -> dict[str, Any]:
     process = subprocess.run(
         [sys.executable, "-m", "ancienttdde.inspection.scenario", str(path.resolve())],
         capture_output=True,
@@ -23,32 +26,33 @@ def inspect_scenario(path: Path) -> dict:
     return json.loads(process.stdout)
 
 
-def scalar(value):
+def scalar(value: object) -> JSONValue:
     if isinstance(value, Enum):
         return value.value if isinstance(value.value, int) else value.name
     if isinstance(value, (str, int, float, bool)) or value is None:
         return value
     if isinstance(value, (list, tuple)):
-        return [scalar(v) for v in value]
+        return [scalar(v) for v in cast(list[object] | tuple[object, ...], value)]
     if isinstance(value, dict):
-        return {str(k): scalar(v) for k, v in value.items()}
+        return {str(k): scalar(v) for k, v in cast(dict[object, object], value).items()}
     raise TypeError(f"Unexpected parser value: {type(value).__name__}")
 
 
-def component(obj, dataset, kind: str) -> dict:
+def component(obj: Any, dataset: Any, kind: str) -> dict[str, Any]:
     identifier = getattr(obj, kind)
     enum = dataset.EffectId if kind == "effect_type" else dataset.ConditionId
     try:
         name = enum(identifier).name.lower()
     except ValueError:
         name = f"unknown_{identifier}"
-    fields = dataset.attributes.get(identifier)
+    fields: list[str] | None = dataset.attributes.get(identifier)
+    values = vars(cast(object, obj))
     if fields is None:
-        fields = [key for key in vars(obj) if not key.startswith("_")]
+        fields = [key for key in values if not key.startswith("_")]
     attributes = {key: scalar(getattr(obj, key, None)) for key in fields if key != kind}
     raw = {
         key: scalar(value)
-        for key, value in vars(obj).items()
+        for key, value in values.items()
         if key not in {"_uuid", "_instance_number_history"}
     }
     if kind == "effect_type":
@@ -56,10 +60,12 @@ def component(obj, dataset, kind: str) -> dict:
     return {"type": name, "type_id": int(identifier), "attributes": attributes, "raw": raw}
 
 
-def references(triggers: list[dict], units: list[dict], players: list[dict]) -> dict:
-    occurrences = []
+def references(
+    triggers: list[dict[str, Any]], units: list[dict[str, Any]], players: list[dict[str, Any]]
+) -> dict[str, Any]:
+    occurrences: list[dict[str, Any]] = []
 
-    def add(kind, identifier, path, owner=None):
+    def add(kind: str, identifier: object, path: str, owner: int | None = None) -> None:
         if type(identifier) is int and identifier >= 0:
             occurrences.append({"kind": kind, "id": identifier, "path": path, "player_id": owner})
 
@@ -70,7 +76,8 @@ def references(triggers: list[dict], units: list[dict], players: list[dict]) -> 
     for player in players:
         for field in ("disabled_units", "disabled_buildings", "disabled_techs"):
             kind = "technology" if field == "disabled_techs" else "object"
-            for identifier in player.get(field) or []:
+            player_ids: list[int] = player.get(field) or []
+            for identifier in player_ids:
                 add(
                     kind, identifier, f"players[{player['player_id']}].{field}", player["player_id"]
                 )
@@ -89,13 +96,14 @@ def references(triggers: list[dict], units: list[dict], players: list[dict]) -> 
                     "legacy_location_object_reference",
                 ):
                     add("instance", attrs.get(field), path + "." + field)
-                for identifier in attrs.get("selected_object_ids") or []:
+                selected_ids: list[int] = attrs.get("selected_object_ids") or []
+                for identifier in selected_ids:
                     add("instance", identifier, path + ".selected_object_ids")
                 add("technology", attrs.get("technology"), path + ".technology", owner)
                 add("trigger", attrs.get("trigger_id"), path + ".trigger_id")
                 for field in ("variable", "variable2"):
                     add("variable", attrs.get(field), path + "." + field)
-    result = {
+    result: dict[str, Any] = {
         f"{kind}_ids": sorted({o["id"] for o in occurrences if o["kind"] == kind})
         for kind in ("object", "instance", "technology", "trigger", "variable")
     }
@@ -103,13 +111,19 @@ def references(triggers: list[dict], units: list[dict], players: list[dict]) -> 
     return result
 
 
-def load_scenario(path: Path) -> dict:
-    from AoE2ScenarioParser.datasets import conditions, effects
-    from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
+def load_scenario(path: Path) -> dict[str, Any]:
+    # The pinned parser exposes no py.typed marker or type stubs.
+    from AoE2ScenarioParser.datasets import (  # pyright: ignore[reportMissingTypeStubs]
+        conditions,
+        effects,
+    )
+    from AoE2ScenarioParser.scenarios.aoe2_de_scenario import (  # pyright: ignore[reportMissingTypeStubs]
+        AoE2DEScenario,
+    )
 
     with Path(os.devnull).open("w") as quiet, contextlib.redirect_stdout(quiet):
         scenario = AoE2DEScenario.from_file(str(path))
-        triggers = []
+        triggers: list[dict[str, Any]] = []
         for trigger in scenario.trigger_manager.triggers:
             fields = (
                 "name",
@@ -135,9 +149,10 @@ def load_scenario(path: Path) -> dict:
                     "effects": [component(e, effects, "effect_type") for e in trigger.effects],
                 }
             )
-        players = []
+        players: list[dict[str, Any]] = []
         for player in scenario.player_manager.players:
-            fields = player._object_attributes + player._object_attributes_non_gaia
+            # Raw inspection uses the parser's internal Gaia/non-Gaia field inventory.
+            fields = player._object_attributes + player._object_attributes_non_gaia  # pyright: ignore[reportPrivateUsage]
             players.append({f: scalar(getattr(player, f, None)) for f in fields})
         units = [
             {
@@ -155,6 +170,7 @@ def load_scenario(path: Path) -> dict:
             k: scalar(v) for k, v in vars(scenario.message_manager).items() if not k.startswith("_")
         }
         terrain = Counter(tile.terrain_id for tile in scenario.map_manager.terrain)
+        xs_manager: Any = scenario.xs_manager
         return {
             "scenario_version": scenario.scenario_version,
             "map": {
@@ -169,7 +185,7 @@ def load_scenario(path: Path) -> dict:
             "trigger_display_order": list(scenario.trigger_manager.trigger_display_order),
             "triggers": triggers,
             "references": references(triggers, units, players),
-            "external_xs": scenario.xs_manager.script_name,
+            "external_xs": xs_manager.script_name,
         }
 
 

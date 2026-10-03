@@ -5,6 +5,7 @@ import tempfile
 from dataclasses import asdict
 from importlib.metadata import version
 from pathlib import Path
+from typing import Any
 
 from ancienttdde.inspection.behavior import activation_times, extract_purchases, extract_waves
 from ancienttdde.inspection.dat import inspect_dat
@@ -18,7 +19,7 @@ from ancienttdde.validation import (
 )
 
 
-def inspect_evidence(root: Path, config: dict) -> tuple[dict, dict]:
+def inspect_evidence(root: Path, config: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     """Extract the scenario and civilization-aware DAT evidence for coverage checks."""
     scenario = inspect_scenario(project_path(root, config["scenario"]))
     dat = inspect_dat(
@@ -30,13 +31,13 @@ def inspect_evidence(root: Path, config: dict) -> tuple[dict, dict]:
     return scenario, dat
 
 
-def write_json(path: Path, value) -> None:
+def write_json(path: Path, value: object) -> None:
     with path.open("w", encoding="utf-8") as handle:
         json.dump(value, handle, indent=2, ensure_ascii=False, sort_keys=True, allow_nan=False)
         handle.write("\n")
 
 
-def run_audit(root: Path, output: Path | None = None) -> dict:
+def run_audit(root: Path, output: Path | None = None) -> dict[str, Any]:
     root = root.resolve()
     config, classification, mappings = validate_inputs(root)
     output = output.resolve() if output else project_path(root, config["report_directory"])

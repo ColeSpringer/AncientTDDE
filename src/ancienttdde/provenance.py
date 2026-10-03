@@ -2,6 +2,7 @@
 
 import hashlib
 from pathlib import Path
+from typing import Any
 
 
 def hash_file(path: Path) -> str:
@@ -16,7 +17,7 @@ def project_path(root: Path, relative: str) -> Path:
     return result
 
 
-def verify_provenance(root: Path, manifest: dict) -> None:
+def verify_provenance(root: Path, manifest: dict[str, Any]) -> None:
     for record in manifest["files"]:
         path = project_path(root, record["path"])
         if not path.is_file():

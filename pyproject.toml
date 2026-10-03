@@ -23,6 +23,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pyright>=1.1.414",
     "pytest>=9.1.1",
     "ruff>=0.16.10",
 ]
@@ -32,6 +33,14 @@ testpaths = ["tests"]
 filterwarnings = [
     "ignore:.*:DeprecationWarning:AoE2ScenarioParser.objects.managers.player_manager",
 ]
+
+[tool.pyright]
+include = ["src"]
+extraPaths = ["src"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
 
 [tool.ruff]
 target-version = "py314"

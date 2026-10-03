@@ -2,25 +2,26 @@
 
 import heapq
 import re
+from typing import Any
 
 from ancienttdde.models import Purchase, Region, Wave
 
 
-def of_type(components: list[dict], kind: str) -> list[dict]:
+def of_type(components: list[dict[str, Any]], kind: str) -> list[dict[str, Any]]:
     return [c["attributes"] for c in components if c["type"] == kind]
 
 
-def timer(trigger: dict) -> int | None:
+def timer(trigger: dict[str, Any]) -> int | None:
     timers = of_type(trigger["conditions"], "timer")
     return timers[0]["timer"] if len(timers) == 1 else None
 
 
-def region(attributes: dict) -> Region | None:
+def region(attributes: dict[str, Any]) -> Region | None:
     coordinates = [attributes.get(key, -1) for key in ("area_x1", "area_y1", "area_x2", "area_y2")]
     return Region(*coordinates) if all(v is not None and v >= 0 for v in coordinates) else None
 
 
-def activation_times(triggers: list[dict]) -> tuple[dict[int, int], dict[int, int]]:
+def activation_times(triggers: list[dict[str, Any]]) -> tuple[dict[int, int], dict[int, int]]:
     """Earliest timer-chain times; guarded activations remain unknown.
 
     These are scheduled game-seconds, excluding engine tick granularity. This
@@ -51,13 +52,17 @@ def activation_times(triggers: list[dict]) -> tuple[dict[int, int], dict[int, in
     return enabled_at, fires_at
 
 
-def extract_waves(triggers: list[dict]) -> list[Wave]:
+def extract_waves(triggers: list[dict[str, Any]]) -> list[Wave]:
     enabled_at, fires_at = activation_times(triggers)
-    result = []
+    result: list[Wave] = []
     for row in triggers:
         regular = re.fullmatch(r"lvl (\d+-[A-E])", row["name"], re.IGNORECASE)
         boss = re.fullmatch(r"Boss (\d+)", row["name"])
-        if not (regular or boss):
+        if boss is not None:
+            key = f"boss-{boss[1]}"
+        elif regular is not None:
+            key = regular[1].upper()
+        else:
             continue
         parents = [
             t
@@ -80,8 +85,8 @@ def extract_waves(triggers: list[dict]) -> list[Wave]:
             if stop and stop["id"] in fires_at and start_seconds is not None
             else None
         )
-        modifications = []
-        activated = []
+        modifications: list[dict[str, Any]] = []
+        activated: list[int] = []
         for source in ([start] if start else []) + [row]:
             modifications.extend(
                 c
@@ -102,7 +107,7 @@ def extract_waves(triggers: list[dict]) -> list[Wave]:
         )
         result.append(
             Wave(
-                key=f"boss-{boss[1]}" if boss else regular[1].upper(),
+                key=key,
                 kind="boss" if boss else "regular",
                 trigger_id=row["id"],
                 start_trigger_id=start["id"] if start else None,
@@ -119,9 +124,9 @@ def extract_waves(triggers: list[dict]) -> list[Wave]:
     return result
 
 
-def extract_purchases(triggers: list[dict], purchase_ids: set[int]) -> list[Purchase]:
+def extract_purchases(triggers: list[dict[str, Any]], purchase_ids: set[int]) -> list[Purchase]:
     by_id = {t["id"]: t for t in triggers}
-    result = []
+    result: list[Purchase] = []
     for identifier in sorted(purchase_ids):
         row = by_id[identifier]
         area_conditions = of_type(row["conditions"], "objects_in_area")

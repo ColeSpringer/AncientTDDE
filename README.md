@@ -18,6 +18,7 @@ uv sync --frozen
 uv run ancienttdde audit
 uv run ancienttdde validate --report .build/audit
 uv run pytest
+uv run pyright
 uv run ruff check .
 uv run ruff format --check .
 uv run python tools/check_xs.py

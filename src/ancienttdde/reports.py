@@ -1,9 +1,12 @@
 """Readable report views over the complete machine-readable evidence."""
 
+from collections.abc import Sequence
+from typing import Any
+
 from ancienttdde.inspection.behavior import of_type
 
 
-def cell(value) -> str:
+def cell(value: object) -> str:
     return (
         str(value if value is not None else "unknown")
         .replace("\x00", "")
@@ -14,18 +17,23 @@ def cell(value) -> str:
     )
 
 
-def table(headers: list[str], rows: list[list]) -> str:
+def table(headers: list[str], rows: Sequence[Sequence[object]]) -> str:
     lines = ["| " + " | ".join(headers) + " |", "| " + " | ".join("---" for _ in headers) + " |"]
     lines.extend("| " + " | ".join(map(cell, row)) + " |" for row in rows)
     return "\n".join(lines) + "\n"
 
 
-def brief(component: dict) -> str:
+def brief(component: dict[str, Any]) -> str:
     attrs = {k: v for k, v in component["attributes"].items() if v not in (-1, None, "", [])}
     return f"{component['type']}: {attrs}"
 
 
-def render_reports(scenario: dict, dat: dict, behavior: dict, summary: dict) -> dict[str, str]:
+def render_reports(
+    scenario: dict[str, Any],
+    dat: dict[str, Any],
+    behavior: dict[str, Any],
+    summary: dict[str, Any],
+) -> dict[str, str]:
     objects = {obj["id"]: obj for obj in dat["objects"]}
     enemy = next(
         (
@@ -36,7 +44,7 @@ def render_reports(scenario: dict, dat: dict, behavior: dict, summary: dict) -> 
         8,
     )
 
-    def name(uid):
+    def name(uid: int) -> str:
         definition = objects[uid]["civilizations"].get(str(enemy))
         return definition["definition"]["Name"] if definition else str(uid)
 
