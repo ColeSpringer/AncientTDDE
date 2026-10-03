@@ -1,0 +1,11 @@
+schema_version = 1
+scenario = "legacy/original/resources/_common/scenario/++ Ancient TD v5.3 ++ By DRAX.aoe2scenario"
+dat_reference = "legacy/reference/dat-verified"
+graphics = "legacy/original/resources/_common/drs/graphics"
+format_seed = "content/maps/format-seed.aoe2scenario"
+provenance = "legacy/provenance.json"
+classification = "content/legacy/classification.json"
+mappings = "content/migration/objects.json"
+report_directory = ".build/audit"
+# Upgrade types reached through the DAT tech tree, not directly placed.
+extra_object_ids = [234, 235]

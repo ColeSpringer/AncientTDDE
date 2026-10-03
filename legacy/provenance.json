@@ -1,0 +1,1100 @@
+{
+  "archive_origin": "Supplied repository input; no download URL was recorded",
+  "files": [
+    {
+      "path": "legacy/original/info.json",
+      "role": "original-package",
+      "sha256": "acd30f19379103ad6c1e581aa59264d3533be091ab4e23335b8a4d8c93b3e522",
+      "size_bytes": 489
+    },
+    {
+      "path": "legacy/original/resources/_common/dat/civilizations.json",
+      "role": "original-package",
+      "sha256": "6433914e7a3c85ef65142b0cf2df565d4400f34825358930aa2c4c1b8c99edc9",
+      "size_bytes": 27570
+    },
+    {
+      "path": "legacy/original/resources/_common/dat/empires2_x2_p1.dat",
+      "role": "original-package",
+      "sha256": "3ea85f0fb7b82f9f3e38cba80c568893d0e4619d0e3a2484195b594e83ff2982",
+      "size_bytes": 4528520
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_100ap_x1.smx",
+      "role": "original-package",
+      "sha256": "b81b7c3a0df7797623486d7fc2b44faccdb08e3b1fee0d4222f3d59c8b51d7bc",
+      "size_bytes": 15292
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_10ap_x1.smx",
+      "role": "original-package",
+      "sha256": "e64b4eb58a25c7aab13205ef1352fabe8c75434514c27ed0d45a34a4cc218088",
+      "size_bytes": 14498
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1500stone_x1.smx",
+      "role": "original-package",
+      "sha256": "25cff2b3b050d1f5ac9e13dd70475f4ce758b02ba4fb8bc7af530f35ce3a928d",
+      "size_bytes": 19108
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_170ap_x1.smx",
+      "role": "original-package",
+      "sha256": "3bcc4ca7562ef8f0c63b3888c667fb2948628905803e344f0cd695bd24863114",
+      "size_bytes": 16706
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_175gold2_x1.smx",
+      "role": "original-package",
+      "sha256": "60c07794559f56644cad481069931fa8d98ab586873b6afd0baa604d7a9b798a",
+      "size_bytes": 26474
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1ap30s_x1.smx",
+      "role": "original-package",
+      "sha256": "8b39f380e4d72e1fe76eb324dfbd34200f98cd1225bc8fadcfff49d15e9b7b68",
+      "size_bytes": 22742
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1apper5_x1.smx",
+      "role": "original-package",
+      "sha256": "91ca4a1290645760371b8e2ff963c336b1a74cb8ecf2bd67ee44c54a086638c4",
+      "size_bytes": 21473
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1kgold2_x1.smx",
+      "role": "original-package",
+      "sha256": "855b823ef4a4c591ce14f4fcafb0d9d9b40f8fcc09e41456482769eb719925b0",
+      "size_bytes": 23812
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1kingper1_x1.smx",
+      "role": "original-package",
+      "sha256": "69aacdf661f10469ce67a4e87340f6b5234c74c26569e3e9b712f6251c32412c",
+      "size_bytes": 25622
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_1kingper2_x1.smx",
+      "role": "original-package",
+      "sha256": "894bb1103958dc8c69d8f2e04bbff2ae8f2c54e154735f6a522142391d4a1a2b",
+      "size_bytes": 29886
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_20relics_x1.smx",
+      "role": "original-package",
+      "sha256": "224b7419920586804cb4bc665d40793c4ec3388623b8147903c6dd0cdd2ec131",
+      "size_bytes": 21818
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_255ap_x1.smx",
+      "role": "original-package",
+      "sha256": "f85c9798305a2f2c18f78021de771f348ecfcbc0a7e9eb661da9e2379cb39278",
+      "size_bytes": 17076
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_25ap_x1.smx",
+      "role": "original-package",
+      "sha256": "0c625b9cd086cd008a345e317810c192c011a203786476bc64046a52ca57f9a6",
+      "size_bytes": 13348
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_2kwood_x1.smx",
+      "role": "original-package",
+      "sha256": "ecf97ae381f2c97f2f28de33502efe81fa84d1eb55eeed819dffc708c2a328b5",
+      "size_bytes": 18346
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_375stone_x1.smx",
+      "role": "original-package",
+      "sha256": "0f51c9d69d15af47c96f68601585b80ca35809c2a26c1abf6e79fb4faf71cd46",
+      "size_bytes": 30046
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_3ap30s_x1.smx",
+      "role": "original-package",
+      "sha256": "f0939e8fc5187844fce34578aee77058f3878337d1fba0d2c69db81145fae2f0",
+      "size_bytes": 23546
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_3carts_x1.smx",
+      "role": "original-package",
+      "sha256": "b6b972396058c1c72ff4c56872a6cce4b94baed5882d087304e481b5713c8b07",
+      "size_bytes": 26158
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_3cogs_x1.smx",
+      "role": "original-package",
+      "sha256": "945d884e736029e93234f579bc2778bbc2085fb5689003344114fed14a197712",
+      "size_bytes": 25038
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_3rdtower_x1.smx",
+      "role": "original-package",
+      "sha256": "fcf8ca6cb50a3ece180d2e7c832862eb836a922ccddd4acdcc8ea9a00fdea703",
+      "size_bytes": 23767
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_3relic_x1.smx",
+      "role": "original-package",
+      "sha256": "dfe61af7ceec0339eaef926ba282a165aab03bc43f4a3df7c8a5d1823fdc4426",
+      "size_bytes": 16318
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_450gold2_x1.smx",
+      "role": "original-package",
+      "sha256": "688972250a22d165c7c3172b9e90d7557e10a4fdb64e615a78055c0f1b29fc7e",
+      "size_bytes": 28508
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_4ap_x1.smx",
+      "role": "original-package",
+      "sha256": "c3f58c3513e39c446746868e131da5c86e4056a58ea0615c9fc5d6ae5778e444",
+      "size_bytes": 14424
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_4thtower_x1.smx",
+      "role": "original-package",
+      "sha256": "659eb958dea361adf0420ddf8b67409ec940004ef69185d9c0665c734dc5950d",
+      "size_bytes": 24700
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_50ap_x1.smx",
+      "role": "original-package",
+      "sha256": "cf9acc7dac08a04cd09824a76dbd8bc23e519651af711195a6f7b70905d865ce",
+      "size_bytes": 13545
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_750ap_x1.smx",
+      "role": "original-package",
+      "sha256": "db80f232b4027994722b18279dcb85c417e9d56ddb4867aa6a7090a86f41ac86",
+      "size_bytes": 18007
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_800stone_x1.smx",
+      "role": "original-package",
+      "sha256": "d8d50150cb8ebd6abef55ad3ad448effba1db81d18ff07d92a04a3302dc8c0cc",
+      "size_bytes": 29098
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_80pop_x1.smx",
+      "role": "original-package",
+      "sha256": "5c9608e7e2dc26e3b0ab1d93203c7d02a7ab00487b5c67b8a0ba32a100c64587",
+      "size_bytes": 13713
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_balrogId_x1.smx",
+      "role": "original-package",
+      "sha256": "fcfdaab4105873b954c74f1aa8caa91619f21d2a70d0f10e75cf074e64b0d4f0",
+      "size_bytes": 2853946
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_balrogwa_x1.smx",
+      "role": "original-package",
+      "sha256": "82c4edb66c8f5a0deb21b2e85528810867ca192e2b7268923aab38594ad4693f",
+      "size_bytes": 2827090
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_bossflame_x1.smx",
+      "role": "original-package",
+      "sha256": "25408e768c7726ed9cf877c2370b4301d049dee118d71f6ac8cd2992b6588c9d",
+      "size_bytes": 392624
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_buildingvill_x1.smx",
+      "role": "original-package",
+      "sha256": "48b8a377b43eecd303a9d88f34d02ae221f070d3b60d98cafdf027d5a9e887b0",
+      "size_bytes": 6952
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_castleage_x1.smx",
+      "role": "original-package",
+      "sha256": "746b26b1309985e00cd8a01cb036472d9c5c4b7f0bc3dbd5288aa2f228a4abe9",
+      "size_bytes": 19300
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_castlestore_x1.smx",
+      "role": "original-package",
+      "sha256": "cf0683a59cc2b86d50c113a3d63fe77da5dafe96eb6d5f7a3c82a88f97ad9bb5",
+      "size_bytes": 9911
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_cavetrollwalk_x1.smx",
+      "role": "original-package",
+      "sha256": "880381532f8d90bd36174a74aeb7ba870b75d62fb8638a08a05d89eee8ba625e",
+      "size_bytes": 1029766
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_cavtroll idle_x1.smx",
+      "role": "original-package",
+      "sha256": "8ff5867d8318220cb89de527d82935abff353e0c0f7ffcdfa6b16cdf9614c6d5",
+      "size_bytes": 618821
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_cursedreskin_x1.smx",
+      "role": "original-package",
+      "sha256": "bfbeb587b8c7009936f1a6824627b33d1e8690286f1495b8eae8ce46b359c0d8",
+      "size_bytes": 99395
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_cursedreskindestro_x1.smx",
+      "role": "original-package",
+      "sha256": "492624049b04ba28e879ed4db4361f3c79dc38d3b561ba95b6514aa931cc766b",
+      "size_bytes": 4305946
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_cursedreskinrubble_x1.smx",
+      "role": "original-package",
+      "sha256": "228cde6373acf4d0b3e64cb29f3205d78df57aad4eb427b60f31d14b32f22e3c",
+      "size_bytes": 20836
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_deathstar2_x1.smx",
+      "role": "original-package",
+      "sha256": "095b0cca5dd56e6104da8b7c59a3223ecc078ebfd54a965f913d967128a0b7d0",
+      "size_bytes": 43897
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_discord_x1.smx",
+      "role": "original-package",
+      "sha256": "6cb49460c846a8e3d8a643cc061a3e3da029bf8657e75924192a30cf7c14e35b",
+      "size_bytes": 43105
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_dragonid_x1.smx",
+      "role": "original-package",
+      "sha256": "afb5b90b451acd2ce1d71828cb25116717e4c01be57f33b4e3013a3504732d67",
+      "size_bytes": 5176228
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_dragonwa_x1.smx",
+      "role": "original-package",
+      "sha256": "a8e3cc073990c83545d2dffa1ea1744bbaccc2a0b0fee3a3fa9b252d9ae62cf9",
+      "size_bytes": 4972250
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_entidle_x1.smx",
+      "role": "original-package",
+      "sha256": "b7cfe098a1b7fdd306e99e41aaa6fc15bfc2fbfe7b393d964c075ca92d3f0f7c",
+      "size_bytes": 600413
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_entwalk_x1.smx",
+      "role": "original-package",
+      "sha256": "480687a2ebfb91677e8e9f6c6956710e021a3155a7304862cb548541c7050b7a",
+      "size_bytes": 636619
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_foodbonus_x1.smx",
+      "role": "original-package",
+      "sha256": "f1ffa86b8070225c5e506e1a58a5f37c7dfc489dae42bacbce0a079fe80e9ead",
+      "size_bytes": 4914
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_goldbonus_x1.smx",
+      "role": "original-package",
+      "sha256": "fc953368299649770cedf69dff0a915b3284d95e826b086593eb4b84ea05ddf0",
+      "size_bytes": 5521
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_impage_x1.smx",
+      "role": "original-package",
+      "sha256": "f54170aaa66d900fd272a0b776ba7158f6600ee2306372bc7229f80567bbd00d",
+      "size_bytes": 15053
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_lraccursed_x1.smx",
+      "role": "original-package",
+      "sha256": "92ab6e9aeb708d654f510e069bac4acb15cef5c27a919a75a23ebc3fe513d9ee",
+      "size_bytes": 32057
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_nazgulknightid_x1.smx",
+      "role": "original-package",
+      "sha256": "cb0f2fc6a77ffbd6d8d467fcee2a03e0f70390343b58c97dc967485b9e8dcd10",
+      "size_bytes": 406899
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_nazgulknightwa_x1.smx",
+      "role": "original-package",
+      "sha256": "1a4fb861e04c9d78e2c929e35ea542eb882ebc3ee00d62c61fc66ada86f0ab8b",
+      "size_bytes": 273269
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_repvill_x1.smx",
+      "role": "original-package",
+      "sha256": "2556e5f8216854487a7d47b51c9fb6a0903d49a86b478cb15f06bf9d15ec8206",
+      "size_bytes": 18686
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_resvill_x1.smx",
+      "role": "original-package",
+      "sha256": "6219605c0b46f20941fcea228463cb88f4b45768e2181302bca08373eeebb303",
+      "size_bytes": 9422
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_sauronid_x1.smx",
+      "role": "original-package",
+      "sha256": "d7e31610169f878d4a3daa201242342510255f4edd84de26fb01703e55f7c751",
+      "size_bytes": 943178
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_sauronwa_x1.smx",
+      "role": "original-package",
+      "sha256": "96a8babca7e9f394cbce7808280d3a7a0f4e41d50b2bffae80850f5dc1c12e46",
+      "size_bytes": 976954
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_spideridle_x1.smx",
+      "role": "original-package",
+      "sha256": "7f39da1f901f2a4584f96c482c2821483eb13349fbed7ca31043fc886ce04772",
+      "size_bytes": 214360
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_spiderwalk_x1.smx",
+      "role": "original-package",
+      "sha256": "a05257376f2b0946a31976f0896f6e450bc6015d0bebf15cf595d8e933913331",
+      "size_bytes": 212744
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_stonebonus_x1.smx",
+      "role": "original-package",
+      "sha256": "4f62f4ef98b77c866f2c0e02bb8de8c13d66d0908c34e551b086cbb06a64ed8f",
+      "size_bytes": 5604
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_tyran_idleA_x1.smx",
+      "role": "original-package",
+      "sha256": "3a0a67e5dabfd520ea3e05f1613b03d7fc2211406f1abc70de1f10120fce9665",
+      "size_bytes": 2081334
+    },
+    {
+      "path": "legacy/original/resources/_common/drs/graphics/b_tyran_walk_x1.smx",
+      "role": "original-package",
+      "sha256": "44f271bab8a894c922444918056f1b63556dae1a6bd74231f8f13a4eabf1f953",
+      "size_bytes": 1303090
+    },
+    {
+      "path": "legacy/original/resources/_common/scenario/++ Ancient TD v5.3 ++ By DRAX.aoe2scenario",
+      "role": "original-package",
+      "sha256": "ce21088918d7da3bc8057cf7ef78dc80ee03eaab04523b557504884a3de71c81",
+      "size_bytes": 103408
+    },
+    {
+      "path": "legacy/original/thumbnail.jpg",
+      "role": "original-package",
+      "sha256": "f5dd869fcee34920b4817c477af2a30c5f3b82a37d7c70b5fa86749087830f10",
+      "size_bytes": 82000
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/000_Gaia.json",
+      "role": "supplied-dat-reference",
+      "sha256": "506567d229b8ce0373bcc58e5752def0e5335f2c9807c678d7f5297d321c899d",
+      "size_bytes": 18199975
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/001_British.json",
+      "role": "supplied-dat-reference",
+      "sha256": "22d76737d463b1571f1c31b3a699f6ec265cb8f2a87e4c452fc82fa189a10f02",
+      "size_bytes": 18085248
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/002_French.json",
+      "role": "supplied-dat-reference",
+      "sha256": "2eacf309bc0c813c309058a102b032b3b3d9af0d5b9d744cffb25aa36eb79168",
+      "size_bytes": 18085247
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/003_Goths.json",
+      "role": "supplied-dat-reference",
+      "sha256": "e1c73ba652e25cab30e32013b4cf38e84cc91734ffa603020703e978f5b3331b",
+      "size_bytes": 18085243
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/004_Teutons.json",
+      "role": "supplied-dat-reference",
+      "sha256": "a56fd94d07e9b212e0949792256146f0f9f94c1e84f2b9ce1420d7e9ab3f5c74",
+      "size_bytes": 18085245
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/005_Japanese.json",
+      "role": "supplied-dat-reference",
+      "sha256": "b6f6bcf68622a0d31defbd4badbfa84d8dfbe95018bf85dc6d93b3b3c77acece",
+      "size_bytes": 18085247
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/006_Chinese.json",
+      "role": "supplied-dat-reference",
+      "sha256": "ae29c51d1924b9c5053a6b700e72608c8a17459c3bc0ce9dfd51fe7818cb5b34",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/007_Byzantine.json",
+      "role": "supplied-dat-reference",
+      "sha256": "ec83e3f5eaa82be2bbc62702c37182ce1e85ac6e8e8da969b1f3bb8a453ae73d",
+      "size_bytes": 18085271
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/008_Persians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "c2f034c66961e8d180a50ac6889038292087355514908a3c7117faaa52158c1c",
+      "size_bytes": 18085249
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/009_Saracens.json",
+      "role": "supplied-dat-reference",
+      "sha256": "3fb8c70422022d4e72b2525933915bd274e8d487bec27d533a47e0628add4976",
+      "size_bytes": 18085249
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/010_Turks.json",
+      "role": "supplied-dat-reference",
+      "sha256": "81c73acef6772e54a2a2dd51a50510242afb2dcc6e0c9a47984d48b08ff75a1e",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/011_Vikings.json",
+      "role": "supplied-dat-reference",
+      "sha256": "d6454e7d1326733ce38681051b7df6c319f8cd0b8a2c524a2990a47a85fe0de9",
+      "size_bytes": 18085245
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/012_Mongols.json",
+      "role": "supplied-dat-reference",
+      "sha256": "05bac05bdbe21152538648a9afa40ccb96a6bcafc0ae9e487ae6b8c33b308279",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/013_Celts.json",
+      "role": "supplied-dat-reference",
+      "sha256": "938f4a27696b7f80c352a2112f7fdb2574767dec51130a571802d5305f8daec9",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/014_Spanish.json",
+      "role": "supplied-dat-reference",
+      "sha256": "80fd010954c4b7326d3d7f87b340a76d8292444f5340db3496a44edb0238cde4",
+      "size_bytes": 18085269
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/015_Aztecs.json",
+      "role": "supplied-dat-reference",
+      "sha256": "c9b8c0d0c2852919ec6d246107df2ad207d3e9ae1e9aa2f1746f02a4051fa942",
+      "size_bytes": 18085366
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/016_Mayan.json",
+      "role": "supplied-dat-reference",
+      "sha256": "d35d5cae7f538c58b4e14545fc390df76abdd11732fb5355037050086714cbd3",
+      "size_bytes": 18085365
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/017_Huns.json",
+      "role": "supplied-dat-reference",
+      "sha256": "290a3c70db57ec5e3496109a50bbec76165a213a63e87c0e2a58d1aec203d794",
+      "size_bytes": 18085242
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/018_Koreans.json",
+      "role": "supplied-dat-reference",
+      "sha256": "44752fe83cd8f137bc3393b1d8e27e902402b7b3c6f4478716a2005d90d2b2a8",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/019_Italians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "464afc94559355d872b1e9c5098edecb265d331cb0ccd6779dae43141c318e89",
+      "size_bytes": 18085269
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/020_Indians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "0667858197db999648ded37dd59f3769ab204293bec35cc06dc52aed7154bd3c",
+      "size_bytes": 18085562
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/021_Incas.json",
+      "role": "supplied-dat-reference",
+      "sha256": "5831788379039a6b2030a3c0595f57f01133887968d7ca58cc70d584e556aa97",
+      "size_bytes": 18085361
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/022_Magyars.json",
+      "role": "supplied-dat-reference",
+      "sha256": "b836df0b0c3234dee15665e76ffc3eafd18d6f216170756935c6b79d730ba177",
+      "size_bytes": 18085355
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/023_Slavs.json",
+      "role": "supplied-dat-reference",
+      "sha256": "62f105114080a418b27ab7aa5e9fb4bdc58a45da44a296d3e63a49d6bb0f07e1",
+      "size_bytes": 18085356
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/024_Portuguese.json",
+      "role": "supplied-dat-reference",
+      "sha256": "e957f88b5563f650ca798332a0fc265d62ccd5b792e3cd175216a4d9d0e342c0",
+      "size_bytes": 18085267
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/025_Ethopians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "3bc348105d84713fb925269a1f96f4313e5d0c03fb98640c803a69366e67e30f",
+      "size_bytes": 18085376
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/026_Malians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "c605fac2e22469626b3c8aa2c4ccc267f8a18b327397e2bc8314b77390f51600",
+      "size_bytes": 18085374
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/027_Berbers.json",
+      "role": "supplied-dat-reference",
+      "sha256": "77e77df9aca0c19aea8f8951ec3e910f0a2af61298f8d33446ca954f86f344d8",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/028_Khmer.json",
+      "role": "supplied-dat-reference",
+      "sha256": "8058c9b3b8f9a7b78aa04134f61131ad55015c3d13d066113e140bbbfacf4aec",
+      "size_bytes": 18085941
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/029_Malay.json",
+      "role": "supplied-dat-reference",
+      "sha256": "257aa6cf1dba994acf45b14c02f26e9a7cf3ff18bde9c81d5d207fce7e7638c7",
+      "size_bytes": 18085953
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/030_Burmese.json",
+      "role": "supplied-dat-reference",
+      "sha256": "ca3ad45d07be5a39a2ad10852370d6510f9fde8683e669a9d7667fb5b6483a1a",
+      "size_bytes": 18085955
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/031_Vietnamese.json",
+      "role": "supplied-dat-reference",
+      "sha256": "2353363114ddfcb8a6608378afb812ecbc1032933575597c7c5f7a23e03565de",
+      "size_bytes": 18085259
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/032_Bulgarians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "aabba50f02f6bc265258c4fab38d798fa4e71e9a35920c2054847297bf56b05e",
+      "size_bytes": 18085374
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/033_Tatars.json",
+      "role": "supplied-dat-reference",
+      "sha256": "5778a7b393116fc1c1fe5e8fc306f2f522dc3bf587a32596034867c15b2fd10f",
+      "size_bytes": 18085956
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/034_Cumans.json",
+      "role": "supplied-dat-reference",
+      "sha256": "4937149accca09f95faa9b5e016904ec1e89bd1be2fa37616ae9075219dceb86",
+      "size_bytes": 18085956
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/035_Lithuanians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "93f56ea4b5bf41191ee640fa88dc103cae033c8e65fe717b870be03093dda759",
+      "size_bytes": 18085375
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/036_Burgundians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "13267bcdfdfec4f059379174269aecc8565a4be196af77d62495aa292e5ec1c0",
+      "size_bytes": 18085255
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/037_Sicilians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "16141facdba404d1a7d55b8c1b95a1e54a8326687c7c207871eb2bdd1abf47d0",
+      "size_bytes": 18085275
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/038_Poles.json",
+      "role": "supplied-dat-reference",
+      "sha256": "15f8586ed9ae00874830440f8302bd48b00fae33933e31242ee7940962e3fd58",
+      "size_bytes": 18085377
+    },
+    {
+      "path": "legacy/reference/dat/civilizations/039_Bohemians.json",
+      "role": "supplied-dat-reference",
+      "sha256": "01fc58dd46796a5be0a9f6e7c10f01811f3999a207053db66257be82ca49ecf3",
+      "size_bytes": 18085381
+    },
+    {
+      "path": "legacy/reference/dat/civilizations.json",
+      "role": "supplied-dat-reference",
+      "sha256": "9a62ed7e9478a5e956e7bbbf91d786f313c09777817073a3e83963f70d72499d",
+      "size_bytes": 3755
+    },
+    {
+      "path": "legacy/reference/dat/effects.json",
+      "role": "supplied-dat-reference",
+      "sha256": "8d5842d2f5f34615f333c77801f244f8fd278c20ad5a64a76253345ec844a18c",
+      "size_bytes": 1582953
+    },
+    {
+      "path": "legacy/reference/dat/float_ptr_terrain_tables.json",
+      "role": "supplied-dat-reference",
+      "sha256": "4cef39b7ccf6bce6c08e2c7d7263186c7fc371394d06b768fbc9a62ded21c58f",
+      "size_bytes": 163
+    },
+    {
+      "path": "legacy/reference/dat/graphic_pointers.json",
+      "role": "supplied-dat-reference",
+      "sha256": "5361555feb013d98c6f6357d76f39350ace0a3f91c8d55504b9e3de4712e9d93",
+      "size_bytes": 62428
+    },
+    {
+      "path": "legacy/reference/dat/graphics.json",
+      "role": "supplied-dat-reference",
+      "sha256": "5886234836e9839914d3a63e77c36fcaf602fe7932b5b6551ec59955ba072533",
+      "size_bytes": 17237065
+    },
+    {
+      "path": "legacy/reference/dat/manifest.json",
+      "role": "supplied-dat-reference",
+      "sha256": "76e796e14aa144e4008dce42abedb09c7d26b8e2f42398ecfeb49a9cfcaf24d5",
+      "size_bytes": 1017
+    },
+    {
+      "path": "legacy/reference/dat/meta.json",
+      "role": "supplied-dat-reference",
+      "sha256": "aee1a71a90adf32576c42f9bcc6cc27971e03131f4aadc08295492ac639da64d",
+      "size_bytes": 344
+    },
+    {
+      "path": "legacy/reference/dat/player_colours.json",
+      "role": "supplied-dat-reference",
+      "sha256": "68faa595c51681578003301679459d40961c3f03244ce3bdd25785106216066f",
+      "size_bytes": 3988
+    },
+    {
+      "path": "legacy/reference/dat/random_maps.json",
+      "role": "supplied-dat-reference",
+      "sha256": "a8db9ffe3bf74b0904ff67d7fa4f4e41793022ac407089204666499795647405",
+      "size_bytes": 64
+    },
+    {
+      "path": "legacy/reference/dat/sounds.json",
+      "role": "supplied-dat-reference",
+      "sha256": "64f0d325d5e7f27eafd4a75bab5c586e8037bab513979232a2d6138b58605356",
+      "size_bytes": 486074
+    },
+    {
+      "path": "legacy/reference/dat/tech_tree.json",
+      "role": "supplied-dat-reference",
+      "sha256": "789dc0640f3c7d56beacb1eba0a6c63b411d96dd9f9f73d45f4500d5cd7a1f6f",
+      "size_bytes": 230521
+    },
+    {
+      "path": "legacy/reference/dat/technologies.json",
+      "role": "supplied-dat-reference",
+      "sha256": "ea48d5c7520604521b3cd0c71da6c8c0f2c3df55c72db59ed987b630c0e39e08",
+      "size_bytes": 649807
+    },
+    {
+      "path": "legacy/reference/dat/terrain_block.json",
+      "role": "supplied-dat-reference",
+      "sha256": "8ae6a7e1bb697273f31b70cccf52eccefd89d7a3f3712efec5eb2cfc1e8c1007",
+      "size_bytes": 1324699
+    },
+    {
+      "path": "legacy/reference/dat/terrain_pass_graphic_pointers.json",
+      "role": "supplied-dat-reference",
+      "sha256": "4cef39b7ccf6bce6c08e2c7d7263186c7fc371394d06b768fbc9a62ded21c58f",
+      "size_bytes": 163
+    },
+    {
+      "path": "legacy/reference/dat/terrain_restrictions.json",
+      "role": "supplied-dat-reference",
+      "sha256": "ea4ee80be15cb211890732234d0eaa82488ca6dbbd86b40730f4681385e8e786",
+      "size_bytes": 449041
+    },
+    {
+      "path": "legacy/reference/dat/unit_headers.json",
+      "role": "supplied-dat-reference",
+      "sha256": "eca0a4f7f9d94b408798522ce13140699b42cf438b93b57a2f42a87cf62a5c2f",
+      "size_bytes": 2625799
+    },
+    {
+      "path": "legacy/reference/dat/unit_lines.json",
+      "role": "supplied-dat-reference",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "size_bytes": 3
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/000_Gaia.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "506567d229b8ce0373bcc58e5752def0e5335f2c9807c678d7f5297d321c899d",
+      "size_bytes": 18199975
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/001_British.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "22d76737d463b1571f1c31b3a699f6ec265cb8f2a87e4c452fc82fa189a10f02",
+      "size_bytes": 18085248
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/002_French.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "43055aa595f82155d6f72fdb6313ffd0e39ed0e34d5cc1a24cbe1165d9a9e1ca",
+      "size_bytes": 18085247
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/003_Goths.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "e1c73ba652e25cab30e32013b4cf38e84cc91734ffa603020703e978f5b3331b",
+      "size_bytes": 18085243
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/004_Teutons.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "a56fd94d07e9b212e0949792256146f0f9f94c1e84f2b9ce1420d7e9ab3f5c74",
+      "size_bytes": 18085245
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/005_Japanese.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "b6f6bcf68622a0d31defbd4badbfa84d8dfbe95018bf85dc6d93b3b3c77acece",
+      "size_bytes": 18085247
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/006_Chinese.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "ae29c51d1924b9c5053a6b700e72608c8a17459c3bc0ce9dfd51fe7818cb5b34",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/007_Byzantine.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "ec83e3f5eaa82be2bbc62702c37182ce1e85ac6e8e8da969b1f3bb8a453ae73d",
+      "size_bytes": 18085271
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/008_Persians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "c2f034c66961e8d180a50ac6889038292087355514908a3c7117faaa52158c1c",
+      "size_bytes": 18085249
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/009_Saracens.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "3fb8c70422022d4e72b2525933915bd274e8d487bec27d533a47e0628add4976",
+      "size_bytes": 18085249
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/010_Turks.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "81c73acef6772e54a2a2dd51a50510242afb2dcc6e0c9a47984d48b08ff75a1e",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/011_Vikings.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "d6454e7d1326733ce38681051b7df6c319f8cd0b8a2c524a2990a47a85fe0de9",
+      "size_bytes": 18085245
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/012_Mongols.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "05bac05bdbe21152538648a9afa40ccb96a6bcafc0ae9e487ae6b8c33b308279",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/013_Celts.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "938f4a27696b7f80c352a2112f7fdb2574767dec51130a571802d5305f8daec9",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/014_Spanish.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "80fd010954c4b7326d3d7f87b340a76d8292444f5340db3496a44edb0238cde4",
+      "size_bytes": 18085269
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/015_Aztecs.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "c9b8c0d0c2852919ec6d246107df2ad207d3e9ae1e9aa2f1746f02a4051fa942",
+      "size_bytes": 18085366
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/016_Mayan.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "d35d5cae7f538c58b4e14545fc390df76abdd11732fb5355037050086714cbd3",
+      "size_bytes": 18085365
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/017_Huns.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "290a3c70db57ec5e3496109a50bbec76165a213a63e87c0e2a58d1aec203d794",
+      "size_bytes": 18085242
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/018_Koreans.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "44752fe83cd8f137bc3393b1d8e27e902402b7b3c6f4478716a2005d90d2b2a8",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/019_Italians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "464afc94559355d872b1e9c5098edecb265d331cb0ccd6779dae43141c318e89",
+      "size_bytes": 18085269
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/020_Indians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "0667858197db999648ded37dd59f3769ab204293bec35cc06dc52aed7154bd3c",
+      "size_bytes": 18085562
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/021_Incas.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "5831788379039a6b2030a3c0595f57f01133887968d7ca58cc70d584e556aa97",
+      "size_bytes": 18085361
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/022_Magyars.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "b836df0b0c3234dee15665e76ffc3eafd18d6f216170756935c6b79d730ba177",
+      "size_bytes": 18085355
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/023_Slavs.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "62f105114080a418b27ab7aa5e9fb4bdc58a45da44a296d3e63a49d6bb0f07e1",
+      "size_bytes": 18085356
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/024_Portuguese.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "e957f88b5563f650ca798332a0fc265d62ccd5b792e3cd175216a4d9d0e342c0",
+      "size_bytes": 18085267
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/025_Ethopians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "3bc348105d84713fb925269a1f96f4313e5d0c03fb98640c803a69366e67e30f",
+      "size_bytes": 18085376
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/026_Malians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "c605fac2e22469626b3c8aa2c4ccc267f8a18b327397e2bc8314b77390f51600",
+      "size_bytes": 18085374
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/027_Berbers.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "77e77df9aca0c19aea8f8951ec3e910f0a2af61298f8d33446ca954f86f344d8",
+      "size_bytes": 18085246
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/028_Khmer.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "8058c9b3b8f9a7b78aa04134f61131ad55015c3d13d066113e140bbbfacf4aec",
+      "size_bytes": 18085941
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/029_Malay.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "257aa6cf1dba994acf45b14c02f26e9a7cf3ff18bde9c81d5d207fce7e7638c7",
+      "size_bytes": 18085953
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/030_Burmese.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "ca3ad45d07be5a39a2ad10852370d6510f9fde8683e669a9d7667fb5b6483a1a",
+      "size_bytes": 18085955
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/031_Vietnamese.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "2353363114ddfcb8a6608378afb812ecbc1032933575597c7c5f7a23e03565de",
+      "size_bytes": 18085259
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/032_Bulgarians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "aabba50f02f6bc265258c4fab38d798fa4e71e9a35920c2054847297bf56b05e",
+      "size_bytes": 18085374
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/033_Tatars.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "5778a7b393116fc1c1fe5e8fc306f2f522dc3bf587a32596034867c15b2fd10f",
+      "size_bytes": 18085956
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/034_Cumans.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "f65affeb3a96ccf0c7034d93af2f131e82cf58283a14e02d63b41050370f4d01",
+      "size_bytes": 18085956
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/035_Lithuanians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "93f56ea4b5bf41191ee640fa88dc103cae033c8e65fe717b870be03093dda759",
+      "size_bytes": 18085375
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/036_Burgundians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "13267bcdfdfec4f059379174269aecc8565a4be196af77d62495aa292e5ec1c0",
+      "size_bytes": 18085255
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/037_Sicilians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "16141facdba404d1a7d55b8c1b95a1e54a8326687c7c207871eb2bdd1abf47d0",
+      "size_bytes": 18085275
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/038_Poles.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "15f8586ed9ae00874830440f8302bd48b00fae33933e31242ee7940962e3fd58",
+      "size_bytes": 18085377
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations/039_Bohemians.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "01fc58dd46796a5be0a9f6e7c10f01811f3999a207053db66257be82ca49ecf3",
+      "size_bytes": 18085381
+    },
+    {
+      "path": "legacy/reference/dat-verified/civilizations.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "9a62ed7e9478a5e956e7bbbf91d786f313c09777817073a3e83963f70d72499d",
+      "size_bytes": 3755
+    },
+    {
+      "path": "legacy/reference/dat-verified/effects.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "8d5842d2f5f34615f333c77801f244f8fd278c20ad5a64a76253345ec844a18c",
+      "size_bytes": 1582953
+    },
+    {
+      "path": "legacy/reference/dat-verified/float_ptr_terrain_tables.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "4cef39b7ccf6bce6c08e2c7d7263186c7fc371394d06b768fbc9a62ded21c58f",
+      "size_bytes": 163
+    },
+    {
+      "path": "legacy/reference/dat-verified/graphic_pointers.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "5361555feb013d98c6f6357d76f39350ace0a3f91c8d55504b9e3de4712e9d93",
+      "size_bytes": 62428
+    },
+    {
+      "path": "legacy/reference/dat-verified/graphics.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "5886234836e9839914d3a63e77c36fcaf602fe7932b5b6551ec59955ba072533",
+      "size_bytes": 17237065
+    },
+    {
+      "path": "legacy/reference/dat-verified/manifest.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "76e796e14aa144e4008dce42abedb09c7d26b8e2f42398ecfeb49a9cfcaf24d5",
+      "size_bytes": 1017
+    },
+    {
+      "path": "legacy/reference/dat-verified/meta.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "aee1a71a90adf32576c42f9bcc6cc27971e03131f4aadc08295492ac639da64d",
+      "size_bytes": 344
+    },
+    {
+      "path": "legacy/reference/dat-verified/player_colours.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "68faa595c51681578003301679459d40961c3f03244ce3bdd25785106216066f",
+      "size_bytes": 3988
+    },
+    {
+      "path": "legacy/reference/dat-verified/random_maps.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "a8db9ffe3bf74b0904ff67d7fa4f4e41793022ac407089204666499795647405",
+      "size_bytes": 64
+    },
+    {
+      "path": "legacy/reference/dat-verified/sounds.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "64f0d325d5e7f27eafd4a75bab5c586e8037bab513979232a2d6138b58605356",
+      "size_bytes": 486074
+    },
+    {
+      "path": "legacy/reference/dat-verified/tech_tree.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "789dc0640f3c7d56beacb1eba0a6c63b411d96dd9f9f73d45f4500d5cd7a1f6f",
+      "size_bytes": 230521
+    },
+    {
+      "path": "legacy/reference/dat-verified/technologies.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "ea48d5c7520604521b3cd0c71da6c8c0f2c3df55c72db59ed987b630c0e39e08",
+      "size_bytes": 649807
+    },
+    {
+      "path": "legacy/reference/dat-verified/terrain_block.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "8ae6a7e1bb697273f31b70cccf52eccefd89d7a3f3712efec5eb2cfc1e8c1007",
+      "size_bytes": 1324699
+    },
+    {
+      "path": "legacy/reference/dat-verified/terrain_pass_graphic_pointers.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "4cef39b7ccf6bce6c08e2c7d7263186c7fc371394d06b768fbc9a62ded21c58f",
+      "size_bytes": 163
+    },
+    {
+      "path": "legacy/reference/dat-verified/terrain_restrictions.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "ea4ee80be15cb211890732234d0eaa82488ca6dbbd86b40730f4681385e8e786",
+      "size_bytes": 449041
+    },
+    {
+      "path": "legacy/reference/dat-verified/unit_headers.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "eca0a4f7f9d94b408798522ce13140699b42cf438b93b57a2f42a87cf62a5c2f",
+      "size_bytes": 2625799
+    },
+    {
+      "path": "legacy/reference/dat-verified/unit_lines.json",
+      "role": "regenerated-dat-reference",
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "size_bytes": 3
+    },
+    {
+      "path": "legacy/original.zip",
+      "role": "original-archive",
+      "sha256": "f04181f131514cf0560adc97e707eee82b539e4b9effb6d90c0d34d54f001420",
+      "size_bytes": 17450010
+    },
+    {
+      "path": "content/maps/format-seed.aoe2scenario",
+      "role": "modern-format-seed",
+      "sha256": "3b0ca9155b6020aefcf2ae835f4d6b8f29a796bb254bc0f77a950de43f541bbc",
+      "size_bytes": 735
+    }
+  ],
+  "known_corrupt_inputs": [
+    "legacy/reference/dat/civilizations/002_French.json",
+    "legacy/reference/dat/civilizations/034_Cumans.json"
+  ],
+  "original_author": "DRAX6869 / DRAX",
+  "original_title": "Ancient TD v5.3 Drag Tower Mod (WORKING)",
+  "reference_source": "legacy/original/resources/_common/dat/empires2_x2_p1.dat",
+  "regeneration": {
+    "command": "./tools/dat/dump_legacy_dat.sh legacy/original/resources/_common/dat/empires2_x2_p1.dat legacy/reference/dat-verified",
+    "file_version": "VER 7.4",
+    "game_version": "GV_C17",
+    "genieutils_commit": "02baa4cc16e5e9e00425a0a1821f3b242cd9655d",
+    "reason": "Original French and Cumans JSON contain structural corruption. Preserve the supplied snapshot and regenerate separately."
+  },
+  "schema_version": 1
+}

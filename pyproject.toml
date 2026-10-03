@@ -1,0 +1,41 @@
+[project]
+name = "ancienttdde"
+version = "0.1.0"
+description = "Inspection and scenario tooling for the stock-DE Ancient Tower Defense migration"
+readme = "README.md"
+authors = [
+    { name = "Cole Springer", email = "93888664+ColeSpringer@users.noreply.github.com" }
+]
+requires-python = ">=3.14.4"
+dependencies = [
+    "aoe2scenarioparser==0.9.4",
+    "genieutils-py>=0.1.2",
+    "rich>=15.0.0",
+    "typer>=0.27.2",
+]
+
+[project.scripts]
+ancienttdde = "ancienttdde.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.12.5,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore:.*:DeprecationWarning:AoE2ScenarioParser.objects.managers.player_manager",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
