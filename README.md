@@ -12,6 +12,8 @@ AoE2ScenarioParser **0.9.4**; `uv.lock` locks the complete environment.
 uv sync --frozen
 uv run ancienttdde audit
 uv run ancienttdde validate --report .build/audit
+uv run ancienttdde build
+uv run ancienttdde validate --build .build/map
 uv run pytest
 uv run pyright
 uv run ruff check .
@@ -34,16 +36,33 @@ manifest. `--root /path/to/project` permits invocation from another directory;
 `validate` checks source provenance, trigger and civilization mapping coverage,
 and scenario references. With `--report`, it also verifies artifact hashes and
 rejects reports whose configuration or content inputs have changed. Without a
-report it extracts fresh evidence for the coverage checks. `build` and `probe`
-expose the planned CLI names and explain
-the future milestone that implements them. The relocated
-`content/maps/format-seed.aoe2scenario` is the original empty version-1.59 seed,
-not the version-1.49 legacy map. The XS check uses the parser's bundled binary;
-there are no gameplay XS files in milestone 1.
+report it extracts fresh evidence for the coverage checks. `probe` is not implemented.
+The XS check uses the parser's bundled binary; the map foundation
+contains no gameplay XS.
 
-Stock object mappings are candidate migration choices. The registry prevents
-using them for generation until verified in-game. The catalog distinguishes
+`build` generates the stock-DE map from versioned plain terrain and placement data.
+It needs no ignored legacy files. `build` writes
+`.build/map/ancient-td-de-map.aoe2scenario`, migrated data, named anchors, structural
+validation results and a hash manifest. `validate --build .build/map` checks current
+input and artifact hashes, reconstructs the expected migration and reloads the
+scenario in a fresh parser process. `--root` and `--output` work for builds too.
+
+The versioned [map template](content/maps/stock-de-template.aoe2scenario) preserves
+the 200×200 seven-lane layout, economy and trade areas. It replaces modded blockers,
+shop signs and life indicators with stock objects and reserves three siege islets
+per lane. All 7,395 placement IDs remain stable. The original empty version-1.59
+`format-seed.aoe2scenario` supplies only the format and stock player settings.
+See [map inputs](content/maps/README.md) and the
+[map verification record](docs/map-foundation.md) for migration decisions
+and the remaining in-game checks.
+
+Gameplay object mappings remain candidates until verified in-game. Map-only
+identities use reviewed names from the pinned parser datasets; these identity
+checks do not approve gameplay behavior. The catalog distinguishes
 scenario behavior, displayed instructions and intended modern design; it records
 the Hard-income asymmetry, unbounded King removal, wall-class tower bonuses and
-timed final victory explicitly. Real engine and multiplayer testing remain later
-milestone requirements.
+timed final victory explicitly. Real engine and multiplayer testing remain required
+for gameplay validation.
+
+Python changes must pass strict Pyright. Local parser interfaces in `typings/`
+are checked alongside `src/`; diagnostic ignores require a demonstrated need.

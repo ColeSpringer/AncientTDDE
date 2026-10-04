@@ -54,7 +54,7 @@
       "status": "candidate",
       "stock_id": 0,
       "stock_name": "MOVEABLE_MAP_REVEALER_A",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -110,7 +110,7 @@
       "status": "candidate",
       "stock_id": 4,
       "stock_name": "ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -166,7 +166,7 @@
       "status": "candidate",
       "stock_id": 5,
       "stock_name": "HAND_CANNONEER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -222,7 +222,7 @@
       "status": "candidate",
       "stock_id": 6,
       "stock_name": "ELITE_SKIRMISHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -278,7 +278,7 @@
       "status": "candidate",
       "stock_id": 7,
       "stock_name": "SKIRMISHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -334,7 +334,7 @@
       "status": "candidate",
       "stock_id": 8,
       "stock_name": "LONGBOWMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -390,7 +390,7 @@
       "status": "candidate",
       "stock_id": 11,
       "stock_name": "MANGUDAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -446,7 +446,7 @@
       "status": "candidate",
       "stock_id": 12,
       "stock_name": "BARRACKS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -502,7 +502,7 @@
       "status": "candidate",
       "stock_id": 13,
       "stock_name": "FISHING_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -558,7 +558,7 @@
       "status": "candidate",
       "stock_id": 17,
       "stock_name": "TRADE_COG",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -614,7 +614,7 @@
       "status": "candidate",
       "stock_id": 21,
       "stock_name": "WAR_GALLEY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -670,7 +670,7 @@
       "status": "candidate",
       "stock_id": 24,
       "stock_name": "CROSSBOWMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -726,7 +726,7 @@
       "status": "candidate",
       "stock_id": 25,
       "stock_name": "TEUTONIC_KNIGHT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -782,7 +782,7 @@
       "status": "candidate",
       "stock_id": 36,
       "stock_name": "BOMBARD_CANNON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -838,7 +838,7 @@
       "status": "candidate",
       "stock_id": 38,
       "stock_name": "KNIGHT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -894,7 +894,7 @@
       "status": "candidate",
       "stock_id": 39,
       "stock_name": "CAVALRY_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -950,7 +950,7 @@
       "status": "candidate",
       "stock_id": 40,
       "stock_name": "CATAPHRACT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1006,7 +1006,7 @@
       "status": "candidate",
       "stock_id": 41,
       "stock_name": "HUSKARL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1062,7 +1062,7 @@
       "status": "candidate",
       "stock_id": 45,
       "stock_name": "DOCK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1118,7 +1118,7 @@
       "status": "candidate",
       "stock_id": 46,
       "stock_name": "JANISSARY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1174,7 +1174,7 @@
       "status": "candidate",
       "stock_id": 49,
       "stock_name": "SIEGE_WORKSHOP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1230,7 +1230,7 @@
       "status": "candidate",
       "stock_id": 50,
       "stock_name": "FARM",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1247,7 +1247,7 @@
       "status": "candidate",
       "stock_id": 59,
       "stock_name": "FORAGE_BUSH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1319,7 +1319,7 @@
       "status": "candidate",
       "stock_id": 66,
       "stock_name": "GOLD_MINE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1430,7 +1430,7 @@
       "status": "candidate",
       "stock_id": 68,
       "stock_name": "MILL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1486,7 +1486,7 @@
       "status": "candidate",
       "stock_id": 70,
       "stock_name": "HOUSE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1542,7 +1542,7 @@
       "status": "candidate",
       "stock_id": 72,
       "stock_name": "PALISADE_WALL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1598,7 +1598,7 @@
       "status": "candidate",
       "stock_id": 73,
       "stock_name": "CHU_KO_NU",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1654,7 +1654,7 @@
       "status": "candidate",
       "stock_id": 74,
       "stock_name": "MILITIA",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1710,7 +1710,7 @@
       "status": "candidate",
       "stock_id": 75,
       "stock_name": "MAN_AT_ARMS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1766,7 +1766,7 @@
       "status": "candidate",
       "stock_id": 77,
       "stock_name": "LONG_SWORDSMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1822,7 +1822,7 @@
       "status": "candidate",
       "stock_id": 79,
       "stock_name": "WATCH_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1878,7 +1878,7 @@
       "status": "candidate",
       "stock_id": 82,
       "stock_name": "CASTLE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1934,7 +1934,7 @@
       "status": "candidate",
       "stock_id": 83,
       "stock_name": "VILLAGER_MALE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -1990,7 +1990,7 @@
       "status": "candidate",
       "stock_id": 84,
       "stock_name": "MARKET",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2046,7 +2046,7 @@
       "status": "candidate",
       "stock_id": 87,
       "stock_name": "ARCHERY_RANGE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2102,7 +2102,7 @@
       "status": "candidate",
       "stock_id": 93,
       "stock_name": "SPEARMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2158,7 +2158,7 @@
       "status": "candidate",
       "stock_id": 101,
       "stock_name": "STABLE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2175,7 +2175,7 @@
       "status": "candidate",
       "stock_id": 102,
       "stock_name": "STONE_MINE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2286,7 +2286,7 @@
       "status": "candidate",
       "stock_id": 103,
       "stock_name": "BLACKSMITH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2342,7 +2342,7 @@
       "status": "candidate",
       "stock_id": 104,
       "stock_name": "MONASTERY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2398,7 +2398,7 @@
       "status": "candidate",
       "stock_id": 109,
       "stock_name": "TOWN_CENTER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2454,7 +2454,7 @@
       "status": "candidate",
       "stock_id": 117,
       "stock_name": "STONE_WALL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2510,7 +2510,7 @@
       "status": "candidate",
       "stock_id": 125,
       "stock_name": "MONK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2566,7 +2566,7 @@
       "status": "candidate",
       "stock_id": 155,
       "stock_name": "FORTIFIED_WALL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2622,7 +2622,7 @@
       "status": "candidate",
       "stock_id": 160,
       "stock_name": "RICHARD_THE_LIONHEART",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2678,7 +2678,7 @@
       "status": "candidate",
       "stock_id": 161,
       "stock_name": "THE_BLACK_PRINCE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2734,7 +2734,7 @@
       "status": "candidate",
       "stock_id": 167,
       "stock_name": "BELISARIUS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2790,7 +2790,7 @@
       "status": "candidate",
       "stock_id": 168,
       "stock_name": "THEODORIC_THE_GOTH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2846,7 +2846,7 @@
       "status": "candidate",
       "stock_id": 169,
       "stock_name": "AETHELFRITH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2902,7 +2902,7 @@
       "status": "candidate",
       "stock_id": 172,
       "stock_name": "TAMERLANE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -2958,7 +2958,7 @@
       "status": "candidate",
       "stock_id": 174,
       "stock_name": "LANCELOT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3014,7 +3014,7 @@
       "status": "candidate",
       "stock_id": 185,
       "stock_name": "SLINGER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3070,7 +3070,7 @@
       "status": "candidate",
       "stock_id": 199,
       "stock_name": "FISH_TRAP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3126,7 +3126,7 @@
       "status": "candidate",
       "stock_id": 204,
       "stock_name": "TRADE_CART_FULL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3182,7 +3182,7 @@
       "status": "candidate",
       "stock_id": 207,
       "stock_name": "IMPERIAL_CAMEL_RIDER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3238,7 +3238,7 @@
       "status": "candidate",
       "stock_id": 209,
       "stock_name": "UNIVERSITY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3294,7 +3294,7 @@
       "status": "candidate",
       "stock_id": 232,
       "stock_name": "WOAD_RAIDER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3350,7 +3350,7 @@
       "status": "candidate",
       "stock_id": 234,
       "stock_name": "GUARD_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3406,7 +3406,7 @@
       "status": "candidate",
       "stock_id": 235,
       "stock_name": "KEEP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3462,7 +3462,7 @@
       "status": "candidate",
       "stock_id": 236,
       "stock_name": "BOMBARD_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3518,7 +3518,7 @@
       "status": "candidate",
       "stock_id": 239,
       "stock_name": "WAR_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3574,7 +3574,7 @@
       "status": "candidate",
       "stock_id": 250,
       "stock_name": "LONGBOAT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3591,7 +3591,7 @@
       "status": "candidate",
       "stock_id": 264,
       "stock_name": "CLIFF_DEFAULT_1",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3663,7 +3663,7 @@
       "status": "candidate",
       "stock_id": 265,
       "stock_name": "CLIFF_DEFAULT_2",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3735,7 +3735,7 @@
       "status": "candidate",
       "stock_id": 266,
       "stock_name": "CLIFF_DEFAULT_3",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3807,7 +3807,7 @@
       "status": "candidate",
       "stock_id": 268,
       "stock_name": "CLIFF_DEFAULT_5",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3879,7 +3879,7 @@
       "status": "candidate",
       "stock_id": 270,
       "stock_name": "CLIFF_DEFAULT_7",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -3951,7 +3951,7 @@
       "status": "candidate",
       "stock_id": 272,
       "stock_name": "CLIFF_DEFAULT_9",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4062,7 +4062,7 @@
       "status": "candidate",
       "stock_id": 279,
       "stock_name": "SCORPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4118,7 +4118,7 @@
       "status": "candidate",
       "stock_id": 280,
       "stock_name": "MANGONEL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4174,7 +4174,7 @@
       "status": "candidate",
       "stock_id": 281,
       "stock_name": "THROWING_AXEMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4230,7 +4230,7 @@
       "status": "candidate",
       "stock_id": 282,
       "stock_name": "MAMELUKE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4286,7 +4286,7 @@
       "status": "candidate",
       "stock_id": 283,
       "stock_name": "CAVALIER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4303,7 +4303,7 @@
       "status": "candidate",
       "stock_id": 285,
       "stock_name": "RELIC",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4414,7 +4414,7 @@
       "status": "candidate",
       "stock_id": 291,
       "stock_name": "SAMURAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4470,7 +4470,7 @@
       "status": "candidate",
       "stock_id": 293,
       "stock_name": "VILLAGER_FEMALE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4526,7 +4526,7 @@
       "status": "candidate",
       "stock_id": 329,
       "stock_name": "CAMEL_RIDER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4582,7 +4582,7 @@
       "status": "candidate",
       "stock_id": 330,
       "stock_name": "HEAVY_CAMEL_RIDER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4638,7 +4638,7 @@
       "status": "candidate",
       "stock_id": 331,
       "stock_name": "TREBUCHET_PACKED",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4694,7 +4694,7 @@
       "status": "candidate",
       "stock_id": 358,
       "stock_name": "PIKEMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4750,7 +4750,7 @@
       "status": "candidate",
       "stock_id": 359,
       "stock_name": "HALBERDIER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4767,7 +4767,7 @@
       "status": "candidate",
       "stock_id": 399,
       "stock_name": "TREE_A",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4839,7 +4839,7 @@
       "status": "candidate",
       "stock_id": 400,
       "stock_name": "TREE_B",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -4911,7 +4911,7 @@
       "status": "candidate",
       "stock_id": 411,
       "stock_name": "TREE_OAK_FOREST",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5022,7 +5022,7 @@
       "status": "candidate",
       "stock_id": 420,
       "stock_name": "CANNON_GALLEON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5078,7 +5078,7 @@
       "status": "candidate",
       "stock_id": 422,
       "stock_name": "CAPPED_RAM",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5134,7 +5134,7 @@
       "status": "candidate",
       "stock_id": 424,
       "stock_name": "CHARLES_MARTEL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5190,7 +5190,7 @@
       "status": "candidate",
       "stock_id": 428,
       "stock_name": "HROLF_THE_GANGER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5246,7 +5246,7 @@
       "status": "candidate",
       "stock_id": 432,
       "stock_name": "WILLIAM_WALLACE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5302,7 +5302,7 @@
       "status": "candidate",
       "stock_id": 434,
       "stock_name": "KING",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5358,7 +5358,7 @@
       "status": "candidate",
       "stock_id": 440,
       "stock_name": "PETARD",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5414,7 +5414,7 @@
       "status": "candidate",
       "stock_id": 441,
       "stock_name": "HUSSAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5470,7 +5470,7 @@
       "status": "candidate",
       "stock_id": 442,
       "stock_name": "GALLEON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5526,7 +5526,7 @@
       "status": "candidate",
       "stock_id": 448,
       "stock_name": "SCOUT_CAVALRY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5582,7 +5582,7 @@
       "status": "candidate",
       "stock_id": 473,
       "stock_name": "TWO_HANDED_SWORDSMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5638,7 +5638,7 @@
       "status": "candidate",
       "stock_id": 474,
       "stock_name": "HEAVY_CAVALRY_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5694,7 +5694,7 @@
       "status": "candidate",
       "stock_id": 487,
       "stock_name": "GATE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5750,7 +5750,7 @@
       "status": "candidate",
       "stock_id": 492,
       "stock_name": "ARBALESTER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5806,7 +5806,7 @@
       "status": "candidate",
       "stock_id": 499,
       "stock_name": "TORCH_A",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5862,7 +5862,7 @@
       "status": "candidate",
       "stock_id": 527,
       "stock_name": "DEMOLITION_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5918,7 +5918,7 @@
       "status": "candidate",
       "stock_id": 528,
       "stock_name": "HEAVY_DEMOLITION_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -5974,7 +5974,7 @@
       "status": "candidate",
       "stock_id": 529,
       "stock_name": "FIRE_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6030,7 +6030,7 @@
       "status": "candidate",
       "stock_id": 530,
       "stock_name": "ELITE_LONGBOWMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6086,7 +6086,7 @@
       "status": "candidate",
       "stock_id": 531,
       "stock_name": "ELITE_THROWING_AXEMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6142,7 +6142,7 @@
       "status": "candidate",
       "stock_id": 532,
       "stock_name": "FAST_FIRE_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6198,7 +6198,7 @@
       "status": "candidate",
       "stock_id": 533,
       "stock_name": "ELITE_LONGBOAT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6254,7 +6254,7 @@
       "status": "candidate",
       "stock_id": 534,
       "stock_name": "ELITE_WOAD_RAIDER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6310,7 +6310,7 @@
       "status": "candidate",
       "stock_id": 539,
       "stock_name": "GALLEY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6366,7 +6366,7 @@
       "status": "candidate",
       "stock_id": 542,
       "stock_name": "HEAVY_SCORPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6422,7 +6422,7 @@
       "status": "candidate",
       "stock_id": 545,
       "stock_name": "TRANSPORT_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6478,7 +6478,7 @@
       "status": "candidate",
       "stock_id": 546,
       "stock_name": "LIGHT_CAVALRY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6534,7 +6534,7 @@
       "status": "candidate",
       "stock_id": 548,
       "stock_name": "SIEGE_RAM",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6590,7 +6590,7 @@
       "status": "candidate",
       "stock_id": 550,
       "stock_name": "ONAGER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6646,7 +6646,7 @@
       "status": "candidate",
       "stock_id": 553,
       "stock_name": "ELITE_CATAPHRACT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6702,7 +6702,7 @@
       "status": "candidate",
       "stock_id": 554,
       "stock_name": "ELITE_TEUTONIC_KNIGHT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6758,7 +6758,7 @@
       "status": "candidate",
       "stock_id": 555,
       "stock_name": "ELITE_HUSKARL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6814,7 +6814,7 @@
       "status": "candidate",
       "stock_id": 556,
       "stock_name": "ELITE_MAMELUKE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6870,7 +6870,7 @@
       "status": "candidate",
       "stock_id": 557,
       "stock_name": "ELITE_JANISSARY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6926,7 +6926,7 @@
       "status": "candidate",
       "stock_id": 558,
       "stock_name": "ELITE_WAR_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -6982,7 +6982,7 @@
       "status": "candidate",
       "stock_id": 559,
       "stock_name": "ELITE_CHU_KO_NU",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7038,7 +7038,7 @@
       "status": "candidate",
       "stock_id": 560,
       "stock_name": "ELITE_SAMURAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7094,7 +7094,7 @@
       "status": "candidate",
       "stock_id": 561,
       "stock_name": "ELITE_MANGUDAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7150,7 +7150,7 @@
       "status": "candidate",
       "stock_id": 562,
       "stock_name": "LUMBER_CAMP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7206,7 +7206,7 @@
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7262,7 +7262,7 @@
       "status": "candidate",
       "stock_id": 569,
       "stock_name": "PALADIN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7318,7 +7318,7 @@
       "status": "candidate",
       "stock_id": 584,
       "stock_name": "MINING_CAMP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7374,7 +7374,7 @@
       "status": "candidate",
       "stock_id": 588,
       "stock_name": "SIEGE_ONAGER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7430,7 +7430,7 @@
       "status": "candidate",
       "stock_id": 596,
       "stock_name": "ELITE_GENITOUR_ORIGINAL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7486,7 +7486,7 @@
       "status": "candidate",
       "stock_id": 598,
       "stock_name": "OUTPOST",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7542,7 +7542,7 @@
       "status": "candidate",
       "stock_id": 600,
       "stock_name": "FLAG_A",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7598,7 +7598,7 @@
       "status": "candidate",
       "stock_id": 601,
       "stock_name": "FLAG_B",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7654,7 +7654,7 @@
       "status": "candidate",
       "stock_id": 602,
       "stock_name": "FLAG_C",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7710,7 +7710,7 @@
       "status": "candidate",
       "stock_id": 603,
       "stock_name": "FLAG_D",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7766,7 +7766,7 @@
       "status": "candidate",
       "stock_id": 604,
       "stock_name": "FLAG_E",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7818,11 +7818,11 @@
       "legacy_names": [
         "RTWC1X"
       ],
-      "reason": "Legacy RTWC1X tower proxy lacks a parser stock identity. Watch Tower is the prototype replacement; verify placement, stats and blocking in milestone 2.",
+      "reason": "Legacy RTWC1X tower proxy lacks a parser stock identity. Watch Tower is the prototype replacement; verify placement, stats and blocking in-game.",
       "status": "candidate",
       "stock_id": 79,
       "stock_name": "WATCH_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7878,7 +7878,7 @@
       "status": "candidate",
       "stock_id": 625,
       "stock_name": "PAVILION_C",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7934,7 +7934,7 @@
       "status": "candidate",
       "stock_id": 629,
       "stock_name": "JOAN_OF_ARC",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -7990,7 +7990,7 @@
       "status": "candidate",
       "stock_id": 632,
       "stock_name": "FRANKISH_PALADIN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8046,7 +8046,7 @@
       "status": "candidate",
       "stock_id": 640,
       "stock_name": "LA_HIRE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8102,7 +8102,7 @@
       "status": "candidate",
       "stock_id": 648,
       "stock_name": "GUY_JOSSELYNE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8158,7 +8158,7 @@
       "status": "candidate",
       "stock_id": 680,
       "stock_name": "MASTER_OF_THE_TEMPLAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8214,7 +8214,7 @@
       "status": "candidate",
       "stock_id": 684,
       "stock_name": "THE_ACCURSED_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8270,7 +8270,7 @@
       "status": "candidate",
       "stock_id": 691,
       "stock_name": "ELITE_CANNON_GALLEON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8326,7 +8326,7 @@
       "status": "candidate",
       "stock_id": 692,
       "stock_name": "BERSERK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8382,7 +8382,7 @@
       "status": "candidate",
       "stock_id": 694,
       "stock_name": "ELITE_BERSERK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8438,7 +8438,7 @@
       "status": "candidate",
       "stock_id": 698,
       "stock_name": "SUBOTAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8494,7 +8494,7 @@
       "status": "candidate",
       "stock_id": 706,
       "stock_name": "SABOTEUR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8511,7 +8511,7 @@
       "status": "candidate",
       "stock_id": 710,
       "stock_name": "SKELETON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8622,7 +8622,7 @@
       "status": "candidate",
       "stock_id": 718,
       "stock_name": "YURT_G",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8678,7 +8678,7 @@
       "status": "candidate",
       "stock_id": 719,
       "stock_name": "YURT_H",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8734,7 +8734,7 @@
       "status": "candidate",
       "stock_id": 720,
       "stock_name": "NINE_BANDS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8790,7 +8790,7 @@
       "status": "candidate",
       "stock_id": 725,
       "stock_name": "JAGUAR_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8846,7 +8846,7 @@
       "status": "candidate",
       "stock_id": 726,
       "stock_name": "ELITE_JAGUAR_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8902,7 +8902,7 @@
       "status": "candidate",
       "stock_id": 731,
       "stock_name": "GENGHIS_KHAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -8958,7 +8958,7 @@
       "status": "candidate",
       "stock_id": 751,
       "stock_name": "EAGLE_SCOUT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9014,7 +9014,7 @@
       "status": "candidate",
       "stock_id": 752,
       "stock_name": "ELITE_EAGLE_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9070,7 +9070,7 @@
       "status": "candidate",
       "stock_id": 753,
       "stock_name": "EAGLE_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9126,7 +9126,7 @@
       "status": "candidate",
       "stock_id": 755,
       "stock_name": "TARKAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9182,7 +9182,7 @@
       "status": "candidate",
       "stock_id": 757,
       "stock_name": "ELITE_TARKAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9238,7 +9238,7 @@
       "status": "candidate",
       "stock_id": 763,
       "stock_name": "PLUMED_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9294,7 +9294,7 @@
       "status": "candidate",
       "stock_id": 765,
       "stock_name": "ELITE_PLUMED_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9350,7 +9350,7 @@
       "status": "candidate",
       "stock_id": 771,
       "stock_name": "CONQUISTADOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9406,7 +9406,7 @@
       "status": "candidate",
       "stock_id": 773,
       "stock_name": "ELITE_CONQUISTADOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9462,7 +9462,7 @@
       "status": "candidate",
       "stock_id": 775,
       "stock_name": "MISSIONARY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9518,7 +9518,7 @@
       "status": "candidate",
       "stock_id": 777,
       "stock_name": "ATTILA_THE_HUN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9574,7 +9574,7 @@
       "status": "candidate",
       "stock_id": 827,
       "stock_name": "WAR_WAGON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9630,7 +9630,7 @@
       "status": "candidate",
       "stock_id": 829,
       "stock_name": "ELITE_WAR_WAGON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9686,7 +9686,7 @@
       "status": "candidate",
       "stock_id": 831,
       "stock_name": "TURTLE_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9742,7 +9742,7 @@
       "status": "candidate",
       "stock_id": 832,
       "stock_name": "ELITE_TURTLE_SHIP",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9798,7 +9798,7 @@
       "status": "candidate",
       "stock_id": 837,
       "stock_name": "MAP_REVEALER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9854,7 +9854,7 @@
       "status": "candidate",
       "stock_id": 845,
       "stock_name": "NOBUNAGA",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9910,7 +9910,7 @@
       "status": "candidate",
       "stock_id": 847,
       "stock_name": "HENRY_V",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -9966,7 +9966,7 @@
       "status": "candidate",
       "stock_id": 849,
       "stock_name": "WILLIAM_THE_CONQUEROR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10022,7 +10022,7 @@
       "status": "candidate",
       "stock_id": 852,
       "stock_name": "SCYTHIAN_SCOUT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10039,7 +10039,7 @@
       "status": "candidate",
       "stock_id": 855,
       "stock_name": "OLD_STONE_HEAD",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10111,7 +10111,7 @@
       "status": "candidate",
       "stock_id": 857,
       "stock_name": "HAY_STACK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10222,7 +10222,7 @@
       "status": "candidate",
       "stock_id": 866,
       "stock_name": "GENOESE_CROSSBOWMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10278,7 +10278,7 @@
       "status": "candidate",
       "stock_id": 868,
       "stock_name": "ELITE_GENOESE_CROSSBOWMAN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10334,7 +10334,7 @@
       "status": "candidate",
       "stock_id": 869,
       "stock_name": "MAGYAR_HUSZAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10390,7 +10390,7 @@
       "status": "candidate",
       "stock_id": 871,
       "stock_name": "ELITE_MAGYAR_HUSZAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10446,7 +10446,7 @@
       "status": "candidate",
       "stock_id": 873,
       "stock_name": "ELEPHANT_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10502,7 +10502,7 @@
       "status": "candidate",
       "stock_id": 875,
       "stock_name": "ELITE_ELEPHANT_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10558,7 +10558,7 @@
       "status": "candidate",
       "stock_id": 876,
       "stock_name": "BOYAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10614,7 +10614,7 @@
       "status": "candidate",
       "stock_id": 878,
       "stock_name": "ELITE_BOYAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10670,7 +10670,7 @@
       "status": "candidate",
       "stock_id": 879,
       "stock_name": "KAMAYUK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10726,7 +10726,7 @@
       "status": "candidate",
       "stock_id": 881,
       "stock_name": "ELITE_KAMAYUK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10782,7 +10782,7 @@
       "status": "candidate",
       "stock_id": 882,
       "stock_name": "CONDOTTIERO",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10838,7 +10838,7 @@
       "status": "candidate",
       "stock_id": 1001,
       "stock_name": "ORGAN_GUN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10894,7 +10894,7 @@
       "status": "candidate",
       "stock_id": 1003,
       "stock_name": "ELITE_ORGAN_GUN",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -10950,7 +10950,7 @@
       "status": "candidate",
       "stock_id": 1004,
       "stock_name": "CARAVEL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11007,7 +11007,7 @@
       "status": "candidate",
       "stock_id": 1006,
       "stock_name": "ELITE_CARAVEL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11063,7 +11063,7 @@
       "status": "candidate",
       "stock_id": 1007,
       "stock_name": "CAMEL_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11119,7 +11119,7 @@
       "status": "candidate",
       "stock_id": 1009,
       "stock_name": "ELITE_CAMEL_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11175,7 +11175,7 @@
       "status": "candidate",
       "stock_id": 1010,
       "stock_name": "GENITOUR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11231,7 +11231,7 @@
       "status": "candidate",
       "stock_id": 1012,
       "stock_name": "ELITE_GENITOUR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11287,7 +11287,7 @@
       "status": "candidate",
       "stock_id": 1013,
       "stock_name": "GBETO",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11343,7 +11343,7 @@
       "status": "candidate",
       "stock_id": 1015,
       "stock_name": "ELITE_GBETO",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11399,7 +11399,7 @@
       "status": "candidate",
       "stock_id": 1016,
       "stock_name": "SHOTEL_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11455,7 +11455,7 @@
       "status": "candidate",
       "stock_id": 1018,
       "stock_name": "ELITE_SHOTEL_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11511,7 +11511,7 @@
       "status": "candidate",
       "stock_id": 1103,
       "stock_name": "FIRE_GALLEY",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11567,7 +11567,7 @@
       "status": "candidate",
       "stock_id": 1104,
       "stock_name": "DEMOLITION_RAFT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11623,7 +11623,7 @@
       "status": "candidate",
       "stock_id": 1105,
       "stock_name": "SIEGE_TOWER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11679,7 +11679,7 @@
       "status": "candidate",
       "stock_id": 1120,
       "stock_name": "BALLISTA_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11735,7 +11735,7 @@
       "status": "candidate",
       "stock_id": 1122,
       "stock_name": "ELITE_BALLISTA_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11791,7 +11791,7 @@
       "status": "candidate",
       "stock_id": 1123,
       "stock_name": "KARAMBIT_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11847,7 +11847,7 @@
       "status": "candidate",
       "stock_id": 1125,
       "stock_name": "ELITE_KARAMBIT_WARRIOR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11903,7 +11903,7 @@
       "status": "candidate",
       "stock_id": 1126,
       "stock_name": "ARAMBAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -11959,7 +11959,7 @@
       "status": "candidate",
       "stock_id": 1128,
       "stock_name": "ELITE_ARAMBAI",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12015,7 +12015,7 @@
       "status": "candidate",
       "stock_id": 1129,
       "stock_name": "RATTAN_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12071,7 +12071,7 @@
       "status": "candidate",
       "stock_id": 1131,
       "stock_name": "ELITE_RATTAN_ARCHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12127,7 +12127,7 @@
       "status": "candidate",
       "stock_id": 1132,
       "stock_name": "BATTLE_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12183,7 +12183,7 @@
       "status": "candidate",
       "stock_id": 1134,
       "stock_name": "ELITE_BATTLE_ELEPHANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12239,7 +12239,7 @@
       "status": "candidate",
       "stock_id": 1155,
       "stock_name": "IMPERIAL_SKIRMISHER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12295,7 +12295,7 @@
       "status": "candidate",
       "stock_id": 1225,
       "stock_name": "KONNIK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12351,7 +12351,7 @@
       "status": "candidate",
       "stock_id": 1227,
       "stock_name": "ELITE_KONNIK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12407,7 +12407,7 @@
       "status": "candidate",
       "stock_id": 1228,
       "stock_name": "KESHIK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12463,7 +12463,7 @@
       "status": "candidate",
       "stock_id": 1230,
       "stock_name": "ELITE_KESHIK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12519,7 +12519,7 @@
       "status": "candidate",
       "stock_id": 1231,
       "stock_name": "KIPCHAK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12575,7 +12575,7 @@
       "status": "candidate",
       "stock_id": 1233,
       "stock_name": "ELITE_KIPCHAK",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12631,7 +12631,7 @@
       "status": "candidate",
       "stock_id": 1234,
       "stock_name": "LEITIS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12687,7 +12687,7 @@
       "status": "candidate",
       "stock_id": 1236,
       "stock_name": "ELITE_LEITIS",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12743,7 +12743,7 @@
       "status": "candidate",
       "stock_id": 1254,
       "stock_name": "KONNIK_KREPOST",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12799,7 +12799,7 @@
       "status": "candidate",
       "stock_id": 1255,
       "stock_name": "ELITE_KONNIK_KREPOST",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12855,7 +12855,7 @@
       "status": "candidate",
       "stock_id": 1258,
       "stock_name": "BATTERING_RAM",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12911,7 +12911,7 @@
       "status": "candidate",
       "stock_id": 1263,
       "stock_name": "FLAMING_CAMEL",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -12967,7 +12967,7 @@
       "status": "candidate",
       "stock_id": 1285,
       "stock_name": "FE_FLAG",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13023,7 +13023,7 @@
       "status": "candidate",
       "stock_id": 1315,
       "stock_name": "IMPALED_CORPSE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13079,7 +13079,7 @@
       "status": "candidate",
       "stock_id": 1370,
       "stock_name": "STEPPE_LANCER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13135,7 +13135,7 @@
       "status": "candidate",
       "stock_id": 1372,
       "stock_name": "ELITE_STEPPE_LANCER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13191,7 +13191,7 @@
       "status": "candidate",
       "stock_id": 1655,
       "stock_name": "COUSTILLIER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13247,7 +13247,7 @@
       "status": "candidate",
       "stock_id": 1657,
       "stock_name": "ELITE_COUSTILLIER",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13303,7 +13303,7 @@
       "status": "candidate",
       "stock_id": 1658,
       "stock_name": "SERJEANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13359,7 +13359,7 @@
       "status": "candidate",
       "stock_id": 1659,
       "stock_name": "ELITE_SERJEANT",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13415,7 +13415,7 @@
       "status": "candidate",
       "stock_id": 1660,
       "stock_name": "SERJEANT_DONJON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13471,7 +13471,7 @@
       "status": "candidate",
       "stock_id": 1661,
       "stock_name": "ELITE_SERJEANT_DONJON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13527,7 +13527,7 @@
       "status": "candidate",
       "stock_id": 1699,
       "stock_name": "FLEMISH_MILITIA",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13583,7 +13583,7 @@
       "status": "candidate",
       "stock_id": 1701,
       "stock_name": "OBUCH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13639,7 +13639,7 @@
       "status": "candidate",
       "stock_id": 1703,
       "stock_name": "ELITE_OBUCH",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13695,7 +13695,7 @@
       "status": "candidate",
       "stock_id": 1704,
       "stock_name": "HUSSITE_WAGON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13751,7 +13751,7 @@
       "status": "candidate",
       "stock_id": 1706,
       "stock_name": "ELITE_HUSSITE_WAGON",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13807,7 +13807,7 @@
       "status": "candidate",
       "stock_id": 1707,
       "stock_name": "WINGED_HUSSAR",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13863,7 +13863,7 @@
       "status": "candidate",
       "stock_id": 1709,
       "stock_name": "HOUFNICE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13880,7 +13880,7 @@
       "status": "candidate",
       "stock_id": 66,
       "stock_name": "GOLD_MINE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -13952,7 +13952,7 @@
       "status": "candidate",
       "stock_id": 102,
       "stock_name": "STONE_MINE",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -16723,11 +16723,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -16779,11 +16779,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -16835,11 +16835,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -16891,11 +16891,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -16947,11 +16947,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -17003,11 +17003,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -17059,11 +17059,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -17115,11 +17115,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -17171,11 +17171,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     },
     {
       "civilization_ids": [
@@ -17227,11 +17227,11 @@
       "legacy_names": [
         "ISPKM"
       ],
-      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; tune appearance/behavior in milestone 3.",
+      "reason": "Custom-graphic boss using a repurposed unit ID. Stock Champion is a prototype carrier for explicit scenario-local boss stats; verify appearance and behavior in a focused in-game probe.",
       "status": "candidate",
       "stock_id": 567,
       "stock_name": "CHAMPION",
-      "verification": "Stock identity/graphics/pathing/operations must be checked in milestone 2; parser datasets supply candidate names only."
+      "verification": "Stock identity, graphics, pathing and operations require in-game verification; parser datasets supply candidate names only."
     }
   ],
   "schema_version": 1,

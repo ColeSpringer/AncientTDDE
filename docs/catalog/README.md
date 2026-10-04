@@ -1,8 +1,8 @@
 # Reviewed Ancient TD v5.3 behavior catalog
 
-This catalog implements milestone 1 of `ANCIENT_TD_DE_PLAN.md`. It records the
-original behavior and the agreed migration decisions, not the modern game's
-balance. The original scenario is version **1.49**, **200 × 200**, with **1,018
+This catalog records original behavior and reviewed migration decisions. Modern
+balance definitions are maintained separately. The original scenario is version
+**1.49**, **200 × 200**, with **1,018
 triggers**, **7,395 placed objects**, seven human lanes and enemy player 8.
 The package credits DRAX6869 / DRAX. The empty modern version-1.59 file is only a
 format seed and lives in `content/maps/format-seed.aoe2scenario`.
@@ -105,8 +105,8 @@ Gaia, each tech-tree and team-bonus effect, and the eight special civilization
 trigger families. The audit records full per-civilization object definitions,
 resources, all DAT technologies and all effects. Native civilization differences
 are not proof of mod changes: no matching unmodified `VER 7.4` DAT was supplied.
-The modern plan supports more civilizations than this historical package; their
-balance review belongs to milestone 7, not a fabricated legacy profile.
+The modern game supports more civilizations than this historical package. Their
+profiles require separate balance review using current game data.
 
 `content/legacy/lanes.json` identifies lane centers, spawn/exit columns, life
 instance references and display variables. Villager transfer triggers 487–500
@@ -116,7 +116,7 @@ Third/fourth-row purchases (677–690) remove Gaia blockers; the fourth row is g
 by the third-row purchase. Anti-blocking kill zones are in 502–508. Illegal
 repairs, conversions and enemy-area access are constrained by 779–785 and
 833–839. Preserve the recognizable layout, transfers and expansion progression;
-verify replacement blockers and routes in milestone 2.
+verify replacement blockers and routes in-game.
 
 ## Lives, defeat and victory
 
@@ -162,8 +162,8 @@ corruption. A separate complete `legacy/reference/dat-verified/` export was
 regenerated from the original DAT with the existing C++ genieutils/GDB tooling;
 the original reference directory was preserved. Provenance records both.
 
-This catalog is reviewed against scenario/DAT evidence and the approved plan.
+This catalog is reviewed against scenario/DAT evidence and the migration decisions.
 Automated checks establish reproducible extraction, coverage and references.
 They do not establish engine behavior, actual tower-bonus persistence, stock
 equivalence, route validity, or multiplayer synchronization. Those checks remain
-assigned to the later map, probe, gameplay and release milestones.
+part of in-game map, mechanic and release validation.

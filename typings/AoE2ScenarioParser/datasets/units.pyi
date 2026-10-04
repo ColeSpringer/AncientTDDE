@@ -1,0 +1,3 @@
+from AoE2ScenarioParser.datasets.support.info_dataset_base import InfoDatasetBase
+
+class UnitInfo(InfoDatasetBase): ...

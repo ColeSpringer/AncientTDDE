@@ -9,6 +9,6 @@
   modern defaults implicitly.
 - `audit.toml`: repository-relative inputs and default generated-report location.
 
-IDs retain their legacy civilization context. Candidate mappings cannot be used
-by the reference registry for scenario generation until verified. Milestone 2
-will add the migrated stock-DE map and prove the candidates in game.
+IDs retain their legacy civilization context. Gameplay mappings require in-game
+verification before generation. Reviewed map identities and geometry are defined
+in `maps/foundation.json`; native behavior and routes require in-game checks.

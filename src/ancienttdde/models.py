@@ -1,7 +1,24 @@
 """Shared inspection and generation vocabulary; legacy values are observations."""
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal, NotRequired, TypedDict
+
+
+class MapIdentity(TypedDict):
+    dataset: Literal["BuildingInfo", "OtherInfo", "UnitInfo", "HeroInfo"]
+    name: str
+    parser_version: str
+
+
+class ObjectMapping(TypedDict):
+    key: str
+    legacy_id: int
+    civilization_ids: list[int]
+    disposition: Literal["keep", "replace", "drop"]
+    stock_id: int | None
+    status: Literal["candidate", "reviewed", "verified"]
+    map_identity: NotRequired[MapIdentity]
+    blocking_size: NotRequired[int]
 
 
 @dataclass(frozen=True)

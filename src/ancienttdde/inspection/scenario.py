@@ -13,9 +13,12 @@ from typing import Any, cast
 type JSONValue = str | int | float | bool | None | list[JSONValue] | dict[str, JSONValue]
 
 
-def inspect_scenario(path: Path) -> dict[str, Any]:
+def inspect_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any]:
+    arguments = [sys.executable, "-m", "ancienttdde.inspection.scenario", str(path.resolve())]
+    if include_terrain:
+        arguments.append("--terrain")
     process = subprocess.run(
-        [sys.executable, "-m", "ancienttdde.inspection.scenario", str(path.resolve())],
+        arguments,
         capture_output=True,
         text=True,
         timeout=120,
@@ -111,13 +114,13 @@ def references(
     return result
 
 
-def load_scenario(path: Path) -> dict[str, Any]:
+def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any]:
     # The pinned parser exposes no py.typed marker or type stubs.
-    from AoE2ScenarioParser.datasets import (  # pyright: ignore[reportMissingTypeStubs]
+    from AoE2ScenarioParser.datasets import (
         conditions,
         effects,
     )
-    from AoE2ScenarioParser.scenarios.aoe2_de_scenario import (  # pyright: ignore[reportMissingTypeStubs]
+    from AoE2ScenarioParser.scenarios.aoe2_de_scenario import (
         AoE2DEScenario,
     )
 
@@ -170,13 +173,25 @@ def load_scenario(path: Path) -> dict[str, Any]:
             k: scalar(v) for k, v in vars(scenario.message_manager).items() if not k.startswith("_")
         }
         terrain = Counter(tile.terrain_id for tile in scenario.map_manager.terrain)
-        xs_manager: Any = scenario.xs_manager
+        xs_manager = scenario.xs_manager
         return {
             "scenario_version": scenario.scenario_version,
+            "next_unit_id": scenario.sections["DataHeader"].next_unit_id_to_place,
+            "victory_condition": scalar(scenario.option_manager.victory_condition),
             "map": {
                 "width": scenario.map_manager.map_width,
                 "height": scenario.map_manager.map_height,
                 "terrain_counts": {str(k): v for k, v in sorted(terrain.items())},
+                **(
+                    {
+                        "tiles": [
+                            [tile.terrain_id, tile.elevation, tile.layer]
+                            for tile in scenario.map_manager.terrain
+                        ]
+                    }
+                    if include_terrain
+                    else {}
+                ),
             },
             "players": players,
             "units": units,
@@ -186,8 +201,23 @@ def load_scenario(path: Path) -> dict[str, Any]:
             "triggers": triggers,
             "references": references(triggers, units, players),
             "external_xs": xs_manager.script_name,
+            "dependencies": {
+                "external_xs": xs_manager.script_name,
+                "embedded_xs": scalar(scenario.sections["Files"].script_file_content),
+                "ai_files": len(scenario.sections["Files"].ai_files),
+                "cinematics": [
+                    scalar(getattr(scenario.sections["Cinematics"], field))
+                    for field in ("ascii_pregame", "ascii_victory", "ascii_loss")
+                ],
+                "background_image": scalar(scenario.sections["BackgroundImage"].ascii_filename),
+            },
         }
 
 
 if __name__ == "__main__":
-    json.dump(load_scenario(Path(sys.argv[1])), sys.stdout, ensure_ascii=False, allow_nan=False)
+    json.dump(
+        load_scenario(Path(sys.argv[1]), include_terrain="--terrain" in sys.argv[2:]),
+        sys.stdout,
+        ensure_ascii=False,
+        allow_nan=False,
+    )

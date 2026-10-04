@@ -7,6 +7,28 @@ from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 from ancienttdde.inspection.scenario import inspect_scenario
 
 
+def test_map_extraction_preserves_tile_order_elevation_and_placements(tmp_path):
+    with contextlib.redirect_stdout(io.StringIO()):
+        scenario = AoE2DEScenario.from_default()
+        scenario.map_manager.map_size = 16
+        tile = scenario.map_manager.get_tile(x=3, y=7)
+        tile.terrain_id = 4
+        tile.elevation = 2
+        tile.layer = 0
+        scenario.unit_manager.add_unit(
+            player=0, unit_const=66, x=3.5, y=7.5, reference_id=0, rotation=1.5
+        )
+        source = tmp_path / "map.aoe2scenario"
+        scenario.write_to_file(str(source))
+    result = inspect_scenario(source, include_terrain=True)
+    assert len(result["map"]["tiles"]) == 256
+    assert result["map"]["tiles"][7 * 16 + 3] == [4, 2, 0]
+    assert result["map"]["tiles"][3 * 16 + 7] == [0, 0, -1]
+    assert result["units"][0]["reference_id"] == 0
+    assert result["units"][0]["rotation"] == 1.5
+    assert "tiles" not in inspect_scenario(source)["map"]
+
+
 def test_isolated_extraction_keeps_zero_ids_negatives_order_and_messages(tmp_path):
     with contextlib.redirect_stdout(io.StringIO()):
         scenario = AoE2DEScenario.from_default()

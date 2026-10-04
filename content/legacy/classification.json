@@ -630,7 +630,7 @@
     {
       "key": "kill_and_level_rewards",
       "disposition": "keep",
-      "reason": "Kill counters exchange 25 kills for wood/stone and four Gaia markers for one King; wave milestones also activate King grants.",
+      "reason": "Kill counters exchange 25 kills for wood/stone and four Gaia markers for one King; level-stop triggers also activate King grants.",
       "migration": "Keep rewards as named per-player state without Gaia marker proxies.",
       "trigger_ids": [
         460,

@@ -73,3 +73,30 @@ def test_verified_mapping_and_named_trigger_and_variable_references():
     assert registry.resolve("variable", "lives.p1") == 0
     with pytest.raises(ValueError, match="Duplicate"):
         registry.register("trigger", "initialize", 1)
+
+
+def test_map_identity_verification_does_not_approve_gameplay():
+    row = {
+        "key": "map.blocker",
+        "legacy_id": 857,
+        "civilization_ids": [9],
+        "disposition": "replace",
+        "stock_id": 1776,
+        "status": "reviewed",
+        "map_identity": {
+            "dataset": "OtherInfo",
+            "name": "BLOCKER",
+            "parser_version": "0.9.4",
+        },
+    }
+    registry = ReferenceRegistry([row])
+    assert registry.map_stock("map.blocker") == 1776
+    with pytest.raises(ValueError, match="verified"):
+        registry.stock("map.blocker")
+    row["map_identity"]["name"] = "HAY_STACK"
+    with pytest.raises(ValueError, match="identity"):
+        ReferenceRegistry([row]).map_stock("map.blocker")
+    row["map_identity"]["name"] = "BLOCKER"
+    row["status"] = "candidate"
+    with pytest.raises(ValueError, match="reviewed"):
+        ReferenceRegistry([row]).map_stock("map.blocker")

@@ -1,12 +1,12 @@
 """Resolve named references and civilization-dependent legacy mappings centrally."""
 
-from typing import Any
+from ancienttdde.models import ObjectMapping
 
 
 class ReferenceRegistry:
-    def __init__(self, mappings: list[dict[str, Any]]) -> None:
-        self._objects: dict[str, dict[str, Any]] = {}
-        self._legacy: dict[tuple[int, int], dict[str, Any]] = {}
+    def __init__(self, mappings: list[ObjectMapping]) -> None:
+        self._objects: dict[str, ObjectMapping] = {}
+        self._legacy: dict[tuple[int, int], ObjectMapping] = {}
         self._references: dict[tuple[str, str], int] = {}
         for row in mappings:
             key = row["key"]
@@ -29,14 +29,54 @@ class ReferenceRegistry:
                     raise ValueError(f"Duplicate legacy reference: {reference}")
                 self._legacy[reference] = row
 
-    def legacy(self, object_id: int, civilization_id: int) -> dict[str, Any]:
+    def legacy(self, object_id: int, civilization_id: int) -> ObjectMapping:
         return self._legacy[object_id, civilization_id]
 
     def stock(self, key: str) -> int:
         row = self._objects[key]
-        if row["status"] != "verified" or row["stock_id"] is None:
+        identifier = row["stock_id"]
+        if row["status"] != "verified" or identifier is None:
             raise ValueError(f"Stock mapping must be verified before generation: {key}")
-        return row["stock_id"]
+        return identifier
+
+    def map_stock(self, key: str) -> int:
+        """Resolve a reviewed map identity without approving gameplay behavior."""
+        from importlib.metadata import version
+
+        from AoE2ScenarioParser.datasets.buildings import (
+            BuildingInfo,
+        )
+        from AoE2ScenarioParser.datasets.heroes import (
+            HeroInfo,
+        )
+        from AoE2ScenarioParser.datasets.other import (
+            OtherInfo,
+        )
+        from AoE2ScenarioParser.datasets.support.info_dataset_base import InfoDatasetBase
+        from AoE2ScenarioParser.datasets.units import (
+            UnitInfo,
+        )
+
+        row = self._objects[key]
+        identifier = row["stock_id"]
+        if row["status"] not in {"reviewed", "verified"} or identifier is None:
+            raise ValueError(f"Map mapping must be reviewed before generation: {key}")
+        identity = row.get("map_identity")
+        datasets: dict[str, type[InfoDatasetBase]] = {
+            "BuildingInfo": BuildingInfo,
+            "OtherInfo": OtherInfo,
+            "UnitInfo": UnitInfo,
+            "HeroInfo": HeroInfo,
+        }
+        if identity is None or identity["parser_version"] != version("AoE2ScenarioParser"):
+            raise ValueError(f"Map identity parser version mismatch: {key}")
+        try:
+            member = datasets[identity["dataset"]].from_id(identifier)
+        except (KeyError, ValueError) as error:
+            raise ValueError(f"Invalid stock map identity: {key}") from error
+        if member.name != identity["name"]:
+            raise ValueError(f"Invalid stock map identity: {key}")
+        return identifier
 
     def register(self, kind: str, key: str, identifier: int) -> None:
         if kind not in {"trigger", "variable", "object"}:

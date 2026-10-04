@@ -104,7 +104,7 @@ purchase uses three +250 effects. Never reinterpret packed values from the name
 alone. The +3 recurring attack trigger is named "Every 1 Minute" but has a
 30-second timer. The historical hints say +700 for the +750 purchase and 250
 stone for the 375-stone investment. Exact decoding semantics, new construction
-and age-upgrade persistence require in-game probes in milestone 3.
+and age-upgrade persistence require focused in-game probes.
 
 General tower attack operations select object group 27 and can reach every
 legacy wall-class object, including genuine walls and unused proxy units. Stock

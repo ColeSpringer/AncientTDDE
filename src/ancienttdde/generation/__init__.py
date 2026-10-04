@@ -1,1 +1,1 @@
-"""Scenario generation boundary; map and gameplay generation begin at milestone 2."""
+"""Stock-DE map generation from reviewed terrain and placement data."""

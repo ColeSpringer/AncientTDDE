@@ -11,7 +11,7 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     files = sorted((root / "src/ancienttdde/xs").rglob("*.xs"))
     if not files:
-        print("XS check: no gameplay scripts in milestone 1.")
+        print("XS check: no gameplay scripts to validate.")
         return
     with Path(os.devnull).open("w") as quiet, contextlib.redirect_stdout(quiet):
         scenario = AoE2DEScenario.from_default()

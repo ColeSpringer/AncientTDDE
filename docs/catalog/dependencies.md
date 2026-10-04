@@ -80,5 +80,5 @@ life meters both use 684, and require separate named instance roles.
 
 The current parser dataset supplies stock candidate names; it does not prove
 behavior or rendering in a current game build. Legacy map terrain IDs also
-require verification in milestone 2. The legacy scenario remains unchanged, and
+require in-game verification. The legacy scenario remains unchanged, and
 all selected object definitions and graphic chains are available in `dat.json`.

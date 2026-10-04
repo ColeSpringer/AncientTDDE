@@ -87,7 +87,7 @@ The original binary DAT remains the byte-level source of truth.
 
 ## Validation
 
-The first milestone regenerated a complete snapshot using this exporter. The
+A complete reference snapshot was regenerated using this exporter. The
 supplied `legacy/reference/dat/` directory is retained unchanged because its
 French and Cumans JSON contain structural corruption. Provenance records both
 snapshots and the original binary; the audit uses `dat-verified/`.

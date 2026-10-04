@@ -1,0 +1,7680 @@
+{
+  "schema_version": 1,
+  "objects": [
+    {
+      "key": "map.object_4",
+      "legacy_id": 4,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 4,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ARCHER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_17",
+      "legacy_id": 17,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 17,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "TRADE_COG",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_38",
+      "legacy_id": 38,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 38,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "KNIGHT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_45",
+      "legacy_id": 45,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 45,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "DOCK",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_59",
+      "legacy_id": 59,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 59,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FORAGE_BUSH",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_66",
+      "legacy_id": 66,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 66,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "GOLD_MINE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_68",
+      "legacy_id": 68,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 68,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "MILL",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 2
+    },
+    {
+      "key": "map.object_74",
+      "legacy_id": 74,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 74,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "MILITIA",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_75",
+      "legacy_id": 75,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 75,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "MAN_AT_ARMS",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_79",
+      "legacy_id": 79,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 79,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "WATCH_TOWER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_83",
+      "legacy_id": 83,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 83,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "VILLAGER_MALE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_84",
+      "legacy_id": 84,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 84,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "MARKET",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 4
+    },
+    {
+      "key": "map.object_93",
+      "legacy_id": 93,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 93,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "SPEARMAN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_102",
+      "legacy_id": 102,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 102,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "STONE_MINE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_103",
+      "legacy_id": 103,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 103,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "BLACKSMITH",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_104",
+      "legacy_id": 104,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 104,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "MONASTERY",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_109",
+      "legacy_id": 109,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 109,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "TOWN_CENTER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 4
+    },
+    {
+      "key": "map.object_125",
+      "legacy_id": 125,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 125,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "MONK",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_160",
+      "legacy_id": 160,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 160,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "RICHARD_THE_LIONHEART",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_161",
+      "legacy_id": 161,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 161,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "THE_BLACK_PRINCE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_167",
+      "legacy_id": 167,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 167,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "BELISARIUS",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_168",
+      "legacy_id": 168,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 168,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "THEODORIC_THE_GOTH",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_169",
+      "legacy_id": 169,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 169,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "AETHELFRITH",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_172",
+      "legacy_id": 172,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 172,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "TAMERLANE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_174",
+      "legacy_id": 174,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 174,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "LANCELOT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_204",
+      "legacy_id": 204,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 128,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "TRADE_CART_EMPTY",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_209",
+      "legacy_id": 209,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 209,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "UNIVERSITY",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 4
+    },
+    {
+      "key": "map.object_239",
+      "legacy_id": 239,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 239,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "WAR_ELEPHANT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_264",
+      "legacy_id": 264,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 264,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_1",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_265",
+      "legacy_id": 265,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 265,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_2",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_266",
+      "legacy_id": 266,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 266,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_3",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_268",
+      "legacy_id": 268,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 268,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_5",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_270",
+      "legacy_id": 270,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 270,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_7",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_272",
+      "legacy_id": 272,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 272,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "CLIFF_DEFAULT_9",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_282",
+      "legacy_id": 282,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 282,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "MAMELUKE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_285",
+      "legacy_id": 285,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 285,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "RELIC",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_293",
+      "legacy_id": 293,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 293,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "VILLAGER_FEMALE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_330",
+      "legacy_id": 330,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 330,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "HEAVY_CAMEL_RIDER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_358",
+      "legacy_id": 358,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 358,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "PIKEMAN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_399",
+      "legacy_id": 399,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 399,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "TREE_A",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_400",
+      "legacy_id": 400,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 400,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "TREE_B",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_411",
+      "legacy_id": 411,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 411,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "TREE_OAK_FOREST",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_424",
+      "legacy_id": 424,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 424,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "CHARLES_MARTEL",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_428",
+      "legacy_id": 428,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 428,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "HROLF_THE_GANGER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_432",
+      "legacy_id": 432,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 432,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "WILLIAM_WALLACE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_434",
+      "legacy_id": 434,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 434,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "KING",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_448",
+      "legacy_id": 448,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 448,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "SCOUT_CAVALRY",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_474",
+      "legacy_id": 474,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 474,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "HEAVY_CAVALRY_ARCHER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_499",
+      "legacy_id": 499,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 499,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "TORCH_A",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_548",
+      "legacy_id": 548,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 548,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "SIEGE_RAM",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_553",
+      "legacy_id": 553,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 553,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_CATAPHRACT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_554",
+      "legacy_id": 554,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 554,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_TEUTONIC_KNIGHT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_558",
+      "legacy_id": 558,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 558,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_WAR_ELEPHANT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_561",
+      "legacy_id": 561,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 561,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_MANGUDAI",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_562",
+      "legacy_id": 562,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 562,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "LUMBER_CAMP",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 2
+    },
+    {
+      "key": "map.object_567",
+      "legacy_id": 567,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 567,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "CHAMPION",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_569",
+      "legacy_id": 569,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 569,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "PALADIN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_584",
+      "legacy_id": 584,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 584,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "MINING_CAMP",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 2
+    },
+    {
+      "key": "map.object_596",
+      "legacy_id": 596,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 596,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_GENITOUR_ORIGINAL",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_598",
+      "legacy_id": 598,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 598,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "OUTPOST",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_600",
+      "legacy_id": 600,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 600,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FLAG_A",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_601",
+      "legacy_id": 601,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 601,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FLAG_B",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_602",
+      "legacy_id": 602,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 602,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FLAG_C",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_603",
+      "legacy_id": 603,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 603,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FLAG_D",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_604",
+      "legacy_id": 604,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 604,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FLAG_E",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_625",
+      "legacy_id": 625,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 625,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "PAVILION_C",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_629",
+      "legacy_id": 629,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 629,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "JOAN_OF_ARC",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_632",
+      "legacy_id": 632,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 632,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "FRANKISH_PALADIN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_640",
+      "legacy_id": 640,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 640,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "LA_HIRE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_648",
+      "legacy_id": 648,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 648,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "GUY_JOSSELYNE",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_680",
+      "legacy_id": 680,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 680,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "MASTER_OF_THE_TEMPLAR",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_684",
+      "legacy_id": 684,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 598,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "OUTPOST",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_694",
+      "legacy_id": 694,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 694,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_BERSERK",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_698",
+      "legacy_id": 698,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 698,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "SUBOTAI",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_706",
+      "legacy_id": 706,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 706,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "SABOTEUR",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_710",
+      "legacy_id": 710,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 710,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SKELETON",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_718",
+      "legacy_id": 718,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 718,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "YURT_G",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 2
+    },
+    {
+      "key": "map.object_719",
+      "legacy_id": 719,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 719,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "BuildingInfo",
+        "name": "YURT_H",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 3
+    },
+    {
+      "key": "map.object_720",
+      "legacy_id": 720,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 720,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "NINE_BANDS",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_731",
+      "legacy_id": 731,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 731,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "GENGHIS_KHAN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_752",
+      "legacy_id": 752,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 752,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_EAGLE_WARRIOR",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_765",
+      "legacy_id": 765,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 765,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_PLUMED_ARCHER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_773",
+      "legacy_id": 773,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 773,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "UnitInfo",
+        "name": "ELITE_CONQUISTADOR",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_777",
+      "legacy_id": 777,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 777,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "ATTILA_THE_HUN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_837",
+      "legacy_id": 837,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 837,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "MAP_REVEALER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_845",
+      "legacy_id": 845,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 845,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "NOBUNAGA",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_847",
+      "legacy_id": 847,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 847,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "HENRY_V",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_849",
+      "legacy_id": 849,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 849,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "WILLIAM_THE_CONQUEROR",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_852",
+      "legacy_id": 852,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 852,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "HeroInfo",
+        "name": "SCYTHIAN_SCOUT",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_855",
+      "legacy_id": 855,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 855,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "OLD_STONE_HEAD",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_857",
+      "legacy_id": 857,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 1776,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "BLOCKER",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 1
+    },
+    {
+      "key": "map.object_1285",
+      "legacy_id": 1285,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "keep",
+      "stock_id": 1285,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "FE_FLAG",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1740",
+      "legacy_id": 1740,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1741",
+      "legacy_id": 1741,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1742",
+      "legacy_id": 1742,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1743",
+      "legacy_id": 1743,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1744",
+      "legacy_id": 1744,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1745",
+      "legacy_id": 1745,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1746",
+      "legacy_id": 1746,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1747",
+      "legacy_id": 1747,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1748",
+      "legacy_id": 1748,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1749",
+      "legacy_id": 1749,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1750",
+      "legacy_id": 1750,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1751",
+      "legacy_id": 1751,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1752",
+      "legacy_id": 1752,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1753",
+      "legacy_id": 1753,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1754",
+      "legacy_id": 1754,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1755",
+      "legacy_id": 1755,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1756",
+      "legacy_id": 1756,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1757",
+      "legacy_id": 1757,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1758",
+      "legacy_id": 1758,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1759",
+      "legacy_id": 1759,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1760",
+      "legacy_id": 1760,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1761",
+      "legacy_id": 1761,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1762",
+      "legacy_id": 1762,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1763",
+      "legacy_id": 1763,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1764",
+      "legacy_id": 1764,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1765",
+      "legacy_id": 1765,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1766",
+      "legacy_id": 1766,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1767",
+      "legacy_id": 1767,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1768",
+      "legacy_id": 1768,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1769",
+      "legacy_id": 1769,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1770",
+      "legacy_id": 1770,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1771",
+      "legacy_id": 1771,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1772",
+      "legacy_id": 1772,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1773",
+      "legacy_id": 1773,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1774",
+      "legacy_id": 1774,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1775",
+      "legacy_id": 1775,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    },
+    {
+      "key": "map.object_1776",
+      "legacy_id": 1776,
+      "civilization_ids": [
+        9,
+        17,
+        8
+      ],
+      "disposition": "replace",
+      "stock_id": 819,
+      "status": "reviewed",
+      "map_identity": {
+        "dataset": "OtherInfo",
+        "name": "SIGN",
+        "parser_version": "0.9.4"
+      },
+      "blocking_size": 0
+    }
+  ],
+  "anchors": {
+    "lane.p1.spawn": {
+      "point": [
+        8.5,
+        15.5
+      ]
+    },
+    "lane.p1.exit": {
+      "point": [
+        56.5,
+        15.5
+      ]
+    },
+    "lane.p1.path": {
+      "region": [
+        8,
+        13,
+        56,
+        17
+      ]
+    },
+    "lane.p1.build.north": {
+      "region": [
+        20,
+        10,
+        47,
+        12
+      ]
+    },
+    "lane.p1.build.south": {
+      "region": [
+        20,
+        18,
+        47,
+        20
+      ]
+    },
+    "lane.p1.economy": {
+      "region": [
+        74,
+        4,
+        92,
+        26
+      ]
+    },
+    "lane.p1.expansion.third.north": {
+      "region": [
+        20,
+        9,
+        47,
+        9
+      ]
+    },
+    "lane.p1.expansion.third.south": {
+      "region": [
+        20,
+        21,
+        47,
+        21
+      ]
+    },
+    "lane.p1.expansion.fourth.north": {
+      "region": [
+        20,
+        8,
+        47,
+        8
+      ]
+    },
+    "lane.p1.expansion.fourth.south": {
+      "region": [
+        20,
+        22,
+        47,
+        22
+      ]
+    },
+    "lane.p1.life": {
+      "point": [
+        134.5,
+        67.5
+      ],
+      "reference_id": 20332,
+      "label": "Player 1 life indicator"
+    },
+    "trade.land.p1.home": {
+      "point": [
+        198.0,
+        2.0
+      ],
+      "reference_id": 0
+    },
+    "trade.land.p1.partner": {
+      "point": [
+        198.0,
+        198.0
+      ],
+      "reference_id": 20675
+    },
+    "trade.land.p1.spawn": {
+      "point": [
+        199.5,
+        192.5
+      ],
+      "reference_id": 29
+    },
+    "trade.water.p1.home": {
+      "point": [
+        117.5,
+        1.5
+      ],
+      "reference_id": 16615
+    },
+    "trade.water.p1.partner": {
+      "point": [
+        117.5,
+        198.5
+      ],
+      "reference_id": 20716
+    },
+    "trade.water.p1.spawn": {
+      "point": [
+        117.5,
+        194.5
+      ],
+      "reference_id": 20559
+    },
+    "siege.p1.1": {
+      "point": [
+        25.5,
+        2.5
+      ],
+      "region": [
+        24,
+        1,
+        26,
+        3
+      ],
+      "label": "Siege position 1 near player 1"
+    },
+    "siege.p1.2": {
+      "point": [
+        33.5,
+        2.5
+      ],
+      "region": [
+        32,
+        1,
+        34,
+        3
+      ],
+      "label": "Siege position 2 near player 1"
+    },
+    "siege.p1.3": {
+      "point": [
+        41.5,
+        2.5
+      ],
+      "region": [
+        40,
+        1,
+        42,
+        3
+      ],
+      "label": "Siege position 3 near player 1"
+    },
+    "lane.p2.spawn": {
+      "point": [
+        8.5,
+        43.5
+      ]
+    },
+    "lane.p2.exit": {
+      "point": [
+        56.5,
+        43.5
+      ]
+    },
+    "lane.p2.path": {
+      "region": [
+        8,
+        41,
+        56,
+        45
+      ]
+    },
+    "lane.p2.build.north": {
+      "region": [
+        20,
+        38,
+        47,
+        40
+      ]
+    },
+    "lane.p2.build.south": {
+      "region": [
+        20,
+        46,
+        47,
+        48
+      ]
+    },
+    "lane.p2.economy": {
+      "region": [
+        74,
+        32,
+        92,
+        54
+      ]
+    },
+    "lane.p2.expansion.third.north": {
+      "region": [
+        20,
+        37,
+        47,
+        37
+      ]
+    },
+    "lane.p2.expansion.third.south": {
+      "region": [
+        20,
+        49,
+        47,
+        49
+      ]
+    },
+    "lane.p2.expansion.fourth.north": {
+      "region": [
+        20,
+        36,
+        47,
+        36
+      ]
+    },
+    "lane.p2.expansion.fourth.south": {
+      "region": [
+        20,
+        50,
+        47,
+        50
+      ]
+    },
+    "lane.p2.life": {
+      "point": [
+        134.5,
+        70.5
+      ],
+      "reference_id": 20330,
+      "label": "Player 2 life indicator"
+    },
+    "trade.land.p2.home": {
+      "point": [
+        194.0,
+        2.0
+      ],
+      "reference_id": 1
+    },
+    "trade.land.p2.partner": {
+      "point": [
+        194.0,
+        198.0
+      ],
+      "reference_id": 20676
+    },
+    "trade.land.p2.spawn": {
+      "point": [
+        195.5,
+        192.5
+      ],
+      "reference_id": 35
+    },
+    "trade.water.p2.home": {
+      "point": [
+        114.5,
+        1.5
+      ],
+      "reference_id": 16614
+    },
+    "trade.water.p2.partner": {
+      "point": [
+        114.5,
+        198.5
+      ],
+      "reference_id": 20718
+    },
+    "trade.water.p2.spawn": {
+      "point": [
+        115.5,
+        194.5
+      ],
+      "reference_id": 20564
+    },
+    "siege.p2.1": {
+      "point": [
+        25.5,
+        30.5
+      ],
+      "region": [
+        24,
+        29,
+        26,
+        31
+      ],
+      "label": "Siege position 1 near player 2"
+    },
+    "siege.p2.2": {
+      "point": [
+        33.5,
+        30.5
+      ],
+      "region": [
+        32,
+        29,
+        34,
+        31
+      ],
+      "label": "Siege position 2 near player 2"
+    },
+    "siege.p2.3": {
+      "point": [
+        41.5,
+        30.5
+      ],
+      "region": [
+        40,
+        29,
+        42,
+        31
+      ],
+      "label": "Siege position 3 near player 2"
+    },
+    "lane.p3.spawn": {
+      "point": [
+        8.5,
+        71.5
+      ]
+    },
+    "lane.p3.exit": {
+      "point": [
+        56.5,
+        71.5
+      ]
+    },
+    "lane.p3.path": {
+      "region": [
+        8,
+        69,
+        56,
+        73
+      ]
+    },
+    "lane.p3.build.north": {
+      "region": [
+        20,
+        66,
+        47,
+        68
+      ]
+    },
+    "lane.p3.build.south": {
+      "region": [
+        20,
+        74,
+        47,
+        76
+      ]
+    },
+    "lane.p3.economy": {
+      "region": [
+        74,
+        60,
+        92,
+        82
+      ]
+    },
+    "lane.p3.expansion.third.north": {
+      "region": [
+        20,
+        65,
+        47,
+        65
+      ]
+    },
+    "lane.p3.expansion.third.south": {
+      "region": [
+        20,
+        77,
+        47,
+        77
+      ]
+    },
+    "lane.p3.expansion.fourth.north": {
+      "region": [
+        20,
+        64,
+        47,
+        64
+      ]
+    },
+    "lane.p3.expansion.fourth.south": {
+      "region": [
+        20,
+        78,
+        47,
+        78
+      ]
+    },
+    "lane.p3.life": {
+      "point": [
+        134.5,
+        73.5
+      ],
+      "reference_id": 20329,
+      "label": "Player 3 life indicator"
+    },
+    "trade.land.p3.home": {
+      "point": [
+        190.0,
+        2.0
+      ],
+      "reference_id": 2
+    },
+    "trade.land.p3.partner": {
+      "point": [
+        190.0,
+        198.0
+      ],
+      "reference_id": 20677
+    },
+    "trade.land.p3.spawn": {
+      "point": [
+        188.5,
+        192.5
+      ],
+      "reference_id": 45
+    },
+    "trade.water.p3.home": {
+      "point": [
+        111.5,
+        1.5
+      ],
+      "reference_id": 16613
+    },
+    "trade.water.p3.partner": {
+      "point": [
+        111.5,
+        198.5
+      ],
+      "reference_id": 20717
+    },
+    "trade.water.p3.spawn": {
+      "point": [
+        112.5,
+        194.5
+      ],
+      "reference_id": 20578
+    },
+    "siege.p3.1": {
+      "point": [
+        25.5,
+        58.5
+      ],
+      "region": [
+        24,
+        57,
+        26,
+        59
+      ],
+      "label": "Siege position 1 near player 3"
+    },
+    "siege.p3.2": {
+      "point": [
+        33.5,
+        58.5
+      ],
+      "region": [
+        32,
+        57,
+        34,
+        59
+      ],
+      "label": "Siege position 2 near player 3"
+    },
+    "siege.p3.3": {
+      "point": [
+        41.5,
+        58.5
+      ],
+      "region": [
+        40,
+        57,
+        42,
+        59
+      ],
+      "label": "Siege position 3 near player 3"
+    },
+    "lane.p4.spawn": {
+      "point": [
+        8.5,
+        99.5
+      ]
+    },
+    "lane.p4.exit": {
+      "point": [
+        56.5,
+        99.5
+      ]
+    },
+    "lane.p4.path": {
+      "region": [
+        8,
+        97,
+        56,
+        101
+      ]
+    },
+    "lane.p4.build.north": {
+      "region": [
+        20,
+        94,
+        47,
+        96
+      ]
+    },
+    "lane.p4.build.south": {
+      "region": [
+        20,
+        102,
+        47,
+        104
+      ]
+    },
+    "lane.p4.economy": {
+      "region": [
+        74,
+        88,
+        92,
+        110
+      ]
+    },
+    "lane.p4.expansion.third.north": {
+      "region": [
+        20,
+        93,
+        47,
+        93
+      ]
+    },
+    "lane.p4.expansion.third.south": {
+      "region": [
+        20,
+        105,
+        47,
+        105
+      ]
+    },
+    "lane.p4.expansion.fourth.north": {
+      "region": [
+        20,
+        92,
+        47,
+        92
+      ]
+    },
+    "lane.p4.expansion.fourth.south": {
+      "region": [
+        20,
+        106,
+        47,
+        106
+      ]
+    },
+    "lane.p4.life": {
+      "point": [
+        134.5,
+        76.5
+      ],
+      "reference_id": 20328,
+      "label": "Player 4 life indicator"
+    },
+    "trade.land.p4.home": {
+      "point": [
+        186.0,
+        2.0
+      ],
+      "reference_id": 3
+    },
+    "trade.land.p4.partner": {
+      "point": [
+        186.0,
+        198.0
+      ],
+      "reference_id": 20678
+    },
+    "trade.land.p4.spawn": {
+      "point": [
+        187.5,
+        192.5
+      ],
+      "reference_id": 47
+    },
+    "trade.water.p4.home": {
+      "point": [
+        108.5,
+        1.5
+      ],
+      "reference_id": 16612
+    },
+    "trade.water.p4.partner": {
+      "point": [
+        108.5,
+        198.5
+      ],
+      "reference_id": 20715
+    },
+    "trade.water.p4.spawn": {
+      "point": [
+        109.5,
+        193.5
+      ],
+      "reference_id": 20591
+    },
+    "siege.p4.1": {
+      "point": [
+        25.5,
+        86.5
+      ],
+      "region": [
+        24,
+        85,
+        26,
+        87
+      ],
+      "label": "Siege position 1 near player 4"
+    },
+    "siege.p4.2": {
+      "point": [
+        33.5,
+        86.5
+      ],
+      "region": [
+        32,
+        85,
+        34,
+        87
+      ],
+      "label": "Siege position 2 near player 4"
+    },
+    "siege.p4.3": {
+      "point": [
+        41.5,
+        86.5
+      ],
+      "region": [
+        40,
+        85,
+        42,
+        87
+      ],
+      "label": "Siege position 3 near player 4"
+    },
+    "lane.p5.spawn": {
+      "point": [
+        8.5,
+        127.5
+      ]
+    },
+    "lane.p5.exit": {
+      "point": [
+        56.5,
+        127.5
+      ]
+    },
+    "lane.p5.path": {
+      "region": [
+        8,
+        125,
+        56,
+        129
+      ]
+    },
+    "lane.p5.build.north": {
+      "region": [
+        20,
+        122,
+        47,
+        124
+      ]
+    },
+    "lane.p5.build.south": {
+      "region": [
+        20,
+        130,
+        47,
+        132
+      ]
+    },
+    "lane.p5.economy": {
+      "region": [
+        74,
+        116,
+        92,
+        138
+      ]
+    },
+    "lane.p5.expansion.third.north": {
+      "region": [
+        20,
+        121,
+        47,
+        121
+      ]
+    },
+    "lane.p5.expansion.third.south": {
+      "region": [
+        20,
+        133,
+        47,
+        133
+      ]
+    },
+    "lane.p5.expansion.fourth.north": {
+      "region": [
+        20,
+        120,
+        47,
+        120
+      ]
+    },
+    "lane.p5.expansion.fourth.south": {
+      "region": [
+        20,
+        134,
+        47,
+        134
+      ]
+    },
+    "lane.p5.life": {
+      "point": [
+        134.5,
+        79.5
+      ],
+      "reference_id": 20327,
+      "label": "Player 5 life indicator"
+    },
+    "trade.land.p5.home": {
+      "point": [
+        182.0,
+        2.0
+      ],
+      "reference_id": 4
+    },
+    "trade.land.p5.partner": {
+      "point": [
+        182.0,
+        198.0
+      ],
+      "reference_id": 20679
+    },
+    "trade.land.p5.spawn": {
+      "point": [
+        182.5,
+        192.5
+      ],
+      "reference_id": 10774
+    },
+    "trade.water.p5.home": {
+      "point": [
+        105.5,
+        1.5
+      ],
+      "reference_id": 16611
+    },
+    "trade.water.p5.partner": {
+      "point": [
+        105.5,
+        198.5
+      ],
+      "reference_id": 20714
+    },
+    "trade.water.p5.spawn": {
+      "point": [
+        106.5,
+        193.5
+      ],
+      "reference_id": 20600
+    },
+    "siege.p5.1": {
+      "point": [
+        25.5,
+        114.5
+      ],
+      "region": [
+        24,
+        113,
+        26,
+        115
+      ],
+      "label": "Siege position 1 near player 5"
+    },
+    "siege.p5.2": {
+      "point": [
+        33.5,
+        114.5
+      ],
+      "region": [
+        32,
+        113,
+        34,
+        115
+      ],
+      "label": "Siege position 2 near player 5"
+    },
+    "siege.p5.3": {
+      "point": [
+        41.5,
+        114.5
+      ],
+      "region": [
+        40,
+        113,
+        42,
+        115
+      ],
+      "label": "Siege position 3 near player 5"
+    },
+    "lane.p6.spawn": {
+      "point": [
+        8.5,
+        155.5
+      ]
+    },
+    "lane.p6.exit": {
+      "point": [
+        56.5,
+        155.5
+      ]
+    },
+    "lane.p6.path": {
+      "region": [
+        8,
+        153,
+        56,
+        157
+      ]
+    },
+    "lane.p6.build.north": {
+      "region": [
+        20,
+        150,
+        47,
+        152
+      ]
+    },
+    "lane.p6.build.south": {
+      "region": [
+        20,
+        158,
+        47,
+        160
+      ]
+    },
+    "lane.p6.economy": {
+      "region": [
+        74,
+        144,
+        92,
+        166
+      ]
+    },
+    "lane.p6.expansion.third.north": {
+      "region": [
+        20,
+        149,
+        47,
+        149
+      ]
+    },
+    "lane.p6.expansion.third.south": {
+      "region": [
+        20,
+        161,
+        47,
+        161
+      ]
+    },
+    "lane.p6.expansion.fourth.north": {
+      "region": [
+        20,
+        148,
+        47,
+        148
+      ]
+    },
+    "lane.p6.expansion.fourth.south": {
+      "region": [
+        20,
+        162,
+        47,
+        162
+      ]
+    },
+    "lane.p6.life": {
+      "point": [
+        134.5,
+        82.5
+      ],
+      "reference_id": 20326,
+      "label": "Player 6 life indicator"
+    },
+    "trade.land.p6.home": {
+      "point": [
+        178.0,
+        2.0
+      ],
+      "reference_id": 5
+    },
+    "trade.land.p6.partner": {
+      "point": [
+        178.0,
+        198.0
+      ],
+      "reference_id": 20680
+    },
+    "trade.land.p6.spawn": {
+      "point": [
+        179.5,
+        192.5
+      ],
+      "reference_id": 10767
+    },
+    "trade.water.p6.home": {
+      "point": [
+        102.5,
+        1.5
+      ],
+      "reference_id": 16610
+    },
+    "trade.water.p6.partner": {
+      "point": [
+        102.5,
+        198.5
+      ],
+      "reference_id": 20713
+    },
+    "trade.water.p6.spawn": {
+      "point": [
+        102.5,
+        194.5
+      ],
+      "reference_id": 20613
+    },
+    "siege.p6.1": {
+      "point": [
+        25.5,
+        142.5
+      ],
+      "region": [
+        24,
+        141,
+        26,
+        143
+      ],
+      "label": "Siege position 1 near player 6"
+    },
+    "siege.p6.2": {
+      "point": [
+        33.5,
+        142.5
+      ],
+      "region": [
+        32,
+        141,
+        34,
+        143
+      ],
+      "label": "Siege position 2 near player 6"
+    },
+    "siege.p6.3": {
+      "point": [
+        41.5,
+        142.5
+      ],
+      "region": [
+        40,
+        141,
+        42,
+        143
+      ],
+      "label": "Siege position 3 near player 6"
+    },
+    "lane.p7.spawn": {
+      "point": [
+        8.5,
+        183.5
+      ]
+    },
+    "lane.p7.exit": {
+      "point": [
+        56.5,
+        183.5
+      ]
+    },
+    "lane.p7.path": {
+      "region": [
+        8,
+        181,
+        56,
+        185
+      ]
+    },
+    "lane.p7.build.north": {
+      "region": [
+        20,
+        178,
+        47,
+        180
+      ]
+    },
+    "lane.p7.build.south": {
+      "region": [
+        20,
+        186,
+        47,
+        188
+      ]
+    },
+    "lane.p7.economy": {
+      "region": [
+        74,
+        172,
+        92,
+        194
+      ]
+    },
+    "lane.p7.expansion.third.north": {
+      "region": [
+        20,
+        177,
+        47,
+        177
+      ]
+    },
+    "lane.p7.expansion.third.south": {
+      "region": [
+        20,
+        189,
+        47,
+        189
+      ]
+    },
+    "lane.p7.expansion.fourth.north": {
+      "region": [
+        20,
+        176,
+        47,
+        176
+      ]
+    },
+    "lane.p7.expansion.fourth.south": {
+      "region": [
+        20,
+        190,
+        47,
+        190
+      ]
+    },
+    "lane.p7.life": {
+      "point": [
+        134.5,
+        85.5
+      ],
+      "reference_id": 20325,
+      "label": "Player 7 life indicator"
+    },
+    "trade.land.p7.home": {
+      "point": [
+        174.0,
+        2.0
+      ],
+      "reference_id": 6
+    },
+    "trade.land.p7.partner": {
+      "point": [
+        174.0,
+        198.0
+      ],
+      "reference_id": 20681
+    },
+    "trade.land.p7.spawn": {
+      "point": [
+        175.5,
+        193.5
+      ],
+      "reference_id": 10763
+    },
+    "trade.water.p7.home": {
+      "point": [
+        99.5,
+        1.5
+      ],
+      "reference_id": 16609
+    },
+    "trade.water.p7.partner": {
+      "point": [
+        99.5,
+        198.5
+      ],
+      "reference_id": 20712
+    },
+    "trade.water.p7.spawn": {
+      "point": [
+        99.5,
+        194.5
+      ],
+      "reference_id": 20623
+    },
+    "siege.p7.1": {
+      "point": [
+        25.5,
+        170.5
+      ],
+      "region": [
+        24,
+        169,
+        26,
+        171
+      ],
+      "label": "Siege position 1 near player 7"
+    },
+    "siege.p7.2": {
+      "point": [
+        33.5,
+        170.5
+      ],
+      "region": [
+        32,
+        169,
+        34,
+        171
+      ],
+      "label": "Siege position 2 near player 7"
+    },
+    "siege.p7.3": {
+      "point": [
+        41.5,
+        170.5
+      ],
+      "region": [
+        40,
+        169,
+        42,
+        171
+      ],
+      "label": "Siege position 3 near player 7"
+    },
+    "shop.entry": {
+      "point": [
+        158.5,
+        8.5
+      ]
+    },
+    "shop.bounds": {
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    "shop.tower_attack_4": {
+      "region": [
+        159,
+        15,
+        161,
+        16
+      ],
+      "label": "Tower Attack +4 (1 Kings; legacy price)"
+    },
+    "shop.tower_attack_10": {
+      "region": [
+        159,
+        18,
+        161,
+        19
+      ],
+      "label": "Tower Attack +10 (2 Kings; legacy price)"
+    },
+    "shop.tower_attack_25": {
+      "region": [
+        159,
+        21,
+        161,
+        22
+      ],
+      "label": "Tower Attack +25 (4 Kings; legacy price)"
+    },
+    "shop.tower_attack_50": {
+      "region": [
+        159,
+        24,
+        162,
+        26
+      ],
+      "label": "Tower Attack +50 (7 Kings; legacy price)"
+    },
+    "shop.tower_attack_100": {
+      "region": [
+        159,
+        28,
+        162,
+        31
+      ],
+      "label": "Tower Attack +100 (12 Kings; legacy price)"
+    },
+    "shop.tower_attack_170": {
+      "region": [
+        159,
+        33,
+        162,
+        38
+      ],
+      "label": "Tower Attack +170 (18 Kings; legacy price)"
+    },
+    "shop.tower_attack_255": {
+      "region": [
+        147,
+        32,
+        151,
+        38
+      ],
+      "label": "Tower Attack +255 (30 Kings; legacy price)"
+    },
+    "shop.tower_attack_750": {
+      "region": [
+        147,
+        21,
+        151,
+        30
+      ],
+      "label": "Tower Attack +750 (50 Kings; legacy price)"
+    },
+    "shop.bombard_attack_400": {
+      "region": [
+        148,
+        15,
+        151,
+        19
+      ],
+      "label": "Bombard Attack +400 (18 Kings; legacy price)"
+    },
+    "shop.2000_wood": {
+      "region": [
+        128,
+        15,
+        130,
+        16
+      ],
+      "label": "2000 Wood (1 Kings; legacy price)"
+    },
+    "shop.activate_king_every_2_5_min": {
+      "region": [
+        128,
+        18,
+        130,
+        22
+      ],
+      "label": "Activate King every 2.5 min (13 Kings; legacy price)"
+    },
+    "shop.activate_king_every_1_minute": {
+      "region": [
+        127,
+        24,
+        130,
+        29
+      ],
+      "label": "Activate King Every 1 Minute (21 Kings; legacy price)"
+    },
+    "shop.activate_1000_gold_every_2_minutes": {
+      "region": [
+        128,
+        31,
+        130,
+        33
+      ],
+      "label": "Activate 1000 Gold every 2 minutes (6 Kings; legacy price)"
+    },
+    "shop.activate_450_gold_every_2minutes": {
+      "region": [
+        128,
+        33,
+        131,
+        35
+      ],
+      "label": "Activate 450 Gold every 2minutes (3 Kings; legacy price)"
+    },
+    "shop.activate_175_gold_every_2_minutes": {
+      "region": [
+        129,
+        37,
+        130,
+        38
+      ],
+      "label": "Activate 175 Gold every 2 Minutes (1 Kings; legacy price)"
+    },
+    "shop.1500_stone": {
+      "region": [
+        138,
+        37,
+        139,
+        38
+      ],
+      "label": "1500 Stone (1 Kings; legacy price)"
+    },
+    "shop.activate_375_stone_every_2_minutes": {
+      "region": [
+        138,
+        34,
+        140,
+        35
+      ],
+      "label": "Activate 375 Stone Every 2 Minutes (3 Kings; legacy price)"
+    },
+    "shop.activate_800_stone_every_2_minutes": {
+      "region": [
+        138,
+        30,
+        140,
+        32
+      ],
+      "label": "Activate 800 Stone Every 2 Minutes (6 Kings; legacy price)"
+    },
+    "shop.activate_1_atttack_every_30_seconds": {
+      "region": [
+        138,
+        25,
+        140,
+        28
+      ],
+      "label": "Activate +1 Atttack Every 30 Seconds (8 Kings; legacy price)"
+    },
+    "shop.activate_3_attack_every_minute": {
+      "region": [
+        138,
+        19,
+        140,
+        23
+      ],
+      "label": "Activate +3 Attack Every Minute (10 Kings; legacy price)"
+    },
+    "shop.20_more_relics": {
+      "region": [
+        138,
+        15,
+        140,
+        17
+      ],
+      "label": "20 More relics (5 Kings; legacy price)"
+    },
+    "shop.castle_age": {
+      "region": [
+        131,
+        46,
+        131,
+        49
+      ],
+      "label": "Castle Age (1 Kings; legacy price)"
+    },
+    "shop.imperial_age": {
+      "region": [
+        133,
+        46,
+        133,
+        49
+      ],
+      "label": "Imperial Age (1 Kings; legacy price)"
+    },
+    "shop.left_accursed_tower": {
+      "region": [
+        135,
+        45,
+        135,
+        49
+      ],
+      "label": "Left Accursed Tower (1 Kings; legacy price)"
+    },
+    "shop.right_accursed_tower": {
+      "region": [
+        137,
+        45,
+        137,
+        49
+      ],
+      "label": "Right Accursed Tower (1 Kings; legacy price)"
+    },
+    "shop.building_villager": {
+      "region": [
+        139,
+        46,
+        140,
+        49
+      ],
+      "label": "Building Villager (1 Kings; legacy price)"
+    },
+    "shop.resource_villager": {
+      "region": [
+        142,
+        46,
+        143,
+        49
+      ],
+      "label": "Resource Villager (1 Kings; legacy price)"
+    },
+    "shop.80_population": {
+      "region": [
+        145,
+        48,
+        147,
+        49
+      ],
+      "label": "80 Population (3 Kings; legacy price)"
+    },
+    "shop.castle": {
+      "region": [
+        149,
+        48,
+        151,
+        49
+      ],
+      "label": "Castle (3 Kings; legacy price)"
+    },
+    "shop.trade_carts": {
+      "region": [
+        153,
+        46,
+        154,
+        49
+      ],
+      "label": "Trade Carts (1 Kings; legacy price)"
+    },
+    "shop.trade_cogs": {
+      "region": [
+        156,
+        48,
+        157,
+        49
+      ],
+      "label": "Trade Cogs (1 Kings; legacy price)"
+    },
+    "shop.relic": {
+      "region": [
+        159,
+        46,
+        160,
+        49
+      ],
+      "label": "Relic (1 Kings; legacy price)"
+    },
+    "shop.3rd_row_of_towers": {
+      "region": [
+        162,
+        46,
+        164,
+        49
+      ],
+      "label": "3rd Row of Towers (2 Kings; legacy price)"
+    },
+    "shop.4th_row_of_towers": {
+      "region": [
+        168,
+        36,
+        169,
+        38
+      ],
+      "label": "4th Row of Towers (3 Kings; legacy price)"
+    },
+    "shop.activate_1_ap_every_5_seconds": {
+      "region": [
+        123,
+        46,
+        129,
+        49
+      ],
+      "label": "Activate +1 AP every 5 seconds (15 Kings; legacy price)"
+    },
+    "shop.repair_villie": {
+      "region": [
+        166,
+        46,
+        168,
+        49
+      ],
+      "label": "Repair villie (10 Kings; legacy price)"
+    }
+  },
+  "placement_overrides": [
+    {
+      "reference_id": 20332,
+      "caption": "Player 1 life indicator"
+    },
+    {
+      "reference_id": 20330,
+      "caption": "Player 2 life indicator"
+    },
+    {
+      "reference_id": 20329,
+      "caption": "Player 3 life indicator"
+    },
+    {
+      "reference_id": 20328,
+      "caption": "Player 4 life indicator"
+    },
+    {
+      "reference_id": 20327,
+      "caption": "Player 5 life indicator"
+    },
+    {
+      "reference_id": 20326,
+      "caption": "Player 6 life indicator"
+    },
+    {
+      "reference_id": 20325,
+      "caption": "Player 7 life indicator"
+    },
+    {
+      "reference_id": 41629,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41029,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41149,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41289,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41469,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 40868,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 40860,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 40869,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41729,
+      "caption": "Stone economy bonus"
+    },
+    {
+      "reference_id": 41719,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 40550,
+      "caption": "Tower Attack +4 / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40573,
+      "caption": "Tower Attack +750 / 50 Kings (legacy)"
+    },
+    {
+      "reference_id": 40574,
+      "caption": "Tower Attack +255 / 30 Kings (legacy)"
+    },
+    {
+      "reference_id": 40575,
+      "caption": "Tower Attack +170 / 18 Kings (legacy)"
+    },
+    {
+      "reference_id": 40576,
+      "caption": "Activate +3 Attack Every Minute / 10 Kings (legacy)"
+    },
+    {
+      "reference_id": 40577,
+      "caption": "Tower Attack +10 / 2 Kings (legacy)"
+    },
+    {
+      "reference_id": 40578,
+      "caption": "Tower Attack +25 / 4 Kings (legacy)"
+    },
+    {
+      "reference_id": 40579,
+      "caption": "Tower Attack +50 / 7 Kings (legacy)"
+    },
+    {
+      "reference_id": 40580,
+      "caption": "Tower Attack +100 / 12 Kings (legacy)"
+    },
+    {
+      "reference_id": 40587,
+      "caption": "20 More relics / 5 Kings (legacy)"
+    },
+    {
+      "reference_id": 40593,
+      "caption": "Activate 800 Stone Every 2 Minutes / 6 Kings (legacy)"
+    },
+    {
+      "reference_id": 40594,
+      "caption": "Activate 1000 Gold every 2 minutes / 6 Kings (legacy)"
+    },
+    {
+      "reference_id": 40595,
+      "caption": "Activate 450 Gold every 2minutes / 3 Kings (legacy)"
+    },
+    {
+      "reference_id": 40596,
+      "caption": "Activate King every 2.5 min / 13 Kings (legacy)"
+    },
+    {
+      "reference_id": 40611,
+      "caption": "80 Population / 3 Kings (legacy)"
+    },
+    {
+      "reference_id": 40598,
+      "caption": "Trade Cogs / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40599,
+      "caption": "Trade Carts / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40600,
+      "caption": "2000 Wood / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40610,
+      "caption": "Castle Age / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40602,
+      "caption": "1500 Stone / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40603,
+      "caption": "Imperial Age / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40605,
+      "caption": "Relic / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40606,
+      "caption": "4th Row of Towers / 3 Kings (legacy)"
+    },
+    {
+      "reference_id": 40607,
+      "caption": "Activate King Every 1 Minute / 21 Kings (legacy)"
+    },
+    {
+      "reference_id": 40608,
+      "caption": "Left Accursed Tower / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40609,
+      "caption": "Activate +1 Atttack Every 30 Seconds / 8 Kings (legacy)"
+    },
+    {
+      "reference_id": 40612,
+      "caption": "3rd Row of Towers / 2 Kings (legacy)"
+    },
+    {
+      "reference_id": 40613,
+      "caption": "Repair villie / 10 Kings (legacy)"
+    },
+    {
+      "reference_id": 40614,
+      "caption": "Activate 375 Stone Every 2 Minutes / 3 Kings (legacy)"
+    },
+    {
+      "reference_id": 40615,
+      "caption": "Activate 175 Gold every 2 Minutes / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40616,
+      "caption": "Castle / 3 Kings (legacy)"
+    },
+    {
+      "reference_id": 40617,
+      "caption": "Activate +1 AP every 5 seconds / 15 Kings (legacy)"
+    },
+    {
+      "reference_id": 40629,
+      "caption": "Resource Villager / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 40630,
+      "caption": "Building Villager / 1 Kings (legacy)"
+    },
+    {
+      "reference_id": 41013,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 41019,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 41133,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 41139,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 41273,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 41279,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 41453,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 41459,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 41613,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 41619,
+      "caption": "Food economy bonus"
+    },
+    {
+      "reference_id": 41713,
+      "caption": "Gold economy bonus"
+    },
+    {
+      "reference_id": 39392,
+      "owner": 0
+    },
+    {
+      "reference_id": 21492,
+      "owner": 0
+    },
+    {
+      "reference_id": 39379,
+      "owner": 0
+    },
+    {
+      "reference_id": 40438,
+      "owner": 0
+    },
+    {
+      "reference_id": 39378,
+      "owner": 0
+    },
+    {
+      "reference_id": 21502,
+      "owner": 0
+    },
+    {
+      "reference_id": 21503,
+      "owner": 0
+    },
+    {
+      "reference_id": 21494,
+      "owner": 0
+    },
+    {
+      "reference_id": 40000,
+      "owner": 0
+    },
+    {
+      "reference_id": 21497,
+      "owner": 0
+    },
+    {
+      "reference_id": 21498,
+      "owner": 0
+    },
+    {
+      "reference_id": 10851,
+      "owner": 0
+    },
+    {
+      "reference_id": 23144,
+      "owner": 0
+    },
+    {
+      "reference_id": 10853,
+      "owner": 0
+    },
+    {
+      "reference_id": 10854,
+      "owner": 0
+    },
+    {
+      "reference_id": 10855,
+      "owner": 0
+    },
+    {
+      "reference_id": 10856,
+      "owner": 0
+    },
+    {
+      "reference_id": 10857,
+      "owner": 0
+    },
+    {
+      "reference_id": 10858,
+      "owner": 0
+    },
+    {
+      "reference_id": 10859,
+      "owner": 0
+    },
+    {
+      "reference_id": 10860,
+      "owner": 0
+    },
+    {
+      "reference_id": 10861,
+      "owner": 0
+    },
+    {
+      "reference_id": 23143,
+      "owner": 0
+    },
+    {
+      "reference_id": 10863,
+      "owner": 0
+    },
+    {
+      "reference_id": 10864,
+      "owner": 0
+    },
+    {
+      "reference_id": 10865,
+      "owner": 0
+    },
+    {
+      "reference_id": 10866,
+      "owner": 0
+    },
+    {
+      "reference_id": 10867,
+      "owner": 0
+    },
+    {
+      "reference_id": 10868,
+      "owner": 0
+    },
+    {
+      "reference_id": 10869,
+      "owner": 0
+    },
+    {
+      "reference_id": 10870,
+      "owner": 0
+    },
+    {
+      "reference_id": 10871,
+      "owner": 0
+    },
+    {
+      "reference_id": 10872,
+      "owner": 0
+    },
+    {
+      "reference_id": 10873,
+      "owner": 0
+    },
+    {
+      "reference_id": 10874,
+      "owner": 0
+    },
+    {
+      "reference_id": 10875,
+      "owner": 0
+    },
+    {
+      "reference_id": 10876,
+      "owner": 0
+    },
+    {
+      "reference_id": 10877,
+      "owner": 0
+    },
+    {
+      "reference_id": 10878,
+      "owner": 0
+    },
+    {
+      "reference_id": 12434,
+      "owner": 0
+    },
+    {
+      "reference_id": 12448,
+      "owner": 0
+    },
+    {
+      "reference_id": 12449,
+      "owner": 0
+    },
+    {
+      "reference_id": 12450,
+      "owner": 0
+    },
+    {
+      "reference_id": 12660,
+      "owner": 0
+    },
+    {
+      "reference_id": 12657,
+      "owner": 0
+    },
+    {
+      "reference_id": 12656,
+      "owner": 0
+    },
+    {
+      "reference_id": 12454,
+      "owner": 0
+    },
+    {
+      "reference_id": 12455,
+      "owner": 0
+    },
+    {
+      "reference_id": 12456,
+      "owner": 0
+    },
+    {
+      "reference_id": 12457,
+      "owner": 0
+    },
+    {
+      "reference_id": 12650,
+      "owner": 0
+    },
+    {
+      "reference_id": 12658,
+      "owner": 0
+    },
+    {
+      "reference_id": 12659,
+      "owner": 0
+    },
+    {
+      "reference_id": 12491,
+      "owner": 0
+    },
+    {
+      "reference_id": 22006,
+      "owner": 0
+    },
+    {
+      "reference_id": 22008,
+      "owner": 0
+    },
+    {
+      "reference_id": 22055,
+      "owner": 0
+    },
+    {
+      "reference_id": 22012,
+      "owner": 0
+    },
+    {
+      "reference_id": 22010,
+      "owner": 0
+    },
+    {
+      "reference_id": 22009,
+      "owner": 0
+    },
+    {
+      "reference_id": 12649,
+      "owner": 0
+    },
+    {
+      "reference_id": 18468,
+      "owner": 0
+    },
+    {
+      "reference_id": 18469,
+      "owner": 0
+    },
+    {
+      "reference_id": 18470,
+      "owner": 0
+    },
+    {
+      "reference_id": 18471,
+      "owner": 0
+    },
+    {
+      "reference_id": 18472,
+      "owner": 0
+    },
+    {
+      "reference_id": 18473,
+      "owner": 0
+    },
+    {
+      "reference_id": 18474,
+      "owner": 0
+    },
+    {
+      "reference_id": 18475,
+      "owner": 0
+    },
+    {
+      "reference_id": 18476,
+      "owner": 0
+    },
+    {
+      "reference_id": 18477,
+      "owner": 0
+    },
+    {
+      "reference_id": 18478,
+      "owner": 0
+    },
+    {
+      "reference_id": 18479,
+      "owner": 0
+    },
+    {
+      "reference_id": 18480,
+      "owner": 0
+    },
+    {
+      "reference_id": 18481,
+      "owner": 0
+    },
+    {
+      "reference_id": 18482,
+      "owner": 0
+    },
+    {
+      "reference_id": 18483,
+      "owner": 0
+    },
+    {
+      "reference_id": 18484,
+      "owner": 0
+    },
+    {
+      "reference_id": 18485,
+      "owner": 0
+    },
+    {
+      "reference_id": 18486,
+      "owner": 0
+    },
+    {
+      "reference_id": 18487,
+      "owner": 0
+    },
+    {
+      "reference_id": 18488,
+      "owner": 0
+    },
+    {
+      "reference_id": 18489,
+      "owner": 0
+    },
+    {
+      "reference_id": 18490,
+      "owner": 0
+    },
+    {
+      "reference_id": 18491,
+      "owner": 0
+    },
+    {
+      "reference_id": 18492,
+      "owner": 0
+    },
+    {
+      "reference_id": 18493,
+      "owner": 0
+    },
+    {
+      "reference_id": 18494,
+      "owner": 0
+    },
+    {
+      "reference_id": 18495,
+      "owner": 0
+    },
+    {
+      "reference_id": 18496,
+      "owner": 0
+    },
+    {
+      "reference_id": 18497,
+      "owner": 0
+    },
+    {
+      "reference_id": 18498,
+      "owner": 0
+    },
+    {
+      "reference_id": 18499,
+      "owner": 0
+    },
+    {
+      "reference_id": 18500,
+      "owner": 0
+    },
+    {
+      "reference_id": 18501,
+      "owner": 0
+    },
+    {
+      "reference_id": 18503,
+      "owner": 0
+    },
+    {
+      "reference_id": 18509,
+      "owner": 0
+    },
+    {
+      "reference_id": 18510,
+      "owner": 0
+    },
+    {
+      "reference_id": 18511,
+      "owner": 0
+    },
+    {
+      "reference_id": 18512,
+      "owner": 0
+    },
+    {
+      "reference_id": 18513,
+      "owner": 0
+    },
+    {
+      "reference_id": 18514,
+      "owner": 0
+    },
+    {
+      "reference_id": 18515,
+      "owner": 0
+    },
+    {
+      "reference_id": 18516,
+      "owner": 0
+    },
+    {
+      "reference_id": 18517,
+      "owner": 0
+    },
+    {
+      "reference_id": 18518,
+      "owner": 0
+    },
+    {
+      "reference_id": 18519,
+      "owner": 0
+    },
+    {
+      "reference_id": 18520,
+      "owner": 0
+    },
+    {
+      "reference_id": 18521,
+      "owner": 0
+    },
+    {
+      "reference_id": 18522,
+      "owner": 0
+    },
+    {
+      "reference_id": 18523,
+      "owner": 0
+    },
+    {
+      "reference_id": 18524,
+      "owner": 0
+    },
+    {
+      "reference_id": 18525,
+      "owner": 0
+    },
+    {
+      "reference_id": 18526,
+      "owner": 0
+    },
+    {
+      "reference_id": 18527,
+      "owner": 0
+    },
+    {
+      "reference_id": 18528,
+      "owner": 0
+    },
+    {
+      "reference_id": 18529,
+      "owner": 0
+    },
+    {
+      "reference_id": 18530,
+      "owner": 0
+    },
+    {
+      "reference_id": 18531,
+      "owner": 0
+    },
+    {
+      "reference_id": 18532,
+      "owner": 0
+    },
+    {
+      "reference_id": 18533,
+      "owner": 0
+    },
+    {
+      "reference_id": 18534,
+      "owner": 0
+    },
+    {
+      "reference_id": 18535,
+      "owner": 0
+    },
+    {
+      "reference_id": 18536,
+      "owner": 0
+    },
+    {
+      "reference_id": 18537,
+      "owner": 0
+    },
+    {
+      "reference_id": 18538,
+      "owner": 0
+    },
+    {
+      "reference_id": 18539,
+      "owner": 0
+    },
+    {
+      "reference_id": 18540,
+      "owner": 0
+    },
+    {
+      "reference_id": 18541,
+      "owner": 0
+    },
+    {
+      "reference_id": 18542,
+      "owner": 0
+    },
+    {
+      "reference_id": 18543,
+      "owner": 0
+    },
+    {
+      "reference_id": 18544,
+      "owner": 0
+    },
+    {
+      "reference_id": 18545,
+      "owner": 0
+    },
+    {
+      "reference_id": 18546,
+      "owner": 0
+    },
+    {
+      "reference_id": 18547,
+      "owner": 0
+    },
+    {
+      "reference_id": 18548,
+      "owner": 0
+    },
+    {
+      "reference_id": 18549,
+      "owner": 0
+    },
+    {
+      "reference_id": 18550,
+      "owner": 0
+    },
+    {
+      "reference_id": 18551,
+      "owner": 0
+    },
+    {
+      "reference_id": 18552,
+      "owner": 0
+    },
+    {
+      "reference_id": 18553,
+      "owner": 0
+    },
+    {
+      "reference_id": 18554,
+      "owner": 0
+    },
+    {
+      "reference_id": 18555,
+      "owner": 0
+    },
+    {
+      "reference_id": 18556,
+      "owner": 0
+    },
+    {
+      "reference_id": 18557,
+      "owner": 0
+    },
+    {
+      "reference_id": 18558,
+      "owner": 0
+    },
+    {
+      "reference_id": 18559,
+      "owner": 0
+    },
+    {
+      "reference_id": 18560,
+      "owner": 0
+    },
+    {
+      "reference_id": 18561,
+      "owner": 0
+    },
+    {
+      "reference_id": 18562,
+      "owner": 0
+    },
+    {
+      "reference_id": 18563,
+      "owner": 0
+    },
+    {
+      "reference_id": 18564,
+      "owner": 0
+    },
+    {
+      "reference_id": 18565,
+      "owner": 0
+    },
+    {
+      "reference_id": 18566,
+      "owner": 0
+    },
+    {
+      "reference_id": 18567,
+      "owner": 0
+    },
+    {
+      "reference_id": 18568,
+      "owner": 0
+    },
+    {
+      "reference_id": 18569,
+      "owner": 0
+    },
+    {
+      "reference_id": 18570,
+      "owner": 0
+    },
+    {
+      "reference_id": 18571,
+      "owner": 0
+    },
+    {
+      "reference_id": 18572,
+      "owner": 0
+    },
+    {
+      "reference_id": 18573,
+      "owner": 0
+    },
+    {
+      "reference_id": 18574,
+      "owner": 0
+    },
+    {
+      "reference_id": 18575,
+      "owner": 0
+    },
+    {
+      "reference_id": 18576,
+      "owner": 0
+    },
+    {
+      "reference_id": 18577,
+      "owner": 0
+    },
+    {
+      "reference_id": 18578,
+      "owner": 0
+    },
+    {
+      "reference_id": 18579,
+      "owner": 0
+    },
+    {
+      "reference_id": 18580,
+      "owner": 0
+    },
+    {
+      "reference_id": 18581,
+      "owner": 0
+    },
+    {
+      "reference_id": 18582,
+      "owner": 0
+    },
+    {
+      "reference_id": 18586,
+      "owner": 0
+    },
+    {
+      "reference_id": 18584,
+      "owner": 0
+    },
+    {
+      "reference_id": 18585,
+      "owner": 0
+    },
+    {
+      "reference_id": 18587,
+      "owner": 0
+    },
+    {
+      "reference_id": 18588,
+      "owner": 0
+    },
+    {
+      "reference_id": 18589,
+      "owner": 0
+    },
+    {
+      "reference_id": 18590,
+      "owner": 0
+    },
+    {
+      "reference_id": 18591,
+      "owner": 0
+    },
+    {
+      "reference_id": 18802,
+      "owner": 0
+    },
+    {
+      "reference_id": 18803,
+      "owner": 0
+    },
+    {
+      "reference_id": 18804,
+      "owner": 0
+    },
+    {
+      "reference_id": 18805,
+      "owner": 0
+    },
+    {
+      "reference_id": 18806,
+      "owner": 0
+    },
+    {
+      "reference_id": 18807,
+      "owner": 0
+    },
+    {
+      "reference_id": 18808,
+      "owner": 0
+    },
+    {
+      "reference_id": 18809,
+      "owner": 0
+    },
+    {
+      "reference_id": 18810,
+      "owner": 0
+    },
+    {
+      "reference_id": 18811,
+      "owner": 0
+    },
+    {
+      "reference_id": 18812,
+      "owner": 0
+    },
+    {
+      "reference_id": 18813,
+      "owner": 0
+    },
+    {
+      "reference_id": 18814,
+      "owner": 0
+    },
+    {
+      "reference_id": 18815,
+      "owner": 0
+    },
+    {
+      "reference_id": 18816,
+      "owner": 0
+    },
+    {
+      "reference_id": 18817,
+      "owner": 0
+    },
+    {
+      "reference_id": 18818,
+      "owner": 0
+    },
+    {
+      "reference_id": 18819,
+      "owner": 0
+    },
+    {
+      "reference_id": 18820,
+      "owner": 0
+    },
+    {
+      "reference_id": 18821,
+      "owner": 0
+    },
+    {
+      "reference_id": 18822,
+      "owner": 0
+    },
+    {
+      "reference_id": 18823,
+      "owner": 0
+    },
+    {
+      "reference_id": 18824,
+      "owner": 0
+    },
+    {
+      "reference_id": 18825,
+      "owner": 0
+    },
+    {
+      "reference_id": 18826,
+      "owner": 0
+    },
+    {
+      "reference_id": 18827,
+      "owner": 0
+    },
+    {
+      "reference_id": 18828,
+      "owner": 0
+    },
+    {
+      "reference_id": 18829,
+      "owner": 0
+    },
+    {
+      "reference_id": 18830,
+      "owner": 0
+    },
+    {
+      "reference_id": 18831,
+      "owner": 0
+    },
+    {
+      "reference_id": 18832,
+      "owner": 0
+    },
+    {
+      "reference_id": 18834,
+      "owner": 0
+    },
+    {
+      "reference_id": 18835,
+      "owner": 0
+    },
+    {
+      "reference_id": 18836,
+      "owner": 0
+    },
+    {
+      "reference_id": 22007,
+      "owner": 0
+    },
+    {
+      "reference_id": 18838,
+      "owner": 0
+    },
+    {
+      "reference_id": 18856,
+      "owner": 0
+    },
+    {
+      "reference_id": 18857,
+      "owner": 0
+    },
+    {
+      "reference_id": 18858,
+      "owner": 0
+    },
+    {
+      "reference_id": 18861,
+      "owner": 0
+    },
+    {
+      "reference_id": 18862,
+      "owner": 0
+    },
+    {
+      "reference_id": 18863,
+      "owner": 0
+    },
+    {
+      "reference_id": 18864,
+      "owner": 0
+    },
+    {
+      "reference_id": 18865,
+      "owner": 0
+    },
+    {
+      "reference_id": 18866,
+      "owner": 0
+    },
+    {
+      "reference_id": 18867,
+      "owner": 0
+    },
+    {
+      "reference_id": 18868,
+      "owner": 0
+    },
+    {
+      "reference_id": 18869,
+      "owner": 0
+    },
+    {
+      "reference_id": 18870,
+      "owner": 0
+    },
+    {
+      "reference_id": 18871,
+      "owner": 0
+    },
+    {
+      "reference_id": 18872,
+      "owner": 0
+    },
+    {
+      "reference_id": 18873,
+      "owner": 0
+    },
+    {
+      "reference_id": 18874,
+      "owner": 0
+    },
+    {
+      "reference_id": 18875,
+      "owner": 0
+    },
+    {
+      "reference_id": 18876,
+      "owner": 0
+    },
+    {
+      "reference_id": 18877,
+      "owner": 0
+    },
+    {
+      "reference_id": 18878,
+      "owner": 0
+    },
+    {
+      "reference_id": 18879,
+      "owner": 0
+    },
+    {
+      "reference_id": 18880,
+      "owner": 0
+    },
+    {
+      "reference_id": 18881,
+      "owner": 0
+    },
+    {
+      "reference_id": 18882,
+      "owner": 0
+    },
+    {
+      "reference_id": 18883,
+      "owner": 0
+    },
+    {
+      "reference_id": 18884,
+      "owner": 0
+    },
+    {
+      "reference_id": 18885,
+      "owner": 0
+    },
+    {
+      "reference_id": 18886,
+      "owner": 0
+    },
+    {
+      "reference_id": 18887,
+      "owner": 0
+    },
+    {
+      "reference_id": 18888,
+      "owner": 0
+    },
+    {
+      "reference_id": 18889,
+      "owner": 0
+    },
+    {
+      "reference_id": 18890,
+      "owner": 0
+    },
+    {
+      "reference_id": 18891,
+      "owner": 0
+    },
+    {
+      "reference_id": 18892,
+      "owner": 0
+    },
+    {
+      "reference_id": 18893,
+      "owner": 0
+    },
+    {
+      "reference_id": 18894,
+      "owner": 0
+    },
+    {
+      "reference_id": 18895,
+      "owner": 0
+    },
+    {
+      "reference_id": 18896,
+      "owner": 0
+    },
+    {
+      "reference_id": 18897,
+      "owner": 0
+    },
+    {
+      "reference_id": 18898,
+      "owner": 0
+    },
+    {
+      "reference_id": 18899,
+      "owner": 0
+    },
+    {
+      "reference_id": 18900,
+      "owner": 0
+    },
+    {
+      "reference_id": 18901,
+      "owner": 0
+    },
+    {
+      "reference_id": 18902,
+      "owner": 0
+    },
+    {
+      "reference_id": 18903,
+      "owner": 0
+    },
+    {
+      "reference_id": 18904,
+      "owner": 0
+    },
+    {
+      "reference_id": 18905,
+      "owner": 0
+    },
+    {
+      "reference_id": 18906,
+      "owner": 0
+    },
+    {
+      "reference_id": 18907,
+      "owner": 0
+    },
+    {
+      "reference_id": 18908,
+      "owner": 0
+    },
+    {
+      "reference_id": 39494,
+      "owner": 0
+    },
+    {
+      "reference_id": 39492,
+      "owner": 0
+    },
+    {
+      "reference_id": 39493,
+      "owner": 0
+    },
+    {
+      "reference_id": 18927,
+      "owner": 0
+    },
+    {
+      "reference_id": 18928,
+      "owner": 0
+    },
+    {
+      "reference_id": 18929,
+      "owner": 0
+    },
+    {
+      "reference_id": 18930,
+      "owner": 0
+    },
+    {
+      "reference_id": 18931,
+      "owner": 0
+    },
+    {
+      "reference_id": 18932,
+      "owner": 0
+    },
+    {
+      "reference_id": 18933,
+      "owner": 0
+    },
+    {
+      "reference_id": 18934,
+      "owner": 0
+    },
+    {
+      "reference_id": 18935,
+      "owner": 0
+    },
+    {
+      "reference_id": 18936,
+      "owner": 0
+    },
+    {
+      "reference_id": 18937,
+      "owner": 0
+    },
+    {
+      "reference_id": 18938,
+      "owner": 0
+    },
+    {
+      "reference_id": 18940,
+      "owner": 0
+    },
+    {
+      "reference_id": 18941,
+      "owner": 0
+    },
+    {
+      "reference_id": 18942,
+      "owner": 0
+    },
+    {
+      "reference_id": 18943,
+      "owner": 0
+    },
+    {
+      "reference_id": 18944,
+      "owner": 0
+    },
+    {
+      "reference_id": 18945,
+      "owner": 0
+    },
+    {
+      "reference_id": 18946,
+      "owner": 0
+    },
+    {
+      "reference_id": 18947,
+      "owner": 0
+    },
+    {
+      "reference_id": 18948,
+      "owner": 0
+    },
+    {
+      "reference_id": 19031,
+      "owner": 0
+    },
+    {
+      "reference_id": 19032,
+      "owner": 0
+    },
+    {
+      "reference_id": 19033,
+      "owner": 0
+    },
+    {
+      "reference_id": 19034,
+      "owner": 0
+    },
+    {
+      "reference_id": 19035,
+      "owner": 0
+    },
+    {
+      "reference_id": 19174,
+      "owner": 0
+    },
+    {
+      "reference_id": 19175,
+      "owner": 0
+    },
+    {
+      "reference_id": 19176,
+      "owner": 0
+    },
+    {
+      "reference_id": 39496,
+      "owner": 0
+    },
+    {
+      "reference_id": 19178,
+      "owner": 0
+    },
+    {
+      "reference_id": 19179,
+      "owner": 0
+    },
+    {
+      "reference_id": 19180,
+      "owner": 0
+    },
+    {
+      "reference_id": 19181,
+      "owner": 0
+    },
+    {
+      "reference_id": 19205,
+      "owner": 0
+    },
+    {
+      "reference_id": 19206,
+      "owner": 0
+    },
+    {
+      "reference_id": 19207,
+      "owner": 0
+    },
+    {
+      "reference_id": 19208,
+      "owner": 0
+    },
+    {
+      "reference_id": 19209,
+      "owner": 0
+    },
+    {
+      "reference_id": 19210,
+      "owner": 0
+    },
+    {
+      "reference_id": 19211,
+      "owner": 0
+    },
+    {
+      "reference_id": 19212,
+      "owner": 0
+    },
+    {
+      "reference_id": 19213,
+      "owner": 0
+    },
+    {
+      "reference_id": 19238,
+      "owner": 0
+    },
+    {
+      "reference_id": 19239,
+      "owner": 0
+    },
+    {
+      "reference_id": 39738,
+      "owner": 0
+    },
+    {
+      "reference_id": 19245,
+      "owner": 0
+    },
+    {
+      "reference_id": 19416,
+      "owner": 0
+    },
+    {
+      "reference_id": 19417,
+      "owner": 0
+    },
+    {
+      "reference_id": 19384,
+      "owner": 0
+    },
+    {
+      "reference_id": 19385,
+      "owner": 0
+    },
+    {
+      "reference_id": 19386,
+      "owner": 0
+    },
+    {
+      "reference_id": 19387,
+      "owner": 0
+    },
+    {
+      "reference_id": 19388,
+      "owner": 0
+    },
+    {
+      "reference_id": 19389,
+      "owner": 0
+    },
+    {
+      "reference_id": 19390,
+      "owner": 0
+    },
+    {
+      "reference_id": 19391,
+      "owner": 0
+    },
+    {
+      "reference_id": 19392,
+      "owner": 0
+    },
+    {
+      "reference_id": 19393,
+      "owner": 0
+    },
+    {
+      "reference_id": 19394,
+      "owner": 0
+    },
+    {
+      "reference_id": 19395,
+      "owner": 0
+    },
+    {
+      "reference_id": 19396,
+      "owner": 0
+    },
+    {
+      "reference_id": 19397,
+      "owner": 0
+    },
+    {
+      "reference_id": 19398,
+      "owner": 0
+    },
+    {
+      "reference_id": 19399,
+      "owner": 0
+    },
+    {
+      "reference_id": 19400,
+      "owner": 0
+    },
+    {
+      "reference_id": 19401,
+      "owner": 0
+    },
+    {
+      "reference_id": 19402,
+      "owner": 0
+    },
+    {
+      "reference_id": 19415,
+      "owner": 0
+    },
+    {
+      "reference_id": 19413,
+      "owner": 0
+    },
+    {
+      "reference_id": 19412,
+      "owner": 0
+    },
+    {
+      "reference_id": 19414,
+      "owner": 0
+    },
+    {
+      "reference_id": 20675,
+      "owner": 0
+    },
+    {
+      "reference_id": 19408,
+      "owner": 0
+    },
+    {
+      "reference_id": 19411,
+      "owner": 0
+    },
+    {
+      "reference_id": 20663,
+      "owner": 0
+    },
+    {
+      "reference_id": 20662,
+      "owner": 0
+    },
+    {
+      "reference_id": 20659,
+      "owner": 0
+    },
+    {
+      "reference_id": 20657,
+      "owner": 0
+    },
+    {
+      "reference_id": 20655,
+      "owner": 0
+    },
+    {
+      "reference_id": 20653,
+      "owner": 0
+    },
+    {
+      "reference_id": 20651,
+      "owner": 0
+    },
+    {
+      "reference_id": 20649,
+      "owner": 0
+    },
+    {
+      "reference_id": 20647,
+      "owner": 0
+    },
+    {
+      "reference_id": 20644,
+      "owner": 0
+    },
+    {
+      "reference_id": 20640,
+      "owner": 0
+    },
+    {
+      "reference_id": 20642,
+      "owner": 0
+    },
+    {
+      "reference_id": 20638,
+      "owner": 0
+    },
+    {
+      "reference_id": 20556,
+      "owner": 0
+    },
+    {
+      "reference_id": 20661,
+      "owner": 0
+    },
+    {
+      "reference_id": 20664,
+      "owner": 0
+    },
+    {
+      "reference_id": 20660,
+      "owner": 0
+    },
+    {
+      "reference_id": 20658,
+      "owner": 0
+    },
+    {
+      "reference_id": 20656,
+      "owner": 0
+    },
+    {
+      "reference_id": 20654,
+      "owner": 0
+    },
+    {
+      "reference_id": 20652,
+      "owner": 0
+    },
+    {
+      "reference_id": 20650,
+      "owner": 0
+    },
+    {
+      "reference_id": 20648,
+      "owner": 0
+    },
+    {
+      "reference_id": 20637,
+      "owner": 0
+    },
+    {
+      "reference_id": 20645,
+      "owner": 0
+    },
+    {
+      "reference_id": 20643,
+      "owner": 0
+    },
+    {
+      "reference_id": 20641,
+      "owner": 0
+    },
+    {
+      "reference_id": 20639,
+      "owner": 0
+    },
+    {
+      "reference_id": 20677,
+      "owner": 0
+    },
+    {
+      "reference_id": 20555,
+      "owner": 0
+    },
+    {
+      "reference_id": 20551,
+      "owner": 0
+    },
+    {
+      "reference_id": 20678,
+      "owner": 0
+    },
+    {
+      "reference_id": 20679,
+      "owner": 0
+    },
+    {
+      "reference_id": 20552,
+      "owner": 0
+    },
+    {
+      "reference_id": 20553,
+      "owner": 0
+    },
+    {
+      "reference_id": 20554,
+      "owner": 0
+    },
+    {
+      "reference_id": 20681,
+      "owner": 0
+    },
+    {
+      "reference_id": 20680,
+      "owner": 0
+    },
+    {
+      "reference_id": 20550,
+      "owner": 0
+    },
+    {
+      "reference_id": 20646,
+      "owner": 0
+    },
+    {
+      "reference_id": 20676,
+      "owner": 0
+    },
+    {
+      "reference_id": 19495,
+      "owner": 0
+    },
+    {
+      "reference_id": 19634,
+      "owner": 0
+    },
+    {
+      "reference_id": 19635,
+      "owner": 0
+    },
+    {
+      "reference_id": 19636,
+      "owner": 0
+    },
+    {
+      "reference_id": 19637,
+      "owner": 0
+    },
+    {
+      "reference_id": 19638,
+      "owner": 0
+    },
+    {
+      "reference_id": 19639,
+      "owner": 0
+    },
+    {
+      "reference_id": 19640,
+      "owner": 0
+    },
+    {
+      "reference_id": 19641,
+      "owner": 0
+    },
+    {
+      "reference_id": 19642,
+      "owner": 0
+    },
+    {
+      "reference_id": 19643,
+      "owner": 0
+    },
+    {
+      "reference_id": 19644,
+      "owner": 0
+    },
+    {
+      "reference_id": 19645,
+      "owner": 0
+    },
+    {
+      "reference_id": 19646,
+      "owner": 0
+    },
+    {
+      "reference_id": 19647,
+      "owner": 0
+    },
+    {
+      "reference_id": 19648,
+      "owner": 0
+    },
+    {
+      "reference_id": 23066,
+      "owner": 0
+    },
+    {
+      "reference_id": 19650,
+      "owner": 0
+    },
+    {
+      "reference_id": 19651,
+      "owner": 0
+    },
+    {
+      "reference_id": 19652,
+      "owner": 0
+    },
+    {
+      "reference_id": 19653,
+      "owner": 0
+    },
+    {
+      "reference_id": 19654,
+      "owner": 0
+    },
+    {
+      "reference_id": 19655,
+      "owner": 0
+    },
+    {
+      "reference_id": 19656,
+      "owner": 0
+    },
+    {
+      "reference_id": 19658,
+      "owner": 0
+    },
+    {
+      "reference_id": 22015,
+      "owner": 0
+    },
+    {
+      "reference_id": 22005,
+      "owner": 0
+    },
+    {
+      "reference_id": 22013,
+      "owner": 0
+    },
+    {
+      "reference_id": 19665,
+      "owner": 0
+    },
+    {
+      "reference_id": 19666,
+      "owner": 0
+    },
+    {
+      "reference_id": 19667,
+      "owner": 0
+    },
+    {
+      "reference_id": 19668,
+      "owner": 0
+    },
+    {
+      "reference_id": 19669,
+      "owner": 0
+    },
+    {
+      "reference_id": 19670,
+      "owner": 0
+    },
+    {
+      "reference_id": 19671,
+      "owner": 0
+    },
+    {
+      "reference_id": 19672,
+      "owner": 0
+    },
+    {
+      "reference_id": 19673,
+      "owner": 0
+    },
+    {
+      "reference_id": 39402,
+      "owner": 0
+    },
+    {
+      "reference_id": 19675,
+      "owner": 0
+    },
+    {
+      "reference_id": 19676,
+      "owner": 0
+    },
+    {
+      "reference_id": 19677,
+      "owner": 0
+    },
+    {
+      "reference_id": 23134,
+      "owner": 0
+    },
+    {
+      "reference_id": 19679,
+      "owner": 0
+    },
+    {
+      "reference_id": 19680,
+      "owner": 0
+    },
+    {
+      "reference_id": 19681,
+      "owner": 0
+    },
+    {
+      "reference_id": 19682,
+      "owner": 0
+    },
+    {
+      "reference_id": 19683,
+      "owner": 0
+    },
+    {
+      "reference_id": 19684,
+      "owner": 0
+    },
+    {
+      "reference_id": 19685,
+      "owner": 0
+    },
+    {
+      "reference_id": 19686,
+      "owner": 0
+    },
+    {
+      "reference_id": 19687,
+      "owner": 0
+    },
+    {
+      "reference_id": 19688,
+      "owner": 0
+    },
+    {
+      "reference_id": 19689,
+      "owner": 0
+    },
+    {
+      "reference_id": 22003,
+      "owner": 0
+    },
+    {
+      "reference_id": 20422,
+      "owner": 0
+    },
+    {
+      "reference_id": 23115,
+      "owner": 0
+    },
+    {
+      "reference_id": 20424,
+      "owner": 0
+    },
+    {
+      "reference_id": 20425,
+      "owner": 0
+    },
+    {
+      "reference_id": 25383,
+      "owner": 0
+    },
+    {
+      "reference_id": 20431,
+      "owner": 0
+    },
+    {
+      "reference_id": 20432,
+      "owner": 0
+    },
+    {
+      "reference_id": 22014,
+      "owner": 0
+    },
+    {
+      "reference_id": 22002,
+      "owner": 0
+    },
+    {
+      "reference_id": 22011,
+      "owner": 0
+    },
+    {
+      "reference_id": 20507,
+      "owner": 0
+    },
+    {
+      "reference_id": 20508,
+      "owner": 0
+    },
+    {
+      "reference_id": 20509,
+      "owner": 0
+    },
+    {
+      "reference_id": 20510,
+      "owner": 0
+    },
+    {
+      "reference_id": 20511,
+      "owner": 0
+    },
+    {
+      "reference_id": 20512,
+      "owner": 0
+    },
+    {
+      "reference_id": 20513,
+      "owner": 0
+    },
+    {
+      "reference_id": 20514,
+      "owner": 0
+    },
+    {
+      "reference_id": 20515,
+      "owner": 0
+    },
+    {
+      "reference_id": 20516,
+      "owner": 0
+    },
+    {
+      "reference_id": 20517,
+      "owner": 0
+    },
+    {
+      "reference_id": 20518,
+      "owner": 0
+    },
+    {
+      "reference_id": 20519,
+      "owner": 0
+    },
+    {
+      "reference_id": 20520,
+      "owner": 0
+    },
+    {
+      "reference_id": 20521,
+      "owner": 0
+    },
+    {
+      "reference_id": 20522,
+      "owner": 0
+    },
+    {
+      "reference_id": 20523,
+      "owner": 0
+    },
+    {
+      "reference_id": 20524,
+      "owner": 0
+    },
+    {
+      "reference_id": 20525,
+      "owner": 0
+    },
+    {
+      "reference_id": 20526,
+      "owner": 0
+    },
+    {
+      "reference_id": 20527,
+      "owner": 0
+    },
+    {
+      "reference_id": 20528,
+      "owner": 0
+    },
+    {
+      "reference_id": 20529,
+      "owner": 0
+    },
+    {
+      "reference_id": 20530,
+      "owner": 0
+    },
+    {
+      "reference_id": 20531,
+      "owner": 0
+    },
+    {
+      "reference_id": 20532,
+      "owner": 0
+    },
+    {
+      "reference_id": 20533,
+      "owner": 0
+    },
+    {
+      "reference_id": 20534,
+      "owner": 0
+    },
+    {
+      "reference_id": 20535,
+      "owner": 0
+    },
+    {
+      "reference_id": 20536,
+      "owner": 0
+    },
+    {
+      "reference_id": 20537,
+      "owner": 0
+    },
+    {
+      "reference_id": 20538,
+      "owner": 0
+    },
+    {
+      "reference_id": 20539,
+      "owner": 0
+    },
+    {
+      "reference_id": 20540,
+      "owner": 0
+    },
+    {
+      "reference_id": 20541,
+      "owner": 0
+    },
+    {
+      "reference_id": 20542,
+      "owner": 0
+    },
+    {
+      "reference_id": 20543,
+      "owner": 0
+    },
+    {
+      "reference_id": 20544,
+      "owner": 0
+    },
+    {
+      "reference_id": 20545,
+      "owner": 0
+    },
+    {
+      "reference_id": 20546,
+      "owner": 0
+    },
+    {
+      "reference_id": 20547,
+      "owner": 0
+    },
+    {
+      "reference_id": 20548,
+      "owner": 0
+    },
+    {
+      "reference_id": 20549,
+      "owner": 0
+    },
+    {
+      "reference_id": 20712,
+      "owner": 0
+    },
+    {
+      "reference_id": 20713,
+      "owner": 0
+    },
+    {
+      "reference_id": 20714,
+      "owner": 0
+    },
+    {
+      "reference_id": 20715,
+      "owner": 0
+    },
+    {
+      "reference_id": 20716,
+      "owner": 0
+    },
+    {
+      "reference_id": 20717,
+      "owner": 0
+    },
+    {
+      "reference_id": 20718,
+      "owner": 0
+    },
+    {
+      "reference_id": 39741,
+      "owner": 0
+    },
+    {
+      "reference_id": 39743,
+      "owner": 0
+    },
+    {
+      "reference_id": 39742,
+      "owner": 0
+    },
+    {
+      "reference_id": 22001,
+      "owner": 0
+    },
+    {
+      "reference_id": 23064,
+      "owner": 0
+    },
+    {
+      "reference_id": 23065,
+      "owner": 0
+    },
+    {
+      "reference_id": 23170,
+      "owner": 0
+    },
+    {
+      "reference_id": 23171,
+      "owner": 0
+    },
+    {
+      "reference_id": 39495,
+      "owner": 0
+    },
+    {
+      "reference_id": 23224,
+      "owner": 0
+    },
+    {
+      "reference_id": 23225,
+      "owner": 0
+    },
+    {
+      "reference_id": 39329,
+      "owner": 0
+    },
+    {
+      "reference_id": 39900,
+      "owner": 0
+    },
+    {
+      "reference_id": 39740,
+      "owner": 0
+    },
+    {
+      "reference_id": 39332,
+      "owner": 0
+    },
+    {
+      "reference_id": 39739,
+      "owner": 0
+    },
+    {
+      "reference_id": 39334,
+      "owner": 0
+    },
+    {
+      "reference_id": 39481,
+      "owner": 0
+    },
+    {
+      "reference_id": 39482,
+      "owner": 0
+    },
+    {
+      "reference_id": 39483,
+      "owner": 0
+    },
+    {
+      "reference_id": 39484,
+      "owner": 0
+    },
+    {
+      "reference_id": 39485,
+      "owner": 0
+    },
+    {
+      "reference_id": 39486,
+      "owner": 0
+    },
+    {
+      "reference_id": 39487,
+      "owner": 0
+    },
+    {
+      "reference_id": 39488,
+      "owner": 0
+    },
+    {
+      "reference_id": 39489,
+      "owner": 0
+    },
+    {
+      "reference_id": 39490,
+      "owner": 0
+    },
+    {
+      "reference_id": 39491,
+      "owner": 0
+    },
+    {
+      "reference_id": 39672,
+      "owner": 0
+    },
+    {
+      "reference_id": 39695,
+      "owner": 0
+    },
+    {
+      "reference_id": 39696,
+      "owner": 0
+    },
+    {
+      "reference_id": 39733,
+      "owner": 0
+    },
+    {
+      "reference_id": 39734,
+      "owner": 0
+    },
+    {
+      "reference_id": 39735,
+      "owner": 0
+    },
+    {
+      "reference_id": 39736,
+      "owner": 0
+    },
+    {
+      "reference_id": 39737,
+      "owner": 0
+    },
+    {
+      "reference_id": 40685,
+      "owner": 0
+    },
+    {
+      "reference_id": 40686,
+      "owner": 0
+    },
+    {
+      "reference_id": 40687,
+      "owner": 0
+    }
+  ],
+  "terrain_patches": [
+    {
+      "key": "siege.p1.1",
+      "region": [
+        24,
+        1,
+        26,
+        3
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p1.2",
+      "region": [
+        32,
+        1,
+        34,
+        3
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p1.3",
+      "region": [
+        40,
+        1,
+        42,
+        3
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p2.1",
+      "region": [
+        24,
+        29,
+        26,
+        31
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p2.2",
+      "region": [
+        32,
+        29,
+        34,
+        31
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p2.3",
+      "region": [
+        40,
+        29,
+        42,
+        31
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p3.1",
+      "region": [
+        24,
+        57,
+        26,
+        59
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p3.2",
+      "region": [
+        32,
+        57,
+        34,
+        59
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p3.3",
+      "region": [
+        40,
+        57,
+        42,
+        59
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p4.1",
+      "region": [
+        24,
+        85,
+        26,
+        87
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p4.2",
+      "region": [
+        32,
+        85,
+        34,
+        87
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p4.3",
+      "region": [
+        40,
+        85,
+        42,
+        87
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p5.1",
+      "region": [
+        24,
+        113,
+        26,
+        115
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p5.2",
+      "region": [
+        32,
+        113,
+        34,
+        115
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p5.3",
+      "region": [
+        40,
+        113,
+        42,
+        115
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p6.1",
+      "region": [
+        24,
+        141,
+        26,
+        143
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p6.2",
+      "region": [
+        32,
+        141,
+        34,
+        143
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p6.3",
+      "region": [
+        40,
+        141,
+        42,
+        143
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p7.1",
+      "region": [
+        24,
+        169,
+        26,
+        171
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p7.2",
+      "region": [
+        32,
+        169,
+        34,
+        171
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.p7.3",
+      "region": [
+        40,
+        169,
+        42,
+        171
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "key": "trade.land.p1.endpoints",
+      "start": "trade.land.p1.home",
+      "end": "trade.land.p1.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p1.spawn",
+      "start": "trade.land.p1.spawn",
+      "end": "trade.land.p1.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p1.endpoints",
+      "start": "trade.water.p1.home",
+      "end": "trade.water.p1.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p1.spawn",
+      "start": "trade.water.p1.spawn",
+      "end": "trade.water.p1.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p1",
+      "start": "lane.p1.spawn",
+      "end": "lane.p1.exit",
+      "medium": "land",
+      "region": [
+        8,
+        13,
+        56,
+        17
+      ]
+    },
+    {
+      "key": "trade.land.p2.endpoints",
+      "start": "trade.land.p2.home",
+      "end": "trade.land.p2.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p2.spawn",
+      "start": "trade.land.p2.spawn",
+      "end": "trade.land.p2.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p2.endpoints",
+      "start": "trade.water.p2.home",
+      "end": "trade.water.p2.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p2.spawn",
+      "start": "trade.water.p2.spawn",
+      "end": "trade.water.p2.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p2",
+      "start": "lane.p2.spawn",
+      "end": "lane.p2.exit",
+      "medium": "land",
+      "region": [
+        8,
+        41,
+        56,
+        45
+      ]
+    },
+    {
+      "key": "trade.land.p3.endpoints",
+      "start": "trade.land.p3.home",
+      "end": "trade.land.p3.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p3.spawn",
+      "start": "trade.land.p3.spawn",
+      "end": "trade.land.p3.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p3.endpoints",
+      "start": "trade.water.p3.home",
+      "end": "trade.water.p3.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p3.spawn",
+      "start": "trade.water.p3.spawn",
+      "end": "trade.water.p3.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p3",
+      "start": "lane.p3.spawn",
+      "end": "lane.p3.exit",
+      "medium": "land",
+      "region": [
+        8,
+        69,
+        56,
+        73
+      ]
+    },
+    {
+      "key": "trade.land.p4.endpoints",
+      "start": "trade.land.p4.home",
+      "end": "trade.land.p4.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p4.spawn",
+      "start": "trade.land.p4.spawn",
+      "end": "trade.land.p4.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p4.endpoints",
+      "start": "trade.water.p4.home",
+      "end": "trade.water.p4.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p4.spawn",
+      "start": "trade.water.p4.spawn",
+      "end": "trade.water.p4.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p4",
+      "start": "lane.p4.spawn",
+      "end": "lane.p4.exit",
+      "medium": "land",
+      "region": [
+        8,
+        97,
+        56,
+        101
+      ]
+    },
+    {
+      "key": "trade.land.p5.endpoints",
+      "start": "trade.land.p5.home",
+      "end": "trade.land.p5.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p5.spawn",
+      "start": "trade.land.p5.spawn",
+      "end": "trade.land.p5.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p5.endpoints",
+      "start": "trade.water.p5.home",
+      "end": "trade.water.p5.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p5.spawn",
+      "start": "trade.water.p5.spawn",
+      "end": "trade.water.p5.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p5",
+      "start": "lane.p5.spawn",
+      "end": "lane.p5.exit",
+      "medium": "land",
+      "region": [
+        8,
+        125,
+        56,
+        129
+      ]
+    },
+    {
+      "key": "trade.land.p6.endpoints",
+      "start": "trade.land.p6.home",
+      "end": "trade.land.p6.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p6.spawn",
+      "start": "trade.land.p6.spawn",
+      "end": "trade.land.p6.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p6.endpoints",
+      "start": "trade.water.p6.home",
+      "end": "trade.water.p6.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p6.spawn",
+      "start": "trade.water.p6.spawn",
+      "end": "trade.water.p6.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p6",
+      "start": "lane.p6.spawn",
+      "end": "lane.p6.exit",
+      "medium": "land",
+      "region": [
+        8,
+        153,
+        56,
+        157
+      ]
+    },
+    {
+      "key": "trade.land.p7.endpoints",
+      "start": "trade.land.p7.home",
+      "end": "trade.land.p7.partner",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.land.p7.spawn",
+      "start": "trade.land.p7.spawn",
+      "end": "trade.land.p7.home",
+      "medium": "land",
+      "region": [
+        172,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p7.endpoints",
+      "start": "trade.water.p7.home",
+      "end": "trade.water.p7.partner",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "trade.water.p7.spawn",
+      "start": "trade.water.p7.spawn",
+      "end": "trade.water.p7.home",
+      "medium": "water",
+      "region": [
+        98,
+        0,
+        119,
+        199
+      ]
+    },
+    {
+      "key": "lane.p7",
+      "start": "lane.p7.spawn",
+      "end": "lane.p7.exit",
+      "medium": "land",
+      "region": [
+        8,
+        181,
+        56,
+        185
+      ]
+    },
+    {
+      "key": "shop.tower_attack_4",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_4",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_10",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_10",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_25",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_25",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_50",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_50",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_100",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_100",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_170",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_170",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_255",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_255",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.tower_attack_750",
+      "start": "shop.entry",
+      "end": "shop.tower_attack_750",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.bombard_attack_400",
+      "start": "shop.entry",
+      "end": "shop.bombard_attack_400",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.2000_wood",
+      "start": "shop.entry",
+      "end": "shop.2000_wood",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_king_every_2_5_min",
+      "start": "shop.entry",
+      "end": "shop.activate_king_every_2_5_min",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_king_every_1_minute",
+      "start": "shop.entry",
+      "end": "shop.activate_king_every_1_minute",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_1000_gold_every_2_minutes",
+      "start": "shop.entry",
+      "end": "shop.activate_1000_gold_every_2_minutes",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_450_gold_every_2minutes",
+      "start": "shop.entry",
+      "end": "shop.activate_450_gold_every_2minutes",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_175_gold_every_2_minutes",
+      "start": "shop.entry",
+      "end": "shop.activate_175_gold_every_2_minutes",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.1500_stone",
+      "start": "shop.entry",
+      "end": "shop.1500_stone",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_375_stone_every_2_minutes",
+      "start": "shop.entry",
+      "end": "shop.activate_375_stone_every_2_minutes",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_800_stone_every_2_minutes",
+      "start": "shop.entry",
+      "end": "shop.activate_800_stone_every_2_minutes",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_1_atttack_every_30_seconds",
+      "start": "shop.entry",
+      "end": "shop.activate_1_atttack_every_30_seconds",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_3_attack_every_minute",
+      "start": "shop.entry",
+      "end": "shop.activate_3_attack_every_minute",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.20_more_relics",
+      "start": "shop.entry",
+      "end": "shop.20_more_relics",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.castle_age",
+      "start": "shop.entry",
+      "end": "shop.castle_age",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.imperial_age",
+      "start": "shop.entry",
+      "end": "shop.imperial_age",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.left_accursed_tower",
+      "start": "shop.entry",
+      "end": "shop.left_accursed_tower",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.right_accursed_tower",
+      "start": "shop.entry",
+      "end": "shop.right_accursed_tower",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.building_villager",
+      "start": "shop.entry",
+      "end": "shop.building_villager",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.resource_villager",
+      "start": "shop.entry",
+      "end": "shop.resource_villager",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.80_population",
+      "start": "shop.entry",
+      "end": "shop.80_population",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.castle",
+      "start": "shop.entry",
+      "end": "shop.castle",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.trade_carts",
+      "start": "shop.entry",
+      "end": "shop.trade_carts",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.trade_cogs",
+      "start": "shop.entry",
+      "end": "shop.trade_cogs",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.relic",
+      "start": "shop.entry",
+      "end": "shop.relic",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.3rd_row_of_towers",
+      "start": "shop.entry",
+      "end": "shop.3rd_row_of_towers",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.4th_row_of_towers",
+      "start": "shop.entry",
+      "end": "shop.4th_row_of_towers",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.activate_1_ap_every_5_seconds",
+      "start": "shop.entry",
+      "end": "shop.activate_1_ap_every_5_seconds",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.repair_villie",
+      "start": "shop.entry",
+      "end": "shop.repair_villie",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    }
+  ],
+  "isolation": [
+    {
+      "key": "lane.p1",
+      "start": "lane.p1.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        13,
+        56,
+        17
+      ]
+    },
+    {
+      "key": "siege.p1.1",
+      "start": "siege.p1.1",
+      "medium": "land",
+      "region": [
+        24,
+        1,
+        26,
+        3
+      ]
+    },
+    {
+      "key": "siege.p1.2",
+      "start": "siege.p1.2",
+      "medium": "land",
+      "region": [
+        32,
+        1,
+        34,
+        3
+      ]
+    },
+    {
+      "key": "siege.p1.3",
+      "start": "siege.p1.3",
+      "medium": "land",
+      "region": [
+        40,
+        1,
+        42,
+        3
+      ]
+    },
+    {
+      "key": "lane.p2",
+      "start": "lane.p2.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        41,
+        56,
+        45
+      ]
+    },
+    {
+      "key": "siege.p2.1",
+      "start": "siege.p2.1",
+      "medium": "land",
+      "region": [
+        24,
+        29,
+        26,
+        31
+      ]
+    },
+    {
+      "key": "siege.p2.2",
+      "start": "siege.p2.2",
+      "medium": "land",
+      "region": [
+        32,
+        29,
+        34,
+        31
+      ]
+    },
+    {
+      "key": "siege.p2.3",
+      "start": "siege.p2.3",
+      "medium": "land",
+      "region": [
+        40,
+        29,
+        42,
+        31
+      ]
+    },
+    {
+      "key": "lane.p3",
+      "start": "lane.p3.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        69,
+        56,
+        73
+      ]
+    },
+    {
+      "key": "siege.p3.1",
+      "start": "siege.p3.1",
+      "medium": "land",
+      "region": [
+        24,
+        57,
+        26,
+        59
+      ]
+    },
+    {
+      "key": "siege.p3.2",
+      "start": "siege.p3.2",
+      "medium": "land",
+      "region": [
+        32,
+        57,
+        34,
+        59
+      ]
+    },
+    {
+      "key": "siege.p3.3",
+      "start": "siege.p3.3",
+      "medium": "land",
+      "region": [
+        40,
+        57,
+        42,
+        59
+      ]
+    },
+    {
+      "key": "lane.p4",
+      "start": "lane.p4.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        97,
+        56,
+        101
+      ]
+    },
+    {
+      "key": "siege.p4.1",
+      "start": "siege.p4.1",
+      "medium": "land",
+      "region": [
+        24,
+        85,
+        26,
+        87
+      ]
+    },
+    {
+      "key": "siege.p4.2",
+      "start": "siege.p4.2",
+      "medium": "land",
+      "region": [
+        32,
+        85,
+        34,
+        87
+      ]
+    },
+    {
+      "key": "siege.p4.3",
+      "start": "siege.p4.3",
+      "medium": "land",
+      "region": [
+        40,
+        85,
+        42,
+        87
+      ]
+    },
+    {
+      "key": "lane.p5",
+      "start": "lane.p5.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        125,
+        56,
+        129
+      ]
+    },
+    {
+      "key": "siege.p5.1",
+      "start": "siege.p5.1",
+      "medium": "land",
+      "region": [
+        24,
+        113,
+        26,
+        115
+      ]
+    },
+    {
+      "key": "siege.p5.2",
+      "start": "siege.p5.2",
+      "medium": "land",
+      "region": [
+        32,
+        113,
+        34,
+        115
+      ]
+    },
+    {
+      "key": "siege.p5.3",
+      "start": "siege.p5.3",
+      "medium": "land",
+      "region": [
+        40,
+        113,
+        42,
+        115
+      ]
+    },
+    {
+      "key": "lane.p6",
+      "start": "lane.p6.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        153,
+        56,
+        157
+      ]
+    },
+    {
+      "key": "siege.p6.1",
+      "start": "siege.p6.1",
+      "medium": "land",
+      "region": [
+        24,
+        141,
+        26,
+        143
+      ]
+    },
+    {
+      "key": "siege.p6.2",
+      "start": "siege.p6.2",
+      "medium": "land",
+      "region": [
+        32,
+        141,
+        34,
+        143
+      ]
+    },
+    {
+      "key": "siege.p6.3",
+      "start": "siege.p6.3",
+      "medium": "land",
+      "region": [
+        40,
+        141,
+        42,
+        143
+      ]
+    },
+    {
+      "key": "lane.p7",
+      "start": "lane.p7.spawn",
+      "medium": "land",
+      "region": [
+        8,
+        181,
+        56,
+        185
+      ]
+    },
+    {
+      "key": "siege.p7.1",
+      "start": "siege.p7.1",
+      "medium": "land",
+      "region": [
+        24,
+        169,
+        26,
+        171
+      ]
+    },
+    {
+      "key": "siege.p7.2",
+      "start": "siege.p7.2",
+      "medium": "land",
+      "region": [
+        32,
+        169,
+        34,
+        171
+      ]
+    },
+    {
+      "key": "siege.p7.3",
+      "start": "siege.p7.3",
+      "medium": "land",
+      "region": [
+        40,
+        169,
+        42,
+        171
+      ]
+    }
+  ],
+  "land_terrain": [
+    0,
+    2,
+    4,
+    5,
+    10,
+    24,
+    35,
+    37
+  ],
+  "water_terrain": [
+    1,
+    4,
+    22,
+    57
+  ],
+  "review": {
+    "identity": "Pinned AoE2ScenarioParser 0.9.4 named stock datasets",
+    "geometry": "Conservative tile footprints; standard DE engine checks pending",
+    "scope": "Map only. No gameplay mapping is promoted to in-game verified."
+  }
+}
