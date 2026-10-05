@@ -8,6 +8,8 @@
 - `balance/`: future readable game definitions. Legacy observations never become
   modern defaults implicitly.
 - `audit.toml`: repository-relative inputs and default generated-report location.
+- `probes/observations.json`: archived probe manifests and attributed DE observations,
+  including earlier failures and focused retests of revised scenarios.
 
 IDs retain their legacy civilization context. Gameplay mappings require in-game
 verification before generation. Reviewed map identities and geometry are defined

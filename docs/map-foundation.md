@@ -11,7 +11,7 @@ forming 21 isolated 3×3 siege positions. No original trigger logic is copied.
 | --- | --- | --- |
 | 5,550 Hay Stack blockers, ID 857 | Stock Blocker, ID 1776 | Explicit blockers preserve boundaries and expansion rows without relying on modded haystack behavior. |
 | Custom signs, IDs 1740–1776 | Stock Sign, ID 819, with captions | Remove custom SMX art; display observed shop names and prices as text. |
-| Life/display Accursed Towers, ID 684 | Outpost, ID 598 | Keep one-tile life-marker geometry without attacks or custom graphics. Final life/protection logic comes later. |
+| Life/display Accursed Towers, ID 684 | Outpost, ID 598 | Keep one-tile life-marker geometry without attacks or custom graphics. Outposts do not keep a player in the game, so each player needs a counted object (see [mechanic probes](mechanic-probes.md#keeping-the-game-running)). |
 | Full Trade Carts, ID 204 | Empty Trade Carts, ID 128 | Start stock traders without relying on a preloaded cargo state. |
 | Gallery units and legacy enemy-owned endpoints | Gaia ownership | Bake in neutral display/endpoint ownership without legacy initialization triggers. Stock Gaia trading is an in-game probe requirement. |
 | Stock buildings, resources, relics, cliffs and other decorations | Reviewed stock identities | Retain recognizable economy and map geometry; native appearances and footprints need editor review. |

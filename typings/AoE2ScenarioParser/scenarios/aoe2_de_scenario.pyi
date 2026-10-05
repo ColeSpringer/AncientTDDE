@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 from typing import Protocol, Self, TypedDict
 
 class _TerrainTile(Protocol):
@@ -45,6 +46,9 @@ class _UnitManager(Protocol):
     ) -> _Unit: ...
 
 class _Trigger(Protocol):
+    name: str
+    new_effect: object
+    new_condition: object
     trigger_id: int
     condition_order: list[int]
     effect_order: list[int]
@@ -59,12 +63,35 @@ class _TriggerManager(Protocol):
     triggers: list[_Trigger]
     variables: list[_Variable]
     trigger_display_order: list[int]
+    def add_trigger(
+        self,
+        name: str,
+        description: str | None = None,
+        display_as_objective: bool | None = None,
+        short_description: str | None = None,
+        display_on_screen: bool | None = None,
+        enabled: bool | None = None,
+        looping: bool | None = None,
+        execute_on_load: bool | None = None,
+    ) -> _Trigger: ...
+    def add_variable(self, name: str, variable_id: int = -1) -> _Variable: ...
 
 class _Player(Protocol):
     _object_attributes: list[str]
     _object_attributes_non_gaia: list[str]
     player_id: int
     human: bool
+    civilization: str | int
+    lock_civ: bool
+    lock_personality: bool
+    starting_age: int
+    population_cap: int | None
+    allied_victory: bool | None
+    diplomacy: list[int] | None
+    food: int
+    wood: int
+    gold: int
+    stone: int
     initial_camera_x: int | None
     initial_camera_y: int | None
     initial_player_view_x: int | None
@@ -82,10 +109,49 @@ class _MessageManager(Protocol):
 
 class _XsManager(Protocol):
     script_name: str
+    xs_check: _XsCheck
+    def add_script(
+        self,
+        xs_file_path: str = "",
+        xs_string: str = "",
+        validate: bool = False,
+    ) -> None: ...
+    def validate_scenario_xs(self) -> None: ...
+
+class _XsCheck(Protocol):
+    path: Path | None
+    raise_on_error: bool
+    @property
+    def is_disabled(self) -> bool: ...
+    def validate(self, xs_file: Path | str | None, show_tmpfile: bool = True) -> bool | None: ...
+
+class _EmbeddedAi(Protocol):
+    ai_per_file_text: str
+
+class _PlayerDataTwo(Protocol):
+    ai_names: list[str]
+    ai_files: list[_EmbeddedAi]
+    ai_type: list[int]
 
 class _OptionManager(Protocol):
     victory_condition: int
     victory_custom_conditions_required: bool
+    lock_teams: bool
+    allow_players_choose_teams: bool
+    random_start_points: bool
+    secondary_game_modes: int | bytes | None
+    legacy_execution_order: bool | None
+
+class _Options(Protocol):
+    all_techs: int
+
+class _GlobalVictory(Protocol):
+    conquest_required: int
+    ruins: int
+    artifacts_required: int
+    discovery: int
+    explored_percent_of_map_required: int
+    gold_required: int
 
 class _FileHeader(Protocol):
     creator_name: str
@@ -105,12 +171,32 @@ class _Cinematics(Protocol):
 class _BackgroundImage(Protocol):
     ascii_filename: str
 
+class _EffectRecord(Protocol):
+    """Stored effect fields; reading a field the scenario version lacks raises KeyError."""
+
+    effect_type: int
+    quantity: int
+    quantity_float: float
+    object_attributes: int
+    object_list_unit_id: int
+    source_player: int
+
+class _TriggerRecord(Protocol):
+    effect_data: list[_EffectRecord]
+
+class _Triggers(Protocol):
+    trigger_data: list[_TriggerRecord]
+
 class _Sections(TypedDict):
     FileHeader: _FileHeader
     DataHeader: _DataHeader
     Files: _Files
     Cinematics: _Cinematics
     BackgroundImage: _BackgroundImage
+    PlayerDataTwo: _PlayerDataTwo
+    Options: _Options
+    GlobalVictory: _GlobalVictory
+    Triggers: _Triggers
 
 class AoE2DEScenario:
     sections: _Sections

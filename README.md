@@ -14,6 +14,8 @@ uv run ancienttdde audit
 uv run ancienttdde validate --report .build/audit
 uv run ancienttdde build
 uv run ancienttdde validate --build .build/map
+uv run ancienttdde probe
+uv run ancienttdde validate --probes .build/probes
 uv run pytest
 uv run pyright
 uv run ruff check .
@@ -36,9 +38,21 @@ manifest. `--root /path/to/project` permits invocation from another directory;
 `validate` checks source provenance, trigger and civilization mapping coverage,
 and scenario references. With `--report`, it also verifies artifact hashes and
 rejects reports whose configuration or content inputs have changed. Without a
-report it extracts fresh evidence for the coverage checks. `probe` is not implemented.
-The XS check uses the parser's bundled binary; the map foundation
-contains no gameplay XS.
+report it extracts fresh evidence for the coverage checks. The XS check uses the
+parser's bundled binary and rejects script errors; the map foundation contains no
+gameplay XS.
+
+`probe` generates seven compact solo scenarios in `.build/probes/`, covering King
+payments, tower bonus persistence, stock trade, raiders, temporary exclusive siege,
+and embedded XS with a passive enemy. Use `--only payments` (repeatable) to select
+experiments. The generated `instructions.md` lists 30 manual checks;
+`results.json` starts without observed outcomes. Scripts and passive AI are embedded
+in each scenario that needs them, so only the `.aoe2scenario` file is installed.
+`validate --probes .build/probes` reloads artifacts, regenerates expected logic and
+checks XS, references, hashes and result attribution. Record actual DE observations
+with `probe record`; rebuilding preserves them and rejects replacing scenarios
+with different content under an existing observation. See the
+[mechanic probe guide](docs/mechanic-probes.md) for commands and verification limits.
 
 `build` generates the stock-DE map from versioned plain terrain and placement data.
 It needs no ignored legacy files. `build` writes

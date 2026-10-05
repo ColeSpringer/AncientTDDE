@@ -1,5 +1,12 @@
 from enum import IntEnum
 
+class StartingAge(IntEnum):
+    DARK_AGE = 2
+    FEUDAL_AGE = 3
+    CASTLE_AGE = 4
+    IMPERIAL_AGE = 5
+    POST_IMPERIAL_AGE = 6
+
 class CivilizationOld(IntEnum):
     GAIA = 0
     BRITONS = 1

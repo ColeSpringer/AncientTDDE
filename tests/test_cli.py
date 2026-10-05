@@ -19,10 +19,11 @@ def test_audit_fails_cleanly_when_inputs_are_missing(tmp_path):
     assert not (tmp_path / ".build").exists()
 
 
-def test_probe_reports_unimplemented_command():
-    result = runner.invoke(app, ["probe"])
-    assert result.exit_code != 0
-    assert "not implemented" in result.output.lower()
+def test_probe_fails_cleanly_when_inputs_are_missing(tmp_path):
+    result = runner.invoke(app, ["probe", "--root", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "format-seed.aoe2scenario" in result.output
+    assert not (tmp_path / ".build").exists()
 
 
 def test_build_fails_cleanly_when_map_inputs_are_missing(tmp_path):

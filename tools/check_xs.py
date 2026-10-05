@@ -6,6 +6,8 @@ from pathlib import Path
 
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
+from ancienttdde.probes.xs import check_xs
+
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
@@ -15,11 +17,7 @@ def main() -> None:
         return
     with Path(os.devnull).open("w") as quiet, contextlib.redirect_stdout(quiet):
         scenario = AoE2DEScenario.from_default()
-    checker = scenario.xs_manager.xs_check
-    if checker.is_disabled:
-        raise RuntimeError("xs-check must be enabled for source validation")
-    for path in files:
-        checker.validate(path)
+    check_xs(scenario, files)
     print(f"XS check: {len(files)} files validated.")
 
 

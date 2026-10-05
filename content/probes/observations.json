@@ -1,0 +1,720 @@
+{
+  "schema_version": 1,
+  "suites": [
+    {
+      "manifest": {
+        "artifacts": [
+          {
+            "path": "instructions.md",
+            "sha256": "38b52163a50c75fd9e20c46edb3ef70f6c635dfb36a8c5e575a6e2494e62d336"
+          },
+          {
+            "path": "payments.aoe2scenario",
+            "sha256": "77bd54fe4af7696dcd4ce44f4495f8416d6cf4bf6a871c9479c6ed6ac21e129a"
+          },
+          {
+            "path": "payments.json",
+            "sha256": "00b80f611670a02e1c7a6cb59f67c68f4e91a857ed53227488549a2990c55286"
+          },
+          {
+            "path": "raiders.aoe2scenario",
+            "sha256": "a6d72a7efc050b473257e8834c7f50f530752a16c9ce33a7f4dbd762ccaf004d"
+          },
+          {
+            "path": "raiders.json",
+            "sha256": "b61dff58c3f50639022ca01ef305f6248c4c93ef20a28b7db416678d36c9205a"
+          },
+          {
+            "path": "scripts-enemy.aoe2scenario",
+            "sha256": "c69f5bcbd62406247543b27019769e51f6186a9912de1fa944918b071be1b1e0"
+          },
+          {
+            "path": "scripts-enemy.json",
+            "sha256": "2524df6636744d0196a449153c9aee387ba03d45d7cf5e4d9aa8beeeb60b6d2c"
+          },
+          {
+            "path": "siege.aoe2scenario",
+            "sha256": "a64640e4a9c8797989d701f37ab54c6990eeeffaa37c095cedde36e11efdb55f"
+          },
+          {
+            "path": "siege.json",
+            "sha256": "6fb718e2eaefe1945175e38e14fbdd6daa89958afe516913ec2ebd574714ae6d"
+          },
+          {
+            "path": "towers.aoe2scenario",
+            "sha256": "c115de33e6ca71b767d2070967b82d3f673e92ec75158a7899bb7b4b2213289f"
+          },
+          {
+            "path": "towers.json",
+            "sha256": "59564631459128e6c8bbc7d67a7d81f977f4e418d9bfe35545b514b05f6c2a23"
+          },
+          {
+            "path": "trade-gaia.aoe2scenario",
+            "sha256": "20ec597afb2becc9c790ff609471a12ece7e283e42c05adf9117b649fc1cb2a3"
+          },
+          {
+            "path": "trade-gaia.json",
+            "sha256": "c0be24fe854e841996fd458d9f6f3798bb079d969c5203c1a6d140e9b97ab94f"
+          },
+          {
+            "path": "trade.aoe2scenario",
+            "sha256": "ddb0979c358801b003872f216289f6454d6151523a663700c83f303c0bc1c6e6"
+          },
+          {
+            "path": "trade.json",
+            "sha256": "fafa4da8dd2d3354e5608058138315ef751cb366a6d6408dc0403c8f7918b1ff"
+          }
+        ],
+        "in_game_verified": false,
+        "inputs": [
+          {
+            "path": "content/maps/format-seed.aoe2scenario",
+            "sha256": "3b0ca9155b6020aefcf2ae835f4d6b8f29a796bb254bc0f77a950de43f541bbc"
+          },
+          {
+            "path": "src/ancienttdde/ai/passive.per",
+            "sha256": "0aff9c448bd5d53f270605d26723b63004d9c857341ad3ce7c37f4eaff597382"
+          },
+          {
+            "path": "src/ancienttdde/xs/probe-heartbeat.xs",
+            "sha256": "2b70a159910139c639d497a7b9a9e1257176bc04a291263e69ca315113e55c56"
+          },
+          {
+            "path": "src/ancienttdde/inspection/scenario.py",
+            "sha256": "8ae900c038977018f932c731db1f851c7cdf1a8fee99dae8b7ced73d7e89cabc"
+          },
+          {
+            "path": "src/ancienttdde/probes/catalog.py",
+            "sha256": "5bc642f4d3e61a3bc72760beb164de240eee34290be1859229ad44f9b7a46c85"
+          },
+          {
+            "path": "src/ancienttdde/probes/models.py",
+            "sha256": "596b2cabc8f3716c5816fd3b9a22c8dd7929d66b68c8055ce065ab55fdbb1b59"
+          },
+          {
+            "path": "src/ancienttdde/probes/native.py",
+            "sha256": "166f44bcfb68e0927fc14fddea50b182b7620f84d75cc7e21f65145b1ba2b187"
+          },
+          {
+            "path": "src/ancienttdde/probes/scenarios.py",
+            "sha256": "5ff23117cfc906a6d4cc22c284fc3d82034e00b0d14bb1c19bddc799bebeacef"
+          },
+          {
+            "path": "src/ancienttdde/probes/xs.py",
+            "sha256": "852fbefac3ea50921be271a98b8e2a2735a51ba6136e1f941ee9aac3774f5c3b"
+          }
+        ],
+        "kind": "mechanics-probes",
+        "probes": [
+          {
+            "case_ids": [
+              "payments.exact",
+              "payments.excess",
+              "payments.repeat",
+              "payments.insufficient",
+              "payments.rejected"
+            ],
+            "id": "payments",
+            "normalized_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+            "scenario": "payments.aoe2scenario",
+            "snapshot": "payments.json"
+          },
+          {
+            "case_ids": [
+              "towers.existing",
+              "towers.construction",
+              "towers.upgrades",
+              "towers.scope",
+              "towers.save-load"
+            ],
+            "id": "towers",
+            "normalized_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+            "scenario": "towers.aoe2scenario",
+            "snapshot": "towers.json"
+          },
+          {
+            "case_ids": [
+              "trade.ally",
+              "trade.protection"
+            ],
+            "id": "trade",
+            "normalized_sha256": "7ec827a69e63847ef7a19a10f49272c809fbb3793336d5888b2263b698d115da",
+            "scenario": "trade.aoe2scenario",
+            "snapshot": "trade.json"
+          },
+          {
+            "case_ids": [
+              "trade.gaia-land",
+              "trade.gaia-water"
+            ],
+            "id": "trade-gaia",
+            "normalized_sha256": "a0106c6b0c548472112178e4368b77c1e26c36d8b84ade0ee01e1c9c25b7bce3",
+            "scenario": "trade-gaia.aoe2scenario",
+            "snapshot": "trade-gaia.json"
+          },
+          {
+            "case_ids": [
+              "raiders.control",
+              "raiders.containment",
+              "raiders.cap",
+              "raiders.replacement",
+              "raiders.protection"
+            ],
+            "id": "raiders",
+            "normalized_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+            "scenario": "raiders.aoe2scenario",
+            "snapshot": "raiders.json"
+          },
+          {
+            "case_ids": [
+              "siege.exclusive",
+              "siege.targeting",
+              "siege.expiry",
+              "siege.cooldown",
+              "siege.repeat",
+              "siege.elimination",
+              "siege.no-rival",
+              "siege.save-load"
+            ],
+            "id": "siege",
+            "normalized_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+            "scenario": "siege.aoe2scenario",
+            "snapshot": "siege.json"
+          },
+          {
+            "case_ids": [
+              "scripts-enemy.heartbeat",
+              "scripts-enemy.passive",
+              "scripts-enemy.save-load"
+            ],
+            "id": "scripts-enemy",
+            "normalized_sha256": "fbe4315d3a5d40700cef66551455cba1a7b185a0737c21fc3fa44b7086d9c55f",
+            "scenario": "scripts-enemy.aoe2scenario",
+            "snapshot": "scripts-enemy.json"
+          }
+        ],
+        "schema_version": 1,
+        "xs_checked": true
+      },
+      "results": {
+        "cases": [
+          {
+            "id": "payments.exact",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "3 Kings disappear and gold increases by exactly 100.",
+                "recorded_at": "2026-10-05T14:33:53.728807+00:00",
+                "scenario_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "payments.excess",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Exactly 3 disappear, 2 remain, and gold increases by 100.",
+                "recorded_at": "2026-10-05T14:34:00.563749+00:00",
+                "scenario_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "payments.repeat",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Two separate purchases consume 6 Kings and grant 200 gold. The time between purchases it pretty short. That seems fine as long as we have each purchase station well separated so accidental purchases are not likely.",
+                "recorded_at": "2026-10-05T14:34:05.586745+00:00",
+                "scenario_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "payments.insufficient",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Both remain and no gold is awarded.",
+                "recorded_at": "2026-10-05T14:34:10.061374+00:00",
+                "scenario_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "payments.rejected",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "All 3 remain, no gold is awarded, and rejection feedback appears. The rejection feed does repeat itself if you do not move the kings.",
+                "recorded_at": "2026-10-05T14:34:16.077636+00:00",
+                "scenario_sha256": "ec153f633a27548d36e76528d4f79dab5acd1321fd531a6dd3addd70fbdbf42b",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "towers.existing",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Its pierce attack increases by 4, exactly once.",
+                "recorded_at": "2026-10-05T14:34:22.437435+00:00",
+                "scenario_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "towers.construction",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "It has the same +4 attack adjustment as the existing tower.",
+                "recorded_at": "2026-10-05T14:34:28.332903+00:00",
+                "scenario_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "towers.upgrades",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Existing and newly built Guard Towers/Keeps retain exactly +4 attack. There was no notice that the Age upgrades went through. You could only tell by the visual upgrade to the towers and the age text changing at the top of the screen.",
+                "recorded_at": "2026-10-05T14:34:34.327132+00:00",
+                "scenario_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "towers.scope",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "They receive no arrow-tower bonus; no unrelated class is modified.",
+                "recorded_at": "2026-10-05T14:34:38.563569+00:00",
+                "scenario_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "towers.save-load",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "The bonus persists without being added a second time.",
+                "recorded_at": "2026-10-05T14:34:44.161294+00:00",
+                "scenario_sha256": "283c1ef4f98b2e5adea5d29c1a2018a7f16e49cfacde959c41d99e3449ecb36e",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "trade.ally",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Both repeatedly pick up at P2 and return to their sole P1 home; gold rises.",
+                "recorded_at": "2026-10-05T14:34:48.884464+00:00",
+                "scenario_sha256": "7ec827a69e63847ef7a19a10f49272c809fbb3793336d5888b2263b698d115da",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "trade.protection",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Endpoints survive combat, remain usable, and traders can still be killed. Not sure if intentional but the raiders do not move. They move towards the market/dock and stay there. They will attack the cart/ship when its in range but they dont move.",
+                "recorded_at": "2026-10-05T14:36:09.393416+00:00",
+                "scenario_sha256": "7ec827a69e63847ef7a19a10f49272c809fbb3793336d5888b2263b698d115da",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "trade.gaia-land",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "It completes repeat trips and deposits gold while the partner remains Gaia-owned.",
+                "recorded_at": "2026-10-05T14:36:16.169376+00:00",
+                "scenario_sha256": "a0106c6b0c548472112178e4368b77c1e26c36d8b84ade0ee01e1c9c25b7bce3",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "trade.gaia-water",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "It completes repeat trips and deposits gold while the partner remains Gaia-owned.",
+                "recorded_at": "2026-10-05T14:36:22.335296+00:00",
+                "scenario_sha256": "a0106c6b0c548472112178e4368b77c1e26c36d8b84ade0ee01e1c9c25b7bce3",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.control",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Units belong to you, accept normal commands, and damage vulnerable units.",
+                "recorded_at": "2026-10-05T14:36:27.138822+00:00",
+                "scenario_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.containment",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Scouts stay inside the land enclosure; galleys stay in the water basin.",
+                "recorded_at": "2026-10-05T14:36:32.573362+00:00",
+                "scenario_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.cap",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "It allows you to buy more than 2 for both land and water raiders. There is also an issue where if you dont move the raider you buy then try and buy another, you will have your 3 kings consumed but a raider wont spawn. Likely because the raider you bought and did not move is blocking the spawn.",
+                "recorded_at": "2026-10-05T14:36:50.045603+00:00",
+                "scenario_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+                "status": "fail",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.replacement",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "A freed living-cap slot permits one purchase; new cart/cog can trade normally.",
+                "recorded_at": "2026-10-05T14:36:57.711191+00:00",
+                "scenario_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.protection",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Protected endpoints survive while traders remain vulnerable.",
+                "recorded_at": "2026-10-05T14:37:01.648590+00:00",
+                "scenario_sha256": "0755ff208135c4a537ea10ce39bd48974623913b615bbe8ed144c0af19cdee11",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.exclusive",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Only P1 pays 25 Kings; P8s 25 Kings remain during ownership/cooldown.",
+                "recorded_at": "2026-10-05T14:37:22.100701+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.targeting",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Exactly two deployed trebuchets appear on rival islets, hit chosen towers and cannot leave.",
+                "recorded_at": "2026-10-05T14:37:29.040947+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.expiry",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Both forms disappear 60 game-seconds after activation.",
+                "recorded_at": "2026-10-05T14:37:36.984657+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.cooldown",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "P8 can claim after shared cooldown; P1 cannot bypass its longer buyer cooldown.",
+                "recorded_at": "2026-10-05T14:37:46.009135+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.repeat",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "A second purchase consumes 25 Kings, runs a full 10-second warning and two trebuchets stay for 60 seconds.",
+                "recorded_at": "2026-10-05T14:37:55.951187+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.elimination",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "All owner siege disappears, pending spawn is canceled and cooldown starts.",
+                "recorded_at": "2026-10-05T14:38:02.445237+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.no-rival",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "A purchase without a surviving rival does not consume Kings.",
+                "recorded_at": "2026-10-05T14:38:08.338199+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "siege.save-load",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Ownership, timers and payment persist without duplicate siege or reset duration.",
+                "recorded_at": "2026-10-05T14:38:15.057528+00:00",
+                "scenario_sha256": "179b9fdd7e1903a1e10a17b1c81531b2b0a152caa3a60bd2df9fa800fcf261f6",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "scripts-enemy.heartbeat",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Embedded XS reports increasing heartbeat values without external-file errors.",
+                "recorded_at": "2026-10-05T14:38:21.071089+00:00",
+                "scenario_sha256": "fbe4315d3a5d40700cef66551455cba1a7b185a0737c21fc3fa44b7086d9c55f",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "scripts-enemy.passive",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "It builds/trains nothing autonomously; triggered enemies follow the given task.",
+                "recorded_at": "2026-10-05T14:38:25.717950+00:00",
+                "scenario_sha256": "fbe4315d3a5d40700cef66551455cba1a7b185a0737c21fc3fa44b7086d9c55f",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "scripts-enemy.save-load",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Heartbeat continues; initialization and the enemy spawn do not run twice.",
+                "recorded_at": "2026-10-05T14:38:32.492899+00:00",
+                "scenario_sha256": "fbe4315d3a5d40700cef66551455cba1a7b185a0737c21fc3fa44b7086d9c55f",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          }
+        ],
+        "schema_version": 1
+      },
+      "source_directory": ".build/probes"
+    },
+    {
+      "manifest": {
+        "artifacts": [
+          {
+            "path": "instructions.md",
+            "sha256": "862a925f783930fa7d01a5e8fca3730e51715d960c86ff54d569397ba582c85a"
+          },
+          {
+            "path": "raiders.aoe2scenario",
+            "sha256": "5f7ece3e40ffcb2c60e8376d50efc0a3e8af21655d9c301c0466ccc036ef574b"
+          },
+          {
+            "path": "raiders.json",
+            "sha256": "74238e218d3a3033d4a05967c793f396c31f3762ba1d8b290b7694cbed24c7ee"
+          }
+        ],
+        "in_game_verified": false,
+        "inputs": [
+          {
+            "path": "content/maps/format-seed.aoe2scenario",
+            "sha256": "3b0ca9155b6020aefcf2ae835f4d6b8f29a796bb254bc0f77a950de43f541bbc"
+          },
+          {
+            "path": "src/ancienttdde/ai/passive.per",
+            "sha256": "0aff9c448bd5d53f270605d26723b63004d9c857341ad3ce7c37f4eaff597382"
+          },
+          {
+            "path": "src/ancienttdde/xs/probe-heartbeat.xs",
+            "sha256": "2b70a159910139c639d497a7b9a9e1257176bc04a291263e69ca315113e55c56"
+          },
+          {
+            "path": "src/ancienttdde/xs/probe-raider-purchases.xs",
+            "sha256": "29d8bf807d06d5fa17ce407f0952beea4e2b3e77a5cf19dfe6ef62ef09383db1"
+          },
+          {
+            "path": "src/ancienttdde/inspection/scenario.py",
+            "sha256": "850ee1c06e63b6beaeae2b91cf49383a77ae93854e16878df0dc7da0211e61d9"
+          },
+          {
+            "path": "src/ancienttdde/probes/catalog.py",
+            "sha256": "475da2e7c14947f087e47d02398170ba867d3f75e281ab6976e1c0c33d02246f"
+          },
+          {
+            "path": "src/ancienttdde/probes/models.py",
+            "sha256": "596b2cabc8f3716c5816fd3b9a22c8dd7929d66b68c8055ce065ab55fdbb1b59"
+          },
+          {
+            "path": "src/ancienttdde/probes/native.py",
+            "sha256": "006e49a5a39859f1b80acb1e7efb8c399a08d323e12ca218931c94cc99a3202b"
+          },
+          {
+            "path": "src/ancienttdde/probes/scenarios.py",
+            "sha256": "855a12eaa660d6d3c8a26e932f68b4506b25ed1db999a2e51a2aec0963982883"
+          },
+          {
+            "path": "src/ancienttdde/probes/xs.py",
+            "sha256": "852fbefac3ea50921be271a98b8e2a2735a51ba6136e1f941ee9aac3774f5c3b"
+          }
+        ],
+        "kind": "mechanics-probes",
+        "probes": [
+          {
+            "case_ids": [
+              "raiders.control",
+              "raiders.containment",
+              "raiders.cap",
+              "raiders.replacement",
+              "raiders.protection"
+            ],
+            "id": "raiders",
+            "normalized_sha256": "088cc6910eb27f7333c0c61e04d6254993c26e5117c76d4b6ccd0b4746ae9485",
+            "scenario": "raiders.aoe2scenario",
+            "snapshot": "raiders.json"
+          }
+        ],
+        "schema_version": 1,
+        "xs_checked": true
+      },
+      "results": {
+        "cases": [
+          {
+            "id": "raiders.control",
+            "runs": []
+          },
+          {
+            "id": "raiders.containment",
+            "runs": []
+          },
+          {
+            "id": "raiders.cap",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Tester confirmed that both land and naval living caps and blocked-spawn payment checks passed in the revised raider scenario.",
+                "recorded_at": "2026-10-05T16:28:06.716378+00:00",
+                "scenario_sha256": "088cc6910eb27f7333c0c61e04d6254993c26e5117c76d4b6ccd0b4746ae9485",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.replacement",
+            "runs": [
+              {
+                "game_build": "25464371",
+                "notes": "Tester confirmed that replacement after a raider dies passed for both land and naval purchases in the revised raider scenario.",
+                "recorded_at": "2026-10-05T16:28:07.387198+00:00",
+                "scenario_sha256": "088cc6910eb27f7333c0c61e04d6254993c26e5117c76d4b6ccd0b4746ae9485",
+                "status": "pass",
+                "tester": "Cole"
+              }
+            ]
+          },
+          {
+            "id": "raiders.protection",
+            "runs": []
+          }
+        ],
+        "schema_version": 1
+      },
+      "source_directory": ".build/probes-raider-fix"
+    }
+  ]
+}

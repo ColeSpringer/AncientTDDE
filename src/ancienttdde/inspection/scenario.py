@@ -2,15 +2,41 @@
 
 import contextlib
 import json
+import math
 import os
 import subprocess
 import sys
 from collections import Counter
 from enum import Enum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Protocol, TypedDict, cast
 
 type JSONValue = str | int | float | bool | None | list[JSONValue] | dict[str, JSONValue]
+
+
+class ScenarioOptionsSnapshot(TypedDict):
+    lock_teams: bool
+    allow_players_choose_teams: bool
+    random_start_points: bool
+    secondary_game_modes: int | None
+    legacy_execution_order: bool | None
+    all_techs: bool
+    victory_custom_conditions_required: bool
+    computer_personalities_locked: bool | None
+
+
+class GlobalVictorySnapshot(TypedDict):
+    conquest_required: int
+    ruins: int
+    artifacts_required: int
+    discovery: int
+    explored_percent_of_map_required: int
+    gold_required: int
+
+
+class EffectRecordQuantity(Protocol):
+    @property
+    def quantity_float(self) -> object: ...
 
 
 def inspect_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any]:
@@ -41,7 +67,25 @@ def scalar(value: object) -> JSONValue:
     raise TypeError(f"Unexpected parser value: {type(value).__name__}")
 
 
-def component(obj: Any, dataset: Any, kind: str) -> dict[str, Any]:
+def stored_float_quantity(stored: EffectRecordQuantity | None) -> float | None:
+    """Return the float quantity an effect record holds, or None when the field is unused.
+
+    Effects store float attribute values, such as movement speed, in a separate field that
+    exists since scenario version 1.55; an unused field holds NaN. The parser raises KeyError
+    for a field the scenario version does not define.
+    """
+    if stored is None:
+        return None
+    try:
+        value = stored.quantity_float
+    except AttributeError, KeyError:
+        return None
+    return value if isinstance(value, float) and math.isfinite(value) else None
+
+
+def component(
+    obj: Any, dataset: Any, kind: str, stored: EffectRecordQuantity | None = None
+) -> dict[str, Any]:
     identifier = getattr(obj, kind)
     enum = dataset.EffectId if kind == "effect_type" else dataset.ConditionId
     try:
@@ -60,6 +104,14 @@ def component(obj: Any, dataset: Any, kind: str) -> dict[str, Any]:
     }
     if kind == "effect_type":
         raw["_quantity_int"] = scalar(obj._quantity_int)
+        float_quantity = stored_float_quantity(stored)
+        raw["_quantity_float"] = float_quantity
+        if "quantity_float" in fields:
+            attributes["quantity_float"] = float_quantity
+        # The parser reads a float-valued quantity back as `float or int`, which turns a
+        # stored 0.0 into the unused marker -1; the stored field is authoritative.
+        if float_quantity is not None and not isinstance(obj._quantity_float, bytes):
+            attributes["quantity"] = float_quantity
     return {"type": name, "type_id": int(identifier), "attributes": attributes, "raw": raw}
 
 
@@ -127,7 +179,10 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
     with Path(os.devnull).open("w") as quiet, contextlib.redirect_stdout(quiet):
         scenario = AoE2DEScenario.from_file(str(path))
         triggers: list[dict[str, Any]] = []
-        for trigger in scenario.trigger_manager.triggers:
+        # Trigger and effect objects mirror the stored records in order; the records keep
+        # field values the object layer merges away.
+        stored_triggers = scenario.sections["Triggers"].trigger_data
+        for trigger, stored in zip(scenario.trigger_manager.triggers, stored_triggers, strict=True):
             fields = (
                 "name",
                 "description",
@@ -149,7 +204,10 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
                     "conditions": [
                         component(c, conditions, "condition_type") for c in trigger.conditions
                     ],
-                    "effects": [component(e, effects, "effect_type") for e in trigger.effects],
+                    "effects": [
+                        component(e, effects, "effect_type", stored=record)
+                        for e, record in zip(trigger.effects, stored.effect_data, strict=True)
+                    ],
                 }
             )
         players: list[dict[str, Any]] = []
@@ -174,10 +232,46 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
         }
         terrain = Counter(tile.terrain_id for tile in scenario.map_manager.terrain)
         xs_manager = scenario.xs_manager
+        option_manager = scenario.option_manager
+        version: tuple[int, ...] = tuple(int(part) for part in scenario.scenario_version.split("."))
+        secondary_modes = option_manager.secondary_game_modes if version >= (1, 42) else None
+        if isinstance(secondary_modes, bytes):
+            secondary_modes = int.from_bytes(secondary_modes, byteorder="little")
+        options: ScenarioOptionsSnapshot = {
+            "lock_teams": option_manager.lock_teams,
+            "allow_players_choose_teams": option_manager.allow_players_choose_teams,
+            "random_start_points": option_manager.random_start_points,
+            "secondary_game_modes": secondary_modes,
+            "legacy_execution_order": (
+                option_manager.legacy_execution_order if version >= (1, 55) else None
+            ),
+            "all_techs": bool(scenario.sections["Options"].all_techs),
+            "victory_custom_conditions_required": option_manager.victory_custom_conditions_required,
+            "computer_personalities_locked": (
+                all(
+                    player.lock_personality
+                    for player in scenario.player_manager.players[1:]
+                    if not player.human
+                )
+                if version >= (1, 53)
+                else None
+            ),
+        }
+        global_victory = scenario.sections["GlobalVictory"]
+        victory: GlobalVictorySnapshot = {
+            "conquest_required": global_victory.conquest_required,
+            "ruins": global_victory.ruins,
+            "artifacts_required": global_victory.artifacts_required,
+            "discovery": global_victory.discovery,
+            "explored_percent_of_map_required": global_victory.explored_percent_of_map_required,
+            "gold_required": global_victory.gold_required,
+        }
         return {
             "scenario_version": scenario.scenario_version,
             "next_unit_id": scenario.sections["DataHeader"].next_unit_id_to_place,
             "victory_condition": scalar(scenario.option_manager.victory_condition),
+            "options": options,
+            "global_victory": victory,
             "map": {
                 "width": scenario.map_manager.map_width,
                 "height": scenario.map_manager.map_height,
@@ -211,6 +305,15 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
                 ],
                 "background_image": scalar(scenario.sections["BackgroundImage"].ascii_filename),
             },
+            "embedded_ai": [
+                {
+                    "player_id": slot + 1,
+                    "name": scenario.sections["PlayerDataTwo"].ai_names[slot],
+                    "script": scenario.sections["PlayerDataTwo"].ai_files[slot].ai_per_file_text,
+                    "type": scenario.sections["PlayerDataTwo"].ai_type[slot],
+                }
+                for slot in range(8)
+            ],
         }
 
 

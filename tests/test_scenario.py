@@ -2,6 +2,7 @@ import contextlib
 import io
 from pathlib import Path
 
+import pytest
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from ancienttdde.inspection.scenario import inspect_scenario
@@ -55,16 +56,44 @@ def test_isolated_extraction_keeps_zero_ids_negatives_order_and_messages(tmp_pat
     assert 79 in result["references"]["object_ids"]
 
 
+def test_float_attribute_quantities_come_from_the_stored_float_field(tmp_path):
+    # The parser keeps float attribute values in a separate field and drops a stored 0.0 when
+    # it reads a file back, so the snapshot must report the value the file holds.
+    with contextlib.redirect_stdout(io.StringIO()):
+        scenario = AoE2DEScenario.from_default()
+        speeds = scenario.trigger_manager.add_trigger("Speeds")
+        for attribute, quantity in ((5, 0), (5, 0.6), (0, 250)):
+            speeds.new_effect.modify_attribute(
+                source_player=1,
+                object_list_unit_id=434,
+                object_attributes=attribute,
+                operation=1,
+                quantity=quantity,
+            )
+        source = tmp_path / "speeds.aoe2scenario"
+        scenario.write_to_file(str(source))
+    frozen, slowed, toughened = inspect_scenario(source)["triggers"][0]["effects"]
+    assert frozen["attributes"]["quantity"] == 0.0
+    assert frozen["attributes"]["quantity_float"] == 0.0
+    assert frozen["raw"]["_quantity_int"] == -1 and frozen["raw"]["_quantity_float"] == 0.0
+    assert slowed["attributes"]["quantity"] == pytest.approx(0.6)
+    assert slowed["attributes"]["quantity_float"] == pytest.approx(0.6)
+    assert toughened["attributes"]["quantity"] == 250
+    assert toughened["attributes"]["quantity_float"] is None
+    assert toughened["raw"]["_quantity_float"] is None
+
+
 def test_real_legacy_regression_when_original_is_available():
     source = Path(
         "legacy/original/resources/_common/scenario/++ Ancient TD v5.3 ++ By DRAX.aoe2scenario"
     )
     if not source.is_file():
-        import pytest
-
         pytest.skip("Original package is intentionally not committed")
     result = inspect_scenario(source)
     assert result["scenario_version"] == "1.49"
+    assert result["options"]["secondary_game_modes"] == 0
+    assert result["options"]["legacy_execution_order"] is None
+    assert result["options"]["computer_personalities_locked"] is None
     assert result["map"]["width"] == result["map"]["height"] == 200
     assert len(result["triggers"]) == 1018
     assert len(result["units"]) == 7395
