@@ -35,8 +35,8 @@ filterwarnings = [
 ]
 
 [tool.pyright]
-include = ["src", "typings"]
-extraPaths = ["src"]
+include = ["src", "typings", "tests", "tools"]
+extraPaths = ["src", "tests"]
 venvPath = "."
 venv = ".venv"
 pythonVersion = "3.14"

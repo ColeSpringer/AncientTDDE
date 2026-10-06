@@ -1,13 +1,14 @@
-"""Resolve named references and civilization-dependent legacy mappings centrally."""
+"""Reviewed object mappings by key and legacy context, and named scenario references."""
 
 from ancienttdde.models import ObjectMapping
 
 
-class ReferenceRegistry:
+class ObjectMappings:
+    """Reviewed mappings from legacy objects, which depend on civilization, to stock objects."""
+
     def __init__(self, mappings: list[ObjectMapping]) -> None:
         self._objects: dict[str, ObjectMapping] = {}
         self._legacy: dict[tuple[int, int], ObjectMapping] = {}
-        self._references: dict[tuple[str, str], int] = {}
         for row in mappings:
             key = row["key"]
             if key in self._objects:
@@ -29,8 +30,16 @@ class ReferenceRegistry:
                     raise ValueError(f"Duplicate legacy reference: {reference}")
                 self._legacy[reference] = row
 
+    def find_legacy(self, object_id: int, civilization_id: int) -> ObjectMapping | None:
+        return self._legacy.get((object_id, civilization_id))
+
     def legacy(self, object_id: int, civilization_id: int) -> ObjectMapping:
-        return self._legacy[object_id, civilization_id]
+        found = self.find_legacy(object_id, civilization_id)
+        if found is None:
+            raise ValueError(
+                f"No mapping for legacy object {object_id} in civilization {civilization_id}"
+            )
+        return found
 
     def stock(self, key: str) -> int:
         row = self._objects[key]
@@ -77,6 +86,13 @@ class ReferenceRegistry:
         if member.name != identity["name"]:
             raise ValueError(f"Invalid stock map identity: {key}")
         return identifier
+
+
+class NameTable:
+    """Named trigger, variable and object IDs registered while a scenario is built."""
+
+    def __init__(self) -> None:
+        self._references: dict[tuple[str, str], int] = {}
 
     def register(self, kind: str, key: str, identifier: int) -> None:
         if kind not in {"trigger", "variable", "object"}:

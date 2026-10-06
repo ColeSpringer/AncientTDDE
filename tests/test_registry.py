@@ -1,10 +1,11 @@
 import pytest
 
-from ancienttdde.registry import ReferenceRegistry
+from ancienttdde.models import MapIdentity, ObjectMapping
+from ancienttdde.registry import NameTable, ObjectMappings
 
 
-def test_registry_resolves_same_legacy_id_by_civilization():
-    registry = ReferenceRegistry(
+def test_mappings_resolve_the_same_legacy_id_by_civilization() -> None:
+    mappings = ObjectMappings(
         [
             {
                 "key": "shop.wood",
@@ -24,14 +25,33 @@ def test_registry_resolves_same_legacy_id_by_civilization():
             },
         ]
     )
-    assert registry.legacy(169, 0)["key"] == "shop.wood"
-    assert registry.legacy(169, 8)["key"] == "wave.hussar"
+    assert mappings.legacy(169, 0)["key"] == "shop.wood"
+    assert mappings.legacy(169, 8)["key"] == "wave.hussar"
     with pytest.raises(ValueError, match="verified"):
-        registry.stock("wave.hussar")
+        mappings.stock("wave.hussar")
 
 
-def test_registry_rejects_ambiguous_mappings():
-    rows = [
+def test_unmapped_legacy_objects_are_reported_or_found_absent() -> None:
+    mappings = ObjectMappings(
+        [
+            {
+                "key": "tower",
+                "legacy_id": 79,
+                "civilization_ids": [0],
+                "disposition": "keep",
+                "stock_id": 79,
+                "status": "candidate",
+            }
+        ]
+    )
+    assert mappings.find_legacy(79, 0) is not None
+    assert mappings.find_legacy(79, 8) is None
+    with pytest.raises(ValueError, match="79.*8"):
+        mappings.legacy(79, 8)
+
+
+def test_mappings_reject_ambiguous_rows() -> None:
+    rows: list[ObjectMapping] = [
         {
             "key": "one",
             "legacy_id": 1,
@@ -50,11 +70,11 @@ def test_registry_rejects_ambiguous_mappings():
         },
     ]
     with pytest.raises(ValueError, match="Duplicate legacy"):
-        ReferenceRegistry(rows)
+        ObjectMappings(rows)
 
 
-def test_verified_mapping_and_named_trigger_and_variable_references():
-    registry = ReferenceRegistry(
+def test_verified_mapping_resolves_its_stock_object() -> None:
+    mappings = ObjectMappings(
         [
             {
                 "key": "king",
@@ -66,37 +86,42 @@ def test_verified_mapping_and_named_trigger_and_variable_references():
             }
         ]
     )
-    assert registry.stock("king") == 434
-    registry.register("trigger", "initialize", 0)
-    registry.register("variable", "lives.p1", 0)
-    assert registry.resolve("trigger", "initialize") == 0
-    assert registry.resolve("variable", "lives.p1") == 0
+    assert mappings.stock("king") == 434
+
+
+def test_named_trigger_and_variable_references() -> None:
+    names = NameTable()
+    names.register("trigger", "initialize", 0)
+    names.register("variable", "lives.p1", 0)
+    assert names.resolve("trigger", "initialize") == 0
+    assert names.resolve("variable", "lives.p1") == 0
     with pytest.raises(ValueError, match="Duplicate"):
-        registry.register("trigger", "initialize", 1)
+        names.register("trigger", "initialize", 1)
+    with pytest.raises(ValueError, match="Unknown reference kind"):
+        names.register("unit", "king", 1)
+    with pytest.raises(ValueError, match="Invalid reference ID"):
+        names.register("object", "king", -1)
 
 
-def test_map_identity_verification_does_not_approve_gameplay():
-    row = {
+def test_map_identity_verification_does_not_approve_gameplay() -> None:
+    identity: MapIdentity = {"dataset": "OtherInfo", "name": "BLOCKER", "parser_version": "0.9.4"}
+    row: ObjectMapping = {
         "key": "map.blocker",
         "legacy_id": 857,
         "civilization_ids": [9],
         "disposition": "replace",
         "stock_id": 1776,
         "status": "reviewed",
-        "map_identity": {
-            "dataset": "OtherInfo",
-            "name": "BLOCKER",
-            "parser_version": "0.9.4",
-        },
+        "map_identity": identity,
     }
-    registry = ReferenceRegistry([row])
-    assert registry.map_stock("map.blocker") == 1776
+    mappings = ObjectMappings([row])
+    assert mappings.map_stock("map.blocker") == 1776
     with pytest.raises(ValueError, match="verified"):
-        registry.stock("map.blocker")
-    row["map_identity"]["name"] = "HAY_STACK"
+        mappings.stock("map.blocker")
+    identity["name"] = "HAY_STACK"
     with pytest.raises(ValueError, match="identity"):
-        ReferenceRegistry([row]).map_stock("map.blocker")
-    row["map_identity"]["name"] = "BLOCKER"
+        ObjectMappings([row]).map_stock("map.blocker")
+    identity["name"] = "BLOCKER"
     row["status"] = "candidate"
     with pytest.raises(ValueError, match="reviewed"):
-        ReferenceRegistry([row]).map_stock("map.blocker")
+        ObjectMappings([row]).map_stock("map.blocker")

@@ -1,4 +1,7 @@
-from enum import IntEnum
+from enum import Enum, IntEnum
+
+class Civilization(Enum):
+    """Stock civilizations; the parser returns one when a player's civilization is read."""
 
 class StartingAge(IntEnum):
     DARK_AGE = 2

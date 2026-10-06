@@ -2,7 +2,6 @@
 
 # Pretty-printers can raise arbitrary Python exceptions. Preserve their context
 # in conversion markers, then reject those markers before writing an export.
-# ruff: noqa: BLE001
 
 import json
 import os

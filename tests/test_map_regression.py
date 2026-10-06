@@ -4,14 +4,15 @@ from pathlib import Path
 
 import pytest
 
-from ancienttdde.generation.build import build_map, check_reload, normalized_hash
-from ancienttdde.generation.foundation import migrate_map
-from ancienttdde.inspection.map import extract_map
+from ancienttdde.map.build import build_map, check_reload, read_manifest
+from ancienttdde.map.extract import extract_map
+from ancienttdde.map.foundation import migrate_map
+from ancienttdde.scenario.snapshot import scenario_digest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_versioned_stock_template_matches_current_migration(tmp_path):
+def test_versioned_stock_template_matches_current_migration(tmp_path: Path) -> None:
     template = ROOT / "content/maps/stock-de-template.aoe2scenario"
     assert template.is_file()
     legacy = json.loads((ROOT / "content/maps/legacy-map.json").read_text())
@@ -25,16 +26,17 @@ def test_versioned_stock_template_matches_current_migration(tmp_path):
     assert counts[1776] == 0
     assert counts[819] == 55
     assert counts[128] == 57
-    assert len(expected["anchors"]) == 178
-    assert expected["migration"]["terrain_patch_tiles"] == 189
-    built = build_map(ROOT, tmp_path / "regression-build")
-    assert normalized_hash(snapshot) == built["normalized_sha256"]
+    assert len(expected.get("anchors", {})) == 178
+    migration = expected.get("migration")
+    assert migration is not None and migration["terrain_patch_tiles"] == 189
+    built = read_manifest(build_map(ROOT, tmp_path / "regression-build") / "manifest.json")
+    assert scenario_digest(snapshot) == built["normalized_sha256"]
     assert len(built["validation"]["routes"]) == 71
     assert len(built["validation"]["isolation"]) == 28
     assert not built["validation"]["in_game_verified"]
 
 
-def test_plain_export_matches_original_when_available():
+def test_plain_export_matches_original_when_available() -> None:
     legacy = json.loads((ROOT / "content/maps/legacy-map.json").read_text())
     source_name = legacy["source"]["path"]
     source = ROOT / source_name

@@ -4,7 +4,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from ancienttdde.generation.build import write_json
+from ancienttdde.common.data import digest, read_object, rows, text_field, write_json
+from ancienttdde.common.output import project_path
 from ancienttdde.probes.models import (
     CaseResults,
     Outcome,
@@ -12,8 +13,7 @@ from ancienttdde.probes.models import (
     ProbeResults,
     ProbeRun,
 )
-from ancienttdde.probes.serialization import digest, read_object, rows, text_field
-from ancienttdde.provenance import project_path
+from ancienttdde.probes.suite import read_manifest, reload_probe
 
 
 def empty_results(manifest: ProbeManifest) -> ProbeResults:
@@ -27,7 +27,12 @@ def empty_results(manifest: ProbeManifest) -> ProbeResults:
     }
 
 
-def read_results(directory: Path, manifest: ProbeManifest) -> ProbeResults:
+def case_ids(manifest: ProbeManifest) -> list[str]:
+    return [case_id for probe in manifest["probes"] for case_id in probe["case_ids"]]
+
+
+def read_results(directory: Path, expected: list[str]) -> ProbeResults:
+    """Read recorded observations, which must cover the expected case IDs in order."""
     value = read_object(project_path(directory, "results.json"))
     if type(value.get("schema_version")) is not int or value["schema_version"] != 1:
         raise ValueError("Unsupported probe results schema")
@@ -50,7 +55,6 @@ def read_results(directory: Path, manifest: ProbeManifest) -> ProbeResults:
                 )
             )
         cases.append(CaseResults(id=text_field(row, "id"), runs=runs))
-    expected = [c for p in manifest["probes"] for c in p["case_ids"]]
     if [c["id"] for c in cases] != expected:
         raise ValueError("Probe results must cover the current case list exactly once")
     return ProbeResults(schema_version=1, cases=cases)
@@ -59,8 +63,6 @@ def read_results(directory: Path, manifest: ProbeManifest) -> ProbeResults:
 def record_result(
     directory: Path, case_id: str, status: str, *, game_build: str, tester: str, notes: str
 ) -> ProbeRun:
-    from ancienttdde.probes.build import read_manifest, reload_probe
-
     directory = directory.resolve()
     outcome = Outcome(status)
     if not game_build.strip() or not tester.strip():
@@ -73,7 +75,7 @@ def record_result(
         raise ValueError(f"Unknown probe case: {case_id}")
     # A result belongs to the inspected scenario, not just to an editable manifest label.
     reload_probe(directory, probe)
-    results = read_results(directory, manifest)
+    results = read_results(directory, case_ids(manifest))
     destination = project_path(directory, "results.json")
     if (directory / "results.json").is_symlink():
         raise ValueError("Probe results must be a regular file, not a symlink")

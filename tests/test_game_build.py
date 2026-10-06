@@ -1,33 +1,30 @@
 """Reload playable artifacts and reject changes hidden behind edited hashes."""
 
-import contextlib
-import io
 import json
 import re
 from pathlib import Path
 
 import pytest
-from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
+from conftest import (
+    ROOT,
+    GameBuild,
+    attr_int,
+    attr_list,
+    attr_number,
+    load_scenario,
+    rehash_artifacts,
+    save_scenario,
+)
 from typer.testing import CliRunner
 
 from ancienttdde.cli import app
-from ancienttdde.probes.xs import xs_checker
-from ancienttdde.provenance import hash_file
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-@pytest.fixture(scope="module")
-def game_build(tmp_path_factory):
-    from ancienttdde.engine.build import build_game
-
-    output = tmp_path_factory.mktemp("game-build")
-    manifest = build_game(ROOT, output)
-    return output, manifest
+from ancienttdde.common.data import asset_text
+from ancienttdde.map.geometry import Position
+from ancienttdde.scenario.xs import xs_checker
 
 
-def test_playable_map_is_self_contained_and_repeatable(game_build, tmp_path):
-    from ancienttdde.engine.build import build_game, validate_game
+def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: GameBuild) -> None:
+    from ancienttdde.game.build import verify_game
 
     output, first = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -40,13 +37,10 @@ def test_playable_map_is_self_contained_and_repeatable(game_build, tmp_path):
     assert not snapshot["options"]["victory_custom_conditions_required"]
     assert all(value == 0 for value in snapshot["global_victory"].values())
     assert {v["name"] for v in snapshot["variables"]} >= {"game.phase", "lane.p7.lives"}
-    assert validate_game(output, ROOT) == first
-    second = build_game(ROOT, tmp_path / "repeat")
-    assert first["normalized_sha256"] == second["normalized_sha256"]
-    assert first["inputs"] == second["inputs"]
+    assert verify_game(output, ROOT) == first
 
 
-def test_native_actions_acknowledge_only_live_lane_requests(game_build):
+def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
@@ -76,18 +70,17 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build):
     assert any(u["unit_const"] == 434 for u in enemy)
 
 
-def test_ai_fillers_use_embedded_passive_ai(game_build):
+def test_ai_fillers_use_embedded_passive_ai(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
-    passive = (ROOT / "src/ancienttdde/ai/passive.per").read_text().strip()
+    passive = asset_text("passive.per").strip()
     assert all(ai["script"].strip() == passive for ai in snapshot["embedded_ai"])
     assert all(p["lock_personality"] for p in snapshot["players"][1:])
-    with contextlib.redirect_stdout(io.StringIO()):
-        scenario = AoE2DEScenario.from_file(str(output / "ancient-td-de.aoe2scenario"))
+    scenario = load_scenario(output / "ancient-td-de.aoe2scenario")
     assert all(p.lock_personality for p in scenario.player_manager.players[1:])
 
 
-def test_initial_traders_receive_orders_to_their_own_partner(game_build):
+def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     anchors = json.loads((output / "map.json").read_text())["anchors"]
@@ -117,8 +110,8 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build):
             assert set(orders[0]["selected_object_ids"]) == traders
 
 
-def test_every_wave_spawns_a_pair_per_lane(game_build):
-    from ancienttdde.engine.config import load_balance
+def test_every_wave_spawns_a_pair_per_lane(game_build: GameBuild) -> None:
+    from ancienttdde.game.config import load_balance
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -136,53 +129,136 @@ def test_every_wave_spawns_a_pair_per_lane(game_build):
 
 
 @pytest.mark.parametrize("change", ["resource_bonus", "ai_personality"])
-def test_validation_rejects_tampered_logic_even_with_updated_hashes(game_build, tmp_path, change):
+def test_validation_rejects_tampered_logic_even_with_updated_hashes(
+    game_build: GameBuild, tmp_path: Path, change: str
+) -> None:
     import shutil
 
-    from ancienttdde.engine.build import validate_game
-    from ancienttdde.inspection.scenario import inspect_scenario
-    from ancienttdde.probes.build import probe_digest
+    from ancienttdde.game.build import ARTIFACTS, compare_game
+    from ancienttdde.scenario.inspect import inspect_scenario
+    from ancienttdde.scenario.snapshot import content_digest
 
     output, _ = game_build
     edited = tmp_path / "edited"
     shutil.copytree(output, edited)
     path = edited / "ancient-td-de.aoe2scenario"
-    with contextlib.redirect_stdout(io.StringIO()):
-        scenario = AoE2DEScenario.from_file(str(path))
-        if change == "resource_bonus":
-            scenario.trigger_manager.add_trigger("Unexpected bonus").new_effect.modify_resource(
-                source_player=1, tribute_list=3, quantity=9999, operation=1
-            )
-        else:
-            scenario.player_manager.players[1].lock_personality = False
-        with xs_checker(scenario):
-            scenario.write_to_file(str(edited / "changed.aoe2scenario"))
+    scenario = load_scenario(path)
+    if change == "resource_bonus":
+        scenario.trigger_manager.add_trigger("Unexpected bonus").new_effect.modify_resource(
+            source_player=1, tribute_list=3, quantity=9999, operation=1
+        )
+    else:
+        scenario.player_manager.players[1].lock_personality = False
+    with xs_checker(scenario):
+        save_scenario(scenario, edited / "changed.aoe2scenario")
     (edited / "changed.aoe2scenario").replace(path)
     snapshot = inspect_scenario(path, include_terrain=True, include_game_settings=True)
     (edited / "scenario.json").write_text(json.dumps(snapshot))
     manifest = json.loads((edited / "manifest.json").read_text())
-    manifest["normalized_sha256"] = probe_digest(snapshot)
-    for record in manifest["artifacts"]:
-        record["sha256"] = hash_file(edited / record["path"])
+    manifest["normalized_sha256"] = content_digest(snapshot)
     (edited / "manifest.json").write_text(json.dumps(manifest))
+    rehash_artifacts(edited, *ARTIFACTS)
+    # The edited copy is internally consistent; only a build of the current definitions
+    # exposes the change.
     with pytest.raises(ValueError, match="current definitions"):
-        validate_game(edited, ROOT)
+        compare_game(edited, output)
 
 
-def test_build_cli_produces_a_game_and_keeps_map_only_available(tmp_path):
-    result = CliRunner().invoke(
-        app, ["build", "--root", str(ROOT), "--output", str(tmp_path / "run")]
+def test_validation_compares_the_build_with_a_build_of_current_definitions(
+    game_build: GameBuild, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import shutil
+
+    from ancienttdde.game import build
+    from ancienttdde.scenario.inspect import inspect_scenario
+    from ancienttdde.scenario.snapshot import content_digest
+
+    output, _ = game_build
+    edited = tmp_path / "edited"
+    shutil.copytree(output, edited)
+    path = edited / "ancient-td-de.aoe2scenario"
+    scenario = load_scenario(path)
+    scenario.trigger_manager.add_trigger("Unexpected bonus").new_effect.modify_resource(
+        source_player=1, tribute_list=3, quantity=9999, operation=1
     )
-    assert result.exit_code == 0, result.output
-    assert (tmp_path / "run/ancient-td-de.aoe2scenario").is_file()
-    result = CliRunner().invoke(
-        app, ["validate", "--root", str(ROOT), "--build", str(tmp_path / "run")]
-    )
+    with xs_checker(scenario):
+        save_scenario(scenario, edited / "changed.aoe2scenario")
+    (edited / "changed.aoe2scenario").replace(path)
+    snapshot = inspect_scenario(path, include_terrain=True, include_game_settings=True)
+    (edited / "scenario.json").write_text(json.dumps(snapshot))
+    manifest = json.loads((edited / "manifest.json").read_text())
+    manifest["normalized_sha256"] = content_digest(snapshot)
+    (edited / "manifest.json").write_text(json.dumps(manifest))
+    rehash_artifacts(edited, "ancient-td-de.aoe2scenario", "scenario.json")
+
+    def rebuild(root: Path, expected: Path | None = None) -> Path:
+        # The session build is a build of the current definitions; copying it saves a rebuild.
+        assert expected is not None
+        shutil.copytree(output, expected, dirs_exist_ok=True)
+        return expected
+
+    monkeypatch.setattr(build, "build_game", rebuild)
+    # The edited copy is internally consistent, so only the comparison can reject it.
+    build.verify_game(edited, ROOT)
+    with pytest.raises(ValueError, match="Game logic differs from current definitions"):
+        build.validate_game(edited, ROOT)
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ("schema", "schema 1; expected 2, rebuild with ancienttdde build --output "),
+        ("parser", "ancient-td-game was built with AoE2ScenarioParser 0.0.1"),
+        ("input", "Game input SHA-256 mismatch: content/balance/game.json"),
+        ("artifact", "Game artifact SHA-256 mismatch: map.json"),
+    ],
+)
+def test_a_stale_or_edited_game_fails_before_any_rebuild(
+    game_build: GameBuild,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    change: str,
+    message: str,
+) -> None:
+    import shutil
+
+    from ancienttdde.game import build
+
+    output, _ = game_build
+    edited = tmp_path / "edited"
+    shutil.copytree(output, edited)
+    manifest = json.loads((edited / "manifest.json").read_text())
+    if change == "schema":
+        manifest["schema_version"] = 1
+    elif change == "parser":
+        manifest["parser_version"] = "0.0.1"
+    elif change == "input":
+        balance = next(r for r in manifest["inputs"] if r["path"] == "content/balance/game.json")
+        balance["sha256"] = "0" * 64
+    else:
+        (edited / "map.json").write_text("{}")
+    (edited / "manifest.json").write_text(json.dumps(manifest))
+    rebuilds: list[Path] = []
+
+    def rebuild(root: Path, output: Path | None = None) -> Path:
+        rebuilds.append(root)
+        raise AssertionError("validation rebuilt the game before its cheap checks failed")
+
+    monkeypatch.setattr(build, "build_game", rebuild)
+    with pytest.raises(ValueError, match=message):
+        build.validate_game(edited, ROOT)
+    assert rebuilds == []
+
+
+def test_build_cli_output_validates_against_a_fresh_rebuild(game_build: GameBuild) -> None:
+    output, _ = game_build
+    assert (output / "ancient-td-de.aoe2scenario").is_file()
+    result = CliRunner().invoke(app, ["validate", "--root", str(ROOT), "--build", str(output)])
     assert result.exit_code == 0, result.output
 
 
-def test_game_output_rejects_sources_and_unrelated_artifacts(tmp_path):
-    from ancienttdde.engine.build import build_game
+def test_game_output_rejects_sources_and_unrelated_artifacts(tmp_path: Path) -> None:
+    from ancienttdde.game.build import build_game
 
     with pytest.raises(ValueError, match="source"):
         build_game(ROOT, ROOT / "src/generated")
@@ -191,8 +267,8 @@ def test_game_output_rejects_sources_and_unrelated_artifacts(tmp_path):
         build_game(ROOT, tmp_path)
 
 
-def test_generated_spawns_and_starter_buildings_avoid_map_blockers(game_build):
-    from ancienttdde.generation.geometry import footprint
+def test_generated_spawns_and_starter_buildings_avoid_map_blockers(game_build: GameBuild) -> None:
+    from ancienttdde.map.geometry import footprint
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -210,19 +286,21 @@ def test_generated_spawns_and_starter_buildings_avoid_map_blockers(game_build):
         for effect in trigger["effects"]:
             attributes = effect["attributes"]
             if effect["type"] == "remove_object":
-                for identifier in attributes.get("selected_object_ids") or []:
+                for identifier in attr_list(attributes, "selected_object_ids"):
                     unit = units[identifier]
                     freed |= footprint(unit, sizes.get(unit["unit_const"], 0))
             if effect["type"] == "create_object":
-                created = footprint(
-                    {"x": attributes["location_x"], "y": attributes["location_y"]},
-                    max(sizes.get(attributes["object_list_unit_id"], 0), 1),
-                )
+                position: Position = {
+                    "x": attr_number(attributes, "location_x"),
+                    "y": attr_number(attributes, "location_y"),
+                }
+                size = max(sizes.get(attr_int(attributes, "object_list_unit_id"), 0), 1)
+                created = footprint(position, size)
                 assert not created & (blocked - freed), f"{trigger['name']} creates on a blocker"
 
 
-def test_lumber_trees_are_replaced_with_endless_wood_at_the_start(game_build):
-    from ancienttdde.generation.geometry import cells
+def test_lumber_trees_are_replaced_with_endless_wood_at_the_start(game_build: GameBuild) -> None:
+    from ancienttdde.map.geometry import cells
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -255,8 +333,8 @@ def test_lumber_trees_are_replaced_with_endless_wood_at_the_start(game_build):
         assert (created["location_x"], created["location_y"]) == (int(tree["x"]), int(tree["y"]))
 
 
-def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build):
-    from ancienttdde.generation.geometry import cells, flood, footprint, neighbors
+def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: GameBuild) -> None:
+    from ancienttdde.map.geometry import cells, flood, footprint, neighbors
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -300,7 +378,7 @@ def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build):
         assert all(position in reachable for position in gatherers)
 
 
-def test_lane_cleanup_preserves_the_preplaced_mill_reference(game_build):
+def test_lane_cleanup_preserves_the_preplaced_mill_reference(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     triggers = {t["name"]: t for t in snapshot["triggers"]}

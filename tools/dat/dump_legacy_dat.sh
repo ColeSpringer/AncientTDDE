@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+# Export the legacy DAT as JSON through the C++ genieutils parser under GDB.
+# Requires g++, GDB with Python support and the libstdc++ pretty-printers, permission
+# to trace the loader child (ptrace), and a built genieutils checkout at $GENIEUTILS
+# (default ~/dev/tools/genieutils).
 set -euo pipefail
 
 usage() {

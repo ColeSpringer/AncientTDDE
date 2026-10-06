@@ -1,96 +1,49 @@
 # Ancient TD DE
 
-Python tooling for migrating DRAX's Ancient Tower Defense v5.3 to a self-contained
-Age of Empires II: Definitive Edition scenario using stock assets.
+Python tooling that migrates DRAX's Ancient Tower Defense v5.3 to a self-contained
+Age of Empires II: Definitive Edition scenario built from stock assets.
 
-## Development
+## Setup
 
-Use Python 3.14.4 and [uv](https://docs.astral.sh/uv/). The parser is pinned to
-AoE2ScenarioParser **0.9.4**; `uv.lock` locks the complete environment.
+Use Python 3.14.4 and [uv](https://docs.astral.sh/uv/). `uv.lock` pins the environment,
+including AoE2ScenarioParser 0.9.4.
 
 ```bash
 uv sync --frozen
-uv run ancienttdde audit
-uv run ancienttdde validate --report .build/audit
-uv run ancienttdde build
-uv run ancienttdde validate --build .build/game
-uv run ancienttdde build --map-only
-uv run ancienttdde validate --build .build/map
-uv run ancienttdde probe
-uv run ancienttdde validate --probes .build/probes
-uv run pytest
-uv run pyright
-uv run ruff check .
-uv run ruff format --check .
-uv run python tools/check_xs.py
 ```
 
-The audit requires the ignored original package and DAT reference snapshots;
-see [legacy provenance](legacy/README.md). A fresh clone can run synthetic tests
-without these files; original-data regression tests skip when they are absent.
+## Commands
 
-Reports go to `.build/audit/`: readable Markdown, complete scenario/DAT evidence,
-behavior models, migration inventory and a deterministic SHA-256 manifest.
-Each scenario is parsed in a separate subprocess to avoid cross-version parser
-state. The audit verifies input hashes and reads the legacy inputs without
-rewriting them. Repeating the audit with the same content produces the same
-manifest. `--root /path/to/project` permits invocation from another directory;
-`--output /path/to/reports` selects a generated-output location.
+```bash
+uv run ancienttdde build                           # playable game in .build/game
+uv run ancienttdde validate --build .build/game    # reload, rebuild and compare the game
+uv run ancienttdde build --map-only                # logic-free map template in .build/map
+uv run ancienttdde validate --build .build/map     # reload and check the template; no rebuild
+uv run ancienttdde probe                           # solo mechanic scenarios in .build/probes
+uv run ancienttdde validate --probes .build/probes # check probes and recorded observations
+uv run ancienttdde probe record --help             # record an observation from a DE run
+uv run ancienttdde audit                           # original-behavior evidence in .build/audit
+uv run ancienttdde validate --report .build/audit  # check an audit against current inputs
+uv run ancienttdde validate                        # check content coverage and provenance
+uv run pytest                                      # tests
+uv run pyright                                     # strict type checks of src, tests and tools
+uv run ruff check . && uv run ruff format --check .
+```
 
-`validate` checks source provenance, trigger and civilization mapping coverage,
-and scenario references. With `--report`, it also verifies artifact hashes and
-rejects reports whose configuration or content inputs have changed. Without a
-report it extracts fresh evidence for the coverage checks. The XS check uses the
-parser's bundled binary and rejects script errors; the map foundation contains no
-gameplay XS.
+`--root` runs a command against another project directory, and `--output` writes to
+another directory. Builds refuse to overwrite sources or another tool's output. Only the
+generated `.aoe2scenario` file needs installing in DE.
 
-`probe` generates seven compact solo scenarios in `.build/probes/`, covering King
-payments, tower bonus persistence, stock trade, raiders, temporary exclusive siege,
-and embedded XS with a passive enemy. Use `--only payments` (repeatable) to select
-experiments. The generated `instructions.md` lists 30 manual checks;
-`results.json` starts without observed outcomes. Scripts and passive AI are embedded
-in each scenario that needs them, so only the `.aoe2scenario` file is installed.
-`validate --probes .build/probes` reloads artifacts, regenerates expected logic and
-checks XS, references, hashes and result attribution. Record actual DE observations
-with `probe record`; rebuilding preserves them and rejects replacing scenarios
-with different content under an existing observation. See the
-[mechanic probe guide](docs/mechanic-probes.md) for commands and verification limits.
+## Fresh clones
 
-`build` generates `.build/game/ancient-td-de.aoe2scenario`, a complete finite run
-over the migrated map. It detects human-controlled lanes among all eight occupied
-lobby slots and clears AI-filled defense lanes apart from each player's berry mill.
-It includes preparation, fifteen shared waves with bosses, lane lives, resource income,
-elimination, solo/competitive victory and sudden death. Progress uses saved scenario
-variables; initialization and tower bonuses apply once. Only the scenario file needs
-installing.
-`validate --build .build/game` reloads and reconstructs gameplay, checks embedded XS,
-and verifies source/artifact hashes. See the [game guide](docs/shared-engine.md)
-for hosting, the initial balance and the outstanding DE checks.
+The original package and its DAT exports are not committed; see
+[legacy inputs](legacy/README.md). Builds, probes and tests run without them. The audit
+and `validate` without options read them, and tests that compare against the original
+data skip when it is absent.
 
-`build --map-only` generates the stock-DE map template from versioned plain terrain
-and placement data. Neither build requires ignored legacy files. The template build writes
-`.build/map/ancient-td-de-map.aoe2scenario`, migrated data, named anchors, structural
-validation results and a hash manifest. `validate --build .build/map` checks current
-input and artifact hashes, reconstructs the expected migration and reloads the
-scenario in a fresh parser process. `--root` and `--output` work for builds too.
+## Documentation
 
-The versioned [map template](content/maps/stock-de-template.aoe2scenario) preserves
-the 200×200 seven-lane layout, economy and trade areas. It retains visible stock
-Hay Stack barriers, replaces shop signs and life indicators with stock objects,
-and reserves three siege islets
-per lane. All 7,395 placement IDs remain stable. The original empty version-1.59
-`format-seed.aoe2scenario` supplies only the format and stock player settings.
-See [map inputs](content/maps/README.md) and the
-[map verification record](docs/map-foundation.md) for migration decisions
-and the remaining in-game checks.
-
-Gameplay object mappings remain candidates until verified in-game. Map-only
-identities use reviewed names from the pinned parser datasets; these identity
-checks do not approve gameplay behavior. The catalog distinguishes
-scenario behavior, displayed instructions and intended modern design; it records
-the Hard-income asymmetry, unbounded King removal, wall-class tower bonuses and
-timed final victory explicitly. Real engine and multiplayer testing remain required
-for gameplay validation.
-
-Python changes must pass strict Pyright. Local parser interfaces in `typings/`
-are checked alongside `src/`; diagnostic ignores require a demonstrated need.
+- [Legacy inputs](legacy/README.md): the immutable original package and its provenance.
+- [Map inputs](content/maps/README.md): map data, migration decisions and the template.
+- [Legacy behavior](docs/legacy-behavior.md): the original scenario and migration decisions.
+- [In-game checks](docs/in-game-checks.md): hosting, and what only DE can verify.

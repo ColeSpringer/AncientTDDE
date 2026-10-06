@@ -1,15 +1,10 @@
 """Typed probe definitions, build evidence, and attributed in-game observations."""
 
 from dataclasses import dataclass
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 from typing import Literal, TypedDict
 
-from ancienttdde.generation.models import HashRecord, ScenarioSnapshot
-from ancienttdde.inspection.scenario import (
-    GlobalVictorySnapshot,
-    JSONValue,
-    ScenarioOptionsSnapshot,
-)
+from ancienttdde.common.manifest import ManifestBase
 
 
 class ProbeId(StrEnum):
@@ -26,10 +21,6 @@ class Outcome(StrEnum):
     PASS = "pass"
     FAIL = "fail"
     BLOCKED = "blocked"
-
-
-class AiMode(IntEnum):
-    CUSTOM = 0
 
 
 @dataclass(frozen=True)
@@ -55,11 +46,8 @@ class ProbeRecord(TypedDict):
     case_ids: list[str]
 
 
-class ProbeManifest(TypedDict):
-    schema_version: int
+class ProbeManifest(ManifestBase):
     kind: Literal["mechanics-probes"]
-    inputs: list[HashRecord]
-    artifacts: list[HashRecord]
     probes: list[ProbeRecord]
     xs_checked: bool
     in_game_verified: Literal[False]
@@ -82,20 +70,3 @@ class CaseResults(TypedDict):
 class ProbeResults(TypedDict):
     schema_version: int
     cases: list[CaseResults]
-
-
-class AiSnapshot(TypedDict):
-    player_id: int
-    name: str
-    script: str
-    type: int
-
-
-class ProbeSnapshot(ScenarioSnapshot):
-    embedded_ai: list[AiSnapshot]
-    messages: dict[str, JSONValue]
-    options: ScenarioOptionsSnapshot
-    global_victory: GlobalVictorySnapshot
-
-
-type FieldValue = int | float | str | bool | list[int]

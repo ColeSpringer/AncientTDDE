@@ -2,6 +2,8 @@ from collections.abc import Generator
 from pathlib import Path
 from typing import Protocol, Self, TypedDict
 
+from AoE2ScenarioParser.datasets.object_support import Civilization
+
 class _TerrainTile(Protocol):
     terrain_id: int
     elevation: int
@@ -14,6 +16,9 @@ class _MapManager(Protocol):
     def map_width(self) -> int: ...
     @property
     def map_height(self) -> int: ...
+    def get_tile(
+        self, x: int | None = None, y: int | None = None, i: int | None = None
+    ) -> _TerrainTile: ...
 
 class _Unit(Protocol):
     reference_id: int
@@ -47,15 +52,29 @@ class _UnitManager(Protocol):
         caption_string: str = "",
     ) -> _Unit: ...
 
+class _Effect(Protocol):
+    effect_type: int
+    source_player: int
+    selected_object_ids: list[int]
+    max_units_affected: int
+
+class _ComponentFactory(Protocol):
+    def __call__(self, **attributes: object) -> object: ...
+
+class _NewComponents:
+    """The parser's new_effect/new_condition helpers: one factory per component name."""
+
+    def __getattr__(self, name: str) -> _ComponentFactory: ...
+
 class _Trigger(Protocol):
     name: str
-    new_effect: object
-    new_condition: object
+    new_effect: _NewComponents
+    new_condition: _NewComponents
     trigger_id: int
     condition_order: list[int]
     effect_order: list[int]
     conditions: list[object]
-    effects: list[object]
+    effects: list[_Effect]
 
 class _Variable(Protocol):
     variable_id: int
@@ -83,7 +102,10 @@ class _Player(Protocol):
     _object_attributes_non_gaia: list[str]
     player_id: int
     human: bool
-    civilization: str | int
+    @property
+    def civilization(self) -> Civilization: ...
+    @civilization.setter
+    def civilization(self, value: Civilization | str | int) -> None: ...
     lock_civ: bool
     lock_personality: bool
     starting_age: int
@@ -107,6 +129,7 @@ class _PlayerManager(Protocol):
 
 class _MessageManager(Protocol):
     instructions: str
+    hints: str
     history: str
 
 class _XsManager(Protocol):
@@ -122,6 +145,7 @@ class _XsManager(Protocol):
 
 class _XsCheck(Protocol):
     path: Path | None
+    enabled: bool
     raise_on_error: bool
     @property
     def is_disabled(self) -> bool: ...

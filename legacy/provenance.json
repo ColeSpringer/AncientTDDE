@@ -400,7 +400,7 @@
     {
       "path": "legacy/reference/dat/civilizations/002_French.json",
       "role": "supplied-dat-reference",
-      "sha256": "2eacf309bc0c813c309058a102b032b3b3d9af0d5b9d744cffb25aa36eb79168",
+      "sha256": "43055aa595f82155d6f72fdb6313ffd0e39ed0e34d5cc1a24cbe1165d9a9e1ca",
       "size_bytes": 18085247
     },
     {
@@ -592,7 +592,7 @@
     {
       "path": "legacy/reference/dat/civilizations/034_Cumans.json",
       "role": "supplied-dat-reference",
-      "sha256": "4937149accca09f95faa9b5e016904ec1e89bd1be2fa37616ae9075219dceb86",
+      "sha256": "f65affeb3a96ccf0c7034d93af2f131e82cf58283a14e02d63b41050370f4d01",
       "size_bytes": 18085956
     },
     {
@@ -1082,10 +1082,6 @@
       "size_bytes": 735
     }
   ],
-  "known_corrupt_inputs": [
-    "legacy/reference/dat/civilizations/002_French.json",
-    "legacy/reference/dat/civilizations/034_Cumans.json"
-  ],
   "original_author": "DRAX6869 / DRAX",
   "original_title": "Ancient TD v5.3 Drag Tower Mod (WORKING)",
   "reference_source": "legacy/original/resources/_common/dat/empires2_x2_p1.dat",
@@ -1094,7 +1090,7 @@
     "file_version": "VER 7.4",
     "game_version": "GV_C17",
     "genieutils_commit": "02baa4cc16e5e9e00425a0a1821f3b242cd9655d",
-    "reason": "Original French and Cumans JSON contain structural corruption. Preserve the supplied snapshot and regenerate separately."
+    "reason": "The supplied French and Cumans JSON failed to parse when first read, so this export was regenerated separately. Those files now match this export byte for byte."
   },
   "schema_version": 1
 }
