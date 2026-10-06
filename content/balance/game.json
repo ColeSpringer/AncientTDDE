@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "lives": 30,
+  "setup_seconds": 5,
+  "preparation_seconds": 233,
+  "intermission_seconds": 30,
+  "income_interval": 5,
+  "income_amount": 20,
+  "starting_resources": 600,
+  "tower_attack_bonus": 4,
+  "max_enemies_per_lane": 80,
+  "sudden_death_interval": 10,
+  "sudden_death_damage": 1,
+  "waves": [
+    {"key":"Villagers", "unit":"VILLAGER_MALE", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":50, "boss":false},
+    {"key":"Militia", "unit":"MILITIA", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":100, "boss":false},
+    {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":120, "boss":false},
+    {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":150, "boss":false},
+    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":1200, "boss":true},
+    {"key":"Long Swords", "unit":"LONG_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":200, "boss":false},
+    {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":230, "boss":false},
+    {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":280, "boss":false},
+    {"key":"Camel Riders", "unit":"CAMEL_RIDER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":300, "boss":false},
+    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":1700, "boss":true},
+    {"key":"Two-Handed Swords", "unit":"TWO_HANDED_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":250, "boss":false},
+    {"key":"Cavaliers", "unit":"CAVALIER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":380, "boss":false},
+    {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":350, "boss":false},
+    {"key":"Paladins", "unit":"PALADIN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":500, "boss":false},
+    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":2200, "boss":true}
+  ]
+}

@@ -13,6 +13,8 @@ uv sync --frozen
 uv run ancienttdde audit
 uv run ancienttdde validate --report .build/audit
 uv run ancienttdde build
+uv run ancienttdde validate --build .build/game
+uv run ancienttdde build --map-only
 uv run ancienttdde validate --build .build/map
 uv run ancienttdde probe
 uv run ancienttdde validate --probes .build/probes
@@ -54,16 +56,28 @@ with `probe record`; rebuilding preserves them and rejects replacing scenarios
 with different content under an existing observation. See the
 [mechanic probe guide](docs/mechanic-probes.md) for commands and verification limits.
 
-`build` generates the stock-DE map from versioned plain terrain and placement data.
-It needs no ignored legacy files. `build` writes
+`build` generates `.build/game/ancient-td-de.aoe2scenario`, a complete finite run
+over the migrated map. It detects human-controlled lanes among all eight occupied
+lobby slots and clears AI-filled defense lanes apart from each player's berry mill.
+It includes preparation, fifteen shared waves with bosses, lane lives, resource income,
+elimination, solo/competitive victory and sudden death. Progress uses saved scenario
+variables; initialization and tower bonuses apply once. Only the scenario file needs
+installing.
+`validate --build .build/game` reloads and reconstructs gameplay, checks embedded XS,
+and verifies source/artifact hashes. See the [game guide](docs/shared-engine.md)
+for hosting, the initial balance and the outstanding DE checks.
+
+`build --map-only` generates the stock-DE map template from versioned plain terrain
+and placement data. Neither build requires ignored legacy files. The template build writes
 `.build/map/ancient-td-de-map.aoe2scenario`, migrated data, named anchors, structural
 validation results and a hash manifest. `validate --build .build/map` checks current
 input and artifact hashes, reconstructs the expected migration and reloads the
 scenario in a fresh parser process. `--root` and `--output` work for builds too.
 
 The versioned [map template](content/maps/stock-de-template.aoe2scenario) preserves
-the 200×200 seven-lane layout, economy and trade areas. It replaces modded blockers,
-shop signs and life indicators with stock objects and reserves three siege islets
+the 200×200 seven-lane layout, economy and trade areas. It retains visible stock
+Hay Stack barriers, replaces shop signs and life indicators with stock objects,
+and reserves three siege islets
 per lane. All 7,395 placement IDs remain stable. The original empty version-1.59
 `format-seed.aoe2scenario` supplies only the format and stock player settings.
 See [map inputs](content/maps/README.md) and the

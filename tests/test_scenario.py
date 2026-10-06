@@ -101,3 +101,18 @@ def test_real_legacy_regression_when_original_is_available():
     assert result["triggers"][485]["effects"][4]["type"] == "deactivate_trigger"
     assert result["triggers"][485]["effects"][4]["attributes"]["trigger_id"] == 34
     assert result["triggers"][1010]["conditions"][0]["attributes"]["timer"] == 70
+
+
+def test_game_settings_are_opt_in_for_historical_digest_compatibility(tmp_path):
+    with contextlib.redirect_stdout(io.StringIO()):
+        scenario = AoE2DEScenario.from_default("1.59")
+        scenario.player_manager.players[1].lock_personality = True
+        scenario.trigger_manager.add_trigger("On load", execute_on_load=True)
+        path = tmp_path / "execution.aoe2scenario"
+        scenario.write_to_file(str(path))
+    default = inspect_scenario(path)
+    assert "execute_on_load" not in default["triggers"][0]
+    assert "lock_personality" not in default["players"][1]
+    detailed = inspect_scenario(path, include_game_settings=True)
+    assert detailed["triggers"][0]["execute_on_load"]
+    assert detailed["players"][1]["lock_personality"]

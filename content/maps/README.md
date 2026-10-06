@@ -15,6 +15,9 @@ and conservative blocking footprint. Placement overrides neutralize the legacy
 display/endpoint objects and provide readable captions. Point and region anchors
 identify lanes, economy areas, life instances, expansion rows, purchase pads, trade
 endpoints and 21 siege positions. Regions use inclusive `[x1, y1, x2, y2]` bounds.
+The original Hay Stack barriers retain their visible stock identity and one-tile
+footprints; they are not replaced by invisible Blockers. Terrain under them is
+preserved, including the original ice along boundaries.
 
 `stock-de-template.aoe2scenario` is the generated 1.59 template for future gameplay
 generation. It contains stock placements, seven configurable human slots and a
@@ -25,14 +28,14 @@ prices**, clearly labeled. Purchases and economy logic are not implemented.
 Generate and validate from a fresh clone:
 
 ```bash
-uv run ancienttdde build
+uv run ancienttdde build --map-only
 uv run ancienttdde validate --build .build/map
 ```
 
 Refresh the versioned template after changing map definitions:
 
 ```bash
-uv run ancienttdde build
+uv run ancienttdde build --map-only
 cp .build/map/ancient-td-de-map.aoe2scenario content/maps/stock-de-template.aoe2scenario
 uv run pytest tests/test_map_regression.py
 ```

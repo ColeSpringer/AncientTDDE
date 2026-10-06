@@ -21,7 +21,8 @@ def test_versioned_stock_template_matches_current_migration(tmp_path):
     assert snapshot["map"]["width"] == snapshot["map"]["height"] == 200
     assert len(snapshot["units"]) == 7395
     counts = Counter(u["unit_const"] for u in snapshot["units"])
-    assert counts[1776] == 5550
+    assert counts[857] == 5550
+    assert counts[1776] == 0
     assert counts[819] == 55
     assert counts[128] == 57
     assert len(expected["anchors"]) == 178

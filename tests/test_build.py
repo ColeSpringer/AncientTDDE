@@ -55,7 +55,7 @@ def test_isolated_stock_map_build_reload_and_repeatability(map_project):
 
 def test_build_cli_and_validation_work_from_plain_data_without_original_package(map_project):
     runner = CliRunner()
-    result = runner.invoke(app, ["build", "--root", str(map_project)])
+    result = runner.invoke(app, ["build", "--map-only", "--root", str(map_project)])
     assert result.exit_code == 0, result.output
     assert "in-game" in result.output.lower()
     result = runner.invoke(

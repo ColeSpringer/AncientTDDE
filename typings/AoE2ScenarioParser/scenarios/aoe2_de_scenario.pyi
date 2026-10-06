@@ -23,6 +23,8 @@ class _Unit(Protocol):
     z: float
     rotation: float
     garrisoned_in_id: int
+    capture_flag: int
+    caption_string: str
 
 class _UnitManager(Protocol):
     units: list[list[_Unit]]

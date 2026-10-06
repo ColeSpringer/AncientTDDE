@@ -36,6 +36,7 @@ type EffectName = Literal[
     "kill_object",
     "enable_disable_object",
     "script_call",
+    "declare_victory",
 ]
 type ConditionName = Literal[
     "timer",
@@ -84,6 +85,7 @@ OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "packed-trebuchet": (UnitInfo, "TREBUCHET_PACKED"),
     "market": (BuildingInfo, "MARKET"),
     "dock": (BuildingInfo, "DOCK"),
+    "mill": (BuildingInfo, "MILL"),
     "town-center": (BuildingInfo, "TOWN_CENTER"),
     "watch-tower": (BuildingInfo, "WATCH_TOWER"),
     "guard-tower": (BuildingInfo, "GUARD_TOWER"),
@@ -92,6 +94,7 @@ OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "life": (BuildingInfo, "BARRACKS"),
     "blocker": (OtherInfo, "BLOCKER"),
     "sign": (OtherInfo, "SIGN"),
+    "tree": (OtherInfo, "TREE_A"),
 }
 
 # The engine defeats a player who owns nothing but towers (including Outposts), walls,
@@ -118,6 +121,7 @@ SURVIVAL_OBJECTS: frozenset[str] = frozenset(
 FOOTPRINTS: dict[str, int] = {
     "market": 4,
     "dock": 3,
+    "mill": 2,
     "town-center": 4,
     "watch-tower": 1,
     "guard-tower": 1,

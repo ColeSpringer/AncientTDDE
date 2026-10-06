@@ -39,10 +39,14 @@ class EffectRecordQuantity(Protocol):
     def quantity_float(self) -> object: ...
 
 
-def inspect_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any]:
+def inspect_scenario(
+    path: Path, *, include_terrain: bool = False, include_game_settings: bool = False
+) -> dict[str, Any]:
     arguments = [sys.executable, "-m", "ancienttdde.inspection.scenario", str(path.resolve())]
     if include_terrain:
         arguments.append("--terrain")
+    if include_game_settings:
+        arguments.append("--game-settings")
     process = subprocess.run(
         arguments,
         capture_output=True,
@@ -166,7 +170,9 @@ def references(
     return result
 
 
-def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any]:
+def load_scenario(
+    path: Path, *, include_terrain: bool = False, include_game_settings: bool = False
+) -> dict[str, Any]:
     # The pinned parser exposes no py.typed marker or type stubs.
     from AoE2ScenarioParser.datasets import (
         conditions,
@@ -195,6 +201,8 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
                 "header",
                 "mute_objectives",
             )
+            if include_game_settings:
+                fields += ("execute_on_load",)
             triggers.append(
                 {
                     "id": trigger.trigger_id,
@@ -214,6 +222,8 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
         for player in scenario.player_manager.players:
             # Raw inspection uses the parser's internal Gaia/non-Gaia field inventory.
             fields = player._object_attributes + player._object_attributes_non_gaia  # pyright: ignore[reportPrivateUsage]
+            if include_game_settings:
+                fields += ["lock_personality"]
             players.append({f: scalar(getattr(player, f, None)) for f in fields})
         units = [
             {
@@ -319,7 +329,11 @@ def load_scenario(path: Path, *, include_terrain: bool = False) -> dict[str, Any
 
 if __name__ == "__main__":
     json.dump(
-        load_scenario(Path(sys.argv[1]), include_terrain="--terrain" in sys.argv[2:]),
+        load_scenario(
+            Path(sys.argv[1]),
+            include_terrain="--terrain" in sys.argv[2:],
+            include_game_settings="--game-settings" in sys.argv[2:],
+        ),
         sys.stdout,
         ensure_ascii=False,
         allow_nan=False,

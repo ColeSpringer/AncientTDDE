@@ -1629,12 +1629,12 @@
         17,
         8
       ],
-      "disposition": "replace",
-      "stock_id": 1776,
+      "disposition": "keep",
+      "stock_id": 857,
       "status": "reviewed",
       "map_identity": {
         "dataset": "OtherInfo",
-        "name": "BLOCKER",
+        "name": "HAY_STACK",
         "parser_version": "0.9.4"
       },
       "blocking_size": 1

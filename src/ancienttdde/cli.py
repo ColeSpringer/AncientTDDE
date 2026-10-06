@@ -6,10 +6,12 @@ from typing import Annotated
 import typer
 
 from ancienttdde.audit import inspect_evidence, run_audit
+from ancienttdde.engine.build import build_game, validate_game
 from ancienttdde.generation.build import build_map, validate_build
 from ancienttdde.probes.build import build_probes, validate_probes
 from ancienttdde.probes.models import Outcome, ProbeId
 from ancienttdde.probes.results import record_result
+from ancienttdde.probes.serialization import read_object
 from ancienttdde.validation import (
     validate_inputs,
     validate_inventory,
@@ -49,7 +51,7 @@ def validate(
     root: Root = Path("."),
     report: Annotated[Path | None, typer.Option(help="Audit report to check as well.")] = None,
     build: Annotated[
-        Path | None, typer.Option(help="Generated map build directory to check.")
+        Path | None, typer.Option(help="Generated game or map build directory to check.")
     ] = None,
     probes: Annotated[
         Path | None, typer.Option(help="Generated mechanic probe directory to check.")
@@ -63,7 +65,10 @@ def validate(
         if probes:
             validate_probes(probes.resolve(), root)
         elif build:
-            validate_build(build, root)
+            if read_object(build / "manifest.json").get("kind") == "ancient-td-game":
+                validate_game(build, root)
+            else:
+                validate_build(build, root)
         elif report:
             validate_report(report, root)
         else:
@@ -84,7 +89,7 @@ def validate(
         return
     if build:
         typer.echo(
-            "Map terrain, stock identities, anchors, routes and build hashes validated. "
+            "Map/game artifacts, current definitions and build hashes validated. "
             "In-game verification remains pending."
         )
         return
@@ -97,20 +102,27 @@ def validate(
 @app.command()
 def build(
     root: Root = Path("."),
-    output: Annotated[Path | None, typer.Option(help="Generated map build directory.")] = None,
+    output: Annotated[Path | None, typer.Option(help="Generated scenario directory.")] = None,
+    map_only: Annotated[
+        bool, typer.Option(help="Build the map template without gameplay.")
+    ] = False,
 ) -> None:
-    """Generate the stock-DE map foundation and a repeatable build manifest."""
+    """Generate a playable stock-DE game and a repeatable build manifest."""
     try:
-        result = build_map(root, output)
+        if map_only:
+            build_map(root, output)
+        else:
+            build_game(root, output)
     except (OSError, ValueError, KeyError, TypeError) as error:
         typer.echo(f"Build failed: {error}", err=True)
         raise typer.Exit(1) from error
-    destination = (output or root / ".build/map") / "ancient-td-de-map.aoe2scenario"
-    typer.echo(f"Map foundation built: {destination}")
-    typer.echo(
-        f"Checked {len(result['validation']['routes'])} routes. "
-        "In-game verification remains pending."
+    destination = (
+        (output or root / ".build/map") / "ancient-td-de-map.aoe2scenario"
+        if map_only
+        else (output or root / ".build/game") / "ancient-td-de.aoe2scenario"
     )
+    typer.echo(f"{'Map foundation' if map_only else 'Playable game'} built: {destination}")
+    typer.echo("In-game verification remains pending.")
 
 
 @probe_app.callback(invoke_without_command=True)
