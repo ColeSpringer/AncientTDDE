@@ -60,6 +60,8 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
             operation=Operation.SET,
         )
     game.research(init, "FEUDAL_AGE", player=player)
+    for technology in balance.economy.starting_technologies:
+        game.research(init, technology, player=player)
     effect(
         init,
         "enable_disable_object",

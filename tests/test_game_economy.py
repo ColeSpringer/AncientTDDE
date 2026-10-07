@@ -5,7 +5,15 @@ import math
 from typing import Any
 
 import pytest
-from conftest import ROOT, GameBuild, attr_int, attr_list, triggers_by_name, variables_by_name
+from conftest import (
+    ROOT,
+    GameBuild,
+    attr_int,
+    attr_list,
+    attr_text,
+    triggers_by_name,
+    variables_by_name,
+)
 
 from ancienttdde.scenario.snapshot import ScenarioSnapshot, TriggerRecord
 
@@ -158,11 +166,28 @@ def test_expansion_rows_remove_only_their_hay_stacks(game_build: GameBuild, play
 
 @pytest.mark.parametrize("player", PLAYERS)
 def test_lanes_start_with_the_original_economy(game_build: GameBuild, player: int) -> None:
+    from AoE2ScenarioParser.datasets.techs import TechInfo
+
     data = snapshot(game_build)
     init = triggers_by_name(data)[f"lane.p{player}.initialize"]
     start = balance()["economy"]["starting_resources"]
-    granted = {e["tribute_list"]: e["quantity"] for e in effects(init, "modify_resource")}
-    assert granted == {0: start["food"], 1: start["wood"], 2: start["stone"], 3: start["gold"]}
+    granted = {
+        (e["tribute_list"], e["operation"]): e["quantity"] for e in effects(init, "modify_resource")
+    }
+    assert granted == {
+        (0, SET): start["food"],
+        (1, SET): start["wood"],
+        (2, SET): start["stone"],
+        (3, SET): start["gold"],
+    }
+    researched = {
+        e["technology"]: e["force_research_technology"]
+        for e in effects(init, "research_technology")
+    }
+    expected = ["FEUDAL_AGE", *balance()["economy"]["starting_technologies"]]
+    assert researched == {TechInfo[name].ID: 1 for name in expected}
+    assert {"BALLISTICS", "MURDER_HOLES", "CARAVAN", "WHEELBARROW", "HAND_CART"} <= set(expected)
+    assert all(e["source_player"] == player for e in effects(init, "research_technology"))
     special = [e for e in effects(init, "modify_attribute") if e["object_list_unit_id"] == ACCURSED]
     assert [(e["armour_attack_quantity"], e["operation"]) for e in special] == [
         (balance()["towers"]["special"]["pierce_bonus"], ADD)
@@ -171,7 +196,9 @@ def test_lanes_start_with_the_original_economy(game_build: GameBuild, player: in
     assert len(relics) == balance()["economy"]["starting_relics"]
     units = {u["reference_id"]: u for u in data["units"]}
     for relic in relics:
-        assert relic["object_list_unit_id_2"] == RELIC and relic["source_player"] == player
+        # Relics belong to Gaia, as in the original map's garrison effects.
+        assert relic["object_list_unit_id_2"] == RELIC and relic["object_list_unit_id"] == RELIC
+        assert relic["source_player"] == 0
         [monastery] = attr_list(relic, "selected_object_ids")
         assert units[monastery]["unit_const"] == MONASTERY
         assert units[monastery]["player_id"] == player
@@ -278,25 +305,27 @@ def test_new_deposits_hold_more_than_a_run_uses(game_build: GameBuild) -> None:
         assert change["quantity"] == balance()["economy"]["endless_deposit"] <= 32767
 
 
-def test_shop_signs_show_the_catalog(game_build: GameBuild) -> None:
-    from ancienttdde.game.catalog import label_captions, load_shop
+def test_shop_has_no_signs_and_keeps_its_named_units(game_build: GameBuild) -> None:
+    """DE cannot rename Sign objects, so the shop's signs are removed; the named units stay."""
+    data = snapshot(game_build)
+    x1, y1, x2, y2 = anchors(game_build)["shop.bounds"]["region"]
+    inside = [u for u in data["units"] if x1 <= u["x"] <= x2 + 1 and y1 <= u["y"] <= y2 + 1]
+    assert not [u for u in inside if u["unit_const"] == SIGN]
+    units = {u["reference_id"]: u for u in data["units"]}
+    from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance
 
     families = [
         name for name, _ in load_balance(ROOT / "content/balance/game.json").towers.families
     ]
     shop = load_shop(ROOT / "content/balance/shop.json", anchors(game_build), families)
-    units = {u["reference_id"]: u for u in snapshot(game_build)["units"]}
-    for label, caption in label_captions(shop).items():
-        assert units[label].get("caption_string") == caption
-    for purchase in shop.purchases:
-        if purchase.new_sign is not None:
-            signs = [
-                u
-                for u in units.values()
-                if u["unit_const"] == SIGN and (u["x"], u["y"]) == purchase.new_sign
-            ]
-            assert [s.get("caption_string") for s in signs] == [purchase.caption]
+    assert all(p.display in units for p in shop.purchases if p.display is not None)
+    # The resource bonus signs stay as markers at the end of the rows.
+    assert len([u for u in data["units"] if u["unit_const"] == SIGN]) == 21
+    labels = triggers_by_name(data)["game.labels"]
+    for rename in effects(labels, "change_object_name"):
+        [ref] = attr_list(rename, "selected_object_ids")
+        assert units[ref]["unit_const"] != SIGN
 
 
 def test_waves_are_announced_with_a_countdown(game_build: GameBuild) -> None:
@@ -381,6 +410,64 @@ def test_purchases_place_units_at_their_lane_sites(game_build: GameBuild, player
     assert (
         trade["location_object_reference"] == sites[f"trade.land.p{player}.partner"]["reference_id"]
     )
+
+
+def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
+    """Pad displays, transfer labels, life Outposts and the credit are renamed at once, as the
+    original map does, so players can read what they are buying and where they are."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.catalog import display_captions, load_shop
+    from ancienttdde.game.config import load_balance, load_lanes
+
+    data = snapshot(game_build)
+    trigger = triggers_by_name(data)["game.labels"]
+    assert not trigger["conditions"] and not trigger["looping"]
+    units = {u["reference_id"]: u for u in data["units"]}
+    names: dict[int, str] = {}
+    for rename in effects(trigger, "change_object_name"):
+        [ref] = attr_list(rename, "selected_object_ids")
+        assert rename["source_player"] == units[ref]["player_id"]
+        names[ref] = attr_text(rename, "message")
+    sites = anchors(game_build)
+    balance = load_balance(ROOT / "content/balance/game.json")
+    shop = load_shop(
+        ROOT / "content/balance/shop.json", sites, [name for name, _ in balance.towers.families]
+    )
+    for ref, caption in display_captions(shop).items():
+        assert names[ref] == caption
+    for purchase in shop.purchases:
+        if purchase.display is not None:
+            assert purchase.caption in names[purchase.display]
+        else:
+            [king] = [
+                ref
+                for ref, u in units.items()
+                if u["unit_const"] == KING and (u["x"], u["y"]) == purchase.display_at
+            ]
+            assert units[king]["player_id"] == 0 and names[king] == purchase.caption
+    relics = [ref for ref, u in units.items() if u["unit_const"] == RELIC and u["player_id"] == 0]
+
+    def label_near(x: int, y: int) -> int:
+        center = (x + 0.5, y + 0.5)
+        [found] = [r for r in relics if math.dist((units[r]["x"], units[r]["y"]), center) <= 2.5]
+        return found
+
+    for lane in load_lanes(object_value(sites, "anchors")):
+        assert names[lane.life_reference].startswith(f"P{lane.player} lives")
+        for key, transfer in lane.sites.transfers.items():
+            pad = names[label_near(transfer.pad[0], transfer.pad[1])]
+            arrival = names[label_near(*transfer.arrival)]
+            assert pad.startswith("Transfer pad:") and "moves to the" in pad, key
+            assert "arrive here from the" in arrival, key
+            if key == "build":
+                # Bought building villagers appear on the arrival tile itself.
+                assert arrival.endswith("and when bought"), arrival
+            elif key == "economy":
+                # Bought resource villagers appear two tiles from the arrival.
+                assert arrival.endswith("bought villagers appear beside it"), arrival
+            else:
+                assert "bought" not in arrival
+    assert names[21492] == "Original Ancient Tower Defense by DRAX6869 / DRAX"
 
 
 @pytest.mark.parametrize("player", PLAYERS)

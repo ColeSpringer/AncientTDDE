@@ -78,15 +78,50 @@ def test_prices_are_written_once_for_captions_and_messages(key: str, price: str)
     assert shop().get(key).caption.startswith(f"{shop().get(key).name}: {price}")
 
 
-def test_shared_signs_list_every_purchase_they_label() -> None:
-    from ancienttdde.game.catalog import label_captions
+def test_every_purchase_names_a_display_object_beside_its_pad() -> None:
+    """The original labels each pad with a placed unit it renames; those units stay in the map.
+    The fourth row's label was a sign the mod named, so the build places a King for it."""
+    from ancienttdde.game.catalog import check_displays, display_captions
 
-    captions = label_captions(shop())
-    left, right = shop().get("left_accursed_tower"), shop().get("right_accursed_tower")
-    assert left.label is not None and left.label == right.label
-    assert captions[left.label] == (
-        "Left Accursed Tower: 1 King, once | Right Accursed Tower: 1 King, once"
-    )
+    catalog = shop()
+    assert not hasattr(catalog.purchases[0], "label")
+    placed = [p.display for p in catalog.purchases if p.display is not None]
+    created = [p for p in catalog.purchases if p.display_at is not None]
+    assert len(placed) + len(created) == len(catalog.purchases)
+    assert [p.key for p in created] == ["fourth_row"]
+    assert created[0].display_at == (167.5, 36.5)
+    assert catalog.get("tower_attack_4").display == 18941
+    assert catalog.get("left_accursed_tower").display == catalog.get("right_accursed_tower").display
+    captions = display_captions(catalog)
+    assert captions[18941] == "Tower attack +4: 1 King"
+    assert captions[catalog.get("third_row").display or 0] == "Third row of towers: 2 Kings, once"
+    assert set(captions) == set(placed)
+    data, config = map_content()
+    check_displays(catalog, data, config)
+
+
+@pytest.mark.parametrize(
+    ("change", "message"),
+    [
+        ({"display": 19181}, "beside its pad"),
+        ({"display": 999999}, "placed"),
+        ({"display": 40004}, "Gaia"),
+        ({"display_at": [160.5, 15.5]}, "pad"),
+        ({"display_at": [168.5, 36.5]}, "pad"),
+    ],
+)
+def test_displays_must_stand_free_beside_their_pads(
+    change: dict[str, object], message: str, tmp_path: Path
+) -> None:
+    from ancienttdde.game.catalog import check_displays
+
+    raw = raw_catalog()
+    first = raw["purchases"][0]
+    first.pop("display", None)
+    first.update(change)
+    data, config = map_content()
+    with pytest.raises(ValueError, match=message):
+        check_displays(load(raw, tmp_path), data, config)
 
 
 def test_once_purchases_have_distinct_ownership_bits() -> None:
@@ -158,7 +193,6 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("repeatable_requirement", "must require a once-only purchase"),
         ("unknown_family", "Unknown tower family: walls"),
         ("unknown_pad", "Purchase pad needs a shop region: shop.nowhere"),
-        ("no_label", "needs exactly one of sign or new_sign"),
         ("unknown_resource", "resource"),
         ("repeatable_investment", "must be once-only: gold_175"),
         ("self_requirement", "Purchase third_row cannot require itself"),
@@ -167,6 +201,9 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("too_many_once", "At most 31 purchases can be once-only"),
         ("second_repair", "At most one repair purchase"),
         ("second_relics", "At most one relics purchase"),
+        ("no_display", "exactly one of display or display_at"),
+        ("two_displays", "exactly one of display or display_at"),
+        ("old_schema", "Unsupported shop schema"),
     ],
 )
 def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path) -> None:
@@ -187,9 +224,6 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
         first["effect"] = {"kind": "tower_attack", "family": "walls", "amount": 4}
     elif defect == "unknown_pad":
         first["pad"] = "shop.nowhere"
-    elif defect == "no_label":
-        first.pop("sign", None)
-        first.pop("new_sign", None)
     elif defect == "unknown_resource":
         first["effect"] = {"kind": "resource", "resource": "glory", "amount": 10}
     elif defect == "repeatable_investment":
@@ -203,6 +237,12 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
     elif defect == "too_many_once":
         for purchase in purchases:
             purchase["once"] = True
+    elif defect == "no_display":
+        first.pop("display")
+    elif defect == "two_displays":
+        first["display_at"] = [150.5, 15.5]
+    elif defect == "old_schema":
+        raw["schema_version"] = 1
     elif defect in ("second_repair", "second_relics"):
         kind = defect.removeprefix("second_")
         first["effect"] = next(p for p in purchases if p["effect"]["kind"] == kind)["effect"]
@@ -221,18 +261,3 @@ def test_pads_that_share_a_standable_tile_are_rejected(tmp_path: Path) -> None:
     second["pad"] = "shop.tower_attack_4"
     with pytest.raises(ValueError, match="share"):
         check_pads(load(raw, tmp_path), data, config)
-
-
-@pytest.mark.parametrize(
-    ("resource", "caption"),
-    [
-        ("gold", "Gold bonus: reach the end of the rows for 10000 gold and endless gold mines"),
-        ("food", "Food bonus: reach the end of the rows for 1000 food and an endless berry bush"),
-        ("stone", "Stone bonus: reach the end of the rows for 3000 stone and endless stone mines"),
-    ],
-)
-def test_bonus_signs_name_the_bonus_and_its_endless_deposits(resource: str, caption: str) -> None:
-    from ancienttdde.game.config import load_balance
-    from ancienttdde.game.instructions import bonus_caption
-
-    assert bonus_caption(load_balance(ROOT / "content/balance/game.json"), resource) == caption

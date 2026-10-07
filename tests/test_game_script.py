@@ -169,6 +169,7 @@ def test_prelude_holds_no_test_only_names() -> None:
         "pending_elimination",
         "tower_access_none",
         "shop_pause",
+        "shop_requires_together",
         "notice_change",
         "transfer_type",
     ],

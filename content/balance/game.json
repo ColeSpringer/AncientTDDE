@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "lives": 30,
   "setup_seconds": 5,
   "preparation_seconds": 233,
@@ -8,7 +8,8 @@
   "sudden_death_interval": 10,
   "sudden_death_damage": 1,
   "economy": {
-    "starting_resources": {"food": 1500, "wood": 3000, "stone": 3000, "gold": 800},
+    "starting_resources": {"food": 750, "wood": 1500, "stone": 1500, "gold": 400},
+    "starting_technologies": ["BALLISTICS", "MURDER_HOLES", "CARAVAN", "WHEELBARROW", "HAND_CART", "SPIES_AND_TREASON"],
     "king_gold": 3500,
     "wave_kings": 1,
     "kill_reward": {"kills": 25, "stone": 125, "wood": 25, "rewards_per_king": 4},
@@ -28,16 +29,16 @@
     {"key":"Militia", "unit":"MILITIA", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":220, "boss":false},
     {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":340, "boss":false},
     {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":420, "boss":false},
-    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":2500, "boss":true},
+    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":2500, "boss":true},
     {"key":"Long Swords", "unit":"LONG_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":800, "boss":false},
     {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":950, "boss":false},
     {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1100, "boss":false},
     {"key":"Camel Riders", "unit":"CAMEL_RIDER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1800, "boss":false},
-    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":11000, "boss":true},
+    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":11000, "boss":true},
     {"key":"Two-Handed Swords", "unit":"TWO_HANDED_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":2600, "boss":false},
     {"key":"Cavaliers", "unit":"CAVALIER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":3000, "boss":false},
     {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":4800, "boss":false},
     {"key":"Paladins", "unit":"PALADIN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":5600, "boss":false},
-    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":30000, "boss":true}
+    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":30000, "boss":true}
   ]
 }

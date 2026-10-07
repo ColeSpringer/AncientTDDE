@@ -10,6 +10,7 @@ from AoE2ScenarioParser.datasets.units import UnitInfo
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
 from ancienttdde.game.sites import LaneSites, load_sites
 from ancienttdde.models import Rect
+from ancienttdde.scenario.objects import technology
 
 WAVE_UNITS = frozenset(
     {
@@ -53,6 +54,10 @@ TOWER_BUILDINGS = frozenset(
 )
 # DE stores unit hit points in 16 bits.
 MAX_HIT_POINTS = 32767
+# Ages and tower upgrades are granted by the game or sold at the shop, never given at the start.
+RESERVED_TECHNOLOGIES = frozenset(
+    {"FEUDAL_AGE", "CASTLE_AGE", "IMPERIAL_AGE", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"}
+)
 
 
 @dataclass(frozen=True)
@@ -65,7 +70,9 @@ class Resources:
 
 @dataclass(frozen=True)
 class Economy:
+    # Each lane starts with these resources and technologies.
     starting_resources: Resources
+    starting_technologies: tuple[str, ...]
     king_gold: int
     wave_kings: int
     kills_per_reward: int
@@ -128,6 +135,23 @@ def tower(name: object) -> str:
     return name
 
 
+def technologies(raw: dict[str, object], key: str) -> tuple[str, ...]:
+    names = raw.get(key)
+    if not isinstance(names, list):
+        raise ValueError(f"{key} must list technology names")
+    listed: list[str] = []
+    for name in cast(list[object], names):
+        if not isinstance(name, str):
+            raise ValueError(f"{key} must list technology names")
+        technology(name)
+        if name in RESERVED_TECHNOLOGIES:
+            raise ValueError(f"{name} cannot be a starting technology: the game grants or sells it")
+        if name in listed:
+            raise ValueError(f"Technology listed twice: {name}")
+        listed.append(name)
+    return tuple(listed)
+
+
 def load_economy(raw: dict[str, object]) -> Economy:
     start = object_value(raw.get("starting_resources"), "starting_resources")
     kills = object_value(raw.get("kill_reward"), "kill_reward")
@@ -136,6 +160,7 @@ def load_economy(raw: dict[str, object]) -> Economy:
         starting_resources=Resources(
             *(integer(start, name, 0, 30000) for name in ("food", "wood", "stone", "gold"))
         ),
+        starting_technologies=technologies(raw, "starting_technologies"),
         king_gold=integer(raw, "king_gold", 1, 30000),
         wave_kings=integer(raw, "wave_kings", 0, 10),
         kills_per_reward=integer(kills, "kills", 1, 1000),
@@ -169,7 +194,7 @@ def load_towers(raw: dict[str, object]) -> Towers:
 
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if integer(raw, "schema_version", 2, 2) != 2:
+    if raw.get("schema_version") != 3:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):

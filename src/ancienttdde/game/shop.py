@@ -1,4 +1,4 @@
-"""Native acknowledgements that apply what the XS shop has paid for, and the shop's signs."""
+"""Native acknowledgements that apply what the XS shop has paid for, and the shop's tidying."""
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
@@ -20,7 +20,6 @@ from ancienttdde.game.catalog import (
     TowerAttack,
     Traders,
     Villagers,
-    label_captions,
 )
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import around, at
@@ -32,11 +31,7 @@ from ancienttdde.scenario.triggers import STORAGE, TriggerHandle, area, effect
 
 def hay_stack(game: Game, tile: Tile) -> int:
     """Return the placed Hay Stack that reserves a tile."""
-    found = [
-        unit.reference_id
-        for unit in game.scenario.unit_manager.units[0]
-        if unit.unit_const == game.stock("hay-stack") and (int(unit.x), int(unit.y)) == tile
-    ]
+    found = [ref for ref, (x, y) in game.gaia("hay-stack").items() if (int(x), int(y)) == tile]
     if len(found) != 1:
         raise ValueError(f"Expected one Hay Stack reserving {tile}, found {len(found)}")
     return game.placement(found[0])
@@ -159,15 +154,37 @@ def lane_purchases(game: Game, lane: EngineLane, shop: Shop, balance: Balance) -
         game.set_value(trigger, f"{prefix}.purchase", 0)
 
 
-def shop_signs(game: Game, shop: Shop) -> None:
-    """Caption the shop's signs from the catalog, and place the signs it adds."""
-    units = {unit.reference_id: unit for unit in game.scenario.unit_manager.units[0]}
-    for label, caption in label_captions(shop).items():
-        units[game.placement(label)].caption_string = caption
+# A shop sign stands within this many tiles of the pad it once labelled; row-end signs are far off.
+SIGN_REACH = 4
+
+
+def beside_pad(shop: Shop, x: float, y: float, reach: float) -> bool:
     for purchase in shop.purchases:
-        if purchase.new_sign is not None:
-            x, y = purchase.new_sign
-            sign = game.scenario.unit_manager.add_unit(
-                player=0, unit_const=game.stock("sign"), x=x, y=y, caption_string=purchase.caption
+        x1, y1, x2, y2 = purchase.pad_region
+        if x1 - reach <= x <= x2 + 1 + reach and y1 - reach <= y <= y2 + 1 + reach:
+            return True
+    return False
+
+
+def remove_shop_signs(game: Game, shop: Shop) -> None:
+    """Take the signs beside the pads out: DE cannot rename them, and every pad has a named unit."""
+    doomed = {
+        ref for ref, (x, y) in game.gaia("sign").items() if beside_pad(shop, x, y, SIGN_REACH)
+    }
+    gaia = game.scenario.unit_manager.units[0]
+    for unit in [u for u in gaia if u.reference_id in doomed]:
+        gaia.remove(unit)
+        game.placements.discard(unit.reference_id)
+    game.forget_gaia("sign")
+
+
+def place_displays(game: Game, shop: Shop) -> None:
+    """Place a Gaia King beside each pad whose original label was an object only the mod named."""
+    for purchase in shop.purchases:
+        if purchase.display_at is not None:
+            x, y = purchase.display_at
+            king = game.scenario.unit_manager.add_unit(
+                player=0, unit_const=game.stock("king"), x=x, y=y
             )
-            game.names.register("object", f"shop.{purchase.key}.sign", sign.reference_id)
+            game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
+    game.forget_gaia("king")

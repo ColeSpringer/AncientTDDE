@@ -51,6 +51,12 @@ and a solo player may use any defense lane.
   arrival clears once the unit moves.
 - Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
   leak and elimination messages reach everyone.
+- Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
+  the shop shows its purchase, destination, lives or credit text from the start; the shop
+  has no signs (DE cannot rename them) and the row-end signs are plain markers.
+- Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, and with Ballistics,
+  Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason researched: towers
+  hit moving targets and shoot adjacent enemies; a King buys 2000 wood or 1500 stone.
 - 3,500 gold, each cleared wave and every 100 kills bring a King to the lane's stall;
   every 25 kills pay 125 stone and 25 wood.
 - Investments pay on their period; the repair crew restores lives for stone.

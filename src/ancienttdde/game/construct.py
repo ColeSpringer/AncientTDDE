@@ -17,10 +17,11 @@ from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.game.catalog import Shop, load_shop
 from ancienttdde.game.config import Balance, EngineLane, load_balance, load_lanes
 from ancienttdde.game.economy import endless_deposits
-from ancienttdde.game.instructions import bonus_caption, instructions
+from ancienttdde.game.instructions import instructions
+from ancienttdde.game.labels import name_objects
 from ancienttdde.game.lanes import lane_actions
 from ancienttdde.game.script import render_prelude, render_xs
-from ancienttdde.game.shop import shop_signs
+from ancienttdde.game.shop import place_displays, remove_shop_signs
 from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
@@ -64,9 +65,11 @@ def clear_sites(game: Game, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
                 game.placements.discard(unit.reference_id)
 
 
-def settings(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
+def settings(game: Game, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
     scenario = game.scenario
     clear_sites(game, lanes, shop)
+    remove_shop_signs(game, shop)
+    place_displays(game, shop)
     scenario.player_manager.active_players = 8
     for player in scenario.player_manager.players[1:]:
         human = player.player_id != 8
@@ -90,12 +93,6 @@ def settings(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: 
     for unit in scenario.unit_manager.units[0]:
         # Gaia trade endpoints and displays must not convert to a nearby player.
         unit.capture_flag = CaptureFlag.NEVER
-        if unit.unit_const == game.stock("sign"):
-            for lane in lanes:
-                for resource, (x1, y1, x2, y2) in lane.sites.bonuses.items():
-                    if x1 <= int(unit.x) <= x2 and y1 <= int(unit.y) <= y2:
-                        unit.caption_string = bonus_caption(balance, resource)
-    shop_signs(game, shop)
     # A protected counted unit keeps the scenario-controlled enemy alive between waves.
     keeper = scenario.unit_manager.add_unit(player=8, unit_const=game.stock("king"), x=25.5, y=2.5)
     game.names.register("object", "enemy.keeper", keeper.reference_id)
@@ -120,6 +117,7 @@ def settings(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: 
 def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
     endless_lumber(game, lanes)
     endless_deposits(game, balance)
+    name_objects(game, lanes, shop)
     game_clock(game)
     game_status(game, balance)
     configure_waves(game, balance)
@@ -142,7 +140,7 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
         construct_scenario(root / "content/maps/format-seed.aoe2scenario", map_path, foundation)
         scenario = AoE2DEScenario.from_file(str(foundation))
     game = Game(scenario)
-    settings(game, balance, lanes, shop)
+    settings(game, lanes, shop)
     scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop))
     prelude.write_text(render_prelude(balance, lanes, shop, extern=True), encoding="utf-8")
     add_logic(game, balance, lanes, shop)

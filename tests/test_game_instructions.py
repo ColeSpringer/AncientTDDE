@@ -45,15 +45,42 @@ def test_kings_are_told_to_stand_still_for_the_sampled_seconds() -> None:
     assert "pausing briefly" in text
 
 
-def test_bonus_sign_and_delivery_message_share_their_reward_text() -> None:
-    from ancienttdde.game.instructions import bonus_caption, bonus_delivered, bonus_reward
+def test_bonus_delivery_message_quotes_the_reward() -> None:
+    from ancienttdde.game.instructions import bonus_delivered, bonus_reward
 
     reward = bonus_reward(balance(), "gold")
     assert reward == "10000 gold and endless gold mines"
-    assert bonus_caption(balance(), "gold") == f"Gold bonus: reach the end of the rows for {reward}"
     assert bonus_delivered(balance(), "gold") == (
         f"Gold bonus delivered: {reward} beside your mining camp."
     )
     assert bonus_delivered(balance(), "food").startswith(
         f"Food bonus delivered: {bonus_reward(balance(), 'food')} "
     )
+
+
+def test_instructions_state_the_starting_grant_and_research() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "Starting Resources" not in text and "lobby's resources" not in text
+    assert "starts with 750 food, 1500 wood, 1500 stone and 400 gold" in text
+    assert "Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason" in text
+    assert "The shop sells 2000 wood for 1 King and 1500 stone for 1 King." in text
+    assert "right pad" not in text
+
+
+def test_instructions_cope_with_no_starting_research(tmp_path: Path) -> None:
+    from ancienttdde.game.instructions import instructions
+
+    raw: dict[str, Any] = json.loads((ROOT / "content/balance/game.json").read_text())
+    raw["economy"]["starting_technologies"] = []
+    path = tmp_path / "game.json"
+    path.write_text(json.dumps(raw))
+    text = instructions(balance(path), shop())
+    assert "researched" not in text
+
+
+def test_instructions_and_the_hero_share_the_credit() -> None:
+    from ancienttdde.game.instructions import CREDIT, instructions
+
+    assert instructions(balance(), shop()).rstrip().endswith(f"{CREDIT}.")

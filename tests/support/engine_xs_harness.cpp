@@ -614,6 +614,18 @@ int main(int argc, char** argv) {
         advanceTo(sPreparation);
         require(mentions("P4 towers: Watch Tower; unavailable: Guard Tower, Keep, Bombard Tower")==1,
                 "A lane without upgrades was not told it keeps Watch Towers");
+    } else if(test=="shop_requires_together") {
+        // Kings on both age pads at once, or Imperial Kings waiting first: Castle Age always sells first.
+        start({1,2});
+        kingsOn(1, cBuyImperialAge, 1);
+        kingsOn(1, cBuyCastleAge, 1);
+        kingsOn(2, cBuyImperialAge, 1);
+        for(int n=0;n<6;++n) tick();
+        require(bought[1]==std::vector<int>({cBuyCastleAge, cBuyImperialAge}), "Imperial Age was not sold strictly after Castle Age");
+        require(bought[2].empty() && kingsOnPad(2, cBuyImperialAge)==1, "Imperial Age was sold without Castle Age");
+        kingsOn(2, cBuyCastleAge, 1);
+        for(int n=0;n<6;++n) tick();
+        require(bought[2]==std::vector<int>({cBuyCastleAge, cBuyImperialAge}), "Castle Age did not unlock the waiting Imperial Age");
     } else if(test=="shop_pause") {
         // A King that stops on a pad for a single sample and walks on has not settled there.
         start({1});

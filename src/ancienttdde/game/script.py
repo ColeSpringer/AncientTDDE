@@ -14,6 +14,7 @@ from ancienttdde.game.config import Balance, EngineLane, Towers
 from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import TRANSFERS
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns
+from ancienttdde.scenario.objects import display_name
 
 
 class State(IntEnum):
@@ -80,7 +81,7 @@ def tower_access(towers: Towers) -> tuple[tuple[str, int], ...]:
     access: list[tuple[str, int]] = []
     for _, members in towers.families:
         for member in members:
-            name = member.replace("_", " ").title()
+            name = display_name(member)
             if member in TOWER_TECHS and (name, TechInfo[TOWER_TECHS[member]].ID) not in access:
                 access.append((name, TechInfo[TOWER_TECHS[member]].ID))
     return tuple(access)

@@ -1,8 +1,11 @@
 """Hosting and play instructions written into the scenario and its sidecar."""
 
-from ancienttdde.game.catalog import Repair, Shop
+from ancienttdde.game.catalog import Repair, ResourceGrant, Shop
 from ancienttdde.game.config import Balance
 from ancienttdde.game.script import STILL_SAMPLES
+from ancienttdde.scenario.objects import display_name
+
+CREDIT = "Original Ancient Tower Defense by DRAX6869 / DRAX"
 
 # DE's Fast lobby speed runs game time at twice real time.
 FAST_GAME_SPEED = 2
@@ -22,16 +25,37 @@ def count(amount: int, single: str, plural: str) -> str:
     return f"{amount} {single if amount == 1 else plural}"
 
 
+def listed(items: list[str]) -> str:
+    if len(items) <= 1:
+        return "".join(items)
+    return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def opening_stock(shop: Shop) -> str:
+    """The resource purchases that top up the starting grant, each with its price."""
+    grants = [
+        (purchase, purchase.effect)
+        for purchase in shop.purchases
+        if isinstance(purchase.effect, ResourceGrant)
+    ]
+    if not grants:
+        return ""
+    sold = [
+        f"{effect.amount} {effect.resource} for {purchase.price}" for purchase, effect in grants
+    ]
+    return f"The shop sells {listed(sold)}. "
+
+
+def starting_research(balance: Balance) -> str:
+    names = [display_name(name) for name in balance.economy.starting_technologies]
+    return f"Every lane starts with {listed(names)} researched. " if names else ""
+
+
 def bonus_reward(balance: Balance, resource: str) -> str:
-    """What reaching the end of a resource's rows gives; signs and messages both quote it."""
+    """What reaching the end of a resource's rows gives; the delivery message quotes it."""
     economy = balance.economy
     amount = {"gold": economy.gold_bonus, "food": economy.food_bonus, "stone": economy.stone_bonus}
     return f"{amount[resource]} {resource} and {DEPOSITS[resource]}"
-
-
-def bonus_caption(balance: Balance, resource: str) -> str:
-    reward = bonus_reward(balance, resource)
-    return f"{resource.title()} bonus: reach the end of the rows for {reward}"
 
 
 def bonus_delivered(balance: Balance, resource: str) -> str:
@@ -73,7 +97,8 @@ def instructions(balance: Balance, shop: Shop) -> str:
         f"stone and {start.gold} gold, {balance.lives} lives, three Kings in the shop, two "
         "Watch Towers, villagers in its build and resource areas, eight trade carts and four "
         "trade cogs that start trading, and "
-        f"{count(economy.starting_relics, 'relic', 'relics')} in its monasteries. Your houses "
+        f"{count(economy.starting_relics, 'relic', 'relics')} in its monasteries. "
+        f"{opening_stock(shop)}{starting_research(balance)}Your houses "
         "provide population; Kings, villagers, traders and monks all use it.\n\n"
         f"Every {economy.king_gold} gold you hold becomes a King at your stall above the "
         "shop. Surviving a wave earns every lane "
@@ -126,5 +151,5 @@ def instructions(balance: Balance, shop: Shop) -> str:
         "Resignation or disconnect eliminates that lane when DE reports it out of the game.\n\n"
         "Save normally during preparation, waves or sudden death. Progress, lives, purchases "
         "and countdowns are stored in the scenario.\n\n"
-        "Original Ancient Tower Defense map by DRAX6869 / DRAX.\n"
+        f"{CREDIT}.\n"
     )

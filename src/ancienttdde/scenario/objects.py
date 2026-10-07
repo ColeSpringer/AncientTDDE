@@ -3,6 +3,7 @@
 from collections.abc import Mapping
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
+from AoE2ScenarioParser.datasets.heroes import HeroInfo
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.support.info_dataset_base import InfoDatasetBase
 from AoE2ScenarioParser.datasets.techs import TechInfo
@@ -21,6 +22,7 @@ OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "cog": (UnitInfo, "TRADE_COG"),
     "trebuchet": (UnitInfo, "TREBUCHET"),
     "packed-trebuchet": (UnitInfo, "TREBUCHET_PACKED"),
+    "william": (HeroInfo, "WILLIAM_THE_CONQUEROR"),
     "market": (BuildingInfo, "MARKET"),
     "monastery": (BuildingInfo, "MONASTERY"),
     "castle": (BuildingInfo, "CASTLE"),
@@ -57,4 +59,13 @@ def stock(key: str, objects: ObjectTable = OBJECTS) -> int:
 
 
 def technology(name: str) -> int:
-    return TechInfo[name].ID
+    """The technology ID for a dataset name; an unknown name is a content error."""
+    try:
+        return TechInfo[name].ID
+    except KeyError as error:
+        raise ValueError(f"Unknown technology: {name}") from error
+
+
+def display_name(member: str) -> str:
+    """A dataset member name as players read it: SPIES_AND_TREASON becomes Spies and Treason."""
+    return member.replace("_", " ").title().replace(" And ", " and ").replace(" Of ", " of ")

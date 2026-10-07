@@ -1,5 +1,6 @@
 """Typed native-trigger operations over the pinned parser's dynamic factories."""
 
+from collections.abc import Mapping
 from typing import Literal, Protocol, cast
 
 from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
@@ -36,6 +37,7 @@ type EffectName = Literal[
     "declare_victory",
     "create_garrisoned_object",
     "change_ownership",
+    "change_object_name",
 ]
 type ConditionName = Literal[
     "timer",
@@ -156,6 +158,29 @@ class Builder:
         for owner, selected in by_owner.items():
             for name in ("disable_unit_attackable", "disable_object_deletion"):
                 effect(trigger, name, source_player=owner, selected_object_ids=selected)
+
+    def rename(
+        self,
+        trigger: TriggerHandle,
+        target: int,
+        text: str,
+        *,
+        owners: Mapping[int, int] | None = None,
+    ) -> None:
+        """Name a placed object when the trigger fires; DE shows the name on selection.
+
+        Pass `owners` from one owners() call when naming many objects.
+        """
+        owners = self.owners() if owners is None else owners
+        if target not in owners:
+            raise ValueError(f"Cannot name an object that was never placed: {target}")
+        effect(
+            trigger,
+            "change_object_name",
+            source_player=owners[target],
+            selected_object_ids=[target],
+            message=text,
+        )
 
     def resources(
         self,

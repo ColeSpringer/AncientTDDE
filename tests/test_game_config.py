@@ -28,6 +28,17 @@ def test_short_waves_keep_their_enemy_count_and_tiers_end_in_bosses() -> None:
     assert [w.boss for w in balance.waves] == [i % 5 == 4 for i in range(len(balance.waves))]
 
 
+def test_boss_waves_keep_the_pressure_on() -> None:
+    from ancienttdde.game.config import load_balance
+
+    for wave in load_balance(ROOT / "content/balance/game.json").waves:
+        if wave.boss:
+            # Pairs of bosses follow each other within twenty seconds, and the wave cannot
+            # outlast its last pair by more than thirty.
+            assert wave.interval <= 20, wave.key
+            assert wave.duration - (wave.batches - 1) * wave.interval <= 30, wave.key
+
+
 def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
     from ancienttdde.game.config import load_balance
 
@@ -36,12 +47,24 @@ def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
     assert waves[0].hit_points < min(w.hit_points for w in waves[1:])
 
 
-def test_starting_resources_build_an_opening_line_of_watch_towers() -> None:
+def test_lanes_start_with_the_originals_technologies_and_a_modest_grant() -> None:
     from ancienttdde.game.config import load_balance
 
-    start = load_balance(ROOT / "content/balance/game.json").economy.starting_resources
-    # A stock Watch Tower costs 125 stone and 35 wood.
-    assert min(start.stone // 125, start.wood // 35) >= 12
+    economy = load_balance(ROOT / "content/balance/game.json").economy
+    assert economy.starting_technologies == (
+        "BALLISTICS",
+        "MURDER_HOLES",
+        "CARAVAN",
+        "WHEELBARROW",
+        "HAND_CART",
+        "SPIES_AND_TREASON",
+    )
+    start = economy.starting_resources
+    # Enough stone and wood for an opening line of eight Watch Towers (125 stone, 25 wood each),
+    # but no free King: the gold stays below a conversion.
+    assert min(start.stone // 125, start.wood // 25) >= 8
+    assert start.gold < economy.king_gold
+    assert (start.food, start.wood, start.stone, start.gold) == (750, 1500, 1500, 400)
 
 
 def test_tower_families_resolve_to_tower_definitions_only() -> None:
@@ -112,6 +135,11 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
     ("path", "value", "message"),
     [
         (("economy", "king_gold"), 0, "king_gold"),
+        (("economy", "starting_technologies"), ["BALLISTICS", "CATAPULTS"], "technology"),
+        (("economy", "starting_technologies"), "BALLISTICS", "starting_technologies"),
+        (("economy", "starting_technologies"), ["BALLISTICS", "BALLISTICS"], "twice"),
+        (("economy", "starting_technologies"), ["CASTLE_AGE"], "CASTLE_AGE"),
+        (("economy", "starting_technologies"), ["GUARD_TOWER"], "GUARD_TOWER"),
         (("economy", "starting_resources", "stone"), -1, "stone"),
         (("economy", "kill_reward", "kills"), 0, "kills"),
         (("towers", "families", "towers"), ["WATCH_TOWER", "HOUSE"], "Not a tower: HOUSE"),
@@ -132,6 +160,16 @@ def test_reject_invalid_economy_and_towers(
         target = target[step]
     target[path[-1]] = value
     with pytest.raises(ValueError, match=message):
+        load_balance(write_balance(tmp_path, raw))
+
+
+def test_reject_an_outdated_balance_schema(tmp_path: Path) -> None:
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    assert raw["schema_version"] == 3
+    raw["schema_version"] = 2
+    with pytest.raises(ValueError, match="Unsupported balance schema"):
         load_balance(write_balance(tmp_path, raw))
 
 

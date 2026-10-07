@@ -1,15 +1,15 @@
 """The purchase catalog: one definition per purchase drives its price, pad, caption and effect."""
 
+import math
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, cast
 
-from AoE2ScenarioParser.datasets.techs import TechInfo
-
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
 from ancienttdde.map.geometry import Cell, cells, footprint
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
+from ancienttdde.scenario.objects import technology
 
 type Resource = Literal["food", "wood", "stone", "gold"]
 RESOURCES: tuple[Resource, ...] = ("food", "wood", "stone", "gold")
@@ -17,6 +17,8 @@ type Payout = Literal["gold", "stone", "king", "attack"]
 PAYOUTS: tuple[Payout, ...] = ("gold", "stone", "king", "attack")
 # XS keeps a lane's once-only purchases as bits of one 32-bit trigger variable.
 OWNERSHIP_BITS = 31
+# A display unit stands within this many tiles of the pad it names.
+DISPLAY_REACH = 4.0
 
 
 @dataclass(frozen=True)
@@ -121,8 +123,10 @@ class Purchase:
     kings: int
     pad: str
     pad_region: tuple[int, int, int, int]
-    label: int | None
-    new_sign: tuple[float, float] | None
+    # The unit beside the pad that is renamed to this purchase, as in the original map: either
+    # a placed object or a King the build places where the original's mod had a named object.
+    display: int | None
+    display_at: tuple[float, float] | None
     once: bool
     requires: str | None
     required_name: str | None
@@ -238,29 +242,26 @@ def pad(
     return key, (x1, y1, x2, y2)
 
 
-def label(row: dict[str, object], key: str) -> tuple[int | None, tuple[float, float] | None]:
-    sign, new = row.get("sign"), row.get("new_sign")
-    if (sign is None) == (new is None):
-        raise ValueError(f"Purchase {key} needs exactly one of sign or new_sign")
-    if sign is not None:
-        return integer(row, "sign", 0, 2**31 - 1), None
-    point = cast(list[object], new) if isinstance(new, list) else []
-    if len(point) != 2 or any(type(v) not in (int, float) for v in point):
-        raise ValueError(f"new_sign must be an [x, y] point: {key}")
-    x, y = (float(cast(int | float, v)) for v in point)
-    return None, (x, y)
-
-
 def only_with(row: dict[str, object]) -> tuple[str, str] | None:
     if "only_with" not in row:
         return None
     limit = object_value(row.get("only_with"), "only_with")
-    technology = text_field(limit, "technology")
-    try:
-        TechInfo[technology]
-    except KeyError as error:
-        raise ValueError(f"Unknown technology: {technology}") from error
-    return technology, text_field(limit, "text")
+    name = text_field(limit, "technology")
+    technology(name)
+    return name, text_field(limit, "text")
+
+
+def display(row: dict[str, object], key: str) -> tuple[int | None, tuple[float, float] | None]:
+    placed, created = row.get("display"), row.get("display_at")
+    if (placed is None) == (created is None):
+        raise ValueError(f"Purchase {key} needs exactly one of display or display_at")
+    if placed is not None:
+        return integer(row, "display", 1, 2**31 - 1), None
+    point = cast(list[object], created) if isinstance(created, list) else []
+    if len(point) != 2 or any(type(v) not in (int, float) for v in point):
+        raise ValueError(f"display_at must be an [x, y] point: {key}")
+    x, y = (float(cast(int | float, v)) for v in point)
+    return None, (x, y)
 
 
 def check_requirements(keys: dict[str, dict[str, object]]) -> None:
@@ -277,7 +278,7 @@ def check_requirements(keys: dict[str, dict[str, object]]) -> None:
 def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection[str]) -> Shop:
     """Read and check the catalog against the map's shop pads and the tower families."""
     raw = read_object(path)
-    if integer(raw, "schema_version", 1, 1) != 1:
+    if raw.get("schema_version") != 2:
         raise ValueError("Unsupported shop schema")
     entries = rows(raw.get("purchases"), "purchases")
     keys: dict[str, dict[str, object]] = {}
@@ -304,8 +305,8 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
             if keys[requires].get("once") is not True:
                 raise ValueError(f"Purchase {key} must require a once-only purchase")
             required_name = text_field(keys[requires], "name")
-        sign, new_sign = label(row, key)
         pad_key, pad_region = pad(row, anchors)
+        placed, created = display(row, key)
         bought = effect(object_value(row.get("effect"), "effect"), families)
         if isinstance(bought, Investment | Repair) and not once:
             raise ValueError(f"Investments and repairs must be once-only: {key}")
@@ -318,8 +319,8 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
                 kings=integer(row, "kings", 1, 100),
                 pad=pad_key,
                 pad_region=pad_region,
-                label=sign,
-                new_sign=new_sign,
+                display=placed,
+                display_at=created,
                 once=once,
                 requires=requires,
                 required_name=required_name,
@@ -355,10 +356,41 @@ def check_pads(shop: Shop, data: MapDocument, config: FoundationConfig) -> None:
                 raise ValueError(f"Shop pads of {owner} and {purchase.key} share tile {cell}")
 
 
-def label_captions(shop: Shop) -> dict[int, str]:
-    """Caption every existing label object with all the purchases it labels."""
+def display_captions(shop: Shop) -> dict[int, str]:
+    """The name each placed display unit gets: every purchase it stands for, joined."""
     captions: dict[int, list[str]] = {}
     for purchase in shop.purchases:
-        if purchase.label is not None:
-            captions.setdefault(purchase.label, []).append(purchase.caption)
-    return {label: " | ".join(texts) for label, texts in captions.items()}
+        if purchase.display is not None:
+            captions.setdefault(purchase.display, []).append(purchase.caption)
+    return {display: " | ".join(texts) for display, texts in captions.items()}
+
+
+def distance(region: tuple[int, int, int, int], x: float, y: float) -> float:
+    x1, y1, x2, y2 = region
+    dx = max(x1 - x, 0.0, x - (x2 + 1))
+    dy = max(y1 - y, 0.0, y - (y2 + 1))
+    return (dx * dx + dy * dy) ** 0.5
+
+
+def check_displays(shop: Shop, data: MapDocument, config: FoundationConfig) -> None:
+    """Every display is a Gaia object, or a free tile, beside its own pad and off every pad."""
+    units = {u["reference_id"]: u for u in data["units"]}
+    sizes = {r["stock_id"]: r.get("blocking_size", 0) for r in config["objects"]}
+    blocked = {c for u in data["units"] for c in footprint(u, sizes.get(u["unit_const"], 0))}
+    pads = {cell for purchase in shop.purchases for cell in cells(purchase.pad_region)}
+    for purchase in shop.purchases:
+        if purchase.display is not None:
+            unit = units.get(purchase.display)
+            if unit is None:
+                raise ValueError(f"Display of {purchase.key} is not a placed object")
+            if unit["player_id"] != 0:
+                raise ValueError(f"Display of {purchase.key} must belong to Gaia")
+            x, y = unit["x"], unit["y"]
+        else:
+            x, y = purchase.display_at or (0.0, 0.0)
+            if (math.floor(x), math.floor(y)) in blocked:
+                raise ValueError(f"Display of {purchase.key} stands on a placed object")
+        if (math.floor(x), math.floor(y)) in pads:
+            raise ValueError(f"Display of {purchase.key} stands on a pad")
+        if distance(purchase.pad_region, x, y) > DISPLAY_REACH:
+            raise ValueError(f"Display of {purchase.key} does not stand beside its pad")

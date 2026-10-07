@@ -176,12 +176,18 @@ def endless_deposits(game: Game, balance: Balance) -> None:
 
 
 def starting_relics(game: Game, trigger: TriggerHandle, lane: EngineLane, balance: Balance) -> None:
-    """Each lane's first relics start inside its own monasteries."""
+    """Each lane's first relics start inside its own monasteries.
+
+    Relics are Gaia objects: the original map fills this effect for player 0 with both object
+    list fields set to the relic, and a relic created for the lane's player crashed DE on load.
+    """
+    relic = game.stock("relic")
     for monastery in lane.sites.monasteries[: balance.economy.starting_relics]:
         effect(
             trigger,
             "create_garrisoned_object",
-            source_player=lane.player,
+            source_player=0,
             selected_object_ids=[game.placement(monastery)],
-            object_list_unit_id_2=game.stock("relic"),
+            object_list_unit_id=relic,
+            object_list_unit_id_2=relic,
         )
