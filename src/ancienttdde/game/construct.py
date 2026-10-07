@@ -1,4 +1,4 @@
-"""Worker: construct the playable game over the migrated stock-DE map."""
+"""Worker: construct the playable game over the migrated stock-DE map, and its XS prelude."""
 
 import sys
 from pathlib import Path
@@ -16,7 +16,7 @@ from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.game.config import Balance, EngineLane, load_balance, load_lanes
 from ancienttdde.game.instructions import instructions
 from ancienttdde.game.lanes import lane_actions
-from ancienttdde.game.script import render_xs
+from ancienttdde.game.script import render_prelude, render_xs
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import configure_waves, declare_results, endless_lumber, game_clock
 from ancienttdde.map.construct import construct_scenario
@@ -87,7 +87,7 @@ def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...]) -> No
     declare_results(game)
 
 
-def construct_game(root: Path, map_path: Path, destination: Path) -> None:
+def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path) -> None:
     balance = load_balance(root / "content/balance/game.json")
     lanes = load_lanes(object_value(read_object(map_path).get("anchors"), "anchors"))
     with TemporaryDirectory(prefix="ancienttdde-map-") as temporary:
@@ -97,6 +97,7 @@ def construct_game(root: Path, map_path: Path, destination: Path) -> None:
     game = Game(scenario)
     settings(game)
     scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes))
+    prelude.write_text(render_prelude(balance, lanes, extern=True), encoding="utf-8")
     add_logic(game, balance, lanes)
     scenario.message_manager.instructions = instructions(balance).replace("\n", "\r")
     with xs_checker(scenario):
@@ -110,4 +111,6 @@ if __name__ == "__main__":
         if sys.argv[1] == "--check-xs":
             check_xs(AoE2DEScenario.from_file(sys.argv[2]))
         else:
-            construct_game(Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]))
+            construct_game(
+                Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4])
+            )

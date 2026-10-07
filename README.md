@@ -34,6 +34,17 @@ uv run ruff check . && uv run ruff format --check .
 another directory. Builds refuse to overwrite sources or another tool's output. Only the
 generated `.aoe2scenario` file needs installing in DE.
 
+## Editing XS
+
+Game builds write `.build/game/runtime-prelude.xs`, the generated declarations that
+`src/ancienttdde/assets/runtime.xs` uses. For VS Code's XS extension, add to the workspace
+settings:
+
+```json
+"xsc.extraPreludePath": ".build/game/runtime-prelude.xs",
+"files.associations": { "**/.build/**/*.xs": "plaintext" }
+```
+
 ## Fresh clones
 
 The original package and its DAT exports are not committed; see

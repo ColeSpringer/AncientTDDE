@@ -51,12 +51,11 @@ def table(name: str, values: list[int]) -> str:
     return f"int {name}(int index = 0) {{\n{cases}\n    return (0);\n}}\n"
 
 
-def render_xs(balance: Balance, lanes: tuple[EngineLane, ...]) -> str:
-    """Prefix the shared runtime with this build's constants and lookup tables.
+def render_prelude(balance: Balance, lanes: tuple[EngineLane, ...], *, extern: bool = False) -> str:
+    """Declare this build's constants and lookup tables for assets/runtime.xs.
 
-    The runtime eliminates a lane once xsGetPlayerInGame turns false, which DE reports for
-    defeated, resigned and dropped players. assets/runtime.xs is embedded verbatim in the
-    game scenario, so notes about it live here rather than in its comments.
+    The parser's xs-check 0.2.30 sees constants declared in another file only when they are
+    extern, so the build's prelude sidecar sets extern for checking runtime.xs on its own.
     """
     constants: dict[str, int] = {f"v{camel(n)}": i for i, n in enumerate(GLOBAL_VARIABLES)}
     constants.update({f"f{camel(n)}": i for i, n in enumerate(LANE_VARIABLES)})
@@ -89,9 +88,19 @@ def render_xs(balance: Balance, lanes: tuple[EngineLane, ...]) -> str:
         "enemyType": sorted({w.object_id for w in balance.waves}),
     }
     constants["cEnemyTypes"] = len(tables["enemyType"])
+    declaration = "extern const int" if extern else "const int"
     return (
-        "\n".join(f"const int {name} = {value};" for name, value in constants.items())
+        "\n".join(f"{declaration} {name} = {value};" for name, value in constants.items())
         + "\n"
         + "\n".join(table(name, values) for name, values in tables.items())
-        + asset_text("runtime.xs")
     )
+
+
+def render_xs(balance: Balance, lanes: tuple[EngineLane, ...]) -> str:
+    """Prefix the shared runtime with this build's constants and lookup tables.
+
+    The runtime eliminates a lane once xsGetPlayerInGame turns false, which DE reports for
+    defeated, resigned and dropped players. assets/runtime.xs is embedded verbatim in the
+    game scenario, so notes about it live here rather than in its comments.
+    """
+    return render_prelude(balance, lanes) + asset_text("runtime.xs")

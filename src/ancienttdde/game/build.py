@@ -33,7 +33,16 @@ from ancienttdde.scenario.inspect import inspect_scenario
 from ancienttdde.scenario.snapshot import ScenarioSnapshot, content_digest, validate_references
 
 SCENARIO_NAME = "ancient-td-de.aoe2scenario"
-ARTIFACTS = (SCENARIO_NAME, "map.json", "scenario.json", "instructions.md", "validation.json")
+# The declarations the scenario embeds before assets/runtime.xs, for checking that file alone.
+PRELUDE = "runtime-prelude.xs"
+ARTIFACTS = (
+    SCENARIO_NAME,
+    "map.json",
+    "scenario.json",
+    "instructions.md",
+    "validation.json",
+    PRELUDE,
+)
 CONTENT_INPUTS = (*MAP_INPUTS, "content/balance/game.json")
 
 
@@ -50,7 +59,10 @@ def read_manifest(path: Path) -> GameManifest:
     if raw.get("xs_checked") is not True or raw.get("in_game_verified") is not False:
         raise ValueError("Game manifest must distinguish static validation from game observations")
     if {r["path"] for r in base["artifacts"]} != set(ARTIFACTS):
-        raise ValueError("Game manifest must record every artifact")
+        raise ValueError(
+            "Game manifest must record every artifact this version builds; "
+            f"rebuild with {rebuild(path.parent)}"
+        )
     return GameManifest(
         **base,
         kind="ancient-td-game",
@@ -69,7 +81,9 @@ def current_inputs(root: Path) -> list[HashRecord]:
 
 
 def worker(root: Path, data: Path, path: Path, *, check_only: bool = False) -> None:
-    arguments = ["--check-xs", str(path)] if check_only else [str(root), str(data), str(path)]
+    # Construction writes the XS prelude beside the scenario, from the inputs it embeds.
+    construction = [str(root), str(data), str(path), str(path.with_name(PRELUDE))]
+    arguments = ["--check-xs", str(path)] if check_only else construction
     run_module("ancienttdde.game.construct", *arguments, label="Game generation/XS validation")
 
 
@@ -160,7 +174,7 @@ def compare_game(directory: Path, expected: Path) -> None:
     current = read_manifest(project_path(expected, "manifest.json"))
     if current["normalized_sha256"] != manifest["normalized_sha256"]:
         raise ValueError("Game logic differs from current definitions")
-    for name in ("map.json", "validation.json", "instructions.md"):
+    for name in ("map.json", "validation.json", "instructions.md", PRELUDE):
         if (directory / name).read_bytes() != (expected / name).read_bytes():
             raise ValueError(f"Game sidecar differs from current definitions: {name}")
 

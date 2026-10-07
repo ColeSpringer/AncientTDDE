@@ -147,6 +147,7 @@ class _XsCheck(Protocol):
     path: Path | None
     enabled: bool
     raise_on_error: bool
+    additional_args: list[str]
     @property
     def is_disabled(self) -> bool: ...
     def validate(self, xs_file: Path | str | None, show_tmpfile: bool = True) -> bool | None: ...

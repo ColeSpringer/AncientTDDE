@@ -45,8 +45,8 @@ void ancientInitialize() {
 
 // Collect every lane's losses before changing state or selecting a winner.
 int ancientCollect() {
-    for (player = 1; <= 7) {
-        laneSet(player, fCount, 0);
+    for (slot = 1; <= 7) {
+        laneSet(slot, fCount, 0);
     }
     for (kind = 0; < cEnemyTypes) {
         ancientUnitArray = xsGetPlayerUnitIds(8, enemyType(kind), ancientUnitArray);
@@ -56,17 +56,17 @@ int ancientCollect() {
                 vector position = xsGetUnitPosition(unit);
                 float x = xsVectorGetX(position);
                 float y = xsVectorGetY(position);
-                for (player = 1; <= 7) {
-                    if ((y >= laneLowY(player)) && (y < laneHighY(player) + 1)) {
+                for (defender = 1; <= 7) {
+                    if ((y >= laneLowY(defender)) && (y < laneHighY(defender) + 1)) {
                         // Units sent to the exit tile stop just short of its west edge,
                         // so its preceding tile, marked by the exit flags, counts as the exit.
-                        if (laneValue(player, fActive) == 0) {
+                        if (laneValue(defender, fActive) == 0) {
                             xsRemoveUnit(unit);
-                        } else if (x >= laneExitX(player) - 1) {
-                            laneSet(player, fLives, laneValue(player, fLives) - 1);
+                        } else if (x >= laneExitX(defender) - 1) {
+                            laneSet(defender, fLives, laneValue(defender, fLives) - 1);
                             xsRemoveUnit(unit);
                         } else {
-                            laneSet(player, fCount, laneValue(player, fCount) + 1);
+                            laneSet(defender, fCount, laneValue(defender, fCount) + 1);
                         }
                     }
                 }
@@ -107,9 +107,9 @@ void ancientFinish(bool victory = false) {
         xsChatData("All defense lanes eliminated. No human winner.");
     }
     xsSetTriggerVariable(vWinner, winner);
-    for (player = 1; <= 7) {
-        laneSet(player, fSpawn, 0);
-        laneSet(player, fIncome, 0);
+    for (slot = 1; <= 7) {
+        laneSet(slot, fSpawn, 0);
+        laneSet(slot, fIncome, 0);
     }
 }
 
@@ -160,8 +160,8 @@ void ancientTick() {
     int income = xsTriggerVariable(vIncomeClock) + 1;
     if ((state != sSetup) && (income >= cIncomeInterval)) {
         income = 0;
-        for (player = 1; <= 7) {
-            if (laneValue(player, fActive) == 1) laneSet(player, fIncome, 1);
+        for (payee = 1; <= 7) {
+            if (laneValue(payee, fActive) == 1) laneSet(payee, fIncome, 1);
         }
     }
     xsSetTriggerVariable(vIncomeClock, income);
@@ -182,8 +182,8 @@ void ancientTick() {
         if (suddenRemaining <= 0) {
             int damage = cSuddenDamage + xsTriggerVariable(vSuddenRound);
             if (damage > 10) damage = 10;
-            for (player = 1; <= 7) {
-                if (laneValue(player, fActive) == 1) laneSet(player, fLives, laneValue(player, fLives) - damage);
+            for (survivor = 1; <= 7) {
+                if (laneValue(survivor, fActive) == 1) laneSet(survivor, fLives, laneValue(survivor, fLives) - damage);
             }
             xsSetTriggerVariable(vSuddenRound, xsTriggerVariable(vSuddenRound) + 1);
             suddenRemaining = cSuddenInterval;
@@ -198,16 +198,16 @@ void ancientTick() {
     int cooldown = xsTriggerVariable(vSpawnClock);
     int alive = 0;
     bool capacity = true;
-    for (player = 1; <= 7) {
-        if (laneValue(player, fActive) == 1) {
-            int count = laneValue(player, fCount);
+    for (defender = 1; <= 7) {
+        if (laneValue(defender, fActive) == 1) {
+            int count = laneValue(defender, fCount);
             alive = alive + count;
             if (count + waveCount(wave) > cEnemyCap) capacity = false;
         }
     }
     if ((batches < waveBatches(wave)) && (cooldown <= 0) && capacity) {
-        for (player = 1; <= 7) {
-            if (laneValue(player, fActive) == 1) laneSet(player, fSpawn, wave + 1);
+        for (slot = 1; <= 7) {
+            if (laneValue(slot, fActive) == 1) laneSet(slot, fSpawn, wave + 1);
         }
         xsSetTriggerVariable(vBatches, batches + 1);
         cooldown = waveInterval(wave);

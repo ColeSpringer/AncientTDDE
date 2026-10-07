@@ -12,6 +12,7 @@ from conftest import (
     attr_list,
     attr_number,
     load_scenario,
+    new_scenario,
     rehash_artifacts,
     save_scenario,
 )
@@ -78,6 +79,37 @@ def test_ai_fillers_use_embedded_passive_ai(game_build: GameBuild) -> None:
     assert all(p["lock_personality"] for p in snapshot["players"][1:])
     scenario = load_scenario(output / "ancient-td-de.aoe2scenario")
     assert all(p.lock_personality for p in scenario.player_manager.players[1:])
+
+
+def test_the_runtime_checks_cleanly_against_the_build_prelude(
+    game_build: GameBuild, tmp_path: Path
+) -> None:
+    from ancienttdde.game.build import PRELUDE
+
+    output, manifest = game_build
+    assert PRELUDE in {record["path"] for record in manifest["artifacts"]}
+    snapshot = json.loads((output / "scenario.json").read_text())
+    scripts = [
+        effect["attributes"]["message"]
+        for trigger in snapshot["triggers"]
+        for effect in trigger["effects"]
+        if effect["type"] == "script_call"
+    ]
+    # The prelude declares what the scenario embeds before the shared runtime. xs-check sees
+    # constants from another file only when they are extern.
+    prelude = (output / PRELUDE).read_text(encoding="utf-8")
+    declarations = prelude.replace("extern const int ", "const int ")
+    assert declarations != prelude
+    text = asset_text("runtime.xs")
+    assert any(declarations + text in script for script in scripts)
+    runtime = tmp_path / "runtime.xs"
+    runtime.write_text(text, encoding="utf-8")
+    scenario = new_scenario()
+    checker = scenario.xs_manager.xs_check
+    checker.additional_args = ["--extra-prelude-path", str(output / PRELUDE)]
+    with xs_checker(scenario):
+        # The parser's check, which the build runs, also fails on warnings.
+        checker.validate(runtime, show_tmpfile=False)
 
 
 def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBuild) -> None:
@@ -204,10 +236,29 @@ def test_validation_compares_the_build_with_a_build_of_current_definitions(
         build.validate_game(edited, ROOT)
 
 
+def test_validation_rejects_a_prelude_that_differs_from_current_definitions(
+    game_build: GameBuild, tmp_path: Path
+) -> None:
+    import shutil
+
+    from ancienttdde.game.build import PRELUDE, compare_game
+
+    output, _ = game_build
+    edited = tmp_path / "edited"
+    shutil.copytree(output, edited)
+    prelude = edited / PRELUDE
+    prelude.write_text(prelude.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+    rehash_artifacts(edited, PRELUDE)
+    message = f"Game sidecar differs from current definitions: {re.escape(PRELUDE)}"
+    with pytest.raises(ValueError, match=message):
+        compare_game(edited, output)
+
+
 @pytest.mark.parametrize(
     ("change", "message"),
     [
         ("schema", "schema 1; expected 2, rebuild with ancienttdde build --output "),
+        ("artifacts", "every artifact this version builds; rebuild with ancienttdde build "),
         ("parser", "ancient-td-game was built with AoE2ScenarioParser 0.0.1"),
         ("input", "Game input SHA-256 mismatch: content/balance/game.json"),
         ("artifact", "Game artifact SHA-256 mismatch: map.json"),
@@ -230,6 +281,9 @@ def test_a_stale_or_edited_game_fails_before_any_rebuild(
     manifest = json.loads((edited / "manifest.json").read_text())
     if change == "schema":
         manifest["schema_version"] = 1
+    elif change == "artifacts":
+        # A build made before the prelude sidecar existed.
+        manifest["artifacts"] = [r for r in manifest["artifacts"] if r["path"] != build.PRELUDE]
     elif change == "parser":
         manifest["parser_version"] = "0.0.1"
     elif change == "input":
