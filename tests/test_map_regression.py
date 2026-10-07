@@ -26,7 +26,7 @@ def test_versioned_stock_template_matches_current_migration(tmp_path: Path) -> N
     assert counts[1776] == 0
     assert counts[819] == 55
     assert counts[128] == 57
-    assert len(expected.get("anchors", {})) == 178
+    assert len(expected.get("anchors", {})) == 339
     migration = expected.get("migration")
     assert migration is not None and migration["terrain_patch_tiles"] == 189
     built = read_manifest(build_map(ROOT, tmp_path / "regression-build") / "manifest.json")

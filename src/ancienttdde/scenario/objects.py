@@ -13,6 +13,7 @@ type ObjectTable = Mapping[str, tuple[type[InfoDatasetBase], str]]
 OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "king": (UnitInfo, "KING"),
     "villager": (UnitInfo, "VILLAGER_MALE"),
+    "monk": (UnitInfo, "MONK"),
     "scout": (UnitInfo, "SCOUT_CAVALRY"),
     "spearman": (UnitInfo, "SPEARMAN"),
     "galley": (UnitInfo, "GALLEY"),
@@ -21,6 +22,8 @@ OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "trebuchet": (UnitInfo, "TREBUCHET"),
     "packed-trebuchet": (UnitInfo, "TREBUCHET_PACKED"),
     "market": (BuildingInfo, "MARKET"),
+    "monastery": (BuildingInfo, "MONASTERY"),
+    "castle": (BuildingInfo, "CASTLE"),
     "dock": (BuildingInfo, "DOCK"),
     "mill": (BuildingInfo, "MILL"),
     "town-center": (BuildingInfo, "TOWN_CENTER"),
@@ -28,10 +31,24 @@ OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "guard-tower": (BuildingInfo, "GUARD_TOWER"),
     "keep": (BuildingInfo, "KEEP"),
     "bombard-tower": (BuildingInfo, "BOMBARD_TOWER"),
+    "accursed-tower": (BuildingInfo, "THE_ACCURSED_TOWER"),
     "blocker": (OtherInfo, "BLOCKER"),
     "sign": (OtherInfo, "SIGN"),
     "tree": (OtherInfo, "TREE_A"),
+    "relic": (OtherInfo, "RELIC"),
+    "hay-stack": (OtherInfo, "HAY_STACK"),
+    "gold-mine": (OtherInfo, "GOLD_MINE"),
+    "stone-mine": (OtherInfo, "STONE_MINE"),
+    "forage-bush": (OtherInfo, "FORAGE_BUSH"),
 }
+
+
+# Marker flags: scenario decoration that still obstructs collision-checked unit creation.
+MARKER_FLAGS = ("FLAG_A", "FLAG_B", "FLAG_C", "FLAG_D", "FLAG_E", "FE_FLAG")
+
+
+def marker_flags() -> frozenset[int]:
+    return frozenset(OtherInfo[name].ID for name in MARKER_FLAGS)
 
 
 def stock(key: str, objects: ObjectTable = OBJECTS) -> int:

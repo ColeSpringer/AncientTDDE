@@ -47,10 +47,10 @@ def validate_structure(data: MapDocument, config: FoundationConfig) -> None:
         if unit["garrisoned_in_id"] >= 0 and unit["garrisoned_in_id"] not in units:
             raise ValueError(f"Dangling garrison reference: {unit['reference_id']}")
     for key, anchor in config["anchors"].items():
-        if not key or not ({"point", "region"} & anchor.keys()):
+        positions = ([anchor["point"]] if "point" in anchor else []) + anchor.get("points", [])
+        if not key or not (positions or "region" in anchor):
             raise ValueError(f"Anchor needs a point or region: {key}")
-        if "point" in anchor:
-            point = anchor["point"]
+        for point in positions:
             if len(point) != 2 or not (0 <= point[0] < width and 0 <= point[1] < height):
                 raise ValueError(f"Anchor outside map: {key}")
         if "region" in anchor:

@@ -36,20 +36,64 @@ def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
     assert waves[0].hit_points < min(w.hit_points for w in waves[1:])
 
 
-def test_resources_at_the_first_wave_stay_near_the_playtested_amounts() -> None:
+def test_starting_resources_build_an_opening_line_of_watch_towers() -> None:
     from ancienttdde.game.config import load_balance
 
-    balance = load_balance(ROOT / "content/balance/game.json")
-    paid = balance.preparation_seconds // balance.income_interval * balance.income_amount
-    # DE trials held 1,300-1,490 of each resource when the first wave arrived.
-    assert balance.starting_resources + paid <= 1600
+    start = load_balance(ROOT / "content/balance/game.json").economy.starting_resources
+    # A stock Watch Tower costs 125 stone and 35 wood.
+    assert min(start.stone // 125, start.wood // 35) >= 12
+
+
+def test_tower_families_resolve_to_tower_definitions_only() -> None:
+    from ancienttdde.game.config import load_balance
+
+    towers = load_balance(ROOT / "content/balance/game.json").towers
+    assert towers.family_ids("towers") == (79, 234, 235, 236)
+    assert towers.family_ids("bombard") == (236,)
+    assert towers.special_id == 684
+
+
+def test_special_tower_states_its_stock_attack_and_range() -> None:
+    from ancienttdde.game.config import load_balance
+
+    towers = load_balance(ROOT / "content/balance/game.json").towers
+    # The stock Accursed Tower: 8 pierce attack, 13 range (DE data).
+    assert (towers.special_attack, towers.special_range) == (8, 13)
+    assert towers.special_pierce == 232
+
+
+def test_wave_hit_points_fit_the_engine_attribute() -> None:
+    from ancienttdde.game.config import load_balance
+
+    waves = load_balance(ROOT / "content/balance/game.json").waves
+    # DE stores unit hit points in 16 bits; a larger value wraps around.
+    assert all(w.hit_points <= 32767 for w in waves)
+
+
+def test_waves_grow_stronger_and_each_boss_outclasses_the_waves_before_it() -> None:
+    from ancienttdde.game.config import load_balance
+
+    waves = load_balance(ROOT / "content/balance/game.json").waves
+    regular = [w.hit_points for w in waves if not w.boss]
+    assert regular == sorted(set(regular))
+    bosses = [w.hit_points for w in waves if w.boss]
+    assert bosses == sorted(set(bosses))
+    for index, wave in enumerate(waves):
+        if wave.boss:
+            before = [w.hit_points for w in waves[:index] if not w.boss]
+            assert wave.hit_points > 3 * max(before)
+
+
+def write_balance(tmp_path: Path, raw: dict[str, object]) -> Path:
+    path = tmp_path / "balance.json"
+    path.write_text(json.dumps(raw))
+    return path
 
 
 @pytest.mark.parametrize(
     ("field", "value"),
     [
         ("lives", 0),
-        ("income_interval", 0),
         ("preparation_seconds", True),
         ("max_enemies_per_lane", 100000),
         ("sudden_death_interval", -1),
@@ -60,10 +104,35 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
 
     raw = json.loads((ROOT / "content/balance/game.json").read_text())
     raw[field] = value
-    path = tmp_path / "balance.json"
-    path.write_text(json.dumps(raw))
     with pytest.raises(ValueError, match=field):
-        load_balance(path)
+        load_balance(write_balance(tmp_path, raw))
+
+
+@pytest.mark.parametrize(
+    ("path", "value", "message"),
+    [
+        (("economy", "king_gold"), 0, "king_gold"),
+        (("economy", "starting_resources", "stone"), -1, "stone"),
+        (("economy", "kill_reward", "kills"), 0, "kills"),
+        (("towers", "families", "towers"), ["WATCH_TOWER", "HOUSE"], "Not a tower: HOUSE"),
+        (("towers", "special", "unit"), "CASTLE", "Not a tower: CASTLE"),
+        (("towers", "special", "range"), 0, "range"),
+        (("towers", "special", "attack"), -1, "attack"),
+        (("waves", 0, "hit_points"), 40000, "hit_points"),
+    ],
+)
+def test_reject_invalid_economy_and_towers(
+    tmp_path: Path, path: tuple[str | int, ...], value: object, message: str
+) -> None:
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    target = raw
+    for step in path[:-1]:
+        target = target[step]
+    target[path[-1]] = value
+    with pytest.raises(ValueError, match=message):
+        load_balance(write_balance(tmp_path, raw))
 
 
 def test_reject_unknown_wave_type_and_incomplete_schedule(tmp_path: Path) -> None:

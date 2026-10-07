@@ -4,6 +4,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
+from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.script import State
@@ -79,6 +80,46 @@ def configure_waves(game: Game, balance: Balance) -> None:
             quantity=0.65,
         )
         game.set_value(configure, "game.configured", index)
+
+
+def wave_warnings(game: Game, balance: Balance) -> None:
+    """Count down to each wave once its preparation or intermission begins."""
+    for number, wave in enumerate(balance.waves, 1):
+        trigger = game.trigger(f"game.wave.{number}.warning", looping=False)
+        game.value(trigger, "game.phase", State.PREPARATION)
+        game.value(trigger, "game.wave", number - 2)
+        seconds = balance.preparation_seconds if number == 1 else balance.intermission_seconds
+        effect(
+            trigger,
+            "display_timer",
+            display_time=seconds,
+            time_unit=TimeUnit.SECONDS,
+            message=f"Wave {number}: {wave.key} in %d",
+            reset_timer=1,
+            timer=0,
+        )
+
+
+def game_status(game: Game, balance: Balance) -> None:
+    wave = game.names.resolve("variable", "game.display_wave")
+    countdown = game.names.resolve("variable", "game.countdown")
+    objective = game.scenario.trigger_manager.add_trigger(
+        "game.status",
+        short_description=(
+            f"Wave <Variable {wave}> of {len(balance.waves)}: <Variable {countdown}> s"
+        ),
+        description=(
+            "Survive every wave. Before a wave, the seconds until it starts; during a wave, "
+            "the seconds its enemies keep spawning; in sudden death, the seconds until the "
+            "next loss of lives."
+        ),
+        display_as_objective=True,
+        display_on_screen=True,
+        enabled=True,
+        execute_on_load=False,
+    )
+    # Never fires: its sole purpose is displaying the persisted wave and countdown.
+    game.value(objective, "game.phase", -1)
 
 
 def lane_waves(game: Game, lane: EngineLane, balance: Balance) -> None:

@@ -35,12 +35,34 @@ and a solo player may use any defense lane.
 - Each wave ends once its enemies are killed or reach the exit flags.
 - Save/reload in preparation, mid-wave, during elimination and sudden death;
   resource grants, spawn cadence and lives match an uninterrupted run.
-- A disconnected or resigned player; its waves and income stop.
+- A disconnected or resigned player; its waves, Kings and purchases stop.
 - Multiplayer synchronization, spectators and a seven-human stress run.
+- A leak lowers the lane's life Outpost health and a chat line reports the lives left.
 
-A solo run reported that a lane's life Outpost does not change when enemies escape and
-that no message reports an escape. The game keeps lives in a scenario variable and
-lists them only in its objectives.
+## Economy and shop
+
+- Kings standing about three seconds on a pad buy it and lose exactly its price; Kings
+  walking across or pausing briefly on pads buy nothing; refusals keep the Kings and are
+  explained to that player alone, including Bombard Tower attack for civilizations
+  without Bombard Towers, and a different refusal is explained at once.
+- New Kings, bought units and transferred villagers appear on their spots, where the build
+  removed the map's marker flags; a transferred villager keeps its type. A unit on an
+  arrival spot delays a purchase, a new King or a transfer without losing anything; the
+  arrival clears once the unit moves.
+- Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
+  leak and elimination messages reach everyone.
+- 3,500 gold, each cleared wave and every 100 kills bring a King to the lane's stall;
+  every 25 kills pay 125 stone and 25 wood.
+- Investments pay on their period; the repair crew restores lives for stone.
+- Tower attack reaches existing, new and upgraded towers only; Accursed Towers appear on
+  the reserved pads with 240 pierce attack.
+- Castle Age and Imperial Age add Guard Tower and Keep only for civilizations that have
+  them, and the preparation message lists each lane's unavailable towers correctly.
+- Transfer pads move one villager at a time between the build and resource areas.
+- Reaching the end of each resource row pays its bonus once and adds endless deposits;
+  starting mines and bushes keep their normal amounts.
+- Starting relics produce gold; bought relics, monks, traders, villagers and the castle
+  appear and work; houses, +80 population and the castle set the population limit.
 
 ## Map template
 

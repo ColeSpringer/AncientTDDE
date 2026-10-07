@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
+from ancienttdde.game.sites import LaneSites, load_sites
 from ancienttdde.models import Rect
 
 WAVE_UNITS = frozenset(
@@ -45,19 +47,69 @@ class WaveDefinition:
         return UnitInfo[self.unit].ID
 
 
+# Building definitions that tower purchases may modify; anything else is rejected.
+TOWER_BUILDINGS = frozenset(
+    {"WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER", "DONJON", "THE_ACCURSED_TOWER"}
+)
+# DE stores unit hit points in 16 bits.
+MAX_HIT_POINTS = 32767
+
+
+@dataclass(frozen=True)
+class Resources:
+    food: int
+    wood: int
+    stone: int
+    gold: int
+
+
+@dataclass(frozen=True)
+class Economy:
+    starting_resources: Resources
+    king_gold: int
+    wave_kings: int
+    kills_per_reward: int
+    kill_stone: int
+    kill_wood: int
+    rewards_per_king: int
+    gold_bonus: int
+    food_bonus: int
+    stone_bonus: int
+    endless_deposit: int
+    starting_relics: int
+
+
+@dataclass(frozen=True)
+class Towers:
+    families: tuple[tuple[str, tuple[str, ...]], ...]
+    special: str
+    # The bonus pierce attack the game adds to the special tower, and its stock attack and range.
+    special_pierce: int
+    special_attack: int
+    special_range: int
+
+    def family_ids(self, family: str) -> tuple[int, ...]:
+        for name, members in self.families:
+            if name == family:
+                return tuple(BuildingInfo[member].ID for member in members)
+        raise ValueError(f"Unknown tower family: {family}")
+
+    @property
+    def special_id(self) -> int:
+        return BuildingInfo[self.special].ID
+
+
 @dataclass(frozen=True)
 class Balance:
     lives: int
     setup_seconds: int
     preparation_seconds: int
     intermission_seconds: int
-    income_interval: int
-    income_amount: int
-    starting_resources: int
-    tower_attack_bonus: int
     max_enemies_per_lane: int
     sudden_death_interval: int
     sudden_death_damage: int
+    economy: Economy
+    towers: Towers
     waves: tuple[WaveDefinition, ...]
 
     @property
@@ -70,9 +122,54 @@ class Balance:
         )
 
 
+def tower(name: object) -> str:
+    if not isinstance(name, str) or name not in TOWER_BUILDINGS:
+        raise ValueError(f"Not a tower: {name}")
+    return name
+
+
+def load_economy(raw: dict[str, object]) -> Economy:
+    start = object_value(raw.get("starting_resources"), "starting_resources")
+    kills = object_value(raw.get("kill_reward"), "kill_reward")
+    bonus = object_value(raw.get("resource_bonus"), "resource_bonus")
+    return Economy(
+        starting_resources=Resources(
+            *(integer(start, name, 0, 30000) for name in ("food", "wood", "stone", "gold"))
+        ),
+        king_gold=integer(raw, "king_gold", 1, 30000),
+        wave_kings=integer(raw, "wave_kings", 0, 10),
+        kills_per_reward=integer(kills, "kills", 1, 1000),
+        kill_stone=integer(kills, "stone", 0, 10000),
+        kill_wood=integer(kills, "wood", 0, 10000),
+        rewards_per_king=integer(kills, "rewards_per_king", 1, 100),
+        gold_bonus=integer(bonus, "gold", 0, 30000),
+        food_bonus=integer(bonus, "food", 0, 30000),
+        stone_bonus=integer(bonus, "stone", 0, 30000),
+        # Larger amounts wrap around: DE applies resource storage as a 16-bit value.
+        endless_deposit=integer(raw, "endless_deposit", 1, 32767),
+        starting_relics=integer(raw, "starting_relics", 0, 2),
+    )
+
+
+def load_towers(raw: dict[str, object]) -> Towers:
+    families: list[tuple[str, tuple[str, ...]]] = []
+    for name, members in object_value(raw.get("families"), "families").items():
+        if not isinstance(members, list) or not members:
+            raise ValueError(f"Tower family needs members: {name}")
+        families.append((name, tuple(tower(m) for m in cast(list[object], members))))
+    special = object_value(raw.get("special"), "special")
+    return Towers(
+        families=tuple(families),
+        special=tower(special.get("unit")),
+        special_pierce=integer(special, "pierce_bonus", 0, 1000),
+        special_attack=integer(special, "attack", 0, 1000),
+        special_range=integer(special, "range", 1, 20),
+    )
+
+
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if integer(raw, "schema_version", 1, 1) != 1:
+    if integer(raw, "schema_version", 2, 2) != 2:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):
@@ -90,7 +187,7 @@ def load_balance(path: Path) -> Balance:
             batches=integer(row, "batches", 1, 80),
             interval=integer(row, "interval", 2, 120),
             duration=integer(row, "duration", 1, 600),
-            hit_points=integer(row, "hit_points", 1, 10000),
+            hit_points=integer(row, "hit_points", 1, MAX_HIT_POINTS),
         )
         if (wave.batches - 1) * wave.interval >= wave.duration:
             raise ValueError(f"Wave duration cannot contain all batches: {key}")
@@ -104,13 +201,11 @@ def load_balance(path: Path) -> Balance:
         setup_seconds=integer(raw, "setup_seconds", 2, 30),
         preparation_seconds=integer(raw, "preparation_seconds", 1, 600),
         intermission_seconds=integer(raw, "intermission_seconds", 1, 120),
-        income_interval=integer(raw, "income_interval", 1, 60),
-        income_amount=integer(raw, "income_amount", 1, 1000),
-        starting_resources=integer(raw, "starting_resources", 1, 10000),
-        tower_attack_bonus=integer(raw, "tower_attack_bonus", 0, 100),
         max_enemies_per_lane=integer(raw, "max_enemies_per_lane", 5, 100),
         sudden_death_interval=integer(raw, "sudden_death_interval", 1, 60),
         sudden_death_damage=integer(raw, "sudden_death_damage", 1, 10),
+        economy=load_economy(object_value(raw.get("economy"), "economy")),
+        towers=load_towers(object_value(raw.get("towers"), "towers")),
         waves=tuple(waves),
     )
 
@@ -126,6 +221,7 @@ class EngineLane:
     life_reference: int
     land_trade_partner: int
     water_trade_partner: int
+    sites: LaneSites
 
 
 def load_lanes(anchors: dict[str, object]) -> tuple[EngineLane, ...]:
@@ -171,6 +267,7 @@ def load_lanes(anchors: dict[str, object]) -> tuple[EngineLane, ...]:
                 life_reference=integer(life, "reference_id", 0, 2**31 - 1),
                 land_trade_partner=integer(land, "reference_id", 0, 2**31 - 1),
                 water_trade_partner=integer(water, "reference_id", 0, 2**31 - 1),
+                sites=load_sites(anchors, player),
             )
         )
     return tuple(result)

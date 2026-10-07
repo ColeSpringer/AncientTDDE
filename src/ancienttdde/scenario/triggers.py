@@ -34,6 +34,8 @@ type EffectName = Literal[
     "enable_disable_object",
     "script_call",
     "declare_victory",
+    "create_garrisoned_object",
+    "change_ownership",
 ]
 type ConditionName = Literal[
     "timer",
@@ -71,6 +73,17 @@ def condition(trigger: TriggerHandle, name: ConditionName, **attributes: FieldVa
 def area(region: Rect) -> dict[str, FieldValue]:
     x1, y1, x2, y2 = region
     return {"area_x1": x1, "area_y1": y1, "area_x2": x2, "area_y2": y2}
+
+
+# Resource storage attributes by resource name, in DE's attribute order.
+STORAGE: dict[str, int] = {
+    "food": Attribute.FOOD_STORAGE,
+    "wood": Attribute.WOOD_STORAGE,
+    "stone": Attribute.STONE_STORAGE,
+    "gold": Attribute.GOLD_STORAGE,
+}
+# DE's attack and armour class for pierce.
+PIERCE = 3
 
 
 class Builder:
@@ -152,12 +165,7 @@ class Builder:
         player: int = 1,
         operation: int = Operation.SET,
     ) -> None:
-        for resource in (
-            Attribute.FOOD_STORAGE,
-            Attribute.WOOD_STORAGE,
-            Attribute.STONE_STORAGE,
-            Attribute.GOLD_STORAGE,
-        ):
+        for resource in STORAGE.values():
             effect(
                 trigger,
                 "modify_resource",
@@ -176,19 +184,26 @@ class Builder:
             force_research_technology=1,
         )
 
-    def tower_attack_bonus(self, trigger: TriggerHandle, amount: int, *, player: int = 1) -> None:
-        """Add pierce attack to the arrow-tower definitions, so later towers keep it too."""
-        for kind in ("watch-tower", "guard-tower", "keep"):
+    def attack_bonus(
+        self, trigger: TriggerHandle, player: int, units: tuple[int, ...], amount: int
+    ) -> None:
+        """Add pierce attack to object definitions, so later copies and upgrades keep it too."""
+        for unit in units:
             effect(
                 trigger,
                 "modify_attribute",
                 source_player=player,
-                object_list_unit_id=self.stock(kind),
+                object_list_unit_id=unit,
                 object_attributes=ObjectAttribute.ATTACK,
                 operation=Operation.ADD,
-                armour_attack_class=3,
+                armour_attack_class=PIERCE,
                 armour_attack_quantity=amount,
             )
+
+    def tower_attack_bonus(self, trigger: TriggerHandle, amount: int, *, player: int = 1) -> None:
+        """Add pierce attack to the stock arrow-tower definitions."""
+        towers = tuple(self.stock(kind) for kind in ("watch-tower", "guard-tower", "keep"))
+        self.attack_bonus(trigger, player, towers, amount)
 
     def on_pad(self, trigger: TriggerHandle, region: Rect, player: int = 1, price: int = 1) -> None:
         condition(

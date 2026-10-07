@@ -18,6 +18,7 @@ from ancienttdde.common.manifest import (
 )
 from ancienttdde.common.output import prepare_output, project_path, publish
 from ancienttdde.common.worker import run_module, run_parallel
+from ancienttdde.game.catalog import check_pads, load_shop
 from ancienttdde.game.config import load_balance
 from ancienttdde.game.instructions import instructions
 from ancienttdde.map.build import CONTENT_INPUTS as MAP_INPUTS
@@ -43,7 +44,7 @@ ARTIFACTS = (
     "validation.json",
     PRELUDE,
 )
-CONTENT_INPUTS = (*MAP_INPUTS, "content/balance/game.json")
+CONTENT_INPUTS = (*MAP_INPUTS, "content/balance/game.json", "content/balance/shop.json")
 
 
 class GameManifest(ManifestBase):
@@ -110,6 +111,9 @@ def build_game(root: Path, output: Path | None = None) -> Path:
     data = migrate_map(legacy, config)
     report = validate_map(data, config)
     balance = load_balance(root / "content/balance/game.json")
+    families = [name for name, _ in balance.towers.families]
+    shop = load_shop(root / "content/balance/shop.json", config["anchors"], families)
+    check_pads(shop, data, config)
     directory.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="ancienttdde-game-", dir=directory.parent) as temporary:
         staging = Path(temporary)
@@ -118,7 +122,7 @@ def build_game(root: Path, output: Path | None = None) -> Path:
         worker(root, staging / "map.json", staging / SCENARIO_NAME)
         snapshot = inspect_game(staging / SCENARIO_NAME)
         write_json(staging / "scenario.json", snapshot)
-        (staging / "instructions.md").write_text(instructions(balance), encoding="utf-8")
+        (staging / "instructions.md").write_text(instructions(balance, shop), encoding="utf-8")
         manifest = GameManifest(
             schema_version=SCHEMA_VERSION,
             kind="ancient-td-game",

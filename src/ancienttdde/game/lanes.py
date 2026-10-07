@@ -1,16 +1,27 @@
-"""Per-lane setup, income, cleanup and status for the playable game."""
+"""Per-lane setup, economy, purchases, cleanup and status for the playable game."""
+
+from dataclasses import asdict
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
-from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
+from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance, EngineLane
+from ancienttdde.game.economy import (
+    lane_attack,
+    lane_bonuses,
+    lane_kings,
+    lane_messages,
+    lane_transfers,
+    starting_relics,
+)
+from ancienttdde.game.shop import lane_purchases
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import lane_route, lane_waves
-from ancienttdde.scenario.triggers import area, effect
+from ancienttdde.scenario.triggers import STORAGE, area, effect
 
 
-def lane_actions(game: Game, lane: EngineLane, balance: Balance) -> None:
+def lane_actions(game: Game, lane: EngineLane, balance: Balance, shop: Shop) -> None:
     player = lane.player
     prefix = f"lane.p{player}"
     mill = game.scenario.unit_manager.add_unit(
@@ -18,11 +29,18 @@ def lane_actions(game: Game, lane: EngineLane, balance: Balance) -> None:
     )
     game.names.register("object", f"{prefix}.berry_mill", mill.reference_id)
     lane_initialize(game, lane, balance)
-    lane_income(game, lane, balance)
     lane_cleanup(game, lane, mill.reference_id)
     lane_waves(game, lane, balance)
     lane_route(game, lane)
-    lane_status(game, lane)
+    lane_status(game, lane, balance)
+    lane_kings(game, lane)
+    family = shop.attack_family()
+    if family is not None:
+        lane_attack(game, lane, balance.towers.family_ids(family))
+    lane_transfers(game, lane)
+    lane_messages(game, lane, balance)
+    lane_bonuses(game, lane, balance)
+    lane_purchases(game, lane, shop, balance)
 
 
 def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
@@ -31,15 +49,16 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
     init = game.trigger(f"{prefix}.initialize", looping=True)
     game.value(init, f"{prefix}.active", 1)
     game.value(init, f"{prefix}.initialized", 0)
-    game.resources(init, balance.starting_resources, player=player)
-    effect(
-        init,
-        "modify_resource",
-        source_player=player,
-        tribute_list=Attribute.POPULATION_HEADROOM,
-        quantity=200,
-        operation=Operation.SET,
-    )
+    start = asdict(balance.economy.starting_resources)
+    for resource, attribute in STORAGE.items():
+        effect(
+            init,
+            "modify_resource",
+            source_player=player,
+            tribute_list=attribute,
+            quantity=start[resource],
+            operation=Operation.SET,
+        )
     game.research(init, "FEUDAL_AGE", player=player)
     effect(
         init,
@@ -48,7 +67,8 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
         object_list_unit_id=game.stock("watch-tower"),
         enabled=1,
     )
-    game.tower_attack_bonus(init, balance.tower_attack_bonus, player=player)
+    # Only the special towers bought for this lane use this definition.
+    game.attack_bonus(init, player, (balance.towers.special_id,), balance.towers.special_pierce)
     for x in (26, 40):
         effect(
             init,
@@ -80,17 +100,8 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
                 location_object_reference=game.placement(partner),
                 action_type=ActionType.DEFAULT,
             )
+    starting_relics(game, init, lane, balance)
     game.set_value(init, f"{prefix}.initialized", 1)
-
-
-def lane_income(game: Game, lane: EngineLane, balance: Balance) -> None:
-    player = lane.player
-    prefix = f"lane.p{player}"
-    income = game.trigger(f"{prefix}.income", looping=True)
-    game.value(income, f"{prefix}.active", 1)
-    game.value(income, f"{prefix}.income", 1)
-    game.resources(income, balance.income_amount, player=player, operation=Operation.ADD)
-    game.set_value(income, f"{prefix}.income", 0)
 
 
 def lane_cleanup(game: Game, lane: EngineLane, mill: int) -> None:
@@ -107,13 +118,13 @@ def lane_cleanup(game: Game, lane: EngineLane, mill: int) -> None:
     game.set_value(cleanup, f"{prefix}.cleanup", 0)
 
 
-def lane_status(game: Game, lane: EngineLane) -> None:
+def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:
     player = lane.player
     prefix = f"lane.p{player}"
     lives = game.names.resolve("variable", f"{prefix}.lives")
     objective = game.scenario.trigger_manager.add_trigger(
         f"{prefix}.status",
-        short_description=f"P{player} lives: <Variable {lives}>",
+        short_description=f"P{player} lives: <Variable {lives}>/{balance.lives}",
         description=f"P{player}: prevent enemies reaching the right-hand exit.",
         display_as_objective=True,
         display_on_screen=True,

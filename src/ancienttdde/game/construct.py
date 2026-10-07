@@ -3,6 +3,7 @@
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import cast
 
 from AoE2ScenarioParser.datasets.object_support import StartingAge
 from AoE2ScenarioParser.datasets.trigger_lists.capture_flag import CaptureFlag
@@ -13,13 +14,26 @@ from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.common.worker import capture_stdout_for_errors
+from ancienttdde.game.catalog import Shop, load_shop
 from ancienttdde.game.config import Balance, EngineLane, load_balance, load_lanes
-from ancienttdde.game.instructions import instructions
+from ancienttdde.game.economy import endless_deposits
+from ancienttdde.game.instructions import bonus_caption, instructions
 from ancienttdde.game.lanes import lane_actions
 from ancienttdde.game.script import render_prelude, render_xs
+from ancienttdde.game.shop import shop_signs
+from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.triggers import Game
-from ancienttdde.game.waves import configure_waves, declare_results, endless_lumber, game_clock
+from ancienttdde.game.waves import (
+    configure_waves,
+    declare_results,
+    endless_lumber,
+    game_clock,
+    game_status,
+    wave_warnings,
+)
 from ancienttdde.map.construct import construct_scenario
+from ancienttdde.map.models import MapAnchor
+from ancienttdde.scenario.objects import marker_flags
 from ancienttdde.scenario.settings import (
     disable_automatic_victory,
     embed_passive_ai,
@@ -30,8 +44,29 @@ from ancienttdde.scenario.triggers import effect
 from ancienttdde.scenario.xs import check_xs, xs_checker
 
 
-def settings(game: Game) -> None:
+def clear_sites(game: Game, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
+    """Take the map's marker flags off the tiles the XS creates units on.
+
+    Creation checks collisions, and DE gives even a flag an obstruction. Anything else on
+    those tiles is a content error.
+    """
+    flags = marker_flags()
+    for lane in lanes:
+        tiles = creation_tiles(lane, shop)
+        for placed in game.scenario.unit_manager.units:
+            for unit in list(placed):
+                tile = (int(unit.x), int(unit.y))
+                if tile not in tiles:
+                    continue
+                if unit.unit_const not in flags:
+                    raise ValueError(f"Object {unit.unit_const} blocks a creation tile {tile}")
+                placed.remove(unit)
+                game.placements.discard(unit.reference_id)
+
+
+def settings(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
     scenario = game.scenario
+    clear_sites(game, lanes, shop)
     scenario.player_manager.active_players = 8
     for player in scenario.player_manager.players[1:]:
         human = player.player_id != 8
@@ -56,7 +91,11 @@ def settings(game: Game) -> None:
         # Gaia trade endpoints and displays must not convert to a nearby player.
         unit.capture_flag = CaptureFlag.NEVER
         if unit.unit_const == game.stock("sign"):
-            unit.caption_string = "Shop closed; build towers with your lane villagers"
+            for lane in lanes:
+                for resource, (x1, y1, x2, y2) in lane.sites.bonuses.items():
+                    if x1 <= int(unit.x) <= x2 and y1 <= int(unit.y) <= y2:
+                        unit.caption_string = bonus_caption(balance, resource)
+    shop_signs(game, shop)
     # A protected counted unit keeps the scenario-controlled enemy alive between waves.
     keeper = scenario.unit_manager.add_unit(player=8, unit_const=game.stock("king"), x=25.5, y=2.5)
     game.names.register("object", "enemy.keeper", keeper.reference_id)
@@ -78,28 +117,36 @@ def settings(game: Game) -> None:
     )
 
 
-def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...]) -> None:
+def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
     endless_lumber(game, lanes)
+    endless_deposits(game, balance)
     game_clock(game)
+    game_status(game, balance)
     configure_waves(game, balance)
+    wave_warnings(game, balance)
     for lane in lanes:
-        lane_actions(game, lane, balance)
+        lane_actions(game, lane, balance, shop)
     declare_results(game)
 
 
 def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path) -> None:
     balance = load_balance(root / "content/balance/game.json")
-    lanes = load_lanes(object_value(read_object(map_path).get("anchors"), "anchors"))
+    anchors = object_value(read_object(map_path).get("anchors"), "anchors")
+    lanes = load_lanes(anchors)
+    families = [name for name, _ in balance.towers.families]
+    shop = load_shop(
+        root / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
+    )
     with TemporaryDirectory(prefix="ancienttdde-map-") as temporary:
         foundation = Path(temporary) / "foundation.aoe2scenario"
         construct_scenario(root / "content/maps/format-seed.aoe2scenario", map_path, foundation)
         scenario = AoE2DEScenario.from_file(str(foundation))
     game = Game(scenario)
-    settings(game)
-    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes))
-    prelude.write_text(render_prelude(balance, lanes, extern=True), encoding="utf-8")
-    add_logic(game, balance, lanes)
-    scenario.message_manager.instructions = instructions(balance).replace("\n", "\r")
+    settings(game, balance, lanes, shop)
+    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop))
+    prelude.write_text(render_prelude(balance, lanes, shop, extern=True), encoding="utf-8")
+    add_logic(game, balance, lanes, shop)
+    scenario.message_manager.instructions = instructions(balance, shop).replace("\n", "\r")
     with xs_checker(scenario):
         scenario.xs_manager.validate_scenario_xs()
         scenario.write_to_file(str(destination))

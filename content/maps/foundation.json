@@ -2409,6 +2409,327 @@
       "reference_id": 20332,
       "label": "Player 1 life indicator"
     },
+    "lane.p1.special.left": {
+      "region": [
+        33,
+        12,
+        33,
+        12
+      ],
+      "label": "Player 1 left Accursed Tower pad"
+    },
+    "lane.p1.special.right": {
+      "region": [
+        33,
+        18,
+        33,
+        18
+      ],
+      "label": "Player 1 right Accursed Tower pad"
+    },
+    "lane.p1.kings": {
+      "points": [
+        [
+          158.5,
+          3.5
+        ],
+        [
+          158.5,
+          8.5
+        ]
+      ],
+      "label": "Player 1 King arrival, then shop entrance"
+    },
+    "lane.p1.transfer.build": {
+      "region": [
+        77,
+        17,
+        77,
+        17
+      ],
+      "points": [
+        [
+          48.5,
+          21.5
+        ],
+        [
+          46.5,
+          20.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p1.transfer.economy": {
+      "region": [
+        48,
+        9,
+        48,
+        9
+      ],
+      "points": [
+        [
+          77.5,
+          13.5
+        ],
+        [
+          81.5,
+          15.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p1.transfer.north": {
+      "region": [
+        19,
+        20,
+        19,
+        20
+      ],
+      "points": [
+        [
+          19.5,
+          10.5
+        ],
+        [
+          21.5,
+          10.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p1.transfer.south": {
+      "region": [
+        48,
+        11,
+        48,
+        11
+      ],
+      "points": [
+        [
+          48.5,
+          19.5
+        ],
+        [
+          45.5,
+          20.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p1.bonus.gold": {
+      "region": [
+        88,
+        8,
+        89,
+        11
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p1.bonus.food": {
+      "region": [
+        88,
+        13,
+        89,
+        17
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p1.bonus.stone": {
+      "region": [
+        88,
+        19,
+        89,
+        22
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p1.endless.gold": {
+      "points": [
+        [
+          83.5,
+          12.5
+        ],
+        [
+          84.5,
+          12.5
+        ],
+        [
+          81.5,
+          10.5
+        ],
+        [
+          81.5,
+          9.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p1.endless.food": {
+      "points": [
+        [
+          89.5,
+          15.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p1.endless.stone": {
+      "points": [
+        [
+          83.5,
+          18.5
+        ],
+        [
+          84.5,
+          18.5
+        ],
+        [
+          81.5,
+          20.5
+        ],
+        [
+          81.5,
+          21.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p1.villagers.build": {
+      "points": [
+        [
+          48.5,
+          21.5
+        ],
+        [
+          47.5,
+          21.5
+        ],
+        [
+          46.5,
+          20.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p1.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          14.5
+        ],
+        [
+          79.5,
+          16.5
+        ],
+        [
+          81.5,
+          15.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p1.relics": {
+      "region": [
+        136,
+        119,
+        136,
+        123
+      ],
+      "points": [
+        [
+          136.5,
+          119.5
+        ],
+        [
+          136.5,
+          121.5
+        ],
+        [
+          136.5,
+          123.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p1.monks": {
+      "points": [
+        [
+          134.5,
+          120.5
+        ],
+        [
+          134.5,
+          122.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p1.monastery.1": {
+      "point": [
+        139.5,
+        119.5
+      ],
+      "reference_id": 20311,
+      "label": "Player 1 monastery 1"
+    },
+    "lane.p1.monastery.2": {
+      "point": [
+        139.5,
+        123.5
+      ],
+      "reference_id": 20180,
+      "label": "Player 1 monastery 2"
+    },
+    "lane.p1.castle": {
+      "point": [
+        168.0,
+        121.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p1.relic_enclosure": {
+      "region": [
+        149,
+        192,
+        153,
+        199
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p1.carts": {
+      "points": [
+        [
+          171.5,
+          0.5
+        ],
+        [
+          169.5,
+          2.5
+        ],
+        [
+          170.5,
+          0.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p1.cogs": {
+      "points": [
+        [
+          120.5,
+          0.5
+        ],
+        [
+          122.5,
+          2.5
+        ],
+        [
+          121.5,
+          0.5
+        ]
+      ],
+      "label": "Bought trade cogs"
+    },
     "trade.land.p1.home": {
       "point": [
         198.0,
@@ -2573,6 +2894,327 @@
       ],
       "reference_id": 20330,
       "label": "Player 2 life indicator"
+    },
+    "lane.p2.special.left": {
+      "region": [
+        33,
+        40,
+        33,
+        40
+      ],
+      "label": "Player 2 left Accursed Tower pad"
+    },
+    "lane.p2.special.right": {
+      "region": [
+        33,
+        46,
+        33,
+        46
+      ],
+      "label": "Player 2 right Accursed Tower pad"
+    },
+    "lane.p2.kings": {
+      "points": [
+        [
+          154.5,
+          3.5
+        ],
+        [
+          154.5,
+          8.5
+        ]
+      ],
+      "label": "Player 2 King arrival, then shop entrance"
+    },
+    "lane.p2.transfer.build": {
+      "region": [
+        77,
+        45,
+        77,
+        45
+      ],
+      "points": [
+        [
+          48.5,
+          49.5
+        ],
+        [
+          46.5,
+          48.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p2.transfer.economy": {
+      "region": [
+        48,
+        37,
+        48,
+        37
+      ],
+      "points": [
+        [
+          77.5,
+          41.5
+        ],
+        [
+          81.5,
+          43.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p2.transfer.north": {
+      "region": [
+        19,
+        48,
+        19,
+        48
+      ],
+      "points": [
+        [
+          19.5,
+          38.5
+        ],
+        [
+          21.5,
+          38.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p2.transfer.south": {
+      "region": [
+        48,
+        39,
+        48,
+        39
+      ],
+      "points": [
+        [
+          48.5,
+          47.5
+        ],
+        [
+          45.5,
+          48.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p2.bonus.gold": {
+      "region": [
+        88,
+        36,
+        89,
+        39
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p2.bonus.food": {
+      "region": [
+        88,
+        41,
+        89,
+        45
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p2.bonus.stone": {
+      "region": [
+        88,
+        47,
+        89,
+        50
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p2.endless.gold": {
+      "points": [
+        [
+          83.5,
+          40.5
+        ],
+        [
+          84.5,
+          40.5
+        ],
+        [
+          81.5,
+          38.5
+        ],
+        [
+          81.5,
+          37.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p2.endless.food": {
+      "points": [
+        [
+          89.5,
+          43.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p2.endless.stone": {
+      "points": [
+        [
+          83.5,
+          46.5
+        ],
+        [
+          84.5,
+          46.5
+        ],
+        [
+          81.5,
+          48.5
+        ],
+        [
+          81.5,
+          49.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p2.villagers.build": {
+      "points": [
+        [
+          48.5,
+          49.5
+        ],
+        [
+          47.5,
+          49.5
+        ],
+        [
+          46.5,
+          48.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p2.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          42.5
+        ],
+        [
+          79.5,
+          44.5
+        ],
+        [
+          81.5,
+          43.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p2.relics": {
+      "region": [
+        128,
+        119,
+        128,
+        123
+      ],
+      "points": [
+        [
+          128.5,
+          119.5
+        ],
+        [
+          128.5,
+          121.5
+        ],
+        [
+          128.5,
+          123.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p2.monks": {
+      "points": [
+        [
+          126.5,
+          120.5
+        ],
+        [
+          126.5,
+          122.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p2.monastery.1": {
+      "point": [
+        131.5,
+        119.5
+      ],
+      "reference_id": 20095,
+      "label": "Player 2 monastery 1"
+    },
+    "lane.p2.monastery.2": {
+      "point": [
+        131.5,
+        123.5
+      ],
+      "reference_id": 20093,
+      "label": "Player 2 monastery 2"
+    },
+    "lane.p2.castle": {
+      "point": [
+        168.0,
+        128.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p2.relic_enclosure": {
+      "region": [
+        143,
+        192,
+        147,
+        199
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p2.carts": {
+      "points": [
+        [
+          169.5,
+          0.5
+        ],
+        [
+          168.5,
+          2.5
+        ],
+        [
+          168.5,
+          0.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p2.cogs": {
+      "points": [
+        [
+          122.5,
+          0.5
+        ],
+        [
+          123.5,
+          0.5
+        ],
+        [
+          123.5,
+          2.5
+        ]
+      ],
+      "label": "Bought trade cogs"
     },
     "trade.land.p2.home": {
       "point": [
@@ -2739,6 +3381,327 @@
       "reference_id": 20329,
       "label": "Player 3 life indicator"
     },
+    "lane.p3.special.left": {
+      "region": [
+        33,
+        68,
+        33,
+        68
+      ],
+      "label": "Player 3 left Accursed Tower pad"
+    },
+    "lane.p3.special.right": {
+      "region": [
+        33,
+        74,
+        33,
+        74
+      ],
+      "label": "Player 3 right Accursed Tower pad"
+    },
+    "lane.p3.kings": {
+      "points": [
+        [
+          150.5,
+          3.5
+        ],
+        [
+          150.5,
+          8.5
+        ]
+      ],
+      "label": "Player 3 King arrival, then shop entrance"
+    },
+    "lane.p3.transfer.build": {
+      "region": [
+        77,
+        73,
+        77,
+        73
+      ],
+      "points": [
+        [
+          48.5,
+          77.5
+        ],
+        [
+          46.5,
+          76.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p3.transfer.economy": {
+      "region": [
+        48,
+        65,
+        48,
+        65
+      ],
+      "points": [
+        [
+          77.5,
+          69.5
+        ],
+        [
+          81.5,
+          71.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p3.transfer.north": {
+      "region": [
+        19,
+        76,
+        19,
+        76
+      ],
+      "points": [
+        [
+          19.5,
+          66.5
+        ],
+        [
+          21.5,
+          66.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p3.transfer.south": {
+      "region": [
+        48,
+        67,
+        48,
+        67
+      ],
+      "points": [
+        [
+          48.5,
+          75.5
+        ],
+        [
+          45.5,
+          76.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p3.bonus.gold": {
+      "region": [
+        88,
+        64,
+        89,
+        67
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p3.bonus.food": {
+      "region": [
+        88,
+        69,
+        89,
+        73
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p3.bonus.stone": {
+      "region": [
+        88,
+        75,
+        89,
+        78
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p3.endless.gold": {
+      "points": [
+        [
+          83.5,
+          68.5
+        ],
+        [
+          84.5,
+          68.5
+        ],
+        [
+          81.5,
+          66.5
+        ],
+        [
+          81.5,
+          65.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p3.endless.food": {
+      "points": [
+        [
+          89.5,
+          71.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p3.endless.stone": {
+      "points": [
+        [
+          83.5,
+          74.5
+        ],
+        [
+          84.5,
+          74.5
+        ],
+        [
+          81.5,
+          76.5
+        ],
+        [
+          81.5,
+          77.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p3.villagers.build": {
+      "points": [
+        [
+          48.5,
+          77.5
+        ],
+        [
+          47.5,
+          77.5
+        ],
+        [
+          46.5,
+          76.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p3.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          70.5
+        ],
+        [
+          79.5,
+          72.5
+        ],
+        [
+          81.5,
+          71.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p3.relics": {
+      "region": [
+        136,
+        111,
+        136,
+        115
+      ],
+      "points": [
+        [
+          136.5,
+          111.5
+        ],
+        [
+          136.5,
+          113.5
+        ],
+        [
+          136.5,
+          115.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p3.monks": {
+      "points": [
+        [
+          134.5,
+          112.5
+        ],
+        [
+          134.5,
+          114.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p3.monastery.1": {
+      "point": [
+        139.5,
+        111.5
+      ],
+      "reference_id": 20097,
+      "label": "Player 3 monastery 1"
+    },
+    "lane.p3.monastery.2": {
+      "point": [
+        139.5,
+        115.5
+      ],
+      "reference_id": 20096,
+      "label": "Player 3 monastery 2"
+    },
+    "lane.p3.castle": {
+      "point": [
+        168.0,
+        135.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p3.relic_enclosure": {
+      "region": [
+        137,
+        192,
+        141,
+        199
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p3.carts": {
+      "points": [
+        [
+          167.5,
+          0.5
+        ],
+        [
+          166.5,
+          0.5
+        ],
+        [
+          167.5,
+          2.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p3.cogs": {
+      "points": [
+        [
+          124.5,
+          0.5
+        ],
+        [
+          125.5,
+          0.5
+        ],
+        [
+          124.5,
+          2.5
+        ]
+      ],
+      "label": "Bought trade cogs"
+    },
     "trade.land.p3.home": {
       "point": [
         190.0,
@@ -2903,6 +3866,327 @@
       ],
       "reference_id": 20328,
       "label": "Player 4 life indicator"
+    },
+    "lane.p4.special.left": {
+      "region": [
+        33,
+        96,
+        33,
+        96
+      ],
+      "label": "Player 4 left Accursed Tower pad"
+    },
+    "lane.p4.special.right": {
+      "region": [
+        33,
+        102,
+        33,
+        102
+      ],
+      "label": "Player 4 right Accursed Tower pad"
+    },
+    "lane.p4.kings": {
+      "points": [
+        [
+          146.5,
+          3.5
+        ],
+        [
+          146.5,
+          8.5
+        ]
+      ],
+      "label": "Player 4 King arrival, then shop entrance"
+    },
+    "lane.p4.transfer.build": {
+      "region": [
+        77,
+        101,
+        77,
+        101
+      ],
+      "points": [
+        [
+          48.5,
+          105.5
+        ],
+        [
+          46.5,
+          104.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p4.transfer.economy": {
+      "region": [
+        48,
+        93,
+        48,
+        93
+      ],
+      "points": [
+        [
+          77.5,
+          97.5
+        ],
+        [
+          81.5,
+          99.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p4.transfer.north": {
+      "region": [
+        19,
+        104,
+        19,
+        104
+      ],
+      "points": [
+        [
+          19.5,
+          94.5
+        ],
+        [
+          21.5,
+          94.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p4.transfer.south": {
+      "region": [
+        48,
+        95,
+        48,
+        95
+      ],
+      "points": [
+        [
+          48.5,
+          103.5
+        ],
+        [
+          45.5,
+          104.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p4.bonus.gold": {
+      "region": [
+        88,
+        92,
+        89,
+        95
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p4.bonus.food": {
+      "region": [
+        88,
+        97,
+        89,
+        101
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p4.bonus.stone": {
+      "region": [
+        88,
+        103,
+        89,
+        106
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p4.endless.gold": {
+      "points": [
+        [
+          83.5,
+          96.5
+        ],
+        [
+          84.5,
+          96.5
+        ],
+        [
+          81.5,
+          94.5
+        ],
+        [
+          81.5,
+          93.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p4.endless.food": {
+      "points": [
+        [
+          89.5,
+          99.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p4.endless.stone": {
+      "points": [
+        [
+          83.5,
+          102.5
+        ],
+        [
+          84.5,
+          102.5
+        ],
+        [
+          81.5,
+          104.5
+        ],
+        [
+          81.5,
+          105.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p4.villagers.build": {
+      "points": [
+        [
+          48.5,
+          105.5
+        ],
+        [
+          47.5,
+          105.5
+        ],
+        [
+          46.5,
+          104.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p4.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          98.5
+        ],
+        [
+          79.5,
+          100.5
+        ],
+        [
+          81.5,
+          99.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p4.relics": {
+      "region": [
+        128,
+        111,
+        128,
+        115
+      ],
+      "points": [
+        [
+          128.5,
+          111.5
+        ],
+        [
+          128.5,
+          113.5
+        ],
+        [
+          128.5,
+          115.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p4.monks": {
+      "points": [
+        [
+          126.5,
+          112.5
+        ],
+        [
+          126.5,
+          114.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p4.monastery.1": {
+      "point": [
+        131.5,
+        111.5
+      ],
+      "reference_id": 20098,
+      "label": "Player 4 monastery 1"
+    },
+    "lane.p4.monastery.2": {
+      "point": [
+        131.5,
+        115.5
+      ],
+      "reference_id": 20099,
+      "label": "Player 4 monastery 2"
+    },
+    "lane.p4.castle": {
+      "point": [
+        168.0,
+        142.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p4.relic_enclosure": {
+      "region": [
+        131,
+        192,
+        135,
+        199
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p4.carts": {
+      "points": [
+        [
+          165.5,
+          0.5
+        ],
+        [
+          166.5,
+          2.5
+        ],
+        [
+          164.5,
+          0.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p4.cogs": {
+      "points": [
+        [
+          126.5,
+          0.5
+        ],
+        [
+          127.5,
+          0.5
+        ],
+        [
+          125.5,
+          2.5
+        ]
+      ],
+      "label": "Bought trade cogs"
     },
     "trade.land.p4.home": {
       "point": [
@@ -3069,6 +4353,327 @@
       "reference_id": 20327,
       "label": "Player 5 life indicator"
     },
+    "lane.p5.special.left": {
+      "region": [
+        33,
+        124,
+        33,
+        124
+      ],
+      "label": "Player 5 left Accursed Tower pad"
+    },
+    "lane.p5.special.right": {
+      "region": [
+        33,
+        130,
+        33,
+        130
+      ],
+      "label": "Player 5 right Accursed Tower pad"
+    },
+    "lane.p5.kings": {
+      "points": [
+        [
+          142.5,
+          3.5
+        ],
+        [
+          142.5,
+          8.5
+        ]
+      ],
+      "label": "Player 5 King arrival, then shop entrance"
+    },
+    "lane.p5.transfer.build": {
+      "region": [
+        77,
+        129,
+        77,
+        129
+      ],
+      "points": [
+        [
+          48.5,
+          133.5
+        ],
+        [
+          46.5,
+          132.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p5.transfer.economy": {
+      "region": [
+        48,
+        121,
+        48,
+        121
+      ],
+      "points": [
+        [
+          77.5,
+          125.5
+        ],
+        [
+          81.5,
+          127.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p5.transfer.north": {
+      "region": [
+        19,
+        132,
+        19,
+        132
+      ],
+      "points": [
+        [
+          19.5,
+          122.5
+        ],
+        [
+          21.5,
+          122.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p5.transfer.south": {
+      "region": [
+        48,
+        123,
+        48,
+        123
+      ],
+      "points": [
+        [
+          48.5,
+          131.5
+        ],
+        [
+          45.5,
+          132.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p5.bonus.gold": {
+      "region": [
+        88,
+        120,
+        89,
+        123
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p5.bonus.food": {
+      "region": [
+        88,
+        125,
+        89,
+        129
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p5.bonus.stone": {
+      "region": [
+        88,
+        131,
+        89,
+        134
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p5.endless.gold": {
+      "points": [
+        [
+          83.5,
+          124.5
+        ],
+        [
+          84.5,
+          124.5
+        ],
+        [
+          81.5,
+          122.5
+        ],
+        [
+          81.5,
+          121.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p5.endless.food": {
+      "points": [
+        [
+          89.5,
+          127.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p5.endless.stone": {
+      "points": [
+        [
+          83.5,
+          130.5
+        ],
+        [
+          84.5,
+          130.5
+        ],
+        [
+          81.5,
+          132.5
+        ],
+        [
+          81.5,
+          133.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p5.villagers.build": {
+      "points": [
+        [
+          48.5,
+          133.5
+        ],
+        [
+          47.5,
+          133.5
+        ],
+        [
+          46.5,
+          132.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p5.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          126.5
+        ],
+        [
+          79.5,
+          128.5
+        ],
+        [
+          81.5,
+          127.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p5.relics": {
+      "region": [
+        136,
+        103,
+        136,
+        107
+      ],
+      "points": [
+        [
+          136.5,
+          103.5
+        ],
+        [
+          136.5,
+          105.5
+        ],
+        [
+          136.5,
+          107.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p5.monks": {
+      "points": [
+        [
+          134.5,
+          104.5
+        ],
+        [
+          134.5,
+          106.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p5.monastery.1": {
+      "point": [
+        139.5,
+        103.5
+      ],
+      "reference_id": 20102,
+      "label": "Player 5 monastery 1"
+    },
+    "lane.p5.monastery.2": {
+      "point": [
+        139.5,
+        107.5
+      ],
+      "reference_id": 20103,
+      "label": "Player 5 monastery 2"
+    },
+    "lane.p5.castle": {
+      "point": [
+        161.0,
+        121.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p5.relic_enclosure": {
+      "region": [
+        149,
+        183,
+        153,
+        190
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p5.carts": {
+      "points": [
+        [
+          166.5,
+          3.5
+        ],
+        [
+          164.5,
+          1.5
+        ],
+        [
+          164.5,
+          2.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p5.cogs": {
+      "points": [
+        [
+          127.5,
+          1.5
+        ],
+        [
+          127.5,
+          2.5
+        ],
+        [
+          125.5,
+          3.5
+        ]
+      ],
+      "label": "Bought trade cogs"
+    },
     "trade.land.p5.home": {
       "point": [
         182.0,
@@ -3234,6 +4839,327 @@
       "reference_id": 20326,
       "label": "Player 6 life indicator"
     },
+    "lane.p6.special.left": {
+      "region": [
+        33,
+        152,
+        33,
+        152
+      ],
+      "label": "Player 6 left Accursed Tower pad"
+    },
+    "lane.p6.special.right": {
+      "region": [
+        33,
+        158,
+        33,
+        158
+      ],
+      "label": "Player 6 right Accursed Tower pad"
+    },
+    "lane.p6.kings": {
+      "points": [
+        [
+          138.5,
+          3.5
+        ],
+        [
+          138.5,
+          8.5
+        ]
+      ],
+      "label": "Player 6 King arrival, then shop entrance"
+    },
+    "lane.p6.transfer.build": {
+      "region": [
+        77,
+        157,
+        77,
+        157
+      ],
+      "points": [
+        [
+          48.5,
+          161.5
+        ],
+        [
+          46.5,
+          160.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p6.transfer.economy": {
+      "region": [
+        48,
+        149,
+        48,
+        149
+      ],
+      "points": [
+        [
+          77.5,
+          153.5
+        ],
+        [
+          81.5,
+          155.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p6.transfer.north": {
+      "region": [
+        19,
+        160,
+        19,
+        160
+      ],
+      "points": [
+        [
+          19.5,
+          150.5
+        ],
+        [
+          21.5,
+          150.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p6.transfer.south": {
+      "region": [
+        48,
+        151,
+        48,
+        151
+      ],
+      "points": [
+        [
+          48.5,
+          159.5
+        ],
+        [
+          45.5,
+          160.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p6.bonus.gold": {
+      "region": [
+        88,
+        148,
+        89,
+        151
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p6.bonus.food": {
+      "region": [
+        88,
+        153,
+        89,
+        157
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p6.bonus.stone": {
+      "region": [
+        88,
+        159,
+        89,
+        162
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p6.endless.gold": {
+      "points": [
+        [
+          83.5,
+          152.5
+        ],
+        [
+          84.5,
+          152.5
+        ],
+        [
+          81.5,
+          150.5
+        ],
+        [
+          81.5,
+          149.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p6.endless.food": {
+      "points": [
+        [
+          89.5,
+          155.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p6.endless.stone": {
+      "points": [
+        [
+          83.5,
+          158.5
+        ],
+        [
+          84.5,
+          158.5
+        ],
+        [
+          81.5,
+          160.5
+        ],
+        [
+          81.5,
+          161.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p6.villagers.build": {
+      "points": [
+        [
+          48.5,
+          161.5
+        ],
+        [
+          47.5,
+          161.5
+        ],
+        [
+          46.5,
+          160.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p6.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          154.5
+        ],
+        [
+          79.5,
+          156.5
+        ],
+        [
+          81.5,
+          155.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p6.relics": {
+      "region": [
+        128,
+        103,
+        128,
+        107
+      ],
+      "points": [
+        [
+          128.5,
+          103.5
+        ],
+        [
+          128.5,
+          105.5
+        ],
+        [
+          128.5,
+          107.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p6.monks": {
+      "points": [
+        [
+          126.5,
+          104.5
+        ],
+        [
+          126.5,
+          106.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p6.monastery.1": {
+      "point": [
+        131.5,
+        103.5
+      ],
+      "reference_id": 20100,
+      "label": "Player 6 monastery 1"
+    },
+    "lane.p6.monastery.2": {
+      "point": [
+        131.5,
+        107.5
+      ],
+      "reference_id": 20234,
+      "label": "Player 6 monastery 2"
+    },
+    "lane.p6.castle": {
+      "point": [
+        161.0,
+        128.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p6.relic_enclosure": {
+      "region": [
+        143,
+        183,
+        147,
+        190
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p6.carts": {
+      "points": [
+        [
+          166.5,
+          4.5
+        ],
+        [
+          164.5,
+          4.5
+        ],
+        [
+          164.5,
+          3.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p6.cogs": {
+      "points": [
+        [
+          127.5,
+          4.5
+        ],
+        [
+          127.5,
+          3.5
+        ],
+        [
+          125.5,
+          4.5
+        ]
+      ],
+      "label": "Bought trade cogs"
+    },
     "trade.land.p6.home": {
       "point": [
         178.0,
@@ -3398,6 +5324,327 @@
       ],
       "reference_id": 20325,
       "label": "Player 7 life indicator"
+    },
+    "lane.p7.special.left": {
+      "region": [
+        33,
+        180,
+        33,
+        180
+      ],
+      "label": "Player 7 left Accursed Tower pad"
+    },
+    "lane.p7.special.right": {
+      "region": [
+        33,
+        186,
+        33,
+        186
+      ],
+      "label": "Player 7 right Accursed Tower pad"
+    },
+    "lane.p7.kings": {
+      "points": [
+        [
+          134.5,
+          3.5
+        ],
+        [
+          134.5,
+          8.5
+        ]
+      ],
+      "label": "Player 7 King arrival, then shop entrance"
+    },
+    "lane.p7.transfer.build": {
+      "region": [
+        77,
+        185,
+        77,
+        185
+      ],
+      "points": [
+        [
+          48.5,
+          189.5
+        ],
+        [
+          46.5,
+          188.5
+        ]
+      ],
+      "label": "Villagers to the build area: pad, arrival, walk target"
+    },
+    "lane.p7.transfer.economy": {
+      "region": [
+        48,
+        177,
+        48,
+        177
+      ],
+      "points": [
+        [
+          77.5,
+          181.5
+        ],
+        [
+          81.5,
+          183.5
+        ]
+      ],
+      "label": "Villagers to the resource area: pad, arrival, walk target"
+    },
+    "lane.p7.transfer.north": {
+      "region": [
+        19,
+        188,
+        19,
+        188
+      ],
+      "points": [
+        [
+          19.5,
+          178.5
+        ],
+        [
+          21.5,
+          178.5
+        ]
+      ],
+      "label": "Villagers to the north build rows: pad, arrival, walk target"
+    },
+    "lane.p7.transfer.south": {
+      "region": [
+        48,
+        179,
+        48,
+        179
+      ],
+      "points": [
+        [
+          48.5,
+          187.5
+        ],
+        [
+          45.5,
+          188.5
+        ]
+      ],
+      "label": "Villagers to the south build rows: pad, arrival, walk target"
+    },
+    "lane.p7.bonus.gold": {
+      "region": [
+        88,
+        176,
+        89,
+        179
+      ],
+      "label": "End of the gold rows"
+    },
+    "lane.p7.bonus.food": {
+      "region": [
+        88,
+        181,
+        89,
+        185
+      ],
+      "label": "End of the berry rows"
+    },
+    "lane.p7.bonus.stone": {
+      "region": [
+        88,
+        187,
+        89,
+        190
+      ],
+      "label": "End of the stone rows"
+    },
+    "lane.p7.endless.gold": {
+      "points": [
+        [
+          83.5,
+          180.5
+        ],
+        [
+          84.5,
+          180.5
+        ],
+        [
+          81.5,
+          178.5
+        ],
+        [
+          81.5,
+          177.5
+        ]
+      ],
+      "label": "Endless gold mines after the gold bonus"
+    },
+    "lane.p7.endless.food": {
+      "points": [
+        [
+          89.5,
+          183.5
+        ]
+      ],
+      "label": "Endless berry bush after the food bonus"
+    },
+    "lane.p7.endless.stone": {
+      "points": [
+        [
+          83.5,
+          186.5
+        ],
+        [
+          84.5,
+          186.5
+        ],
+        [
+          81.5,
+          188.5
+        ],
+        [
+          81.5,
+          189.5
+        ]
+      ],
+      "label": "Endless stone mines after the stone bonus"
+    },
+    "lane.p7.villagers.build": {
+      "points": [
+        [
+          48.5,
+          189.5
+        ],
+        [
+          47.5,
+          189.5
+        ],
+        [
+          46.5,
+          188.5
+        ]
+      ],
+      "label": "Bought building villagers: two arrivals, walk target"
+    },
+    "lane.p7.villagers.economy": {
+      "points": [
+        [
+          79.5,
+          182.5
+        ],
+        [
+          79.5,
+          184.5
+        ],
+        [
+          81.5,
+          183.5
+        ]
+      ],
+      "label": "Bought resource villagers: two arrivals, walk target"
+    },
+    "lane.p7.relics": {
+      "region": [
+        136,
+        95,
+        136,
+        99
+      ],
+      "points": [
+        [
+          136.5,
+          95.5
+        ],
+        [
+          136.5,
+          97.5
+        ],
+        [
+          136.5,
+          99.5
+        ]
+      ],
+      "label": "Bought relics"
+    },
+    "lane.p7.monks": {
+      "points": [
+        [
+          134.5,
+          96.5
+        ],
+        [
+          134.5,
+          98.5
+        ]
+      ],
+      "label": "Monks that collect bought relics"
+    },
+    "lane.p7.monastery.1": {
+      "point": [
+        139.5,
+        95.5
+      ],
+      "reference_id": 20310,
+      "label": "Player 7 monastery 1"
+    },
+    "lane.p7.monastery.2": {
+      "point": [
+        139.5,
+        99.5
+      ],
+      "reference_id": 20104,
+      "label": "Player 7 monastery 2"
+    },
+    "lane.p7.castle": {
+      "point": [
+        161.0,
+        135.0
+      ],
+      "label": "Bought castle site"
+    },
+    "lane.p7.relic_enclosure": {
+      "region": [
+        137,
+        183,
+        141,
+        190
+      ],
+      "label": "Twenty relics, two monasteries and two monks"
+    },
+    "lane.p7.carts": {
+      "points": [
+        [
+          166.5,
+          5.5
+        ],
+        [
+          166.5,
+          6.5
+        ],
+        [
+          164.5,
+          5.5
+        ]
+      ],
+      "label": "Bought trade carts"
+    },
+    "lane.p7.cogs": {
+      "points": [
+        [
+          127.5,
+          5.5
+        ],
+        [
+          127.5,
+          6.5
+        ],
+        [
+          125.5,
+          5.5
+        ]
+      ],
+      "label": "Bought trade cogs"
     },
     "trade.land.p7.home": {
       "point": [
@@ -7668,8 +9915,10 @@
   ],
   "water_terrain": [
     1,
+    2,
     4,
     22,
+    37,
     57
   ],
   "review": {

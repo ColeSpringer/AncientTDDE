@@ -1,31 +1,43 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "lives": 30,
   "setup_seconds": 5,
   "preparation_seconds": 233,
   "intermission_seconds": 30,
-  "income_interval": 5,
-  "income_amount": 20,
-  "starting_resources": 600,
-  "tower_attack_bonus": 4,
   "max_enemies_per_lane": 80,
   "sudden_death_interval": 10,
   "sudden_death_damage": 1,
+  "economy": {
+    "starting_resources": {"food": 1500, "wood": 3000, "stone": 3000, "gold": 800},
+    "king_gold": 3500,
+    "wave_kings": 1,
+    "kill_reward": {"kills": 25, "stone": 125, "wood": 25, "rewards_per_king": 4},
+    "resource_bonus": {"gold": 10000, "food": 1000, "stone": 3000},
+    "endless_deposit": 32000,
+    "starting_relics": 2
+  },
+  "towers": {
+    "families": {
+      "towers": ["WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"],
+      "bombard": ["BOMBARD_TOWER"]
+    },
+    "special": {"unit": "THE_ACCURSED_TOWER", "pierce_bonus": 232, "attack": 8, "range": 13}
+  },
   "waves": [
-    {"key":"Villagers", "unit":"VILLAGER_MALE", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":50, "boss":false},
-    {"key":"Militia", "unit":"MILITIA", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":100, "boss":false},
-    {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":120, "boss":false},
-    {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":150, "boss":false},
-    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":1200, "boss":true},
-    {"key":"Long Swords", "unit":"LONG_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":200, "boss":false},
-    {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":230, "boss":false},
-    {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":280, "boss":false},
-    {"key":"Camel Riders", "unit":"CAMEL_RIDER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":300, "boss":false},
-    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":1700, "boss":true},
-    {"key":"Two-Handed Swords", "unit":"TWO_HANDED_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":250, "boss":false},
-    {"key":"Cavaliers", "unit":"CAVALIER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":380, "boss":false},
-    {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":350, "boss":false},
-    {"key":"Paladins", "unit":"PALADIN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":500, "boss":false},
-    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":2200, "boss":true}
+    {"key":"Villagers", "unit":"VILLAGER_MALE", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":150, "boss":false},
+    {"key":"Militia", "unit":"MILITIA", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":220, "boss":false},
+    {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":340, "boss":false},
+    {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":420, "boss":false},
+    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":2500, "boss":true},
+    {"key":"Long Swords", "unit":"LONG_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":800, "boss":false},
+    {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":950, "boss":false},
+    {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1100, "boss":false},
+    {"key":"Camel Riders", "unit":"CAMEL_RIDER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1800, "boss":false},
+    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":11000, "boss":true},
+    {"key":"Two-Handed Swords", "unit":"TWO_HANDED_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":2600, "boss":false},
+    {"key":"Cavaliers", "unit":"CAVALIER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":3000, "boss":false},
+    {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":4800, "boss":false},
+    {"key":"Paladins", "unit":"PALADIN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":5600, "boss":false},
+    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":30, "duration":120, "hit_points":30000, "boss":true}
   ]
 }

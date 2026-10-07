@@ -32,6 +32,35 @@ def test_migration_preserves_geometry_and_references_and_replaces_custom_objects
     assert report["isolation"][0]["contained"] is True
 
 
+def test_anchors_can_name_several_points(foundation_inputs: FoundationInputs) -> None:
+    from ancienttdde.map.foundation import migrate_map, validate_map
+
+    legacy, config = foundation_inputs
+    config["anchors"]["lane.p1.kings"] = {"points": [[2.5, 3.5], [2.5, 6.5]]}
+    result = migrate_map(legacy, config)
+    assert result.get("anchors", {})["lane.p1.kings"] == {"points": [[2.5, 3.5], [2.5, 6.5]]}
+    validate_map(result, config)
+
+
+@pytest.mark.parametrize(
+    ("points", "message"),
+    [
+        ([[2.5, 3.5], [3.5, 16.0]], "Anchor outside map: lane.p1.kings"),
+        ([[2.5, 3.5], [3.5]], "Anchor outside map: lane.p1.kings"),
+        ([], "Anchor needs a point or region: lane.p1.kings"),
+    ],
+)
+def test_anchor_points_must_lie_on_the_map(
+    foundation_inputs: FoundationInputs, points: list[list[float]], message: str
+) -> None:
+    from ancienttdde.map.foundation import migrate_map
+
+    legacy, config = foundation_inputs
+    config["anchors"]["lane.p1.kings"] = {"points": points}
+    with pytest.raises(ValueError, match=f"^{message}$"):
+        migrate_map(legacy, config)
+
+
 def test_blocked_routes_fail_validation(foundation_inputs: FoundationInputs) -> None:
     from ancienttdde.map.foundation import migrate_map, validate_map
 

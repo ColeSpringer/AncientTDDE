@@ -47,7 +47,15 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
     variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
     triggers = {t["name"]: t for t in snapshot["triggers"]}
     for player in range(1, 8):
-        for suffix in ("initialize", "income", "wave.1"):
+        for suffix in (
+            "initialize",
+            "king",
+            "attack",
+            "wave.1",
+            "buy.tower_attack_4",
+            "transfer.build",
+            "bonus.gold",
+        ):
             trigger = triggers[f"lane.p{player}.{suffix}"]
             assert not trigger["execute_on_load"]
             assert any(

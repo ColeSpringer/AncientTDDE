@@ -15,6 +15,8 @@ class LegacyPlayer(TypedDict):
 
 class MapAnchor(TypedDict):
     point: NotRequired[list[float]]
+    # Ordered positions that belong together, such as a spawn and its walk target.
+    points: NotRequired[list[list[float]]]
     region: NotRequired[list[int]]
     reference_id: NotRequired[int]
     label: NotRequired[str]
