@@ -5,8 +5,7 @@ Age of Empires II: Definitive Edition scenario built from stock assets.
 
 ## Setup
 
-Use Python 3.14.4 and [uv](https://docs.astral.sh/uv/). `uv.lock` pins the environment,
-including AoE2ScenarioParser 0.9.4.
+Use Python 3.14.4 and [uv](https://docs.astral.sh/uv/). `uv.lock` pins the environment.
 
 ```bash
 uv sync --frozen
