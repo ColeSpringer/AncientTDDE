@@ -16,6 +16,10 @@ int ancientSampleX = -1;
 int ancientSampleY = -1;
 int ancientSampleStill = -1;
 int ancientLastNotice = -1;
+// Each lane's boss as last seen: the hit points its unit was left with, and the quarter of
+// its reservoir it was in.
+int ancientBossLast = -1;
+int ancientBossQuarter = -1;
 
 int laneVariable(int player = 1, int field = 0) {
     return (cLaneBase + (player - 1) * cLaneStride + field);
@@ -103,10 +107,11 @@ void ancientShowLives(int player = 1) {
     xsSetUnitHitpoints(laneLife(player), hitpoints);
 }
 
-// Query every documented object class; DE documents no all-objects wildcard.
+// Query the object classes a lane's units belong to; DE documents no all-objects wildcard,
+// and class N is addressed as cArcherClass + N.
 void ancientCleanupLane(int player = 1, int berryMill = -1) {
-    for (objectClass = cArcherClass; < cSentinelEndClass) {
-        ancientUnitArray = xsGetPlayerUnitIds(player, objectClass, ancientUnitArray);
+    for (kind = 0; < cLaneClasses) {
+        ancientUnitArray = xsGetPlayerUnitIds(player, cArcherClass + laneClass(kind), ancientUnitArray);
         for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
             int unit = xsArrayGetInt(ancientUnitArray, index);
             if (unit != berryMill) xsRemoveUnit(unit);
@@ -222,8 +227,8 @@ void ancientInitialize() {
     xsSetTriggerVariable(vParticipants, participants);
     xsSetTriggerVariable(vSurvivors, participants);
     xsSetTriggerVariable(vPhase, sSetup);
-    xsSetTriggerVariable(vRemaining, cSetup);
-    xsSetTriggerVariable(vCountdown, cSetup + cPreparation);
+    xsSetTriggerVariable(vRemaining, cChoice);
+    xsSetTriggerVariable(vCountdown, cChoice + cPreparation);
     xsSetTriggerVariable(vDisplayWave, 1);
     xsSetTriggerVariable(vWave, -1);
     xsSetTriggerVariable(vChooser, chooser);
@@ -237,10 +242,25 @@ void ancientInitialize() {
     xsChatData("Ancient TD: human defense lanes = %d", participants);
     if (participants == 0) return;
     xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
+    string window = " within " + ancientText(cChoice) + " game seconds";
     if (participants == 1) {
-        xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop before the first wave.");
+        xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop" + window + "; Standard is the default.");
     } else {
-        xsChatData(ancientPlayer(chooser) + ": PvP is off; select PvP on below the shop before the first wave to put raiders and the siege power-up on sale.");
+        xsChatData(ancientPlayer(chooser) + ": PvP is off; select PvP on below the shop" + window + " to put raiders and the siege power-up on sale.");
+    }
+}
+
+// Preparation follows the chooser's selection, or the end of the choice window.
+void ancientBeginPreparation() {
+    xsSetTriggerVariable(vPhase, sPreparation);
+    xsSetTriggerVariable(vRemaining, cPreparation);
+    xsSetTriggerVariable(vCountdown, cPreparation);
+    xsChatData("Prepare your towers. First wave in %d game seconds.", cPreparation);
+    for (newcomer = 1; <= 7) {
+        if (laneValue(newcomer, fActive) == 1) {
+            xsChatData(ancientTowerAccess(newcomer));
+            xsChatData(ancientCivilization(newcomer));
+        }
     }
 }
 
@@ -266,20 +286,21 @@ int ancientEndlessArmor(int endless = 0) {
     return (steps * cArmorStep);
 }
 
+// The hit points a wave's enemies carry: a boss's can exceed the attribute's limit, which the
+// native configuration applied, so the rest is set on the unit itself.
+int ancientWaveHitPoints(int wave = 0) {
+    if (wave < cWaveCount) return (waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + wave));
+    int endless = wave - cWaveCount;
+    int position = endless % cEndlessTemplates;
+    return (endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates + position) * cEndlessLevels + ancientEndlessLevel(endless) - 1));
+}
+
 string ancientWaveText(int wave = 0) {
     int pattern = ancientTemplate(wave);
-    int level = xsTriggerVariable(vDifficulty);
-    int hitpoints = waveHitPoints(level * cWaveCount + wave);
     string armor = "";
-    if (wave >= cWaveCount) {
-        int endless = wave - cWaveCount;
-        int position = endless % cEndlessTemplates;
-        hitpoints = endlessHitPoints((level * cEndlessTemplates + position) * cEndlessLevels + ancientEndlessLevel(endless) - 1);
-        armor = ", +" + ancientText(ancientEndlessArmor(endless)) + " pierce armor";
-    }
-    string text = ancientText(waveEnemies(pattern)) + " " + waveKey(pattern) + ", " + ancientText(hitpoints) + " HP each" + armor;
-    if (waveBoss(pattern) == 1) text = text + " (boss)";
-    return (text);
+    if (wave >= cWaveCount) armor = ", +" + ancientText(ancientEndlessArmor(wave - cWaveCount)) + " pierce armor";
+    if (waveBoss(pattern) == 1) return (waveKey(pattern) + ", a boss with " + ancientText(ancientWaveHitPoints(wave)) + " HP");
+    return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
 }
 
 // Native triggers set the endless enemies' hit points for a new level and add each armor step,
@@ -301,13 +322,13 @@ void ancientConfigureEndless(int wave = 0) {
     xsSetTriggerVariable(vConfigured, ancientTemplate(wave) + 1);
 }
 
-// The options become fixed when the first wave starts or the first practice control is used.
-void ancientLock() {
+// The options become fixed by the chooser's first selection, which announces itself, or
+// when the choice window ends, which announces what stands.
+void ancientLock(bool chosen = false) {
     if (xsTriggerVariable(vLocked) == 1) return;
     xsSetTriggerVariable(vLocked, 1);
     if (xsTriggerVariable(vParticipants) > 1) {
-        if (xsTriggerVariable(vPvp) == 1) xsChatData("PvP is on: raiders and the siege power-up are for sale.");
-        else xsChatData("PvP is off: no raiders or siege in this game.");
+        if (chosen == false) xsChatData("PvP is off: no raiders or siege in this game.");
     } else {
         xsChatData(modeName(xsTriggerVariable(vMode)) + " run on " + difficultyName(xsTriggerVariable(vDifficulty)) + ".");
     }
@@ -324,26 +345,28 @@ void ancientChoose(int player = 1, int code = 0) {
     }
     bool solo = (xsTriggerVariable(vParticipants) == 1);
     if (code <= cControlPractice) {
-        if (solo == false) {
+        int mode = code - cControlStandard;
+        if ((solo == false) && (mode != cModeStandard)) {
             ancientMessage(player, cMessageSoloModes);
             return;
         }
-        int mode = code - cControlStandard;
-        if (mode == xsTriggerVariable(vMode)) return;
         xsSetTriggerVariable(vMode, mode);
-        xsChatData(ancientPlayer(player) + " chose " + modeName(mode) + ": " + modeText(mode) + ".");
-        return;
+        if (solo) xsChatData(ancientPlayer(player) + " chose " + modeName(mode) + ": " + modeText(mode) + ".");
+        else xsChatData(ancientPlayer(player) + " chose Standard with PvP off: no raiders or siege in this game.");
+    } else {
+        if (solo) {
+            ancientMessage(player, cMessageNeedsRivals);
+            return;
+        }
+        int pvp = 0;
+        if (code == cControlPvpOn) pvp = 1;
+        xsSetTriggerVariable(vPvp, pvp);
+        if (pvp == 1) xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
+        else xsChatData(ancientPlayer(player) + " chose PvP off: no raiders or siege in this game.");
     }
-    if (solo) {
-        ancientMessage(player, cMessageNeedsRivals);
-        return;
-    }
-    int pvp = 0;
-    if (code == cControlPvpOn) pvp = 1;
-    if (pvp == xsTriggerVariable(vPvp)) return;
-    xsSetTriggerVariable(vPvp, pvp);
-    if (pvp == 1) xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
-    else xsChatData(ancientPlayer(player) + " switched PvP off: no raiders or siege in this game.");
+    // One selection decides: the options are fixed and preparation begins.
+    ancientLock(true);
+    if (xsTriggerVariable(vPhase) == sSetup) ancientBeginPreparation();
 }
 
 void ancientPractice(int player = 1, int code = 0) {
@@ -374,10 +397,6 @@ void ancientPractice(int player = 1, int code = 0) {
         xsChatData("Practice: " + who + " has all lives back.");
     }
     xsSetTriggerVariable(vAssists, xsTriggerVariable(vAssists) + 1);
-    if (xsTriggerVariable(vLocked) == 0) {
-        xsChatData("Practice help used: this run stays an assisted Practice run.");
-        ancientLock();
-    }
 }
 
 // The lane's native triggers record each new selection of a control; it acts once and is
@@ -405,7 +424,7 @@ void ancientResult() {
         int kills = ancientWaveKills(player);
         text = text + ", " + ancientCount(lives, "life", "lives") + " left, " + ancientCount(kills, "kill", "kills");
     }
-    text = text + ", " + ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
+    text = text + ", " + ancientCount((xsTriggerVariable(vEconomy) + xsTriggerVariable(vSetupElapsed)) / 60, "game minute", "game minutes");
     int assists = xsTriggerVariable(vAssists);
     if (assists > 0) text = text + ", assisted by " + ancientCount(assists, "practice action", "practice actions");
     xsChatData(text + ".");
@@ -487,6 +506,45 @@ void ancientSiege() {
     ancientEndSiege(false);
 }
 
+void ancientBossBuffers() {
+    if (ancientBossLast < 0) {
+        ancientBossLast = xsArrayCreateInt(8, -1, "ancientBossLast");
+        ancientBossQuarter = xsArrayCreateInt(8, -1, "ancientBossQuarter");
+    }
+}
+
+// What a boss took this second leaves its lane's reservoir, and its unit is topped back up to
+// the attribute's limit until the reservoir runs lower than that. Its lane's player hears at
+// each quarter spent. After a reload the unit's hit points stand in for the last ones seen.
+void ancientBossTrack(int player = 1, int unit = -1) {
+    ancientBossBuffers();
+    int now = ancientWhole(xsGetUnitHitpoints(unit));
+    int last = xsArrayGetInt(ancientBossLast, player);
+    if (last < 0) last = now;
+    int pool = laneValue(player, fBoss);
+    if (now < last) pool = pool - (last - now);
+    if (pool < now) pool = now;
+    laneSet(player, fBoss, pool);
+    int target = pool;
+    if (target > cHitPointCap) target = cHitPointCap;
+    if (now != target) {
+        float restored = 1.0 * target;
+        xsSetUnitHitpoints(unit, restored);
+    }
+    xsArraySetInt(ancientBossLast, player, target);
+    int total = ancientWaveHitPoints(xsTriggerVariable(vWave));
+    if (total <= 0) return;
+    int quarter = (4 * pool + total - 1) / total;
+    int before = xsArrayGetInt(ancientBossQuarter, player);
+    if ((before < 0) || (before > 4)) before = 4;
+    if ((quarter < before) && (quarter >= 1) && (quarter <= 3)) {
+        if (quarter == 3) ancientMessage(player, cMessageBossThreeQuarters);
+        else if (quarter == 2) ancientMessage(player, cMessageBossHalf);
+        else ancientMessage(player, cMessageBossQuarter);
+    }
+    if (quarter < before) xsArraySetInt(ancientBossQuarter, player, quarter);
+}
+
 // Collect every lane's losses before changing state or selecting a winner.
 int ancientCollect() {
     if (ancientLeakCounts < 0) ancientLeakCounts = xsArrayCreateInt(8, 0, "ancientLeakCounts");
@@ -496,6 +554,8 @@ int ancientCollect() {
     }
     for (kind = 0; < cEnemyTypes) {
         ancientUnitArray = xsGetPlayerUnitIds(8, enemyType(kind), ancientUnitArray);
+        int lives = enemyLives(kind);
+        bool boss = (enemyBoss(kind) == 1);
         for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
             int unit = xsArrayGetInt(ancientUnitArray, index);
             if (xsGetUnitHitpoints(unit) > 0) {
@@ -509,11 +569,12 @@ int ancientCollect() {
                         if (laneValue(defender, fActive) == 0) {
                             xsRemoveUnit(unit);
                         } else if (x >= laneExitX(defender) - 1) {
-                            laneSet(defender, fLives, laneValue(defender, fLives) - 1);
-                            xsArraySetInt(ancientLeakCounts, defender, xsArrayGetInt(ancientLeakCounts, defender) + 1);
+                            laneSet(defender, fLives, laneValue(defender, fLives) - lives);
+                            xsArraySetInt(ancientLeakCounts, defender, xsArrayGetInt(ancientLeakCounts, defender) + lives);
                             xsRemoveUnit(unit);
                         } else {
                             laneSet(defender, fCount, laneValue(defender, fCount) + 1);
+                            if (boss) ancientBossTrack(defender, unit);
                         }
                     }
                 }
@@ -606,7 +667,6 @@ void ancientStartWave() {
     else xsSetTriggerVariable(vPhase, sWave);
     // The countdown to this wave ends now, even when practice started it early.
     xsSetTriggerVariable(vWaveDisplay, 2);
-    if (wave == 0) ancientLock();
     if (wave < cWaveCount) {
         string number = ancientText(wave + 1) + " of " + ancientText(cWaveCount);
         xsChatData("Wave " + number + ": " + ancientWaveText(wave) + ".");
@@ -644,6 +704,40 @@ void ancientNextWave(int wave = 0) {
         next = ancientExtraWave(false) + " " + ancientText(wave + 2 - cWaveCount) + " (" + next + ")";
     }
     xsChatData("Next: " + next + ", " + ancientWaveText(wave + 1) + ", in " + ancientText(cIntermission) + " game seconds.");
+}
+
+// Where an enemy of a batch stands across the lane: a pair one tile above and one below the
+// center, as the original placed them, a third in the middle.
+int ancientRowOffset(int count = 1, int index = 0) {
+    if (count == 2) {
+        if (index == 0) return (-1);
+        return (1);
+    }
+    return (index - (count - 1) / 2);
+}
+
+// A batch of the wave's enemies for a lane, created without collision checks so nothing holds
+// a wave back. The lane's native trigger then sets their stance and sends them down the lane.
+// A boss comes alone with the attribute's limit of hit points; the rest waits in the lane's
+// reservoir, which its unit draws on as it is hit.
+void ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
+    int count = waveCount(pattern);
+    int unit = -1;
+    for (index = 0; < count) {
+        vector spot = xsVectorSet(0.5 + laneSpawnX(player), 0.5 + laneY(player) + ancientRowOffset(count, index), 0.0);
+        unit = xsCreateUnit(waveUnit(pattern), 8, spot, false, true, false);
+    }
+    if ((waveBoss(pattern) == 1) && (unit >= 0)) {
+        ancientBossBuffers();
+        laneSet(player, fBoss, hitpoints);
+        int shown = hitpoints;
+        if (shown > cHitPointCap) shown = cHitPointCap;
+        float carried = 1.0 * shown;
+        xsSetUnitHitpoints(unit, carried);
+        xsArraySetInt(ancientBossLast, player, shown);
+        xsArraySetInt(ancientBossQuarter, player, 4);
+    }
+    laneSet(player, fSpawn, 1);
 }
 
 // Sudden death costs every survivor lives at each interval, more each time.
@@ -697,9 +791,9 @@ bool ancientRelicsWaiting(int player = 1) {
     return (false);
 }
 
-// Raiders and siege are for sale only in a competitive game with PvP on, once it has started.
+// Raiders and siege are for sale only in a competitive game with PvP on, from its first wave.
 bool ancientInteraction() {
-    return ((xsTriggerVariable(vPvp) == 1) && (xsTriggerVariable(vLocked) == 1) && (xsTriggerVariable(vParticipants) > 1));
+    return ((xsTriggerVariable(vPvp) == 1) && (xsTriggerVariable(vWave) >= 0) && (xsTriggerVariable(vParticipants) > 1));
 }
 
 int ancientRivals(int player = 1) {
@@ -1069,23 +1163,24 @@ void ancientTick() {
         }
     }
     if (ready == false) return;
+    if (state == sSetup) {
+        xsSetTriggerVariable(vSetupElapsed, xsTriggerVariable(vSetupElapsed) + 1);
+        // A selection this second has begun preparation already; the second was the window's.
+        if (xsTriggerVariable(vPhase) != sSetup) return;
+    }
     if ((state == sSetup) || (state == sPreparation)) {
         int remaining = xsTriggerVariable(vRemaining) - 1;
         xsSetTriggerVariable(vRemaining, remaining);
-        if (state == sSetup) xsSetTriggerVariable(vCountdown, remaining + cPreparation);
-        else xsSetTriggerVariable(vCountdown, remaining);
+        if (state == sSetup) {
+            // The on-screen countdown starts with the window's first counted second.
+            if (remaining == cChoice - 1) xsSetTriggerVariable(vWaveDisplay, 3);
+            xsSetTriggerVariable(vCountdown, remaining + cPreparation);
+        } else xsSetTriggerVariable(vCountdown, remaining);
         xsSetTriggerVariable(vDisplayWave, xsTriggerVariable(vWave) + 2);
         if (remaining <= 0) {
             if (state == sSetup) {
-                xsSetTriggerVariable(vPhase, sPreparation);
-                xsSetTriggerVariable(vRemaining, cPreparation);
-                xsChatData("Prepare your towers. First wave in %d game seconds.", cPreparation);
-                for (newcomer = 1; <= 7) {
-                    if (laneValue(newcomer, fActive) == 1) {
-                        xsChatData(ancientTowerAccess(newcomer));
-                        xsChatData(ancientCivilization(newcomer));
-                    }
-                }
+                ancientLock();
+                ancientBeginPreparation();
             } else ancientStartWave();
         }
         return;
@@ -1104,9 +1199,12 @@ void ancientTick() {
             if (count + waveCount(pattern) > cEnemyCap) capacity = false;
         }
     }
-    if ((batches < waveBatches(pattern)) && (cooldown <= 0) && capacity) {
+    // A batch waits for the native triggers to configure the wave's enemies.
+    bool configured = (xsTriggerVariable(vConfigured) == pattern + 1);
+    if ((batches < waveBatches(pattern)) && (cooldown <= 0) && capacity && configured) {
+        int hitpoints = ancientWaveHitPoints(wave);
         for (slot = 1; <= 7) {
-            if (laneValue(slot, fActive) == 1) laneSet(slot, fSpawn, pattern + 1);
+            if (laneValue(slot, fActive) == 1) ancientSpawnBatch(slot, pattern, hitpoints);
         }
         xsSetTriggerVariable(vBatches, batches + 1);
         cooldown = waveInterval(pattern);

@@ -20,7 +20,7 @@ from ancienttdde.game.catalog import (
     SiegePowerUp,
 )
 from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
-from ancienttdde.game.config import Balance, EngineLane, Towers
+from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Towers
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import RAIDER_MEDIA, TRANSFERS
@@ -42,6 +42,12 @@ class State(IntEnum):
 # What follows the scheduled waves: nothing yet, endless waves in a solo Endless run, or endless
 # waves and a growing loss of lives for every competitor who survives the finale.
 STAGES = ("scheduled", "endless", "sudden")
+# The object classes a defense lane's units belong to, as DE numbers them: trade cogs, buildings,
+# villagers, used-up pastures and the like, raiders, torches, monks, trade carts, fire ships,
+# flags, monks carrying relics, farms and pastures, packed and unpacked trebuchets, towers and
+# Kings. Clearing a lane queries these classes only; the DAT check compares them with what a
+# lane can own.
+LANE_CLASSES = (2, 3, 4, 11, 12, 14, 18, 19, 22, 30, 43, 49, 51, 52, 54, 59)
 # The pierce armor endless waves may add stays within the engine's 16-bit armor values.
 ARMOR_LIMIT = 30000
 # Siege positions per lane in the siege tables.
@@ -60,6 +66,8 @@ GLOBAL_VARIABLES = (
     "spawn_clock",
     # Seconds since preparation began; investments and repairs pay on its multiples.
     "economy",
+    # Seconds the run options were open before preparation began.
+    "setup_elapsed",
     "resume_phase",
     "sudden_round",
     "configured",
@@ -79,7 +87,8 @@ GLOBAL_VARIABLES = (
     # After the schedule: the stage, the endless growth level applied and one awaiting the
     # native triggers, the pierce armor added and steps awaiting them, and seconds until sudden
     # death next costs lives. wave_display asks the native triggers to count down to the next
-    # endless wave (1) or to clear the countdown when a wave starts (2).
+    # endless wave (1), to clear the countdown when a wave starts (2) or to count down the
+    # choice window (3).
     "stage",
     "endless_level",
     "endless_request",
@@ -117,6 +126,8 @@ LANE_VARIABLES = (
     "control_held",
     # Seconds until this lane may buy the siege power-up again.
     "siege_cooldown",
+    # The hit points the lane's boss has left in all, which its unit draws on as it fights.
+    "boss",
     # The native effect set of the lane's civilization profile, 0 for none.
     "profile",
 )
@@ -318,10 +329,13 @@ def render_prelude(
         cLaneBase=len(GLOBAL_VARIABLES),
         cLaneStride=len(LANE_VARIABLES),
         cLives=balance.lives,
-        cSetup=balance.setup_seconds,
+        cBossLeakLives=balance.boss_leak_lives,
+        cChoice=balance.choice_seconds,
         cPreparation=balance.preparation_seconds,
         cIntermission=balance.intermission_seconds,
         cEnemyCap=balance.max_enemies_per_lane,
+        cHitPointCap=MAX_HIT_POINTS,
+        cLaneClasses=len(LANE_CLASSES),
         cSuddenInterval=balance.sudden_death_interval,
         cSuddenDamage=balance.sudden_death_damage,
         cWaveCount=len(balance.waves),
@@ -390,6 +404,8 @@ def render_prelude(
         (p.pad_region[0], p.pad_region[1], p.pad_region[2], p.pad_region[3]) for p in purchases
     ]
     invested = [p.effect for p in investments if isinstance(p.effect, Investment)]
+    bosses = {w.object_id for w in balance.waves if w.boss}
+    enemies = sorted({w.object_id for w in balance.waves})
     tables: dict[str, list[int]] = {
         "waveUnit": [w.object_id for w in balance.waves],
         "waveCount": [w.count for w in balance.waves],
@@ -397,7 +413,7 @@ def render_prelude(
         "waveInterval": [w.interval for w in balance.waves],
         "waveDuration": [w.duration for w in balance.waves],
         "waveBoss": [int(w.boss) for w in balance.waves],
-        "waveEnemies": [w.count * w.batches for w in balance.waves],
+        "waveEnemies": [w.enemies for w in balance.waves],
         # Indexed by level * cWaveCount + wave.
         "waveHitPoints": [
             balance.hit_points(wave, level)
@@ -446,7 +462,11 @@ def render_prelude(
         "laneEconomyY1": [0] + [lane.economy[1] for lane in lanes],
         "laneEconomyX2": [0] + [lane.economy[2] for lane in lanes],
         "laneEconomyY2": [0] + [lane.economy[3] for lane in lanes],
-        "enemyType": sorted({w.object_id for w in balance.waves}),
+        "enemyType": enemies,
+        # Whether each enemy type is a boss's, and the lives its leak costs, in enemyType order.
+        "enemyBoss": [int(enemy in bosses) for enemy in enemies],
+        "enemyLives": [balance.boss_leak_lives if enemy in bosses else 1 for enemy in enemies],
+        "laneClass": list(LANE_CLASSES),
         "shopX1": [pad[0] for pad in pads],
         "shopY1": [pad[1] for pad in pads],
         "shopX2": [pad[2] for pad in pads],

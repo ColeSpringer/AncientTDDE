@@ -1,5 +1,7 @@
 """Native triggers for a lane's Kings, periodic tower attack, villager transfers and bonuses."""
 
+import math
+
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
@@ -8,7 +10,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.instructions import bonus_delivered
 from ancienttdde.game.messages import message_code, message_texts
-from ancienttdde.game.sites import Tile
+from ancienttdde.game.sites import Tile, within
 from ancienttdde.game.triggers import Game
 from ancienttdde.models import Rect
 from ancienttdde.scenario.triggers import (
@@ -23,6 +25,10 @@ from ancienttdde.scenario.triggers import (
 # Villagers belong to this stock class whatever task they are doing.
 CIVILIAN = 4
 DEPOSITS = {"gold": "gold-mine", "food": "forage-bush", "stone": "stone-mine"}
+# What a placed resource villager gathers: the deposit or tree beside it.
+GATHERED = ("gold-mine", "forage-bush", "stone-mine", "tree")
+# A placed villager stands this close to the resource it works.
+GATHER_REACH = 1.5
 
 
 def at(tile: Tile) -> dict[str, FieldValue]:
@@ -35,6 +41,33 @@ def around(tiles: tuple[Tile, ...]) -> dict[str, FieldValue]:
     xs, ys = [x for x, _ in tiles], [y for _, y in tiles]
     bounds: Rect = (min(xs), min(ys), max(xs), max(ys))
     return area(bounds)
+
+
+def lane_gatherers(game: Game, trigger: TriggerHandle, lane: EngineLane) -> None:
+    """Each villager placed in the resource area starts gathering the deposit or tree beside
+    it; the build-area villagers wait for orders."""
+    kinds = {game.stock(kind) for kind in GATHERED}
+    resources = [
+        (u.reference_id, u.x, u.y)
+        for u in game.scenario.unit_manager.units[0]
+        if u.unit_const in kinds and within(lane.economy, u.x, u.y)
+    ]
+    villagers = {game.stock("villager"), game.stock("villager-female")}
+    for unit in game.scenario.unit_manager.units[lane.player]:
+        if unit.unit_const not in villagers or not within(lane.economy, unit.x, unit.y):
+            continue
+        distances = [(r[0], math.dist((r[1], r[2]), (unit.x, unit.y))) for r in resources]
+        reference, distance = min(distances, key=lambda found: found[1], default=(-1, math.inf))
+        if distance > GATHER_REACH:
+            raise ValueError(f"P{lane.player} villager at {(unit.x, unit.y)} stands by no resource")
+        effect(
+            trigger,
+            "task_object",
+            source_player=lane.player,
+            selected_object_ids=[game.placement(unit.reference_id)],
+            location_object_reference=game.placement(reference),
+            action_type=ActionType.DEFAULT,
+        )
 
 
 def lane_kings(game: Game, lane: EngineLane) -> None:

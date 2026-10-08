@@ -7,7 +7,9 @@ of those available or upgrade into one, and the civilization bonuses that would 
 every tower's volley. Many objects become available only when a lane reaches an age, through
 technologies the game researches for free, so those technologies are listed too; and reaching
 an age upgrades some buildings into new forms, which the lane disables again once it has that
-age. `tools/dat/restricted_check.py` compares the tables with the installed data file.
+age. Technologies a lane's buildings offer that would change nothing a lane can own are listed
+too, so no dock sells fishing research. `tools/dat/restricted_check.py` compares the tables
+with the installed data file.
 """
 
 # Object IDs and internal names, every age variant included.
@@ -587,6 +589,77 @@ TECHNOLOGIES: dict[int, str] = {
 # Civilization bonuses that would multiply every tower's volley.
 TOWER_BONUSES: dict[int, str] = {
     1493: "C-Bonus, Towers and Castles x2 arrows (Saxons)",
+}
+
+# Technologies a lane's dock, blacksmith or bought castle offers that touch only units no lane
+# can own: warships, fishing ships, archers and the unique units of the castle's civilization.
+# A technology stays researchable when one that requires it, and is not itself withheld,
+# touches a lane: the infantry armors carry the Incas' villager armor and the Macedonians'
+# cavalry armor, and Arquebus tunes the Bombard Tower's shot. Their names are the data file's.
+POINTLESS: dict[int, str] = {
+    35: "Galleon",
+    65: "Gillnets",
+    906: "Fishing Lines",
+    211: "Padded Archer Armor",
+    212: "Leather Archer Armor",
+    219: "Ring Archer Armor",
+    4: "Mayan El Dorado",
+    6: "Mongol Siege Drill",
+    9: "Saracen Zealotry",
+    24: "Aztec Garland Wars",
+    49: "Bogsveigar",
+    52: "Chinese Rocketry",
+    61: "Byzantine Logistica",
+    83: "Frankish Bearded Axe",
+    445: "Korean catapults",
+    457: "Gothic Perfusion",
+    460: "Aztec Sacrifice",
+    463: "Viking Chieftains",
+    485: "Mayans UT",
+    488: "Persians UT",
+    490: "Saracens UT",
+    491: "Sipahi",
+    493: "Franks UT",
+    494: "Pavise",
+    507: "Indians UT2",
+    513: "Slavs UT",
+    514: "Magyars UT",
+    515: "Indians UT",
+    516: "Incas UT",
+    517: "Indians UT",
+    574: "Ethiopian UT",
+    575: "Ethiopian UT",
+    576: "Malian UT",
+    579: "Berber UT",
+    622: "Khmer UT",
+    623: "Khmer UT",
+    625: "Malay UT",
+    626: "Burmese UT",
+    628: "Vietnamese UT",
+    686: "Khmer UT",
+    691: "Vietnamese UT",
+    692: "Vietnamese UT",
+    757: "Hauberk",
+    782: "Szlachta Privileges",
+    784: "Wagenburg Tactics",
+    831: "Medical Corps",
+    833: "Paiks",
+    836: "Frontier Guards",
+    883: "Ballistas",
+    884: "Comitatenses",
+    902: "Pirotecnia",
+    921: "Fereters",
+    922: "Cilician Fleet",
+    997: "Thunderclap Bombs",
+    1006: "Lamellar Armor",
+    1069: "Bolt Magazine",
+    1365: "Herbalism",
+    1366: "Huaracas",
+    1379: "Malon",
+    1392: "Caciques",
+    1473: "Vendel Legacy",
+    1474: "Gothikon",
+    1496: "Ordonnance Companies",
 }
 
 AGE_UPGRADES: dict[str, tuple[int, ...]] = {

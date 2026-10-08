@@ -1046,6 +1046,414 @@
     }
   },
   "units": {
+    "ABRAHA_ELEPHANT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          5,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          15
+        ],
+        [
+          4,
+          25
+        ],
+        [
+          13,
+          15
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 31,
+      "class": 12,
+      "cost": {
+        "food": 200,
+        "gold": 75
+      },
+      "hit_points": 750,
+      "id": 1071,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.7,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "AETHELFRITH": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 16,
+      "class": 6,
+      "cost": {
+        "food": 65,
+        "gold": 25
+      },
+      "hit_points": 140,
+      "id": 169,
+      "line_of_sight": 3,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.03,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ARCHER": {
+      "accuracy": 80,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          3
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          13,
+          0
+        ]
+      ],
+      "build_time": 35,
+      "class": 0,
+      "cost": {
+        "gold": 45,
+        "wood": 25
+      },
+      "hit_points": 30,
+      "id": 4,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 4,
+      "reload": 2,
+      "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ATTILA_THE_HUN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          8,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          13
+        ],
+        [
+          24,
+          40
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 20
+      },
+      "hit_points": 350,
+      "id": 777,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.2,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "BAYINNAUNG": {
+      "accuracy": 100,
+      "armor": [
+        [
+          5,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          10
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          13,
+          10
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 31,
+      "class": 12,
+      "cost": {
+        "food": 120,
+        "gold": 75
+      },
+      "hit_points": 400,
+      "id": 1165,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.75,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "BELISARIUS": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          1,
+          6
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 23,
+      "class": 12,
+      "cost": {
+        "food": 70,
+        "gold": 75
+      },
+      "hit_points": 210,
+      "id": 167,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.35,
+      "storage": 2,
+      "work_rate": 1
+    },
     "BOMBARD_TOWER": {
       "accuracy": 100,
       "armor": [
@@ -1093,6 +1501,7 @@
         ]
       ],
       "build_time": 80,
+      "class": 52,
       "cost": {
         "gold": 100,
         "stone": 125
@@ -1174,6 +1583,7 @@
         ]
       ],
       "build_time": 22,
+      "class": 12,
       "cost": {
         "food": 55,
         "gold": 60
@@ -1243,6 +1653,7 @@
         ]
       ],
       "build_time": 200,
+      "class": 3,
       "cost": {
         "stone": 650
       },
@@ -1311,6 +1722,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 60,
         "gold": 75
@@ -1372,6 +1784,7 @@
         ]
       ],
       "build_time": 21,
+      "class": 6,
       "cost": {
         "food": 50,
         "gold": 20
@@ -1383,6 +1796,134 @@
       "range": 0,
       "reload": 2,
       "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "CHARLEMAGNE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 17,
+      "class": 6,
+      "cost": {
+        "food": 55,
+        "gold": 25
+      },
+      "hit_points": 200,
+      "id": 165,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 3,
+      "reload": 2,
+      "speed": 0.9,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "CHARLES_MARTEL": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          13
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "class": 6,
+      "cost": {
+        "food": 60,
+        "gold": 20
+      },
+      "hit_points": 180,
+      "id": 424,
+      "line_of_sight": 8,
+      "min_range": 0,
+      "range": 6,
+      "reload": 1,
+      "speed": 0.9,
       "storage": 1,
       "work_rate": 1
     },
@@ -1437,6 +1978,7 @@
         ]
       ],
       "build_time": 125,
+      "class": 52,
       "cost": {
         "stone": 175,
         "wood": 50
@@ -1449,6 +1991,705 @@
       "reload": 2,
       "speed": 0,
       "storage": 0,
+      "work_rate": 1
+    },
+    "ELITE_BERSERK": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          3
+        ],
+        [
+          21,
+          3
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 12,
+      "class": 6,
+      "cost": {
+        "food": 65,
+        "gold": 20
+      },
+      "hit_points": 62,
+      "id": 694,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.05,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_CATAPHRACT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          16
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          1,
+          18
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 20,
+      "class": 12,
+      "cost": {
+        "food": 70,
+        "gold": 75
+      },
+      "hit_points": 150,
+      "id": 553,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.7,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_CONQUISTADOR": {
+      "accuracy": 70,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          23,
+          0
+        ],
+        [
+          28,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          3,
+          19
+        ],
+        [
+          17,
+          6
+        ],
+        [
+          39,
+          -3
+        ]
+      ],
+      "build_time": 24,
+      "class": 23,
+      "cost": {
+        "food": 75,
+        "gold": 60
+      },
+      "hit_points": 70,
+      "id": 773,
+      "line_of_sight": 9,
+      "min_range": 0,
+      "range": 6,
+      "reload": 2.9,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_EAGLE_WARRIOR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          29,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          25,
+          10
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          8,
+          4
+        ],
+        [
+          16,
+          2
+        ],
+        [
+          20,
+          5
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          30,
+          3
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 20,
+      "class": 6,
+      "cost": {
+        "food": 20,
+        "gold": 50
+      },
+      "hit_points": 60,
+      "id": 752,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_GENITOUR_ORIGINAL": {
+      "accuracy": 90,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          21,
+          0
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "build_time": 29,
+      "class": 36,
+      "cost": {
+        "food": 60,
+        "wood": 50
+      },
+      "hit_points": 70,
+      "id": 596,
+      "line_of_sight": 6,
+      "min_range": 1,
+      "range": 4,
+      "reload": 3,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_MANGUDAI": {
+      "accuracy": 95,
+      "armor": [
+        [
+          28,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          1
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          20,
+          5
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "build_time": 26,
+      "class": 36,
+      "cost": {
+        "gold": 65,
+        "wood": 55
+      },
+      "hit_points": 60,
+      "id": 561,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 4,
+      "reload": 2.1,
+      "speed": 1.4,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_PLUMED_ARCHER": {
+      "accuracy": 90,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          2
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          17,
+          0
+        ]
+      ],
+      "build_time": 16,
+      "class": 0,
+      "cost": {
+        "gold": 55,
+        "wood": 55
+      },
+      "hit_points": 65,
+      "id": 765,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 5,
+      "reload": 1.9,
+      "speed": 1.2,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_TEUTONIC_KNIGHT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          4
+        ],
+        [
+          21,
+          4
+        ],
+        [
+          4,
+          17
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 12,
+      "class": 6,
+      "cost": {
+        "food": 85,
+        "gold": 30
+      },
+      "hit_points": 110,
+      "id": 554,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.8,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ELITE_WAR_ELEPHANT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          5,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          30
+        ],
+        [
+          4,
+          20
+        ],
+        [
+          13,
+          30
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 25,
+      "class": 12,
+      "cost": {
+        "food": 170,
+        "gold": 85
+      },
+      "hit_points": 600,
+      "id": 558,
+      "line_of_sight": 8,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.8,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "EL_CID_CAMPEADOR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          15
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 430,
+      "id": 824,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.32,
+      "storage": 1,
       "work_rate": 1
     },
     "FAST_FIRE_SHIP": {
@@ -1498,6 +2739,7 @@
         ]
       ],
       "build_time": 27,
+      "class": 22,
       "cost": {
         "gold": 45,
         "wood": 75
@@ -1559,6 +2801,7 @@
         ]
       ],
       "build_time": 49,
+      "class": 22,
       "cost": {
         "gold": 45,
         "wood": 75
@@ -1620,6 +2863,7 @@
         ]
       ],
       "build_time": 27,
+      "class": 22,
       "cost": {
         "gold": 45,
         "wood": 75
@@ -1639,6 +2883,7 @@
       "armor": [],
       "attack": [],
       "build_time": 0,
+      "class": 7,
       "cost": {},
       "hit_points": 0,
       "id": 59,
@@ -1650,11 +2895,160 @@
       "storage": 125,
       "work_rate": 0
     },
+    "FREDERICK_BARBAROSSA": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          4
+        ],
+        [
+          21,
+          4
+        ],
+        [
+          4,
+          19
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 12,
+      "class": 6,
+      "cost": {
+        "food": 85,
+        "gold": 40
+      },
+      "hit_points": 170,
+      "id": 429,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.75,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "GENGHIS_KHAN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          15,
+          2
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          0
+        ],
+        [
+          3,
+          25
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "class": 36,
+      "cost": {
+        "gold": 65,
+        "wood": 55
+      },
+      "hit_points": 300,
+      "id": 731,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 5,
+      "reload": 2,
+      "speed": 1.45,
+      "storage": 1,
+      "work_rate": 1
+    },
     "GOLD_MINE": {
       "accuracy": 100,
       "armor": [],
       "attack": [],
       "build_time": 0,
+      "class": 32,
       "cost": {},
       "hit_points": 0,
       "id": 66,
@@ -1717,6 +3111,7 @@
         ]
       ],
       "build_time": 80,
+      "class": 52,
       "cost": {
         "stone": 125,
         "wood": 35
@@ -1729,6 +3124,64 @@
       "reload": 2,
       "speed": 0,
       "storage": 0,
+      "work_rate": 1
+    },
+    "GUY_JOSSELYNE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          3
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          14
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 35,
+      "class": 12,
+      "cost": {
+        "food": 70,
+        "gold": 60
+      },
+      "hit_points": 190,
+      "id": 648,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.45,
+      "storage": 1,
       "work_rate": 1
     },
     "HEAVY_CAMEL_RIDER": {
@@ -1802,6 +3255,7 @@
         ]
       ],
       "build_time": 22,
+      "class": 12,
       "cost": {
         "food": 55,
         "gold": 60
@@ -1813,6 +3267,207 @@
       "range": 0,
       "reload": 2,
       "speed": 1.45,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "HEAVY_CAVALRY_ARCHER": {
+      "accuracy": 80,
+      "armor": [
+        [
+          28,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          4
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 36,
+      "cost": {
+        "gold": 60,
+        "wood": 40
+      },
+      "hit_points": 60,
+      "id": 474,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 4,
+      "reload": 2,
+      "speed": 1.4,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "HENRY_V": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          5
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          16
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 37,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 240,
+      "id": 847,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "HROLF_THE_GANGER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          -1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          20
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 6,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 140,
+      "id": 428,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1,
+      "speed": 0.7,
       "storage": 1,
       "work_rate": 1
     },
@@ -1875,6 +3530,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 80
       },
@@ -1885,6 +3541,120 @@
       "range": 0,
       "reload": 1.9,
       "speed": 1.5,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "JAN_ZIZKA": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          4
+        ],
+        [
+          8,
+          10
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          16
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 230,
+      "id": 1713,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.4,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "JOAN_OF_ARC": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          17
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 200,
+      "id": 629,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.45,
       "storage": 1,
       "work_rate": 1
     },
@@ -1939,6 +3709,7 @@
         ]
       ],
       "build_time": 80,
+      "class": 52,
       "cost": {
         "stone": 125,
         "wood": 35
@@ -1975,6 +3746,7 @@
       ],
       "attack": [],
       "build_time": 30,
+      "class": 59,
       "cost": {
         "food": 50
       },
@@ -1985,6 +3757,68 @@
       "range": 0,
       "reload": 0,
       "speed": 1.32,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "KING_ARTHUR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          2
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          13
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "class": 6,
+      "cost": {
+        "food": 60,
+        "gold": 20
+      },
+      "hit_points": 270,
+      "id": 173,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.9,
       "storage": 1,
       "work_rate": 1
     },
@@ -2043,6 +3877,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 60,
         "gold": 75
@@ -2054,6 +3889,126 @@
       "range": 0,
       "reload": 1.8,
       "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "LANCELOT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          14
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 37,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 240,
+      "id": 174,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "LA_HIRE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 15,
+      "class": 6,
+      "cost": {
+        "food": 50,
+        "gold": 10
+      },
+      "hit_points": 200,
+      "id": 640,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.9,
       "storage": 1,
       "work_rate": 1
     },
@@ -2116,6 +4071,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 80
       },
@@ -2129,41 +4085,19 @@
       "storage": 1,
       "work_rate": 1
     },
-    "LONG_SWORDSMAN": {
+    "MAMELUKE": {
       "accuracy": 100,
       "armor": [
         [
-          1,
+          4,
           0
         ],
         [
-          4,
-          1
+          35,
+          0
         ],
         [
           3,
-          1
-        ],
-        [
-          31,
-          0
-        ]
-      ],
-      "attack": [
-        [
-          29,
-          8
-        ],
-        [
-          21,
-          3
-        ],
-        [
-          4,
-          9
-        ],
-        [
-          8,
           0
         ],
         [
@@ -2171,22 +4105,65 @@
           0
         ],
         [
-          15,
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          39,
+          -3
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
           0
         ]
       ],
-      "build_time": 21,
+      "build_time": 23,
+      "class": 12,
       "cost": {
-        "food": 50,
-        "gold": 20
+        "food": 55,
+        "gold": 85
       },
-      "hit_points": 60,
-      "id": 77,
-      "line_of_sight": 4,
+      "hit_points": 80,
+      "id": 282,
+      "line_of_sight": 5,
       "min_range": 0,
-      "range": 0,
+      "range": 3,
       "reload": 2,
-      "speed": 0.96,
+      "speed": 1.4,
       "storage": 1,
       "work_rate": 1
     },
@@ -2237,6 +4214,7 @@
         ]
       ],
       "build_time": 21,
+      "class": 6,
       "cost": {
         "food": 50,
         "gold": 20
@@ -2248,6 +4226,63 @@
       "range": 0,
       "reload": 2,
       "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "MASTER_OF_THE_TEMPLAR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          1
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          15
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 250,
+      "id": 680,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.32,
       "storage": 1,
       "work_rate": 1
     },
@@ -2298,6 +4333,7 @@
         ]
       ],
       "build_time": 21,
+      "class": 6,
       "cost": {
         "food": 50,
         "gold": 20
@@ -2334,6 +4370,7 @@
       ],
       "attack": [],
       "build_time": 51,
+      "class": 18,
       "cost": {
         "gold": 100
       },
@@ -2346,6 +4383,76 @@
       "speed": 0.7,
       "storage": 1,
       "work_rate": 1.25
+    },
+    "NOBUNAGA": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          19,
+          5
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 16,
+      "class": 6,
+      "cost": {
+        "food": 60,
+        "gold": 30
+      },
+      "hit_points": 190,
+      "id": 845,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0.5,
+      "speed": 0.9,
+      "storage": 1,
+      "work_rate": 1
     },
     "OUTPOST": {
       "accuracy": 100,
@@ -2373,6 +4480,7 @@
       ],
       "attack": [],
       "build_time": 15,
+      "class": 3,
       "cost": {
         "stone": 5,
         "wood": 25
@@ -2442,6 +4550,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 60,
         "gold": 75
@@ -2519,6 +4628,7 @@
         ]
       ],
       "build_time": 22,
+      "class": 6,
       "cost": {
         "food": 35,
         "wood": 25
@@ -2538,6 +4648,7 @@
       "armor": [],
       "attack": [],
       "build_time": 30,
+      "class": 42,
       "cost": {
         "food": 50
       },
@@ -2548,6 +4659,266 @@
       "range": 0,
       "reload": 0,
       "speed": 0,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "RICHARD_THE_LIONHEART": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          14
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 37,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 220,
+      "id": 160,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "ROLAND": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          10
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 37,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 150,
+      "id": 166,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SABOTEUR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          16,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          500
+        ],
+        [
+          4,
+          100
+        ],
+        [
+          13,
+          500
+        ]
+      ],
+      "build_time": 30,
+      "class": 35,
+      "cost": {
+        "gold": 50,
+        "wood": 70
+      },
+      "hit_points": 45,
+      "id": 706,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SALADIN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          1
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          35,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ],
+        [
+          39,
+          -3
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          8,
+          12
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 23,
+      "class": 12,
+      "cost": {
+        "food": 55,
+        "gold": 85
+      },
+      "hit_points": 150,
+      "id": 1296,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 3,
+      "reload": 2,
+      "speed": 1.4,
       "storage": 1,
       "work_rate": 1
     },
@@ -2606,6 +4977,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 47,
       "cost": {
         "food": 80
       },
@@ -2616,6 +4988,117 @@
       "range": 0,
       "reload": 2,
       "speed": 1.2,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SCYTHIAN_SCOUT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          10
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 80
+      },
+      "hit_points": 90,
+      "id": 852,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.5,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SIEGE_RAM": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          -1
+        ],
+        [
+          3,
+          195
+        ],
+        [
+          17,
+          2
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          200
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          20,
+          65
+        ]
+      ],
+      "build_time": 36,
+      "class": 13,
+      "cost": {
+        "gold": 75,
+        "wood": 160
+      },
+      "hit_points": 270,
+      "id": 548,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 5,
+      "speed": 0.6,
       "storage": 1,
       "work_rate": 1
     },
@@ -2682,6 +5165,7 @@
         ]
       ],
       "build_time": 22,
+      "class": 6,
       "cost": {
         "food": 35,
         "wood": 25
@@ -2701,6 +5185,7 @@
       "armor": [],
       "attack": [],
       "build_time": 0,
+      "class": 8,
       "cost": {},
       "hit_points": 0,
       "id": 102,
@@ -2711,6 +5196,220 @@
       "speed": 0,
       "storage": 350,
       "work_rate": 0
+    },
+    "SUBOTAI": {
+      "accuracy": 50,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          15,
+          2
+        ],
+        [
+          8,
+          2
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          5
+        ],
+        [
+          3,
+          12
+        ],
+        [
+          17,
+          5
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 36,
+      "cost": {
+        "gold": 50,
+        "wood": 40
+      },
+      "hit_points": 250,
+      "id": 698,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 5,
+      "reload": 2,
+      "speed": 1.65,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "TAMERLANE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          1
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          0
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          20,
+          3
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "class": 36,
+      "cost": {
+        "gold": 65,
+        "wood": 55
+      },
+      "hit_points": 350,
+      "id": 172,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 4,
+      "reload": 2,
+      "speed": 1.41,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "THEODORIC_THE_GOTH": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          4,
+          10
+        ],
+        [
+          15,
+          3
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 26,
+      "class": 6,
+      "cost": {
+        "food": 80,
+        "gold": 40
+      },
+      "hit_points": 450,
+      "id": 168,
+      "line_of_sight": 3,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.9,
+      "storage": 1,
+      "work_rate": 1
     },
     "THE_ACCURSED_TOWER": {
       "accuracy": 100,
@@ -2755,6 +5454,7 @@
         ]
       ],
       "build_time": 80,
+      "class": 52,
       "cost": {
         "stone": 150
       },
@@ -2766,6 +5466,68 @@
       "reload": 3,
       "speed": 0,
       "storage": 0,
+      "work_rate": 1
+    },
+    "THE_BLACK_PRINCE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          12
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 37,
+      "class": 12,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 370,
+      "id": 161,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.3,
+      "storage": 1,
       "work_rate": 1
     },
     "TRADE_CART_EMPTY": {
@@ -2786,6 +5548,7 @@
       ],
       "attack": [],
       "build_time": 51,
+      "class": 19,
       "cost": {
         "gold": 50,
         "wood": 100
@@ -2822,6 +5585,7 @@
       ],
       "attack": [],
       "build_time": 36,
+      "class": 2,
       "cost": {
         "gold": 50,
         "wood": 100
@@ -2871,6 +5635,7 @@
         ]
       ],
       "build_time": 50,
+      "class": 54,
       "cost": {
         "gold": 200,
         "wood": 200
@@ -2916,6 +5681,7 @@
         ]
       ],
       "build_time": 50,
+      "class": 51,
       "cost": {
         "gold": 200,
         "wood": 200
@@ -2935,6 +5701,7 @@
       "armor": [],
       "attack": [],
       "build_time": 0,
+      "class": 15,
       "cost": {},
       "hit_points": 20,
       "id": 399,
@@ -2945,67 +5712,6 @@
       "speed": 0,
       "storage": 125,
       "work_rate": 0
-    },
-    "TWO_HANDED_SWORDSMAN": {
-      "accuracy": 100,
-      "armor": [
-        [
-          1,
-          0
-        ],
-        [
-          4,
-          1
-        ],
-        [
-          3,
-          1
-        ],
-        [
-          31,
-          0
-        ]
-      ],
-      "attack": [
-        [
-          29,
-          9
-        ],
-        [
-          21,
-          4
-        ],
-        [
-          4,
-          12
-        ],
-        [
-          8,
-          0
-        ],
-        [
-          30,
-          0
-        ],
-        [
-          15,
-          0
-        ]
-      ],
-      "build_time": 21,
-      "cost": {
-        "food": 50,
-        "gold": 20
-      },
-      "hit_points": 65,
-      "id": 473,
-      "line_of_sight": 5,
-      "min_range": 0,
-      "range": 0,
-      "reload": 2,
-      "speed": 0.96,
-      "storage": 1,
-      "work_rate": 1
     },
     "VILLAGER_MALE": {
       "accuracy": 100,
@@ -3050,6 +5756,7 @@
         ]
       ],
       "build_time": 25,
+      "class": 4,
       "cost": {
         "food": 50
       },
@@ -3060,6 +5767,76 @@
       "range": 0,
       "reload": 2,
       "speed": 0.8,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "VYTAUTAS_THE_GREAT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          4
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          15
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "gold": 50,
+        "wood": 40
+      },
+      "hit_points": 220,
+      "id": 1281,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.5,
       "storage": 1,
       "work_rate": 1
     },
@@ -3130,6 +5907,7 @@
         ]
       ],
       "build_time": 25,
+      "class": 12,
       "cost": {
         "food": 170,
         "gold": 85
@@ -3195,6 +5973,7 @@
         ]
       ],
       "build_time": 80,
+      "class": 52,
       "cost": {
         "stone": 125,
         "wood": 35
@@ -3207,6 +5986,116 @@
       "reload": 2,
       "speed": 0,
       "storage": 0,
+      "work_rate": 1
+    },
+    "WILLIAM_THE_CONQUEROR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          4
+        ],
+        [
+          8,
+          4
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          15
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 12,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 250,
+      "id": 849,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.32,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "WILLIAM_WALLACE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          5
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          20
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "class": 6,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 400,
+      "id": 432,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1,
+      "storage": 1,
       "work_rate": 1
     },
     "WINGED_HUSSAR": {
@@ -3272,6 +6161,7 @@
         ]
       ],
       "build_time": 30,
+      "class": 12,
       "cost": {
         "food": 80
       },

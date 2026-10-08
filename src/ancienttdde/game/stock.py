@@ -12,7 +12,7 @@ from typing import cast
 from AoE2ScenarioParser.datasets.techs import TechInfo
 
 from ancienttdde.common.data import digest, integer, object_value, read_object, rows, text_field
-from ancienttdde.game.config import RAIDERS, TOWER_BUILDINGS, WAVE_UNITS
+from ancienttdde.game.config import RAIDERS, TOWER_BUILDINGS, Balance
 
 # DE's damage classes the model reads.
 PIERCE_CLASS = 3
@@ -60,9 +60,9 @@ WATCHED_TECHNOLOGIES: dict[str, int] = {
         "IMPERIAL_AGE",
     )
 } | {"WAR_GALLEY": 34}
+# The units every snapshot holds; the wave schedule's enemies are required on top of them.
 REQUIRED_UNITS = frozenset(
     TOWER_BUILDINGS
-    | WAVE_UNITS
     | RAIDERS["land"]
     | RAIDERS["naval"]
     | {
@@ -109,9 +109,15 @@ class StockCivilization:
     lacks: frozenset[str]
 
 
+# Unit classes no wave may use: boats, buildings, the odds and ends of class 11, monks,
+# walls and gates, relics, packed and unpacked siege engines, and Kings.
+UNWALKABLE_CLASSES = frozenset({2, 3, 11, 18, 20, 21, 22, 27, 39, 42, 43, 51, 53, 54, 59})
+
+
 @dataclass(frozen=True)
 class StockUnit:
     id: int
+    unit_class: int
     hit_points: int
     attacks: tuple[tuple[int, float], ...]
     armors: tuple[tuple[int, float], ...]
@@ -162,7 +168,17 @@ class Stock:
     relic_gold_per_minute: int
 
     def unit(self, name: str) -> StockUnit:
+        if name not in self.units:
+            raise ValueError(f"Stock snapshot lacks a unit: {name}; regenerate it")
         return self.units[name]
+
+    def check_waves(self, balance: Balance) -> None:
+        """Every enemy the schedule names has its stats in the snapshot and can walk a lane."""
+        for wave in balance.waves:
+            if self.unit(wave.unit).unit_class in UNWALKABLE_CLASSES:
+                raise ValueError(
+                    f"{wave.unit} cannot walk a lane: class {self.unit(wave.unit).unit_class}"
+                )
 
     def technology(self, name: str) -> StockTechnology:
         return self.technologies[name]
@@ -212,6 +228,7 @@ def costs(row: dict[str, object], key: str) -> dict[str, int]:
 def load_unit(raw: dict[str, object]) -> StockUnit:
     return StockUnit(
         id=integer(raw, "id", 0, 100000),
+        unit_class=integer(raw, "class", 0, 1000),
         hit_points=integer(raw, "hit_points", 0, 32767),
         attacks=pairs(raw, "attack"),
         armors=pairs(raw, "armor"),

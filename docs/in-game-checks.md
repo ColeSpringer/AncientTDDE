@@ -27,13 +27,23 @@ level; run options are selected in game, in the row of Outposts below the shop.
 - Two nonconsecutive human slots with AI filling the others; AI lanes keep only their
   mills and stay unpaid.
 - Automatic land/water trade startup and pairs spawning without colliding with barriers.
-- Lumber-camp trees start with 32,000 wood each and keep supplying it.
+- An endless tree with 32,000 wood stands behind each lumber tree from the start, and the
+  lumberjacks move on to it once their placed tree is gone.
+- The resource villagers gather gold, berries, stone and wood from the first second
+  without orders; the build-area villagers wait.
 - A player-owned mill beside the berries in all seven defense lanes, including after
   a computer-filled or eliminated lane is cleared.
 - Visible Hay Stack boundaries, blocked expansion rows and reserved tower pads.
 - New towers and age upgrades; bonuses persist without duplication.
 - Multiple enemies crossing exits together, and simultaneous final losses.
 - Each wave ends once its enemies are killed or reach the exit flags.
+- Enemies appear in pairs side by side, one row above and one below the lane's center
+  (threes fill the three rows), and walk in files to the exit.
+- Each of the ten bosses shows at most 32,767 hit points and is refilled from the total the
+  chat announces as towers hit it, so it falls only once that total is spent; its lane's
+  player is told at three quarters, half and a quarter; a boss reaching the exit costs 5
+  lives. Enemies hold their ground between move orders instead of chasing villagers, and no
+  sound plays when they appear.
 - Save/reload in preparation, mid-wave, during elimination and sudden death;
   resource grants, spawn cadence and lives match an uninterrupted run.
 - A disconnected or resigned player; its waves, Kings and purchases stop.
@@ -56,6 +66,9 @@ level; run options are selected in game, in the row of Outposts below the shop.
 - Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
   the shop shows its purchase, destination, lives or credit text from the start; the shop
   has no signs (DE cannot rename them) and the row-end signs are plain markers.
+- The dock offers no Fishing Lines, Gillnets or Galleon, the blacksmith no infantry or
+  archer armor, and a bought castle no unique technology that touches only units no lane
+  has; Celts see none of them.
 - Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, and with Ballistics,
   Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason researched: towers
   hit moving targets and shoot adjacent enemies; a King buys 2000 wood or 1500 stone.
@@ -99,11 +112,16 @@ level; run options are selected in game, in the row of Outposts below the shop.
 
 ## Modes and competition
 
-- Selecting each Outpost below the shop shows its option; only the first human lane's
-  selection changes a run option, once per selection, even when something else is
-  selected within the same second. Options stay fixed after the first wave or the first
-  practice control; the run options then disappear, and the practice controls too unless
-  the run is Practice.
+- The chooser's view opens on the run options, with "Run options close in" counting down
+  60 game seconds and two on-screen lines naming the options and practice controls left to
+  right; whether DE draws each Outpost's and pad unit's caption beside it (the one-word
+  labels) or shows them nowhere. Selecting an Outpost shows its full option.
+- The first human lane's first selection fixes the options and begins preparation at once,
+  even when it is the default (Standard in a competitive game keeps PvP off); a later
+  selection, or one by another lane, changes nothing
+  and is explained to that player. Without a selection, Standard or PvP off stands when
+  the countdown ends. The run options then disappear with their lines, and the practice
+  controls too unless the run is Practice.
 - Solo: Easiest plays Easy and Hard plays Hard (the opening chat names the level and gold
   per King); competitive games play Normal whatever the lobby says.
 - Practice: start next wave, Kings, resources and lives each work once per selection, and

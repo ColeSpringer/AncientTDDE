@@ -63,6 +63,8 @@ int classOf(int type) {
     switch (type) {
         case 17: return 2;                                // Trade Cog
         case 68: case 129: case 130: case 131: return 3;  // Mill and its age forms
+        case 50: return 49;                               // Farm
+        case 286: return 43;                              // Monk with Relic
         case 82: case 598: return 3;                      // Castle, Outpost
         case 83: case 293: return 4;                      // Villager
         case 125: return 18;                              // Monk
@@ -114,6 +116,9 @@ vector xsGetUnitPosition(int id) { return units.at(id).pos; }
 vector xsVectorSet(float x, float y, float z) { return {x, y, z}; }
 std::array<int, 9> kingsCreated{};
 std::array<std::map<int, int>, 9> created{};
+// Enemies the XS created, by the lane whose rows they appeared in.
+std::array<int, 9> spawns{};
+int laneOfRow(float y);
 // A unit, building or object on the spot blocks a collision-checked creation, as in DE.
 int xsCreateUnit(int type, int owner, vector pos, bool, bool, bool checkCollision) {
     if (checkCollision)
@@ -123,6 +128,7 @@ int xsCreateUnit(int type, int owner, vector pos, bool, bool, bool checkCollisio
     units.emplace(id, Unit{type, pos, 100, owner});
     ++created[owner][type];
     if (type == 434) ++kingsCreated[owner];
+    if (owner == 8) { int lane = laneOfRow(pos[1]); if (lane > 0) ++spawns[lane]; }
     return id;
 }
 float xsVectorGetX(vector pos) { return pos[0]; }
@@ -146,7 +152,11 @@ void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n';
 int lane(int player, int field) { return xsTriggerVariable(laneVariable(player, field)); }
 void setLane(int player, int field, int value) { xsSetTriggerVariable(laneVariable(player, field), value); }
 int phase() { return xsTriggerVariable(vPhase); }
-std::array<int, 9> grants{}, spawns{}, cleanups{}, attacks{};
+int laneOfRow(float y) {
+    for (int p = 1; p <= 7; ++p) if (y >= laneLowY(p) && y < laneHighY(p) + 1) return p;
+    return 0;
+}
+std::array<int, 9> grants{}, cleanups{}, attacks{}, acknowledged{};
 std::array<std::vector<int>, 9> bought{};
 // Message codes each lane's native message triggers delivered to its player.
 std::array<std::vector<int>, 9> sent{};
@@ -159,11 +169,11 @@ void resetXsBuffers() {
     ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientLeakCounts=-1;
     ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPads=-1;
     ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientLastNotice=-1;
-    ancientSpawnArray=-1; ancientVillagerArray=-1;
+    ancientSpawnArray=-1; ancientVillagerArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
 }
 // Endless growth levels and armor steps the native triggers applied, and countdowns shown.
 std::vector<int> endlessLevels;
-int armorSteps = 0, waveTimers = 0, timerClears = 0;
+int armorSteps = 0, waveTimers = 0, timerClears = 0, choiceTimers = 0;
 // Native triggers acknowledge one request per lane each pass, as the generated ones do.
 void nativeEffects() {
     if (xsTriggerVariable(vEndlessRequest) > 0) {
@@ -174,8 +184,12 @@ void nativeEffects() {
         ++armorSteps;
         xsSetTriggerVariable(vArmorRequest, xsTriggerVariable(vArmorRequest) - 1);
     }
+    // The configure triggers set a scheduled wave's enemies up before any batch may spawn.
+    int configuring = xsTriggerVariable(vWave);
+    if (configuring >= 0 && configuring < cWaveCount) xsSetTriggerVariable(vConfigured, configuring + 1);
     if (xsTriggerVariable(vWaveDisplay) == 1) ++waveTimers;
     if (xsTriggerVariable(vWaveDisplay) == 2) ++timerClears;
+    if (xsTriggerVariable(vWaveDisplay) == 3) ++choiceTimers;
     xsSetTriggerVariable(vWaveDisplay, 0);
     for (int p=1; p<=7; ++p) {
         if (lane(p, fActive) && !lane(p, fInitialized)) { ++grants[p]; setLane(p, fInitialized, 1); }
@@ -204,13 +218,8 @@ void nativeEffects() {
         }
         if (lane(p, fActive) && lane(p, fAttack) > 0) { ++attacks[p]; setLane(p, fAttack, lane(p, fAttack) - 1); }
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
-        int wave = lane(p, fSpawn) - 1;
-        if (lane(p, fActive) && wave >= 0) {
-            spawns[p] += waveCount(wave);
-            for (int i=0; i<waveCount(wave); ++i)
-                units.emplace(sequence++, Unit{waveUnit(wave), {float(laneSpawnX(p)), float(laneY(p)), 0}});
-            setLane(p, fSpawn, 0);
-        }
+        // The XS creates each batch; the lane's trigger sends it down the lane and clears the flag.
+        if (lane(p, fActive) && lane(p, fSpawn)) { ++acknowledged[p]; setLane(p, fSpawn, 0); }
     }
 }
 // Waves clear the field each second; a lane's own Kings and life display stay.
@@ -226,6 +235,17 @@ void start(std::initializer_list<int> humans) {
     for (int p:humans) playerTypes[p]=cPlayerTypeHuman;
     for (int p=1; p<=7; ++p) units.emplace(laneLife(p), Unit{598, {134.5f, 67.5f + 3 * (p - 1), 0}, 500, p});
     tick();
+}
+// A fresh game in the same process: every record of the previous one is cleared, while the
+// case's own setup (civilizations, lobby difficulty) stays.
+void restart(std::initializer_list<int> humans) {
+    variables.fill(0); units.clear(); chat.clear(); researched.clear(); techStates.clear();
+    for (int p=0; p<9; ++p) { sent[p].clear(); bought[p].clear(); attributes[p].clear(); created[p].clear(); }
+    outpostHitpoints.fill(500);
+    kingsCreated.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); attacks.fill(0); acknowledged.fill(0);
+    endlessLevels.clear(); armorSteps = waveTimers = timerClears = choiceTimers = 0;
+    resetXsBuffers();
+    start(humans);
 }
 void advanceTo(int desired) {
     for(int n=0; n<10000 && phase()!=desired; ++n) tick(true);
@@ -282,6 +302,8 @@ void competitive(std::initializer_list<int> humans, bool pvp=true) {
     if (pvp) { select(xsTriggerVariable(vChooser), cControlPvpOn); tick(); }
     advanceTo(sWave);
 }
+// Runs of the schedule's length in text, for the result and wave announcements.
+string waveNumber(int offset) { return ancientText(cWaveCount + offset); }
 int unitsOf(int player, int type) {
     int count = 0;
     for (auto &[id, u] : units) if (u.owner == player && u.type == type) ++count;
@@ -300,7 +322,7 @@ int main(int argc, char** argv) {
         for(int p=1;p<=7;++p) {
             berryMills[p]=sequence;
             units.emplace(sequence++, Unit{68, {84, float(laneY(p)), 0}, 100, p});
-            for(int type: {293, 79, 128, 17, 601, 434}) {
+            for(int type: {293, 79, 128, 17, 601, 434, 50, 286}) {
                 laneUnits[p].push_back(sequence);
                 units.emplace(sequence++, Unit{type, {85.5, float(laneY(p))-1.5f, 0}, 100, p});
             }
@@ -402,7 +424,7 @@ int main(int argc, char** argv) {
         select(4, cControlEndless); tick();
         reachWave(cWaveCount + 1);
         require(phase()!=sVictory && xsTriggerVariable(vStage)==cStageEndless, "Endless stopped at the finale");
-        require(mentions("Endless wave 1 (wave 16)")==1 && mentions("Endless wave 2 (wave 17)")==1,
+        require(mentions("Endless wave 1 (wave " + waveNumber(1) + ")")==1 && mentions("Endless wave 2 (wave " + waveNumber(2) + ")")==1,
                 "Endless waves were not announced");
         int first = endlessTemplate(0), second = endlessTemplate(1);
         require(spawns[4] > 0 && xsTriggerVariable(vConfigured)==second + 1, "Endless waves did not spawn their template");
@@ -440,8 +462,8 @@ int main(int argc, char** argv) {
         attributes[8][cAttributeKillsByPlayer1+3]=4567;
         setLane(4, fLives, 0); tick(); tick();
         require(phase()==sDefeat, "The endless run did not end when its lane fell");
-        string minutes = ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
-        require(mentions("Result: Endless run on Normal: 17 waves cleared (2 endless), 0 lives left, 4567 kills, " + minutes + ".")==1,
+        string minutes = ancientCount((xsTriggerVariable(vEconomy) + xsTriggerVariable(vSetupElapsed)) / 60, "game minute", "game minutes");
+        require(mentions("Result: Endless run on Normal: " + waveNumber(2) + " waves cleared (2 endless), 0 lives left, 4567 kills, " + minutes + ".")==1,
                 "The endless result was not shown");
     } else if(test=="resume_endless") {
         start({4});
@@ -488,10 +510,100 @@ int main(int argc, char** argv) {
         tick(); require(lane(2,fLives)==cLives-4 && lane(7,fLives)==cLives-4, "Leaks were not counted exactly once");
         tick(); require(lane(2,fLives)==cLives-4, "Leak charged twice");
     } else if(test=="first_wave") {
-        // Fast is DE's 2x lobby speed: the first pair should arrive about two real minutes in.
-        start({7}); int seconds=1;
+        // Fast is DE's 2x lobby speed: once the run option is chosen, the first pair arrives
+        // about two real minutes in.
+        start({7}); select(7, cControlStandard); int seconds=1;
         while(spawns[7]==0 && seconds<1000) { tick(true); ++seconds; }
         require(seconds>=230 && seconds<=250, "First enemies did not arrive about 240 game seconds in");
+    } else if(test=="choice_timeout") {
+        // Without a selection the window runs out, Standard stands and preparation begins.
+        start({7}); require(phase()==sSetup && choiceTimers==0, "The countdown ran before the window's first second");
+        tick(true); require(choiceTimers==1 && xsTriggerVariable(vRemaining)==cChoice-1, "The countdown did not start with the window");
+        for(int n=0;n<cChoice-2;++n) { tick(true); require(phase()==sSetup, "Preparation began before the window closed"); }
+        tick(true);
+        require(phase()==sPreparation && xsTriggerVariable(vLocked)==1 && xsTriggerVariable(vMode)==cModeStandard,
+                "The window's end did not fix Standard and begin preparation");
+        require(xsTriggerVariable(vSetupElapsed)==cChoice && xsTriggerVariable(vRemaining)==cPreparation,
+                "The window's seconds were not counted into the run");
+        require(mentions("Prepare your towers")==1 && mentions("Standard run on Normal.")==1, "Preparation was not announced");
+        select(7, cControlEndless); tick(true);
+        require(xsTriggerVariable(vMode)==cModeStandard && told(7, cMessageOptionsFixed)==1, "A late selection changed the options");
+    } else if(test=="choice_once") {
+        // The first selection decides: preparation begins at once and nothing else is taken.
+        start({3}); tick(); tick();
+        select(3, cControlEndless); tick();
+        require(phase()==sPreparation && xsTriggerVariable(vMode)==cModeEndless && xsTriggerVariable(vLocked)==1,
+                "The selection did not fix Endless and begin preparation");
+        require(xsTriggerVariable(vSetupElapsed)==3 && xsTriggerVariable(vRemaining)==cPreparation,
+                "The selection's second was not counted as the window's");
+        require(xsTriggerVariable(vEconomy)==0, "The economy clock ran during the window");
+        require(mentions("P3 chose Endless")==1 && mentions("Endless run on Normal.")==1 && mentions("Prepare your towers")==1,
+                "The choice and preparation were not announced once");
+        select(3, 0); tick(); select(3, cControlStandard); tick();
+        require(xsTriggerVariable(vMode)==cModeEndless && told(3, cMessageOptionsFixed)==1, "A second selection was taken");
+        restart({4}); select(4, cControlStandard); tick();
+        require(phase()==sPreparation && xsTriggerVariable(vMode)==cModeStandard, "Selecting the default did not count as a choice");
+    } else if(test=="spawn_rows") {
+        // A pair appears side by side across the lane, a triple with one in the middle.
+        start({2}); advanceTo(sWave); tick();
+        std::vector<float> rows;
+        for(auto &[id, u] : units) if(u.owner==8) { require(u.pos[0]==laneSpawnX(2)+0.5f, "An enemy appeared off the spawn column"); rows.push_back(u.pos[1]); }
+        std::sort(rows.begin(), rows.end());
+        require(rows==std::vector<float>({laneY(2)-0.5f, laneY(2)+1.5f}), "The pair did not appear one row above and below the center");
+        int triple=-1; for(int w=0;w<cWaveCount;++w) if(waveCount(w)==3) { triple=w; break; }
+        require(triple>=0, "The schedule has no batches of three");
+        reachWave(triple); tick(true);
+        for(int n=0;n<10 && spawns[2]==0;++n) tick();
+        rows.clear();
+        for(auto &[id, u] : units) if(u.owner==8) rows.push_back(u.pos[1]);
+        std::sort(rows.begin(), rows.end());
+        require(rows==std::vector<float>({laneY(2)-0.5f, laneY(2)+0.5f, laneY(2)+1.5f}), "A triple did not fill the three rows");
+    } else if(test=="boss_hitpoints") {
+        // A boss comes alone at the attribute's limit and draws the rest from its lane's
+        // reservoir as it is hit, so it falls only once the whole amount is spent.
+        start({5}); reachWave(cWaveCount-1); tick(true);
+        int boss=-1; for(auto &[id, u] : units) if(u.owner==8) boss=id;
+        require(boss>=0 && units.at(boss).type==waveUnit(cWaveCount-1), "The last boss did not appear");
+        int total = waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + cWaveCount - 1);
+        require(total > cHitPointCap && units.at(boss).hp == float(cHitPointCap) && lane(5, fBoss)==total, "The boss did not bring its reservoir");
+        tick();
+        require(units.at(boss).hp == float(cHitPointCap) && lane(5, fBoss)==total, "The boss was not topped up without being hit");
+        units.at(boss).hp -= 10000; tick();
+        require(units.at(boss).hp == float(cHitPointCap) && lane(5, fBoss)==total-10000, "Damage did not leave the reservoir and refill the unit");
+        units.at(boss).hp += 5; tick();
+        require(lane(5, fBoss)==total-10000, "Regeneration counted against the reservoir");
+        require(told(5, cMessageBossThreeQuarters)==0, "A quarter was announced early");
+        setLane(5, fBoss, total * 3 / 4 + 100); units.at(boss).hp -= 200; tick();
+        require(told(5, cMessageBossThreeQuarters)==1, "Three quarters left was not announced");
+        setLane(5, fBoss, total / 2 + 100); units.at(boss).hp -= 200; tick(); tick();
+        require(told(5, cMessageBossHalf)==1 && told(5, cMessageBossThreeQuarters)==1, "Half left was not announced once");
+        setLane(5, fBoss, cHitPointCap + 50); units.at(boss).hp -= 100; tick();
+        require(lane(5, fBoss)==cHitPointCap-50 && units.at(boss).hp == float(cHitPointCap-50), "The last of the reservoir did not drain the unit");
+        require(told(5, cMessageBossQuarter)==1, "A quarter left was not announced");
+        units.at(boss).hp -= 20; tick();
+        require(units.at(boss).hp == float(cHitPointCap-70) && lane(5, fBoss)==cHitPointCap-70, "The drained unit was topped up");
+        bool plain=true; for(int w=0;w<cWaveCount;++w) if(waveBoss(w)==0 && waveHitPoints(w) > cHitPointCap) plain=false;
+        require(plain, "A regular wave exceeds the attribute's limit");
+        // A reload forgets the last sight of the boss but keeps its reservoir.
+        auto saved=variables; resetXsBuffers(); variables=saved; tick();
+        require(lane(5, fBoss)==cHitPointCap-70 && units.at(boss).hp == float(cHitPointCap-70), "A reload changed the reservoir");
+    } else if(test=="boss_leak") {
+        start({2,7});
+        units.emplace(sequence++, Unit{waveUnit(cWaveCount-1), {float(laneExitX(2)), float(laneY(2)), 0}});
+        units.emplace(sequence++, Unit{waveUnit(0), {float(laneExitX(7)), float(laneY(7)), 0}});
+        tick();
+        require(lane(2,fLives)==cLives-cBossLeakLives && lane(7,fLives)==cLives-1, "A boss leak did not cost its lives");
+        require(mentions("P2 lost " + ancientText(cBossLeakLives) + " lives")==1, "The boss leak was not reported");
+    } else if(test=="pvp_waits_for_first_wave") {
+        start({1,7}); select(1, cControlPvpOn); tick();
+        require(phase()==sPreparation && xsTriggerVariable(vPvp)==1 && xsTriggerVariable(vLocked)==1, "PvP on did not fix the options");
+        require(mentions("are for sale.")==0 && mentions("go on sale when the first wave starts")==1, "The lock claimed raiders were already for sale");
+        kingsOn(1, cBuyLandRaider, 3);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && told(1, cMessagePvpOff)==1, "A raider was sold during preparation");
+        advanceTo(sWave);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuyLandRaider}, "The raider was not sold once the first wave started");
     } else if(test=="exit_arrival") {
         // A DE trial left a militia sent to exit tile (56, 15) standing at (55.97, 15.0).
         start({2,7});
@@ -603,7 +715,7 @@ int main(int argc, char** argv) {
         start({1});
         require(kingGold(xsTriggerVariable(vDifficulty)) > 2000, "The case needs a King price above the gold paid");
         setLane(1, fOwned, own({cBuyGold1000, cBuyKingEveryMinute}));
-        for(int n=0;n<cSetup;++n) tick(true);
+        for(int n=0;n<cChoice;++n) tick(true);
         require(xsTriggerVariable(vEconomy)<=1 && kingsCreated[1]==0, "Investments paid during setup");
         advanceEconomy(240-xsTriggerVariable(vEconomy));
         tick(true);
@@ -795,7 +907,7 @@ int main(int argc, char** argv) {
         start({2,5});
         require(xsTriggerVariable(vChooser)==2 && xsTriggerVariable(vPvp)==0,
                 "Competition did not default to PvP off, chosen by the first lane");
-        require(mentions("P2: PvP is off; select PvP on below the shop before the first wave")==1,
+        require(mentions("P2: PvP is off; select PvP on below the shop within " + ancientText(cChoice) + " game seconds")==1,
                 "The chooser was not invited to switch PvP on");
         require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "Competition ignored its fixed difficulty");
     } else if(test=="pvp_opt_in") {
@@ -824,11 +936,9 @@ int main(int argc, char** argv) {
         require(xsTriggerVariable(vMode)==cModeEndless && mentions("P3 chose Endless")==1, "Endless was not chosen");
         tick(); tick();
         require(mentions("P3 chose Endless")==1, "A held selection acted again");
-        select(3, 0); tick();
-        select(3, cControlPractice); tick();
-        require(xsTriggerVariable(vMode)==cModePractice, "Practice was not chosen");
-        select(3, cControlStandard); tick();
-        require(xsTriggerVariable(vMode)==cModeStandard, "Standard was not chosen back");
+        restart({4});
+        select(4, cControlPractice); tick();
+        require(xsTriggerVariable(vMode)==cModePractice && phase()==sPreparation, "Practice was not chosen");
     } else if(test=="options_reload_held") {
         start({3});
         select(3, cControlEndless); tick();
@@ -844,11 +954,22 @@ int main(int argc, char** argv) {
         require(xsTriggerVariable(vPvp)==1 && mentions("P2 switched PvP on")==1, "The chooser could not switch PvP on");
         select(2, 0); tick();
         select(2, cControlPvpOff); tick();
-        require(xsTriggerVariable(vPvp)==0, "PvP did not switch back off");
+        require(xsTriggerVariable(vPvp)==1 && told(2, cMessageOptionsFixed)==1, "PvP switched back off after the choice");
+        restart({3,6});
+        select(3, cControlPvpOff); tick();
+        require(xsTriggerVariable(vPvp)==0 && phase()==sPreparation && mentions("P3 chose PvP off")==1,
+                "Choosing PvP off did not fix the options and begin preparation");
+        require(mentions("PvP is off: no raiders or siege in this game.")==0 && mentions("are for sale.")==0,
+                "The lock repeated or contradicted the choice");
     } else if(test=="options_solo_only") {
         start({2,5});
         select(2, cControlEndless); tick();
         require(xsTriggerVariable(vMode)==cModeStandard && told(2, cMessageSoloModes)==1, "Competition chose a solo mode");
+        require(phase()==sSetup && xsTriggerVariable(vLocked)==0, "A refused solo mode fixed the options");
+        select(2, 0); tick(); select(2, cControlStandard); tick();
+        require(phase()==sPreparation && xsTriggerVariable(vLocked)==1 && xsTriggerVariable(vPvp)==0,
+                "Standard did not fix the options of a competitive game");
+        require(mentions("P2 chose Standard with PvP off")==1, "The Standard choice was not announced");
     } else if(test=="options_pvp_solo") {
         start({1});
         select(1, cControlPvpOn); tick();
@@ -900,7 +1021,7 @@ int main(int argc, char** argv) {
         start({7});
         finishSchedule();
         require(phase()==sVictory, "The solo run was not won");
-        require(mentions("Result: Standard run on Normal: 15 waves cleared")==1, "The result did not summarize the run");
+        require(mentions("Result: Standard run on Normal: " + waveNumber(0) + " waves cleared")==1, "The result did not summarize the run");
         require(xsTriggerVariable(vCleared)==cWaveCount, "The cleared waves were not counted");
     } else if(test=="results_practice") {
         start({7});
@@ -914,7 +1035,7 @@ int main(int argc, char** argv) {
         advanceTo(sWave);
         attributes[8][cAttributeKillsByPlayer1+6]=123;
         setLane(7, fLives, 0); tick(); tick();
-        string minutes = ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
+        string minutes = ancientCount((xsTriggerVariable(vEconomy) + xsTriggerVariable(vSetupElapsed)) / 60, "game minute", "game minutes");
         require(phase()==sDefeat && mentions("Result: Standard run on Normal: 0 waves cleared, 0 lives left, 123 kills, " + minutes + ".")==1,
                 "A defeat did not summarize the run");
     } else if(test=="raider_pvp_off") {
@@ -968,16 +1089,16 @@ int main(int argc, char** argv) {
         civilizations[3]=200;
         start({3});
         advanceTo(sPreparation);
-        require(mentions("P3: default profile: +1 starting King.")==1,
+        require(mentions("P3: default profile: +3 starting Kings.")==1,
                 "The default profile was not announced for an unknown civilization");
-        require(kingsCreated[3]==1 && lane(3,fKings)==0, "An unknown civilization did not receive the default King");
+        require(kingsCreated[3]==3 && lane(3,fKings)==0, "An unknown civilization did not receive the default Kings");
         int price = kingGold(xsTriggerVariable(vDifficulty));
         attributes[3][cAttributeGold]=price - 1;
         tick(true);
         require(resource(3, cAttributeGold)==price - 1, "An unknown civilization converted gold below the price");
         attributes[3][cAttributeGold]=price;
         tick(true);
-        require(resource(3, cAttributeGold)==0 && lane(3,fKings)+kingsCreated[3]==2, "An unknown civilization did not convert at the full price");
+        require(resource(3, cAttributeGold)==0 && lane(3,fKings)+kingsCreated[3]==4, "An unknown civilization did not convert at the full price");
         attributes[8][cAttributeKillsByPlayer1+2]=cKillsPerReward;
         tick(true);
         require(resource(3, cAttributeStone)==cKillStone && resource(3, cAttributeWood)==cKillWood, "An unknown civilization's kill rewards were scaled");
@@ -1179,7 +1300,7 @@ int main(int argc, char** argv) {
     } else if(test=="sudden_labels") {
         start({1,7});
         reachWave(cWaveCount + 1);
-        require(mentions("Sudden death wave 1 (wave 16)")==1 && mentions("Next: sudden death wave 2 (wave 17)")==1,
+        require(mentions("Sudden death wave 1 (wave " + waveNumber(1) + ")")==1 && mentions("Next: sudden death wave 2 (wave " + waveNumber(2) + ")")==1,
                 "Sudden death waves were not announced as such");
         require(mentions("ndless wave")==0, "Sudden death waves were announced as Endless");
     } else if(test=="practice_repeat") {

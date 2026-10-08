@@ -7,32 +7,36 @@ from pathlib import Path
 from typing import cast
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
+from AoE2ScenarioParser.datasets.heroes import HeroInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
-from ancienttdde.game.restricted import TECHNOLOGIES
+from ancienttdde.game.restricted import POINTLESS, TECHNOLOGIES
 from ancienttdde.game.sites import LaneSites, RaiderMedium, Tile, TradeMedium, load_sites
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import technology
 
-WAVE_UNITS = frozenset(
-    {
-        "VILLAGER_MALE",
-        "MILITIA",
-        "MAN_AT_ARMS",
-        "LONG_SWORDSMAN",
-        "TWO_HANDED_SWORDSMAN",
-        "CHAMPION",
-        "SPEARMAN",
-        "PIKEMAN",
-        "SCOUT_CAVALRY",
-        "KNIGHT",
-        "CAVALIER",
-        "PALADIN",
-        "CAMEL_RIDER",
-        "WAR_ELEPHANT",
-    }
-)
+# DE stores unit hit points in 16 bits. A boss may carry more: its current hit points are
+# a float the engine keeps, so the XS tops a boss up after creating it.
+MAX_HIT_POINTS = 32767
+BOSS_HIT_POINTS = 5_000_000
+# The schedule may hold this many waves; every wave is a trigger per difficulty level.
+MAX_WAVES = 60
+# A batch stands side by side across the lane: one row above and below its center, or three
+# rows. The lane's path must hold those rows.
+MAX_BATCH = 3
+PATH_ROWS = 3
+
+
+def wave_unit(name: str) -> int:
+    """The object ID of a wave unit: a unit or a hero the pinned dataset names, other than
+    the King the shop counts."""
+    if name == "KING":
+        raise ValueError("The King is the shop's currency, not a wave unit")
+    for dataset in (UnitInfo, HeroInfo):
+        if name in dataset.__members__:
+            return dataset[name].ID
+    raise ValueError(f"Unknown wave unit: {name}")
 
 
 @dataclass(frozen=True)
@@ -45,18 +49,22 @@ class WaveDefinition:
     duration: int
     hit_points: int
     boss: bool
+    # The pierce armor the enemies carry instead of the unit's own, when the schedule says.
+    pierce_armor: int | None = None
 
     @property
     def object_id(self) -> int:
-        return UnitInfo[self.unit].ID
+        return wave_unit(self.unit)
+
+    @property
+    def enemies(self) -> int:
+        return self.count * self.batches
 
 
 # Building definitions that tower purchases may modify; anything else is rejected.
 TOWER_BUILDINGS = frozenset(
     {"WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER", "DONJON", "THE_ACCURSED_TOWER"}
 )
-# DE stores unit hit points in 16 bits.
-MAX_HIT_POINTS = 32767
 # Ages and tower upgrades are granted by the game or sold at the shop, never given at the start.
 RESERVED_TECHNOLOGIES = frozenset(
     {"FEUDAL_AGE", "CASTLE_AGE", "IMPERIAL_AGE", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"}
@@ -253,7 +261,10 @@ class Practice:
 @dataclass(frozen=True)
 class Balance:
     lives: int
-    setup_seconds: int
+    # Lives a leaking boss costs; any other enemy costs one.
+    boss_leak_lives: int
+    # The most the game waits for the chooser's run option before preparation begins.
+    choice_seconds: int
     preparation_seconds: int
     intermission_seconds: int
     max_enemies_per_lane: int
@@ -270,16 +281,18 @@ class Balance:
     @property
     def scheduled_seconds(self) -> int:
         return (
-            self.setup_seconds
+            self.choice_seconds
             + self.preparation_seconds
             + sum(w.duration for w in self.waves)
             + self.intermission_seconds * (len(self.waves) - 1)
         )
 
     def hit_points(self, wave: int, difficulty: int) -> int:
-        """A scheduled wave's enemy hit points at a difficulty level, within the engine limit."""
+        """A scheduled wave's enemy hit points at a difficulty level: within the engine's
+        attribute limit, or a boss's larger current hit points."""
         percent = self.difficulty.levels[difficulty].hit_points_percent
-        return min(MAX_HIT_POINTS, (self.waves[wave].hit_points * percent + 50) // 100)
+        limit = BOSS_HIT_POINTS if self.waves[wave].boss else MAX_HIT_POINTS
+        return min(limit, (self.waves[wave].hit_points * percent + 50) // 100)
 
     def endless_hit_points(self, level: int, position: int, difficulty: int) -> int:
         """Hit points of an endless template's enemies after `level` rounds of growth."""
@@ -317,7 +330,7 @@ def technologies(raw: dict[str, object], key: str) -> tuple[str, ...]:
         identifier = technology(name)
         if name in RESERVED_TECHNOLOGIES:
             raise ValueError(f"{name} cannot be a starting technology: the game grants or sells it")
-        if name in UNRESEARCHABLE or identifier in TECHNOLOGIES:
+        if name in UNRESEARCHABLE or identifier in TECHNOLOGIES or identifier in POINTLESS:
             raise ValueError(f"{name} cannot be a starting technology: the game rules it out")
         if name in listed:
             raise ValueError(f"Technology listed twice: {name}")
@@ -409,6 +422,9 @@ def load_endless(raw: dict[str, object], waves: tuple[WaveDefinition, ...]) -> E
             raise ValueError(f"Unknown endless template: {name}")
         if keys.index(name) in templates:
             raise ValueError(f"Endless template listed twice: {name}")
+        # Endless enemies stay within the attribute's limit, which a boss's hit points exceed.
+        if waves[keys.index(name)].boss:
+            raise ValueError(f"A boss cannot be an endless template: {name}")
         # Each template's enemies get their own hit points, so no two may share a unit.
         if waves[keys.index(name)].unit in {waves[t].unit for t in templates}:
             raise ValueError(f"Endless templates share a unit: {name}")
@@ -458,13 +474,12 @@ def load_siege(raw: dict[str, object]) -> Siege:
 
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if raw.get("schema_version") != 5:
+    if raw.get("schema_version") != 6:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):
         key, unit = text_field(row, "key"), text_field(row, "unit")
-        if unit not in WAVE_UNITS:
-            raise ValueError(f"Unknown wave unit: {unit}")
+        wave_unit(unit)
         boss = row.get("boss")
         if type(boss) is not bool:
             raise ValueError("boss must be a boolean")
@@ -472,24 +487,34 @@ def load_balance(path: Path) -> Balance:
             key=key,
             unit=unit,
             boss=boss,
-            count=integer(row, "count", 1, 5),
+            count=integer(row, "count", 1, MAX_BATCH),
             batches=integer(row, "batches", 1, 80),
             interval=integer(row, "interval", 2, 120),
             duration=integer(row, "duration", 1, 600),
-            hit_points=integer(row, "hit_points", 1, MAX_HIT_POINTS),
+            hit_points=integer(row, "hit_points", 1, BOSS_HIT_POINTS if boss else MAX_HIT_POINTS),
+            pierce_armor=integer(row, "pierce_armor", 0, 500) if "pierce_armor" in row else None,
         )
         if (wave.batches - 1) * wave.interval >= wave.duration:
             raise ValueError(f"Wave duration cannot contain all batches: {key}")
+        # A boss comes alone: its hit points are a reservoir the engine keeps for one unit.
+        if boss and (wave.count != 1 or wave.batches != 1):
+            raise ValueError(f"A boss wave spawns one enemy: {key}")
         if key in {w.key for w in waves}:
             raise ValueError(f"Duplicate wave key: {key}")
         waves.append(wave)
-    if not waves or len(waves) > 30 or not waves[-1].boss:
-        raise ValueError("waves must contain 1–30 entries ending in a boss")
+    if not waves or len(waves) > MAX_WAVES or not waves[-1].boss:
+        raise ValueError(f"waves must contain 1–{MAX_WAVES} entries ending in a boss")
+    # A leak costs lives by the enemy's type, so a boss's unit is a boss's alone.
+    regular_units = {w.unit for w in waves if not w.boss}
+    for wave in waves:
+        if wave.boss and wave.unit in regular_units:
+            raise ValueError(f"A boss unit cannot also be a regular wave's: {wave.unit}")
     interaction = object_value(raw.get("interaction"), "interaction")
     practice = object_value(raw.get("practice"), "practice")
     balance = Balance(
         lives=integer(raw, "lives", 1, 100),
-        setup_seconds=integer(raw, "setup_seconds", 2, 30),
+        boss_leak_lives=integer(raw, "boss_leak_lives", 1, 100),
+        choice_seconds=integer(raw, "choice_seconds", 10, 300),
         preparation_seconds=integer(raw, "preparation_seconds", 1, 600),
         intermission_seconds=integer(raw, "intermission_seconds", 1, 120),
         max_enemies_per_lane=integer(raw, "max_enemies_per_lane", 5, 100),
@@ -560,6 +585,8 @@ def load_lanes(anchors: dict[str, object]) -> tuple[EngineLane, ...]:
         ex, ey = coordinates["exit"]
         if not (x1 <= sx < ex <= x2 and y1 <= sy == ey <= y2):
             raise ValueError(f"Invalid lane route: {prefix}")
+        if not (y1 + PATH_ROWS // 2 <= sy <= y2 - PATH_ROWS // 2):
+            raise ValueError(f"Lane path must hold {PATH_ROWS} rows around its center: {prefix}")
         ax1, ay1, ax2, ay2 = coordinates["economy"]
         if not (ax1 <= ax2 and ay1 <= ay2):
             raise ValueError(f"Invalid economy region: {prefix}")

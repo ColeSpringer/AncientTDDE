@@ -1,13 +1,16 @@
 """Objectives that appear once they apply: the run's mode, sudden death, the siege, the result."""
 
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
+
 from ancienttdde.game.controls import MODES
 from ancienttdde.game.script import STAGES, State
 from ancienttdde.game.triggers import Game
-from ancienttdde.scenario.triggers import effect
+from ancienttdde.scenario.triggers import TriggerHandle, effect
 
 
-def objective(game: Game, key: str, text: str, description: str, *, shown: bool = False) -> int:
-    """An objective that shows its text, with live variables, from the start or once revealed."""
+def listed(game: Game, key: str, text: str, description: str, *, shown: bool) -> TriggerHandle:
+    """An objective trigger showing its text on screen while it is enabled and has not fired;
+    the caller adds the conditions that complete it, or one that never holds."""
     trigger = game.scenario.trigger_manager.add_trigger(
         key,
         short_description=text,
@@ -18,15 +21,30 @@ def objective(game: Game, key: str, text: str, description: str, *, shown: bool 
         execute_on_load=False,
     )
     game.names.register("trigger", key, trigger.trigger_id)
+    return trigger
+
+
+def objective(game: Game, key: str, text: str, description: str, *, shown: bool = False) -> int:
+    """An objective that shows its text, with live variables, from the start or once revealed."""
+    trigger = listed(game, key, text, description, shown=shown)
     # Never fires: it only displays its text.
     game.value(trigger, "game.phase", -1)
     return trigger.trigger_id
 
 
-def reveal(game: Game, key: str, target: int, values: dict[str, int]) -> None:
+def reveal(
+    game: Game,
+    key: str,
+    target: int,
+    values: dict[str, int],
+    at_least: dict[str, int] | None = None,
+) -> None:
+    """Activate an objective once the named variables hold these values, or reach them."""
     trigger = game.trigger(key, looping=False)
     for name, value in values.items():
         game.value(trigger, name, value)
+    for name, value in (at_least or {}).items():
+        game.value(trigger, name, value, Comparison.LARGER_OR_EQUAL)
     effect(trigger, "activate_trigger", trigger_id=target)
 
 
@@ -64,7 +82,8 @@ def run_objectives(game: Game) -> None:
         f"{variable('game.siege_cooldown')} s",
         "One player at a time holds the siege; its buyer waits longer than everyone else.",
     )
-    reveal(game, "game.reveal.siege", siege, {"game.pvp": 1} | fixed)
+    # The siege is for sale from the first wave of a competitive game with PvP on.
+    reveal(game, "game.reveal.siege", siege, {"game.pvp": 1}, at_least={"game.wave": 0})
     result = objective(
         game,
         "game.objective.result",

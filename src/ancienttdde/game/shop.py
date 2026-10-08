@@ -23,6 +23,7 @@ from ancienttdde.game.catalog import (
     TowerAttack,
     Traders,
     Villagers,
+    display_captions,
 )
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import around, at
@@ -213,7 +214,19 @@ def place_displays(game: Game, shop: Shop) -> None:
         if purchase.display_at is not None:
             x, y = purchase.display_at
             king = game.scenario.unit_manager.add_unit(
-                player=0, unit_const=game.stock("king"), x=x, y=y
+                player=0,
+                unit_const=game.stock("king"),
+                x=x,
+                y=y,
+                caption_string=purchase.brief,
             )
             game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
     game.forget_gaia("king")
+
+
+def caption_displays(game: Game, shop: Shop) -> None:
+    """Each placed display unit carries its purchases' brief lines as its caption."""
+    briefs = display_captions(shop, brief=True)
+    for unit in game.scenario.unit_manager.get_all_units():
+        if unit.reference_id in briefs:
+            unit.caption_string = briefs[unit.reference_id]

@@ -23,12 +23,14 @@ class Type50:
     min_range: float
     reload_time: float
     accuracy_percent: int
+    projectile_unit_id: int
 
 class Creatable:
     resource_costs: tuple[ResourceCost, ResourceCost, ResourceCost]
     train_locations: list[TrainLocation]
     total_projectiles: float
     max_total_projectiles: int
+    secondary_projectile_unit: int
 
 class Bird:
     work_rate: float

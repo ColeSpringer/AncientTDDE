@@ -108,6 +108,7 @@ def test_prelude_lists_tower_access_from_the_tower_families() -> None:
     assert tower_access(donjons) == ()
     text = prelude()
     assert "const int cTowerKinds = 3;" in text
+    assert "int enemyBoss(" in text and "int enemyLives(" in text
     assert 'if (index == 2) return ("Bombard Tower");' in text.split("string towerName")[1]
 
 
@@ -351,6 +352,12 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "practice_repeat",
         "shared_arrivals",
         "economy_towers",
+        "choice_timeout",
+        "choice_once",
+        "spawn_rows",
+        "boss_hitpoints",
+        "boss_leak",
+        "pvp_waits_for_first_wave",
     ],
 )
 def test_shared_engine(engine_runner: Path, case: str) -> None:

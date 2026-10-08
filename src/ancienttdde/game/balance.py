@@ -232,15 +232,16 @@ def wave_needs(inputs: Inputs) -> tuple[WaveNeed, ...]:
     needs: list[WaveNeed] = []
     for index, wave in enumerate(inputs.balance.waves):
         hit_points = inputs.balance.hit_points(index, inputs.level)
-        enemies = wave.count * wave.batches
+        enemies = wave.enemies
         spawn = (wave.batches - 1) * wave.interval
+        armor = inputs.stock.unit(wave.unit).armor(PIERCE_CLASS)
         needs.append(
             WaveNeed(
                 key=wave.key,
                 unit=wave.unit,
                 enemies=enemies,
                 hit_points=hit_points,
-                pierce_armor=inputs.stock.unit(wave.unit).armor(PIERCE_CLASS),
+                pierce_armor=armor if wave.pierce_armor is None else wave.pierce_armor,
                 total_hit_points=enemies * hit_points,
                 spawn_seconds=spawn,
                 crossing_seconds=crossing,
@@ -289,7 +290,7 @@ class Income:
 def baseline_income(inputs: Inputs, assumptions: Assumptions) -> Income:
     balance = inputs.balance
     economy = balance.economy
-    kills = sum(w.count * w.batches for w in balance.waves)
+    kills = sum(w.enemies for w in balance.waves)
     rewards = kills // economy.kills_per_reward
     trade = assumptions.starting_carts * trader_gold_per_minute(
         inputs, assumptions, "land"

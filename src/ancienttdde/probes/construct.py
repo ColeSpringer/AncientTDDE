@@ -155,7 +155,7 @@ def construct_probe(root: Path, definition: ProbeDefinition, destination: Path) 
         + "\r"
         + "\r".join(f"{c.id}: {c.action} Expected: {c.expected}" for c in definition.cases)
     )
-    scenario.message_manager.history = "Ancient Tower Defense original map by DRAX6869 / DRAX."
+    scenario.message_manager.history = "Based on Ancient TD v5.3 by DRAX6869 / DRAX."
     with xs_checker(scenario):
         scenario.xs_manager.validate_scenario_xs()
         scenario.write_to_file(str(destination))

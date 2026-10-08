@@ -2,9 +2,10 @@
 
 Usage: uv run python tools/dat/stock_stats.py <empires2_x2_p1.dat> content/balance/stock.json
 
-The data file's Gaia table supplies every unit; each civilization's technology tree says which
-of the watched technologies it can never research. Pass the game's CivTechTrees directory as a
-third argument to cross-check tower availability against the game's own trees.
+The data file's Gaia table supplies every unit the model needs, the wave schedule's enemies in
+game.json beside the output included; each civilization's technology tree says which of the
+watched technologies it can never research. Pass the game's CivTechTrees directory as a third
+argument to cross-check tower availability against the game's own trees.
 """
 
 import json
@@ -14,6 +15,7 @@ from pathlib import Path
 from typing import cast
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
+from AoE2ScenarioParser.datasets.heroes import HeroInfo
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
 from genieutils.datfile import DatFile
@@ -23,6 +25,7 @@ from genieutils.unit import Unit
 
 from ancienttdde.common.data import write_json
 from ancienttdde.common.hashing import hash_file
+from ancienttdde.game.config import load_balance
 from ancienttdde.game.stock import (
     MELEE_CLASS,
     PIERCE_CLASS,
@@ -56,7 +59,7 @@ def tree_file(civilization: str) -> str:
 
 
 def unit_id(name: str) -> int:
-    for dataset in (UnitInfo, BuildingInfo, OtherInfo):
+    for dataset in (UnitInfo, HeroInfo, BuildingInfo, OtherInfo):
         if name in dataset.__members__:
             return dataset[name].ID
     raise ValueError(f"Unknown unit: {name}")
@@ -86,6 +89,7 @@ def unit_record(unit: Unit) -> dict[str, object]:
     storage = max((int(s.amount) for s in unit.resource_storages if s.amount > 0), default=0)
     return {
         "id": unit.id,
+        "class": unit.class_,
         "hit_points": unit.hit_points,
         "attack": [[a.class_, number(a.amount)] for a in combat.attacks] if combat else [],
         "armor": [[a.class_, number(a.amount)] for a in combat.armours] if combat else [],
@@ -204,11 +208,12 @@ def find_nodes(value: object) -> list[dict[str, object]]:
     return found
 
 
-def snapshot(dat_path: Path, trees: Path | None) -> dict[str, object]:
+def snapshot(dat_path: Path, trees: Path | None, wanted: set[str]) -> dict[str, object]:
     dat = DatFile.parse(dat_path)
     gaia = dat.civs[0]
     units = {
-        name: unit_record(cast(Unit, gaia.units[unit_id(name)])) for name in sorted(REQUIRED_UNITS)
+        name: unit_record(cast(Unit, gaia.units[unit_id(name)]))
+        for name in sorted(REQUIRED_UNITS | wanted)
     }
     technologies = {
         name: technology_record(dat, dat.techs[identifier], identifier)
@@ -241,6 +246,15 @@ def snapshot(dat_path: Path, trees: Path | None) -> dict[str, object]:
     }
 
 
+def wave_units(output: Path) -> set[str]:
+    """The enemies the wave schedule beside the output names; the output belongs beside it."""
+    schedule = output.with_name("game.json")
+    if not schedule.is_file():
+        raise ValueError(f"The snapshot belongs beside the wave schedule; no {schedule}")
+    return {wave.unit for wave in load_balance(schedule).waves}
+
+
 if __name__ == "__main__":
     trees_directory = Path(sys.argv[3]) if len(sys.argv) > 3 else None
-    write_json(Path(sys.argv[2]), snapshot(Path(sys.argv[1]), trees_directory))
+    output_path = Path(sys.argv[2])
+    write_json(output_path, snapshot(Path(sys.argv[1]), trees_directory, wave_units(output_path)))

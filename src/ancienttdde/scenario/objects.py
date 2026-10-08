@@ -14,6 +14,7 @@ type ObjectTable = Mapping[str, tuple[type[InfoDatasetBase], str]]
 OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     "king": (UnitInfo, "KING"),
     "villager": (UnitInfo, "VILLAGER_MALE"),
+    "villager-female": (UnitInfo, "VILLAGER_FEMALE"),
     "monk": (UnitInfo, "MONK"),
     "scout": (UnitInfo, "SCOUT_CAVALRY"),
     "spearman": (UnitInfo, "SPEARMAN"),

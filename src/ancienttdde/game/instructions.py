@@ -6,7 +6,7 @@ from ancienttdde.game.config import LOBBY_DIFFICULTIES, Balance
 from ancienttdde.game.script import STILL_SAMPLES
 from ancienttdde.scenario.objects import display_name
 
-CREDIT = "Original Ancient Tower Defense by DRAX6869 / DRAX"
+CREDIT = "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
 
 # DE's Fast lobby speed runs game time at twice real time.
 FAST_GAME_SPEED = 2
@@ -145,12 +145,19 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
     towers = balance.towers
     start = economy.starting_resources
     repair = next((p.effect for p in shop.purchases if isinstance(p.effect, Repair)), None)
+    level = balance.difficulty.competitive
     schedule = "\n".join(
-        f"{i}. {w.key}: {w.batches * w.count} enemies with "
-        f"{balance.hit_points(i - 1, balance.difficulty.competitive)} HP each, "
-        f"{w.duration} game seconds" + (" (boss)" if w.boss else "")
+        f"{i}. {w.key}: boss with {balance.hit_points(i - 1, level)} HP"
+        if w.boss
+        else f"{i}. {w.key}: {w.enemies} enemies with {balance.hit_points(i - 1, level)} HP "
+        f"each, {w.duration} game seconds"
         for i, w in enumerate(balance.waves, 1)
     )
+    threes = next((i for i, w in enumerate(balance.waves, 1) if w.count == 3), None)
+    batches = "Enemies spawn in pairs on the same schedule in all surviving lanes"
+    if threes is not None:
+        batches += f", in threes from wave {threes}"
+    batches += ", and each boss comes alone. "
     catalog = "\n".join(f"- {p.caption}" for p in shop.purchases)
     endless = listed([balance.waves[t].key for t in balance.endless.templates])
     repairs = (
@@ -172,16 +179,17 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         f"lobby's Difficulty sets the level: {lobby_levels(balance)}. Competitive games always "
         f"play {balance.difficulty.levels[balance.difficulty.competitive].name}.\n\n"
         "## Run options\n\n"
-        "Before the first wave, the first human lane chooses the run options by selecting them "
-        "in the row of Outposts below the shop. A solo run chooses Standard, Endless or "
-        "Practice: Standard ends in victory after the finale, Endless keeps the waves coming, "
-        f"and Practice adds controls beside the options: start the next wave now, "
-        f"{balance.practice.kings} more Kings, {balance.practice.resources} more of each "
-        "resource and all lives back. A Practice run is shown as assisted. Competitive games "
-        "start with PvP off; selecting PvP on puts raiders and the siege power-up on sale. Each "
-        "new selection of an Outpost acts once. The options are fixed once the first wave "
-        "starts or practice help is first used; then the run options leave the row, as do the "
-        "practice controls unless the run is Practice.\n\n"
+        f"The game opens with {balance.choice_seconds} game seconds for the first human lane "
+        "to select a run option in the row of Outposts below the shop; the first selection is "
+        "final and preparation begins at once. Standard and PvP off are the defaults when the "
+        "time runs out. A solo run chooses Standard, Endless or Practice: Standard ends in "
+        "victory after the finale, Endless keeps the waves coming, and Practice adds controls "
+        f"beside the options: start the next wave now, {balance.practice.kings} more Kings, "
+        f"{balance.practice.resources} more of each resource and all lives back. A Practice "
+        "run is shown as assisted. Competitive games choose PvP on, which puts raiders and the "
+        "siege power-up on sale from the first wave, or PvP off. Each selection of a practice "
+        "control acts once. Once the options are fixed the run options leave the row, as do "
+        "the practice controls unless the run is Practice.\n\n"
         "## Economy\n\n"
         f"Each human lane starts with {start.food} food, {start.wood} wood, {start.stone} "
         f"stone and {start.gold} gold, {balance.lives} lives, three Kings in the shop, two "
@@ -232,19 +240,22 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "tower's volley, and towers fire one arrow of their own whatever the civilization. "
         "Competitive games rule out Eupseong and Artillery, whose range would reach the next "
         "lane.\n\n"
-        "Each enemy reaching the exit flags at the right-hand end of a lane costs one life. "
+        "Each enemy reaching the exit flags at the right-hand end of a lane costs one life, a "
+        f"boss {balance.boss_leak_lives}. "
         "Your life Outpost below the shop shows your remaining lives, and the objectives "
         f"list every lane. {repairs}".rstrip()
         + "\n\n"
         "## Waves\n\n"
         f"Preparation lasts {balance.preparation_seconds} game seconds, about "
         f"{balance.preparation_seconds / FAST_GAME_SPEED:.0f} real seconds at Fast. "
-        "Enemies spawn in pairs on the same schedule in all surviving lanes. "
+        f"{batches}"
         f"There are {balance.intermission_seconds} game seconds between waves after the "
         "remaining enemies are cleared. The schedule lasts about "
         f"{balance.scheduled_seconds / 60:.1f} game minutes plus enemy cleanup. Hit points "
         f"below are for {balance.difficulty.levels[balance.difficulty.competitive].name}: "
-        f"{hit_point_scales(balance)}, up to 32767.\n\n"
+        f"{hit_point_scales(balance)}, up to 32767 for regular enemies. A boss shows at most "
+        "32767 and is restored from its whole amount as it takes damage, so it falls only once "
+        "that amount is spent; your boss tells you at each quarter.\n\n"
         f"{schedule}\n\n"
         f"After the finale, Endless runs and sudden death keep the waves coming: {endless} "
         f"repeat in turn with {balance.endless.growth_percent}% more hit points each round, up "

@@ -171,6 +171,11 @@ class Purchase:
         return 2**self.bit if self.bit >= 0 else 0
 
     @property
+    def brief(self) -> str:
+        """The short line DE draws beside the pad: the name and the price."""
+        return f"{self.name}: {self.price}"
+
+    @property
     def caption(self) -> str:
         limits = (
             (", once" if self.once else "")
@@ -178,7 +183,7 @@ class Purchase:
             + (f", for civilizations with {self.only_with[1]}" if self.only_with else "")
             + (", when PvP is on" if self.pvp else "")
         )
-        return f"{self.name}: {self.price}{limits}"
+        return f"{self.brief}{limits}"
 
 
 @dataclass(frozen=True)
@@ -399,12 +404,14 @@ def check_pads(shop: Shop, data: MapDocument, config: FoundationConfig) -> None:
                 raise ValueError(f"Shop pads of {owner} and {purchase.key} share tile {cell}")
 
 
-def display_captions(shop: Shop) -> dict[int, str]:
-    """The name each placed display unit gets: every purchase it stands for, joined."""
+def display_captions(shop: Shop, *, brief: bool = False) -> dict[int, str]:
+    """The name each placed display unit gets, or with `brief` the caption DE draws beside
+    it: every purchase it stands for, joined."""
     captions: dict[int, list[str]] = {}
     for purchase in shop.purchases:
         if purchase.display is not None:
-            captions.setdefault(purchase.display, []).append(purchase.caption)
+            text = purchase.brief if brief else purchase.caption
+            captions.setdefault(purchase.display, []).append(text)
     return {display: " | ".join(texts) for display, texts in captions.items()}
 
 

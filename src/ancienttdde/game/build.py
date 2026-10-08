@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Literal
 
-from ancienttdde.common.data import HashRecord, digest, read_object, write_json
+from ancienttdde.common.data import HashRecord, digest, object_value, read_object, write_json
 from ancienttdde.common.hashing import hash_inputs, hash_records, verify_hashes, verify_inputs
 from ancienttdde.common.manifest import (
     SCHEMA_VERSION,
@@ -20,9 +20,10 @@ from ancienttdde.common.output import prepare_output, project_path, publish
 from ancienttdde.common.worker import run_module, run_parallel
 from ancienttdde.game.catalog import check_pads, load_shop
 from ancienttdde.game.civilizations import load_profiles
-from ancienttdde.game.config import load_balance
+from ancienttdde.game.config import load_balance, load_lanes
 from ancienttdde.game.instructions import instructions
 from ancienttdde.game.stock import load_stock
+from ancienttdde.game.waves import check_lumber_room
 from ancienttdde.map.build import CONTENT_INPUTS as MAP_INPUTS
 from ancienttdde.map.build import read_content
 from ancienttdde.map.foundation import migrate_map, validate_map
@@ -122,8 +123,10 @@ def build_game(root: Path, output: Path | None = None) -> Path:
     families = [name for name, _ in balance.towers.families]
     shop = load_shop(root / "content/balance/shop.json", config["anchors"], families)
     stock = load_stock(root / "content/balance/stock.json")
+    stock.check_waves(balance)
     profiles = load_profiles(root / "content/balance/civilizations.json", balance, shop, stock)
     check_pads(shop, data, config)
+    check_lumber_room(load_lanes(object_value(data.get("anchors"), "anchors")), data, config)
     directory.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="ancienttdde-game-", dir=directory.parent) as temporary:
         staging = Path(temporary)

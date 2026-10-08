@@ -17,7 +17,7 @@ from AoE2ScenarioParser.datasets.object_support import CivilizationOld
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
 from ancienttdde.game.catalog import RESOURCES, Raider, Shop, SiegePowerUp, Traders
 from ancienttdde.game.config import RESERVED_TECHNOLOGIES, UNRESEARCHABLE, Balance, Resources
-from ancienttdde.game.restricted import TECHNOLOGIES
+from ancienttdde.game.restricted import POINTLESS, TECHNOLOGIES
 from ancienttdde.game.sites import RAIDER_MEDIA, TRADE_MEDIA, RaiderMedium, TradeMedium
 from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name, technology
@@ -261,7 +261,7 @@ def profile_technologies(raw: dict[str, object], balance: Balance) -> tuple[str,
         identifier = technology(name)
         if name in RESERVED_TECHNOLOGIES:
             raise ValueError(f"{name} cannot be a profile technology: the game grants or sells it")
-        if name in UNRESEARCHABLE or identifier in TECHNOLOGIES:
+        if name in UNRESEARCHABLE or identifier in TECHNOLOGIES or identifier in POINTLESS:
             raise ValueError(f"{name} cannot be a profile technology: the game rules it out")
         if name in balance.economy.starting_technologies:
             raise ValueError(f"{name} is a starting technology")

@@ -23,6 +23,8 @@ from ancienttdde.common.data import asset_text
 from ancienttdde.map.geometry import Position
 from ancienttdde.scenario.xs import xs_checker
 
+MOVE = 1
+
 
 def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: GameBuild) -> None:
     from ancienttdde.game.build import verify_game
@@ -51,7 +53,7 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
             "initialize",
             "king",
             "attack",
-            "wave.1",
+            "spawned",
             "buy.tower_attack_4",
             "transfer.build",
             "bonus.gold",
@@ -155,22 +157,57 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBui
             assert set(orders[0]["selected_object_ids"]) == traders
 
 
-def test_every_wave_spawns_a_pair_per_lane(game_build: GameBuild) -> None:
-    from ancienttdde.game.config import load_balance
+def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: GameBuild) -> None:
+    """The XS creates every batch itself; no trigger creates an enemy. Each lane's
+    acknowledgment and its three-second route hold the enemies to the lane and walk each row
+    band to its own exit tile, so pairs created side by side stay side by side."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.config import load_lanes
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
-    batches = [
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
+    lane_waves = [
         t for t in snapshot["triggers"] if t["name"].startswith("lane.") and ".wave." in t["name"]
     ]
-    assert len(batches) == 7 * len(load_balance(ROOT / "content/balance/game.json").waves)
-    for trigger in batches:
-        spawns = [e["attributes"] for e in trigger["effects"] if e["type"] == "create_object"]
-        assert len(spawns) == 2
-        assert all(e["source_player"] == 8 for e in spawns)
-        assert spawns[0]["object_list_unit_id"] == spawns[1]["object_list_unit_id"]
-        assert spawns[0]["location_y"] == spawns[1]["location_y"]
-        assert spawns[1]["location_x"] == spawns[0]["location_x"] + 1
+    assert not lane_waves
+    for trigger in snapshot["triggers"]:
+        for change in trigger["effects"]:
+            if change["type"] == "create_object":
+                assert change["attributes"]["source_player"] != 8
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    for lane in load_lanes(object_value(anchors, "anchors")):
+        x1, y1, x2, y2 = lane.path
+        center = lane.center_y
+        for name in (f"lane.p{lane.player}.spawned", f"lane.p{lane.player}.route"):
+            trigger = triggers[name]
+            assert trigger["looping"]
+            [stance] = [e for e in trigger["effects"] if e["type"] == "change_object_stance"]
+            held = stance["attributes"]
+            assert (held["source_player"], held["attack_stance"]) == (8, 2)
+            assert (held["area_x1"], held["area_y1"], held["area_x2"], held["area_y2"]) == lane.path
+            orders = [e["attributes"] for e in trigger["effects"] if e["type"] == "task_object"]
+            bands = [(o["area_y1"], o["area_y2"], o["location_x"], o["location_y"]) for o in orders]
+            assert bands == [
+                (y1, center - 1, lane.exit_x, center - 1),
+                (center, center, lane.exit_x, center),
+                (center + 1, y2, lane.exit_x, center + 1),
+            ]
+            assert all(o["source_player"] == 8 and o["action_type"] == MOVE for o in orders)
+            assert all((o["area_x1"], o["area_x2"]) == (x1, x2) for o in orders)
+        spawned = triggers[f"lane.p{lane.player}.spawned"]
+        requested = {
+            c["attributes"]["variable"]: c["attributes"]["quantity"]
+            for c in spawned["conditions"]
+            if c["type"] == "variable_value"
+        }
+        assert requested[variables[f"lane.p{lane.player}.spawn"]] == 1
+        [cleared] = [e["attributes"] for e in spawned["effects"] if e["type"] == "change_variable"]
+        assert (cleared["variable"], cleared["quantity"]) == (
+            variables[f"lane.p{lane.player}.spawn"],
+            0,
+        )
 
 
 @pytest.mark.parametrize("change", ["resource_bonus", "ai_personality"])
@@ -366,7 +403,9 @@ def test_generated_spawns_and_starter_buildings_avoid_map_blockers(game_build: G
                 assert not created & (blocked - freed), f"{trigger['name']} creates on a blocker"
 
 
-def test_lumber_trees_are_replaced_with_endless_wood_at_the_start(game_build: GameBuild) -> None:
+def test_an_endless_tree_grows_behind_each_lumber_tree_at_the_start(game_build: GameBuild) -> None:
+    """The placed trees stay, so the lumberjacks' work orders can name them; the endless
+    trees created behind them take the raised wood amount."""
     from ancienttdde.map.geometry import cells
 
     output, _ = game_build
@@ -382,22 +421,20 @@ def test_lumber_trees_are_replaced_with_endless_wood_at_the_start(game_build: Ga
     assert first["attributes"]["operation"] == 1
     # DE applies this value as a 16-bit number: a DE trial turned 1,000,000 into 16,960.
     assert 30_000 <= first["attributes"]["quantity"] <= 32_767
-    replaced = [
-        (removal["attributes"]["selected_object_ids"], creation["attributes"])
-        for removal, creation in zip(rest[::2], rest[1::2], strict=True)
-    ]
-    trees = {u["reference_id"]: u for u in snapshot["units"] if u["unit_const"] == 399}
+    assert all(e["type"] == "create_object" for e in rest)
+    created = {(e["attributes"]["location_x"], e["attributes"]["location_y"]) for e in rest}
+    assert all(e["attributes"]["source_player"] == 0 for e in rest)
+    assert all(e["attributes"]["object_list_unit_id"] == 399 for e in rest)
+    occupied = {(int(u["x"]), int(u["y"])) for u in snapshot["units"]}
+    trees = [u for u in snapshot["units"] if u["unit_const"] == 399 and u["player_id"] == 0]
+    placed: set[tuple[int, int]] = set()
     for player in range(1, 8):
         economy = cells(tuple(anchors[f"lane.p{player}.economy"]["region"]))
-        lane = {r for r, u in trees.items() if (int(u["x"]), int(u["y"])) in economy}
+        lane = {(int(u["x"]), int(u["y"])) for u in trees if (int(u["x"]), int(u["y"])) in economy}
         assert len(lane) == 4, f"P{player} needs four lumber trees"
-    assert sorted(ids[0] for ids, _ in replaced) == sorted(trees)
-    for ids, created in replaced:
-        tree = trees[ids[0]]
-        assert len(ids) == 1
-        assert created["source_player"] == 0
-        assert created["object_list_unit_id"] == 399
-        assert (created["location_x"], created["location_y"]) == (int(tree["x"]), int(tree["y"]))
+        placed |= lane
+    assert created == {(x + 1, y) for x, y in placed} and len(rest) == 28
+    assert not created & occupied
 
 
 def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: GameBuild) -> None:

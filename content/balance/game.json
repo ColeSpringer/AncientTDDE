@@ -1,65 +1,190 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "lives": 30,
-  "setup_seconds": 5,
+  "boss_leak_lives": 5,
+  "choice_seconds": 60,
   "preparation_seconds": 233,
   "intermission_seconds": 30,
   "max_enemies_per_lane": 80,
   "sudden_death_interval": 30,
   "sudden_death_damage": 1,
   "economy": {
-    "starting_resources": {"food": 750, "wood": 1500, "stone": 1500, "gold": 400},
-    "starting_technologies": ["BALLISTICS", "MURDER_HOLES", "CARAVAN", "WHEELBARROW", "HAND_CART", "SPIES_AND_TREASON"],
+    "starting_resources": {
+      "food": 750,
+      "wood": 1500,
+      "stone": 1500,
+      "gold": 400
+    },
+    "starting_technologies": [
+      "BALLISTICS",
+      "MURDER_HOLES",
+      "CARAVAN",
+      "WHEELBARROW",
+      "HAND_CART",
+      "SPIES_AND_TREASON"
+    ],
     "wave_kings": 1,
-    "kill_reward": {"kills": 25, "stone": 125, "wood": 25, "rewards_per_king": 4},
-    "resource_bonus": {"gold": 10000, "food": 1000, "stone": 3000},
+    "kill_reward": {
+      "kills": 25,
+      "stone": 125,
+      "wood": 25,
+      "rewards_per_king": 4
+    },
+    "resource_bonus": {
+      "gold": 10000,
+      "food": 1000,
+      "stone": 3000
+    },
     "endless_deposit": 32000,
     "starting_relics": 2
   },
   "difficulty": {
     "levels": {
-      "easy": {"name": "Easy", "king_gold": 1500, "hit_points_percent": 80},
-      "normal": {"name": "Normal", "king_gold": 2000, "hit_points_percent": 100},
-      "hard": {"name": "Hard", "king_gold": 3000, "hit_points_percent": 125}
+      "easy": {
+        "name": "Easy",
+        "king_gold": 1500,
+        "hit_points_percent": 80
+      },
+      "normal": {
+        "name": "Normal",
+        "king_gold": 2000,
+        "hit_points_percent": 100
+      },
+      "hard": {
+        "name": "Hard",
+        "king_gold": 3000,
+        "hit_points_percent": 125
+      }
     },
-    "lobby": {"easiest": "easy", "standard": "normal", "moderate": "normal", "hard": "hard", "hardest": "hard", "extreme": "hard"},
+    "lobby": {
+      "easiest": "easy",
+      "standard": "normal",
+      "moderate": "normal",
+      "hard": "hard",
+      "hardest": "hard",
+      "extreme": "hard"
+    },
     "competitive": "normal"
   },
   "endless": {
-    "templates": ["Two-Handed Swords", "Cavaliers", "Champions", "Paladins", "Elephant Finale"],
+    "templates": [
+      "Elite Conquistadors",
+      "Attila the Hun",
+      "Master of the Templar",
+      "Lancelot",
+      "Henry V"
+    ],
     "hit_point_growth_percent": 50,
     "armor_step": 25
   },
   "interaction": {
     "raiders": {
-      "land": {"unit": "LIGHT_CAVALRY", "line": ["LIGHT_CAVALRY", "HUSSAR", "WINGED_HUSSAR"], "cap": 2},
-      "naval": {"unit": "FIRE_GALLEY", "line": ["FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP"], "cap": 2}
+      "land": {
+        "unit": "LIGHT_CAVALRY",
+        "line": [
+          "LIGHT_CAVALRY",
+          "HUSSAR",
+          "WINGED_HUSSAR"
+        ],
+        "cap": 2
+      },
+      "naval": {
+        "unit": "FIRE_GALLEY",
+        "line": [
+          "FIRE_GALLEY",
+          "FIRE_SHIP",
+          "FAST_FIRE_SHIP"
+        ],
+        "cap": 2
+      }
     },
-    "siege": {"trebuchets_per_rival": 2, "warning_seconds": 10, "active_seconds": 60, "shared_cooldown": 60, "buyer_cooldown": 120}
+    "siege": {
+      "trebuchets_per_rival": 2,
+      "warning_seconds": 10,
+      "active_seconds": 60,
+      "shared_cooldown": 60,
+      "buyer_cooldown": 120
+    }
   },
-  "practice": {"kings": 5, "resources": 5000},
+  "practice": {
+    "kings": 5,
+    "resources": 5000
+  },
   "towers": {
     "families": {
-      "towers": ["WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"],
-      "bombard": ["BOMBARD_TOWER"]
+      "towers": [
+        "WATCH_TOWER",
+        "GUARD_TOWER",
+        "KEEP",
+        "BOMBARD_TOWER"
+      ],
+      "bombard": [
+        "BOMBARD_TOWER"
+      ]
     },
-    "special": {"unit": "THE_ACCURSED_TOWER", "pierce_bonus": 232, "attack": 8, "range": 13}
+    "special": {
+      "unit": "THE_ACCURSED_TOWER",
+      "pierce_bonus": 232,
+      "attack": 8,
+      "range": 13
+    }
   },
   "waves": [
-    {"key":"Villagers", "unit":"VILLAGER_MALE", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":150, "boss":false},
-    {"key":"Militia", "unit":"MILITIA", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":220, "boss":false},
-    {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":340, "boss":false},
-    {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":420, "boss":false},
-    {"key":"Elephant Vanguard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":2500, "boss":true},
-    {"key":"Long Swords", "unit":"LONG_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":800, "boss":false},
-    {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":950, "boss":false},
-    {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1100, "boss":false},
-    {"key":"Camel Riders", "unit":"CAMEL_RIDER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":1800, "boss":false},
-    {"key":"Elephant Guard", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":11000, "boss":true},
-    {"key":"Two-Handed Swords", "unit":"TWO_HANDED_SWORDSMAN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":2600, "boss":false},
-    {"key":"Cavaliers", "unit":"CAVALIER", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":3000, "boss":false},
-    {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":4800, "boss":false},
-    {"key":"Paladins", "unit":"PALADIN", "count":2, "batches":30, "interval":4, "duration":120, "hit_points":5600, "boss":false},
-    {"key":"Elephant Finale", "unit":"WAR_ELEPHANT", "count":2, "batches":4, "interval":20, "duration":90, "hit_points":30000, "boss":true}
+    {"key":"Villagers", "unit":"VILLAGER_MALE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":60},
+    {"key":"Militia", "unit":"MILITIA", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":70},
+    {"key":"Spearmen", "unit":"SPEARMAN", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":90},
+    {"key":"Archers", "unit":"ARCHER", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":115},
+    {"key":"War Elephants", "unit":"WAR_ELEPHANT", "count":2, "batches":9, "interval":5, "duration":45, "boss":false, "hit_points":230},
+    {"key":"Men-at-Arms", "unit":"MAN_AT_ARMS", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":160},
+    {"key":"Pikemen", "unit":"PIKEMAN", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":180},
+    {"key":"Champions", "unit":"CHAMPION", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":210},
+    {"key":"Scout Cavalry", "unit":"SCOUT_CAVALRY", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":230},
+    {"key":"Mamelukes", "unit":"MAMELUKE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":270},
+    {"key":"Elite Berserks", "unit":"ELITE_BERSERK", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":300},
+    {"key":"Elite Eagle Warriors", "unit":"ELITE_EAGLE_WARRIOR", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":340},
+    {"key":"Heavy Camel Riders", "unit":"HEAVY_CAMEL_RIDER", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":390},
+    {"key":"Knights", "unit":"KNIGHT", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":440},
+    {"key":"Saboteurs", "unit":"SABOTEUR", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":500},
+    {"key":"Charles Martel", "unit":"CHARLES_MARTEL", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":570},
+    {"key":"Guy Josselyne", "unit":"GUY_JOSSELYNE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":650},
+    {"key":"Joan of Arc", "unit":"JOAN_OF_ARC", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":730},
+    {"key":"William Wallace", "unit":"WILLIAM_WALLACE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":830},
+    {"key":"William the Conqueror", "unit":"WILLIAM_THE_CONQUEROR", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":940},
+    {"key":"Nobunaga", "unit":"NOBUNAGA", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":1050},
+    {"key":"La Hire", "unit":"LA_HIRE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":1200},
+    {"key":"Elite Plumed Archers", "unit":"ELITE_PLUMED_ARCHER", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":1400},
+    {"key":"The Black Prince", "unit":"THE_BLACK_PRINCE", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":1550},
+    {"key":"Richard the Lionheart", "unit":"RICHARD_THE_LIONHEART", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":1800},
+    {"key":"Hrolf the Ganger", "unit":"HROLF_THE_GANGER", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2000},
+    {"key":"Elite Teutonic Knights", "unit":"ELITE_TEUTONIC_KNIGHT", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2300},
+    {"key":"Elite Genitours", "unit":"ELITE_GENITOUR_ORIGINAL", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2600},
+    {"key":"Aethelfrith", "unit":"AETHELFRITH", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2950},
+    {"key":"Theodoric the Goth", "unit":"THEODORIC_THE_GOTH", "count":2, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":3350},
+    {"key":"Heavy Cavalry Archers", "unit":"HEAVY_CAVALRY_ARCHER", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2550},
+    {"key":"Elite Mangudai", "unit":"ELITE_MANGUDAI", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":2900},
+    {"key":"Tamerlane", "unit":"TAMERLANE", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":3250},
+    {"key":"Genghis Khan", "unit":"GENGHIS_KHAN", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":3700},
+    {"key":"Subotai", "unit":"SUBOTAI", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":4200},
+    {"key":"Paladins", "unit":"PALADIN", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":4800},
+    {"key":"Elite War Elephants", "unit":"ELITE_WAR_ELEPHANT", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":5400},
+    {"key":"Elite Cataphracts", "unit":"ELITE_CATAPHRACT", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":6200},
+    {"key":"Belisarius", "unit":"BELISARIUS", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":7000},
+    {"key":"Siege Rams", "unit":"SIEGE_RAM", "count":3, "batches":15, "interval":3, "duration":45, "boss":false, "hit_points":5000, "pierce_armor":40},
+    {"key":"Elite Conquistadors", "unit":"ELITE_CONQUISTADOR", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":6800},
+    {"key":"Attila the Hun", "unit":"ATTILA_THE_HUN", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":7700},
+    {"key":"Master of the Templar", "unit":"MASTER_OF_THE_TEMPLAR", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":8800},
+    {"key":"Lancelot", "unit":"LANCELOT", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":9900},
+    {"key":"Henry V", "unit":"HENRY_V", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":11300},
+    {"key":"Scythian Scouts", "unit":"SCYTHIAN_SCOUT", "count":3, "batches":25, "interval":3, "duration":75, "boss":false, "hit_points":12800},
+    {"key":"Charlemagne", "unit":"CHARLEMAGNE", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":632000},
+    {"key":"Roland", "unit":"ROLAND", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":676000},
+    {"key":"Frederick Barbarossa", "unit":"FREDERICK_BARBAROSSA", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":723000},
+    {"key":"Saladin", "unit":"SALADIN", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":774000},
+    {"key":"El Cid Campeador", "unit":"EL_CID_CAMPEADOR", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":828000},
+    {"key":"Jan Zizka", "unit":"JAN_ZIZKA", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":886000},
+    {"key":"Vytautas the Great", "unit":"VYTAUTAS_THE_GREAT", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":948000},
+    {"key":"Bayinnaung", "unit":"BAYINNAUNG", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":1015000},
+    {"key":"King Arthur", "unit":"KING_ARTHUR", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":1086000},
+    {"key":"Abraha Elephant", "unit":"ABRAHA_ELEPHANT", "count":1, "batches":1, "interval":2, "duration":1, "boss":true, "hit_points":1162000}
   ]
 }

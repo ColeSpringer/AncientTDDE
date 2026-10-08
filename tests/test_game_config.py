@@ -8,43 +8,92 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_balance_has_a_finite_schedule_ending_in_a_boss() -> None:
+def test_balance_has_a_finite_schedule_ending_in_ten_bosses() -> None:
     from ancienttdde.game.config import load_balance
 
     balance = load_balance(ROOT / "content/balance/game.json")
-    assert 2100 <= balance.scheduled_seconds <= 3600
-    assert balance.waves[-1].boss
-    assert all(w.count == 2 for w in balance.waves)
-    assert all(w.count * w.batches <= 400 for w in balance.waves)
+    # About seventy game minutes of spawning and intermissions: roughly fifty real minutes at
+    # Fast once the enemies' crossings are added.
+    assert 3600 <= balance.scheduled_seconds <= 5400
+    assert len(balance.waves) == 56
+    assert [w.boss for w in balance.waves] == [False] * 46 + [True] * 10
+    assert all(w.enemies <= 400 for w in balance.waves)
     assert balance.max_enemies_per_lane <= 100
+    assert (balance.choice_seconds, balance.boss_leak_lives) == (60, 5)
 
 
-def test_short_waves_keep_their_enemy_count_and_tiers_end_in_bosses() -> None:
+def test_the_schedule_follows_the_originals_roster_and_cadence() -> None:
+    """The original's 46 regular waves in its order, and its pacing: pairs every three seconds
+    for forty-five seconds, threes from level 7, seventy-five seconds for level 9 and 10-A."""
     from ancienttdde.game.config import load_balance
 
-    balance = load_balance(ROOT / "content/balance/game.json")
-    assert all(w.duration <= 120 for w in balance.waves)
-    assert all(w.count * w.batches >= (8 if w.boss else 60) for w in balance.waves)
-    assert [w.boss for w in balance.waves] == [i % 5 == 4 for i in range(len(balance.waves))]
-
-
-def test_boss_waves_keep_the_pressure_on() -> None:
-    from ancienttdde.game.config import load_balance
-
-    for wave in load_balance(ROOT / "content/balance/game.json").waves:
-        if wave.boss:
-            # Pairs of bosses follow each other within twenty seconds, and the wave cannot
-            # outlast its last pair by more than thirty.
-            assert wave.interval <= 20, wave.key
-            assert wave.duration - (wave.batches - 1) * wave.interval <= 30, wave.key
+    waves = load_balance(ROOT / "content/balance/game.json").waves
+    units = [w.unit for w in waves[:46]]
+    assert units[:5] == ["VILLAGER_MALE", "MILITIA", "SPEARMAN", "ARCHER", "WAR_ELEPHANT"]
+    assert units[5:10] == ["MAN_AT_ARMS", "PIKEMAN", "CHAMPION", "SCOUT_CAVALRY", "MAMELUKE"]
+    assert units[15:20] == [
+        "CHARLES_MARTEL",
+        "GUY_JOSSELYNE",
+        "JOAN_OF_ARC",
+        "WILLIAM_WALLACE",
+        "WILLIAM_THE_CONQUEROR",
+    ]
+    assert units[35:40] == [
+        "PALADIN",
+        "ELITE_WAR_ELEPHANT",
+        "ELITE_CATAPHRACT",
+        "BELISARIUS",
+        "SIEGE_RAM",
+    ]
+    assert units[45] == "SCYTHIAN_SCOUT"
+    assert len(set(units)) == 46
+    for index, wave in enumerate(waves[:46]):
+        level = index // 5 + 1
+        assert wave.count == (2 if level <= 6 else 3), wave.key
+        assert wave.interval == (5 if index == 4 else 3), wave.key
+        assert wave.duration == (75 if level >= 9 else 45), wave.key
+        expected = 18 if index == 4 else 30 if level <= 6 else 45 if level <= 8 else 75
+        assert wave.enemies == expected, wave.key
+    bosses = waves[46:]
+    assert all(w.enemies == 1 and w.duration == 1 for w in bosses)
+    # The rams keep some of their armor, not the 195 that would turn arrows away.
+    rams = next(w for w in waves if w.unit == "SIEGE_RAM")
+    assert rams.pierce_armor == 40 and all(w.pierce_armor is None for w in waves if w is not rams)
+    assert len({w.unit for w in bosses}) == 10 and not {w.unit for w in bosses} & set(units)
 
 
 def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
     from ancienttdde.game.config import load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
-    assert waves[0].unit == "VILLAGER_MALE"
+    assert waves[0].unit == "VILLAGER_MALE" and waves[0].hit_points == 60
     assert waves[0].hit_points < min(w.hit_points for w in waves[1:])
+
+
+def test_wave_units_may_be_heroes_but_not_the_king() -> None:
+    from ancienttdde.game.config import load_balance, wave_unit
+
+    assert wave_unit("CHARLEMAGNE") == 165 and wave_unit("VILLAGER_MALE") == 83
+    with pytest.raises(ValueError, match="Unknown wave unit: DRAGON"):
+        wave_unit("DRAGON")
+    with pytest.raises(ValueError, match="King"):
+        wave_unit("KING")
+    waves = load_balance(ROOT / "content/balance/game.json").waves
+    assert waves[-1].object_id == 1071
+
+
+def test_lane_paths_hold_the_three_rows_a_batch_fills() -> None:
+    from ancienttdde.common.data import object_value, read_object
+    from ancienttdde.game.config import load_lanes
+
+    anchors = object_value(read_object(ROOT / "content/maps/foundation.json")["anchors"], "anchors")
+    for lane in load_lanes(anchors):
+        assert lane.path[1] + 1 <= lane.center_y <= lane.path[3] - 1
+    anchors["lane.p1.path"] = {"region": [8, 14, 56, 16]}
+    load_lanes(anchors)
+    anchors["lane.p1.path"] = {"region": [8, 15, 56, 16]}
+    with pytest.raises(ValueError, match="3 rows"):
+        load_lanes(anchors)
 
 
 def test_lanes_start_with_the_originals_technologies_and_a_modest_grant() -> None:
@@ -88,26 +137,22 @@ def test_special_tower_states_its_stock_attack_and_range() -> None:
     assert towers.special_pierce == 232
 
 
-def test_wave_hit_points_fit_the_engine_attribute() -> None:
+def test_wave_hit_points_fit_the_engine_attribute_except_for_bosses() -> None:
+    from ancienttdde.game.config import BOSS_HIT_POINTS, MAX_HIT_POINTS, load_balance
+
+    waves = load_balance(ROOT / "content/balance/game.json").waves
+    # DE stores unit hit points in 16 bits; a boss carries more as its current hit points.
+    assert all(w.hit_points <= MAX_HIT_POINTS for w in waves if not w.boss)
+    assert all(MAX_HIT_POINTS < w.hit_points <= BOSS_HIT_POINTS for w in waves if w.boss)
+
+
+def test_each_boss_outclasses_the_last() -> None:
     from ancienttdde.game.config import load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
-    # DE stores unit hit points in 16 bits; a larger value wraps around.
-    assert all(w.hit_points <= 32767 for w in waves)
-
-
-def test_waves_grow_stronger_and_each_boss_outclasses_the_waves_before_it() -> None:
-    from ancienttdde.game.config import load_balance
-
-    waves = load_balance(ROOT / "content/balance/game.json").waves
-    regular = [w.hit_points for w in waves if not w.boss]
-    assert regular == sorted(set(regular))
     bosses = [w.hit_points for w in waves if w.boss]
     assert bosses == sorted(set(bosses))
-    for index, wave in enumerate(waves):
-        if wave.boss:
-            before = [w.hit_points for w in waves[:index] if not w.boss]
-            assert wave.hit_points > 3 * max(before)
+    assert bosses[0] > 10 * max(w.hit_points for w in waves if not w.boss)
 
 
 def write_balance(tmp_path: Path, raw: dict[str, object]) -> Path:
@@ -120,6 +165,8 @@ def write_balance(tmp_path: Path, raw: dict[str, object]) -> Path:
     ("field", "value"),
     [
         ("lives", 0),
+        ("boss_leak_lives", 0),
+        ("choice_seconds", 5),
         ("preparation_seconds", True),
         ("max_enemies_per_lane", 100000),
         ("sudden_death_interval", -1),
@@ -143,7 +190,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("difficulty", "competitive"), "brutal", "difficulty level"),
         (("endless", "templates"), ["Knights", "Dragons"], "Dragons"),
         (("endless", "templates"), [], "templates"),
-        (("endless", "templates"), ["Elephant Vanguard", "Elephant Finale"], "share"),
+        (("endless", "templates"), ["Villagers", "Villagers"], "twice"),
         (("endless", "hit_point_growth_percent"), 0, "hit_point_growth_percent"),
         (("endless", "armor_step"), -1, "armor_step"),
         (("interaction", "raiders", "land", "unit"), "ARCHER", "ARCHER"),
@@ -166,6 +213,14 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("towers", "special", "range"), 0, "range"),
         (("towers", "special", "attack"), -1, "attack"),
         (("waves", 0, "hit_points"), 40000, "hit_points"),
+        (("waves", 55, "hit_points"), 6_000_000, "hit_points"),
+        (("waves", 0, "count"), 4, "count"),
+        (("waves", 55, "count"), 2, "one enemy"),
+        (("waves", 39, "pierce_armor"), 600, "pierce_armor"),
+        (("waves", 0, "unit"), "KING", "King"),
+        (("waves", 0, "unit"), "CHARLEMAGNE", "boss unit"),
+        (("endless", "templates"), ["Charlemagne"], "boss"),
+        (("economy", "starting_technologies"), ["BALLISTICS", "GILLNETS"], "GILLNETS"),
     ],
 )
 def test_reject_invalid_economy_and_towers(
@@ -186,8 +241,8 @@ def test_reject_an_outdated_balance_schema(tmp_path: Path) -> None:
     from ancienttdde.game.config import load_balance
 
     raw = json.loads((ROOT / "content/balance/game.json").read_text())
-    assert raw["schema_version"] == 5
-    raw["schema_version"] = 4
+    assert raw["schema_version"] == 6
+    raw["schema_version"] = 5
     with pytest.raises(ValueError, match="Unsupported balance schema"):
         load_balance(write_balance(tmp_path, raw))
 
@@ -212,6 +267,12 @@ def test_reject_unknown_wave_type_and_incomplete_schedule(tmp_path: Path) -> Non
     path = tmp_path / "balance.json"
     path.write_text(json.dumps(raw))
     with pytest.raises(ValueError, match="unit"):
+        load_balance(path)
+    raw["waves"][0]["unit"] = "VILLAGER_MALE"
+    raw["waves"][1]["unit"] = "VILLAGER_MALE"
+    raw["endless"]["templates"] = ["Villagers", "Militia"]
+    path.write_text(json.dumps(raw))
+    with pytest.raises(ValueError, match="share"):
         load_balance(path)
     raw["waves"] = []
     path.write_text(json.dumps(raw))
@@ -250,10 +311,12 @@ def test_difficulty_scales_wave_hit_points_within_the_engine_limit() -> None:
     for index, wave in enumerate(balance.waves):
         assert balance.hit_points(index, normal) == wave.hit_points
         scaled = [balance.hit_points(index, level) for level in range(3)]
-        assert scaled == sorted(scaled) and max(scaled) <= MAX_HIT_POINTS
-    assert balance.hit_points(0, balance.difficulty.index("easy")) == 120
+        assert scaled == sorted(scaled)
+        assert wave.boss or max(scaled) <= MAX_HIT_POINTS
+    assert balance.hit_points(0, balance.difficulty.index("easy")) == 48
+    last = balance.waves[-1]
     assert balance.hit_points(len(balance.waves) - 1, balance.difficulty.index("hard")) == (
-        MAX_HIT_POINTS
+        last.hit_points * 125 // 100
     )
 
 
@@ -263,11 +326,11 @@ def test_endless_waves_repeat_the_last_tier_and_grow_until_the_limit() -> None:
     balance = load_balance(ROOT / "content/balance/game.json")
     endless = balance.endless
     assert [balance.waves[t].key for t in endless.templates] == [
-        "Two-Handed Swords",
-        "Cavaliers",
-        "Champions",
-        "Paladins",
-        "Elephant Finale",
+        "Elite Conquistadors",
+        "Attila the Hun",
+        "Master of the Templar",
+        "Lancelot",
+        "Henry V",
     ]
     assert (endless.growth_percent, endless.armor_step) == (50, 25)
     levels = balance.endless_levels

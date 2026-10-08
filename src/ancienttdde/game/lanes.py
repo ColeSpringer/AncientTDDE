@@ -12,6 +12,7 @@ from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import (
     lane_attack,
     lane_bonuses,
+    lane_gatherers,
     lane_kings,
     lane_messages,
     lane_transfers,
@@ -24,7 +25,7 @@ from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reac
 from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
 from ancienttdde.game.triggers import Game
-from ancienttdde.game.waves import lane_route, lane_waves
+from ancienttdde.game.waves import lane_route, lane_spawned
 from ancienttdde.scenario.triggers import STORAGE, area, effect
 
 
@@ -40,7 +41,7 @@ def lane_actions(
     lane_initialize(game, lane, balance)
     lane_profiles(game, lane, balance, profiles, shop)
     lane_cleanup(game, lane, mill.reference_id)
-    lane_waves(game, lane, balance)
+    lane_spawned(game, lane)
     lane_route(game, lane)
     lane_status(game, lane, balance)
     lane_kings(game, lane)
@@ -128,6 +129,7 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
                 action_type=ActionType.DEFAULT,
             )
     starting_relics(game, init, lane, balance)
+    lane_gatherers(game, init, lane)
     game.set_value(init, f"{prefix}.initialized", 1)
 
 

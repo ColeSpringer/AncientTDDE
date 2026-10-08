@@ -6,7 +6,16 @@ from typing import cast
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 
 from ancienttdde.common.data import object_value
-from ancienttdde.game.controls import CONTROLS, MODES, ControlGroup, control_code, controls
+from ancienttdde.game.config import Balance
+from ancienttdde.game.controls import (
+    CONTROLS,
+    MODES,
+    ControlGroup,
+    control_code,
+    control_labels,
+    controls,
+)
+from ancienttdde.game.objectives import listed
 from ancienttdde.game.sites import numbers
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
@@ -25,13 +34,65 @@ def control_points(anchors: Mapping[str, object]) -> tuple[tuple[float, float], 
     return tuple(points)
 
 
-def place_controls(game: Game, anchors: Mapping[str, object]) -> None:
-    """Gaia Outposts below the shop stand for the controls; players select them."""
+def place_controls(game: Game, anchors: Mapping[str, object], balance: Balance) -> None:
+    """Gaia Outposts below the shop stand for the controls; players select them. Each carries
+    its short label as a caption, which goes with the Outpost."""
+    labels = control_labels(balance)
     for control, (x, y) in zip(CONTROLS, control_points(anchors), strict=True):
         outpost = game.scenario.unit_manager.add_unit(
-            player=0, unit_const=game.stock("outpost"), x=x, y=y
+            player=0,
+            unit_const=game.stock("outpost"),
+            x=x,
+            y=y,
+            caption_string=labels[control.key],
         )
         game.names.register("object", f"control.{control.key}", outpost.reference_id)
+
+
+def chooser_view(game: Game, anchors: Mapping[str, object]) -> None:
+    """The chooser's view starts on the run options, whichever lane the chooser is. The role
+    passes to the next lane when the chooser falls, so only an open choice moves a view."""
+    points = control_points(anchors)[: len(controls("run"))]
+    x = int(sum(x for x, _ in points) / len(points))
+    y = int(sum(y for _, y in points) / len(points))
+    for player in range(1, 8):
+        trigger = game.trigger(f"game.view.p{player}", looping=False)
+        game.value(trigger, "game.chooser", player)
+        game.value(trigger, "game.locked", 0)
+        effect(trigger, "change_view", source_player=player, location_x=x, location_y=y, scroll=0)
+
+
+def options_objectives(game: Game, balance: Balance) -> None:
+    """On-screen lines naming the controls left to right, listed while they stand: an
+    objective completes, and leaves the screen, once its conditions hold."""
+    labels = control_labels(balance)
+    run = ", ".join(labels[c.key] for c in controls("run"))
+    practice = ", ".join(labels[c.key] for c in controls("practice"))
+    options = listed(
+        game,
+        "game.objective.options",
+        f"Run options below the shop, left to right: {run}",
+        "The first human lane selects one; Standard and PvP off are taken after "
+        f"{balance.choice_seconds} game seconds.",
+        shown=True,
+    )
+    game.value(options, "game.locked", 1)
+    helpers = listed(
+        game,
+        "game.objective.practice_controls",
+        f"Practice controls (solo Practice runs) to their right: {practice}",
+        "They work in a Practice run and leave with the options otherwise.",
+        shown=True,
+    )
+    game.value(helpers, "game.locked", 1)
+    condition(
+        helpers,
+        "variable_value",
+        variable=game.names.resolve("variable", "game.mode"),
+        quantity=MODES.index("practice"),
+        comparison=Comparison.EQUAL,
+        inverted=1,
+    )
 
 
 def lane_controls(game: Game, player: int) -> None:

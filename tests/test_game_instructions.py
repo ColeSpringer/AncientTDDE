@@ -100,9 +100,12 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
     text = instructions(balance(), shop(), profiles())
     assert "row of Outposts below the shop" in text
     assert "Standard, Endless or Practice" in text
+    assert "opens with 60 game seconds for the first human lane to select a run option" in text
+    assert "the first selection is final and preparation begins at once" in text
+    assert "Standard and PvP off are the defaults when the time runs out" in text
     assert (
-        "Competitive games start with PvP off; selecting PvP on puts raiders and the siege "
-        "power-up on sale" in text
+        "Competitive games choose PvP on, which puts raiders and the siege power-up on sale "
+        "from the first wave, or PvP off" in text
     )
     assert (
         "Easiest plays Easy; Standard and Moderate play Normal; Hard, Hardest and Extreme "
@@ -118,7 +121,11 @@ def test_instructions_scale_the_schedule_by_difficulty() -> None:
 
     text = instructions(balance(), shop(), profiles())
     assert "Hit points below are for Normal: 80% on Easy and 125% on Hard" in text
-    assert "1. Villagers: 60 enemies with 150 HP each" in text
+    assert "1. Villagers: 30 enemies with 60 HP each, 45 game seconds" in text
+    assert "56. Abraha Elephant: boss with 1162000 HP" in text
+    assert "in threes from wave 31, and each boss comes alone" in text
+    assert "costs one life, a boss 5" in text
+    assert "restored from its whole amount as it takes damage" in text
 
 
 def test_the_schedule_shows_hit_points_at_the_competitive_level(tmp_path: Path) -> None:
@@ -130,15 +137,18 @@ def test_the_schedule_shows_hit_points_at_the_competitive_level(tmp_path: Path) 
     path.write_text(json.dumps(raw))
     text = instructions(balance(path), shop(), profiles())
     assert "Hit points below are for Hard: 80% on Easy and 100% on Normal" in text
-    # 150 hit points at 125%, rounded half up.
-    assert "1. Villagers: 60 enemies with 188 HP each" in text
+    # 60 hit points at 125%.
+    assert "1. Villagers: 30 enemies with 75 HP each" in text
 
 
 def test_instructions_explain_endless_practice_and_sudden_death() -> None:
     from ancienttdde.game.instructions import instructions
 
     text = instructions(balance(), shop(), profiles())
-    assert "Two-Handed Swords, Cavaliers, Champions, Paladins and Elephant Finale repeat" in text
+    assert (
+        "Elite Conquistadors, Attila the Hun, Master of the Templar, Lancelot and Henry V repeat"
+        in text
+    )
     assert "50% more hit points each round" in text and "+25 pierce armor" in text
     assert "5 more Kings" in text and "5000 more of each resource" in text
     assert "assisted" in text
@@ -174,8 +184,8 @@ def test_instructions_explain_what_keeps_lanes_apart() -> None:
     assert "Competitive games rule out Eupseong and Artillery" in text
     assert "Markets, docks, Kings, life Outposts and yurts cannot be attacked" in text
     assert "a bought castle never fires" in text
-    assert "Each new selection of an Outpost acts once" in text
-    assert "then the run options leave the row" in text
+    assert "Each selection of a practice control acts once" in text
+    assert "the run options leave the row" in text
 
 
 def test_instructions_list_every_civilization_profile() -> None:
@@ -188,7 +198,7 @@ def test_instructions_list_every_civilization_profile() -> None:
         assert f"- {civilization.name}: {listed.text(civilization)}." in section
     assert "+1 land raider with PvP on" in section and "+1 naval raider with PvP on" in section
     assert f"- Any other civilization: {listed.text(None)}." in section
-    assert "adjustments: +1 starting King" in listed.text(None)
+    assert "adjustments: +3 starting Kings" in listed.text(None)
     assert section.count("\n- ") == len(listed.civilizations) + 1
 
 

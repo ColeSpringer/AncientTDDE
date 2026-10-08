@@ -26,8 +26,13 @@ from ancienttdde.game.lanes import lane_actions
 from ancienttdde.game.objectives import run_objectives
 from ancienttdde.game.restrictions import restrict_competitive
 from ancienttdde.game.script import render_prelude, render_xs
-from ancienttdde.game.selection import place_controls, retire_controls
-from ancienttdde.game.shop import place_displays, remove_shop_signs
+from ancienttdde.game.selection import (
+    chooser_view,
+    options_objectives,
+    place_controls,
+    retire_controls,
+)
+from ancienttdde.game.shop import caption_displays, place_displays, remove_shop_signs
 from ancienttdde.game.sites import numbers
 from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.stock import load_stock
@@ -99,7 +104,8 @@ def settings(
     remove_shop_signs(game, shop)
     remove_selectors(game, lanes)
     place_displays(game, shop)
-    place_controls(game, anchors)
+    caption_displays(game, shop)
+    place_controls(game, anchors, balance)
     keeper = keeper_point(anchors)
     scenario.player_manager.active_players = 8
     for player in scenario.player_manager.players[1:]:
@@ -168,7 +174,12 @@ def keeper_point(anchors: dict[str, object]) -> tuple[float, float]:
 
 
 def add_logic(
-    game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop, profiles: Profiles
+    game: Game,
+    balance: Balance,
+    lanes: tuple[EngineLane, ...],
+    shop: Shop,
+    profiles: Profiles,
+    anchors: dict[str, object],
 ) -> None:
     endless_lumber(game, lanes)
     endless_deposits(game, balance)
@@ -176,6 +187,8 @@ def add_logic(
     game_clock(game)
     game_status(game, balance)
     run_objectives(game)
+    options_objectives(game, balance)
+    chooser_view(game, anchors)
     configure_waves(game, balance)
     endless_growth(game, balance)
     wave_warnings(game, balance)
@@ -197,6 +210,7 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
         root / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
     )
     stock = load_stock(root / "content/balance/stock.json")
+    stock.check_waves(balance)
     profiles = load_profiles(root / "content/balance/civilizations.json", balance, shop, stock)
     with TemporaryDirectory(prefix="ancienttdde-map-") as temporary:
         foundation = Path(temporary) / "foundation.aoe2scenario"
@@ -208,7 +222,7 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     prelude.write_text(
         render_prelude(balance, lanes, shop, profiles, extern=True), encoding="utf-8"
     )
-    add_logic(game, balance, lanes, shop, profiles)
+    add_logic(game, balance, lanes, shop, profiles, anchors)
     scenario.message_manager.instructions = instructions(balance, shop, profiles).replace(
         "\n", "\r"
     )

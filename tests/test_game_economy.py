@@ -481,7 +481,7 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
                 assert arrival.endswith("bought villagers appear beside it"), arrival
             else:
                 assert "bought" not in arrival
-    assert names[21492] == "Original Ancient Tower Defense by DRAX6869 / DRAX"
+    assert names[21492] == "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
 
 
 @pytest.mark.parametrize("player", PLAYERS)

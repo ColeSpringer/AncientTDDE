@@ -5,7 +5,8 @@ Raiders, traders and siege are confined by terrain and walls, so nothing may car
 arrows), take units from others (monks) or add units outside the purchase caps (production
 buildings and their units). Villagers build towers and economy buildings only: population
 comes from the shop, and every lane has its market, blacksmith and university from the start.
-The tables themselves live in restricted.py.
+Research that would change nothing a lane owns is withheld as well. The tables themselves
+live in restricted.py.
 """
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
@@ -16,7 +17,13 @@ from AoE2ScenarioParser.datasets.trigger_lists.technology_state import Technolog
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.game.config import RULED_OUT, TOWER_RANGE
-from ancienttdde.game.restricted import AGE_UPGRADES, OBJECTS, TECHNOLOGIES, TOWER_BONUSES
+from ancienttdde.game.restricted import (
+    AGE_UPGRADES,
+    OBJECTS,
+    POINTLESS,
+    TECHNOLOGIES,
+    TOWER_BONUSES,
+)
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
@@ -35,7 +42,12 @@ def disable_objects(trigger: TriggerHandle, player: int, objects: tuple[int, ...
 def restrict(game: Game, trigger: TriggerHandle, player: int) -> None:
     """Disable the restricted objects and what would make them available again."""
     disable_objects(trigger, player, tuple(OBJECTS))
-    technologies = [*TECHNOLOGIES, *TOWER_BONUSES, *(TechInfo[name].ID for name in RULED_OUT)]
+    technologies = [
+        *TECHNOLOGIES,
+        *TOWER_BONUSES,
+        *POINTLESS,
+        *(TechInfo[name].ID for name in RULED_OUT),
+    ]
     for technology in technologies:
         effect(
             trigger,

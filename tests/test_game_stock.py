@@ -54,12 +54,22 @@ def test_snapshot_records_its_source_and_every_civilization() -> None:
 
 
 def test_snapshot_holds_every_unit_the_game_and_the_model_use() -> None:
-    from ancienttdde.game.config import RAIDERS, TOWER_BUILDINGS, WAVE_UNITS
+    from ancienttdde.game.config import RAIDERS, TOWER_BUILDINGS, load_balance
 
     stock = load()
+    balance = load_balance(ROOT / "content/balance/game.json")
+    stock.check_waves(balance)
+    assert stock.unit("SIEGE_RAM").unit_class == 13 and stock.unit("KING").unit_class == 59
+    from dataclasses import replace
+
+    from ancienttdde.game.config import WaveDefinition
+
+    boat = WaveDefinition("Cogs", "TRADE_COG", 1, 1, 2, 1, 100, False)
+    with pytest.raises(ValueError, match="cannot walk a lane"):
+        stock.check_waves(replace(balance, waves=(boat, *balance.waves[1:])))
     needed = (
         set(TOWER_BUILDINGS)
-        | set(WAVE_UNITS)
+        | {wave.unit for wave in balance.waves}
         | set(RAIDERS["land"])
         | set(RAIDERS["naval"])
         | {

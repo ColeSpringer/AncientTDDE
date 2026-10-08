@@ -1,5 +1,6 @@
 """Native triggers for competition: PvP diplomacy, siege countdowns and protected Kings."""
 
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
@@ -9,10 +10,10 @@ from ancienttdde.scenario.triggers import condition, effect
 
 
 def pvp_diplomacy(game: Game) -> None:
-    """With PvP on, every defense slot becomes every other's enemy once the options are fixed."""
+    """With PvP on, every defense slot becomes every other's enemy when the first wave starts."""
     trigger = game.trigger("game.pvp", looping=False)
     game.value(trigger, "game.pvp", 1)
-    game.value(trigger, "game.locked", 1)
+    game.value(trigger, "game.wave", 0, Comparison.LARGER_OR_EQUAL)
     for source in range(1, 8):
         for target in range(1, 8):
             if source != target:

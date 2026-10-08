@@ -19,11 +19,11 @@ TOWERS = (
 )
 # The game's Accursed Towers carry this much extra pierce attack.
 ACCURSED_PIERCE = 232
-# Enemies at the scheduled waves' Normal hit points: Militia, Knights and Elephant Vanguard.
+# Enemies at the scheduled waves' Normal hit points: Militia, Knights and War Elephants.
 ENEMIES = (
-    ("militia", "militia", 220),
-    ("knight", "knight", 1100),
-    ("elephant", "war-elephant", 2500),
+    ("militia", "militia", 70),
+    ("knight", "knight", 440),
+    ("elephant", "war-elephant", 230),
 )
 ATTACK_BONUS = 100
 PADS = {

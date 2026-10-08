@@ -25,7 +25,7 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("chooser_only", "Only the first human lane chooses the run options."),
     (
         "options_fixed",
-        "The run options are fixed once the first wave starts or practice help is used.",
+        "The run options were fixed by the first selection, or when the choice window closed.",
     ),
     ("solo_modes", "Endless and Practice are solo modes; competitive games play Standard."),
     ("needs_rivals", "PvP needs rivals: it applies only to competitive games."),
@@ -36,6 +36,9 @@ MESSAGES: tuple[tuple[str, str], ...] = (
         "economy_tower",
         "Towers belong in your build rows: one built in your resource area was removed.",
     ),
+    ("boss_three_quarters", "Your boss has three quarters of its hit points left."),
+    ("boss_half", "Your boss has half of its hit points left."),
+    ("boss_quarter", "Your boss has a quarter of its hit points left."),
 )
 
 

@@ -56,10 +56,10 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
 
 
 def creation_tiles(lane: EngineLane, shop: Shop, interaction: Interaction) -> set[Tile]:
-    """Every tile the XS creates a unit on for this lane: the King stall, the transfer arrivals,
-    the spots of bought units and the islets where a rival's trebuchets arrive. Nothing may be
-    placed there: a checked spot would stay blocked, and a shared one would put the unit
-    inside it."""
+    """Every tile the XS creates a unit of the lane's on: the King stall, the transfer
+    arrivals, the spots of bought units and the islets where a rival's trebuchets arrive.
+    Nothing may be placed there: a checked spot would stay blocked, and a shared one would put
+    the unit inside it. Enemies appear on the lane's spawn column without collision checks."""
     tiles = {lane.sites.king_spawn}
     tiles.update(transfer.arrival for transfer in lane.sites.transfers.values())
     tiles.update(lane.sites.siege[: interaction.siege.trebuchets_per_rival])

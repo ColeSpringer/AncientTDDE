@@ -91,7 +91,16 @@ def test_each_scheduled_wave_is_configured_once_per_difficulty(game_build: GameB
                 8,
                 wave.object_id,
             )
-            assert hit_points["quantity"] == balance().hit_points(number - 1, level) <= 32767
+            assert hit_points["quantity"] == min(32767, balance().hit_points(number - 1, level))
+            armor = [
+                e for e in effects(trigger, "modify_attribute") if e["object_attributes"] == ARMOR
+            ]
+            if wave.pierce_armor is None:
+                assert not armor
+            else:
+                [set_armor] = armor
+                assert (set_armor["operation"], set_armor["armour_attack_class"]) == (SET, PIERCE)
+                assert set_armor["armour_attack_quantity"] == wave.pierce_armor
             assert sets(trigger, variables["game.configured"]) == [(number, SET)]
 
 
@@ -166,7 +175,7 @@ def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild)
         ("sudden", {"game.stage": 2}, ["game.drain"], "Sudden death"),
         (
             "siege",
-            {"game.pvp": 1, "game.locked": 1},
+            {"game.pvp": 1},
             ["game.siege_owner", "game.siege_left", "game.siege_cooldown"],
             "Siege",
         ),
@@ -198,6 +207,17 @@ def test_objectives_appear_when_they_apply(
         assert {name: requested(trigger, ids[name]) for name in reveal} == reveal or (
             objective == "result" and requested(trigger, ids["game.phase"]) in (6, 8)
         )
+        if objective == "siege":
+            # For sale from the first wave, not from the choice that switched PvP on.
+            [wave] = [
+                c
+                for c in conditions(trigger, "variable_value")
+                if c["variable"] == ids["game.wave"]
+            ]
+            assert (attr_int(wave, "quantity"), attr_int(wave, "comparison")) == (
+                0,
+                LARGER_OR_EQUAL,
+            )
 
 
 def test_only_display_objectives_are_ever_activated(game_build: GameBuild) -> None:
@@ -344,13 +364,15 @@ def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(
     assert [keeper["x"], keeper["y"]] == spots["enemy.keeper"]["point"]
 
 
-def test_pvp_makes_every_defense_slot_an_enemy_once_fixed(game_build: GameBuild) -> None:
+def test_pvp_makes_every_defense_slot_an_enemy_at_the_first_wave(game_build: GameBuild) -> None:
     data = snapshot(game_build)
     trigger = triggers_by_name(data)["game.pvp"]
     variables = variables_by_name(data)
     assert not trigger["looping"]
     assert requested(trigger, variables["game.pvp"]) == 1
-    assert requested(trigger, variables["game.locked"]) == 1
+    wave_id = variables["game.wave"]
+    [wave] = [c for c in conditions(trigger, "variable_value") if c["variable"] == wave_id]
+    assert (attr_int(wave, "quantity"), attr_int(wave, "comparison")) == (0, LARGER_OR_EQUAL)
     pairs = {
         (attr_int(e, "source_player"), attr_int(e, "target_player"))
         for e in effects(trigger, "change_diplomacy")

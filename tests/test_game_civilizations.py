@@ -298,7 +298,7 @@ def test_the_default_profile_is_light_and_needs_no_native_triggers() -> None:
     assert profiles.default_identity
     assert profiles.default.native is None
     worth = profile_value(profiles.default, load_inputs(ROOT), Assumptions())
-    assert 0.5 <= worth.solo <= 1.2 and worth.pvp == worth.solo
+    assert worth.solo == profiles.default.kings == 3 and worth.pvp == worth.solo
 
 
 def test_every_civilization_has_an_identity_line_and_some_adjustment() -> None:
@@ -309,17 +309,28 @@ def test_every_civilization_has_an_identity_line_and_some_adjustment() -> None:
 
 
 def test_profile_worth_stays_within_the_agreed_bands() -> None:
-    from ancienttdde.game.balance import Assumptions, civilization_value, load_inputs
+    from ancienttdde.game.balance import (
+        Assumptions,
+        baseline_income,
+        civilization_value,
+        load_inputs,
+        profile_value,
+    )
 
     inputs = load_inputs(ROOT)
+    # Slight uniqueness, measured against what a lane earns over the run without buying
+    # anything: every profile is worth about 2.6 to 7.1 percent of that income (one to two
+    # Kings of the thirty-one a shorter schedule once paid); with the civilization's own
+    # bonuses counted, no one holds more than 9.7 percent, and PvP adds at most 3.2 percent.
+    income = baseline_income(inputs, Assumptions()).total_kings
+    floor, ceiling = 0.026 * income, 0.071 * income
     for civilization in inputs.profiles.civilizations:
         worth = civilization_value(civilization, inputs, Assumptions())
-        # Slight uniqueness: every profile is worth about one to two Kings over a run; with
-        # the civilization's own bonuses counted, no one holds more than three Kings, and
-        # PvP adds at most a King on top.
-        assert 0.8 <= worth.profile.solo <= 2.2, (civilization.key, worth)
-        assert worth.solo <= 3.0, (civilization.key, worth)
-        assert worth.pvp <= worth.solo + 1.0, (civilization.key, worth)
+        assert floor <= worth.profile.solo <= ceiling, (civilization.key, worth)
+        assert worth.solo <= 0.097 * income, (civilization.key, worth)
+        assert worth.pvp <= worth.solo + 0.032 * income, (civilization.key, worth)
+    default = profile_value(inputs.profiles.default, inputs, Assumptions())
+    assert floor <= default.solo <= ceiling
 
 
 def test_native_worth_is_read_from_the_content_and_defaults_to_nothing(tmp_path: Path) -> None:
@@ -374,7 +385,7 @@ def test_the_chat_line_holds_only_the_adjustments_and_stays_short() -> None:
     assert huns is not None
     assert profiles.chat(huns) == ", ".join(adjustments_of(huns.profile))
     assert huns.identity not in profiles.chat(huns)
-    assert profiles.chat(None) == "default profile: +1 starting King"
+    assert profiles.chat(None) == "default profile: +3 starting Kings"
     from ancienttdde.game.civilizations import Civilization, Profile
 
     plain = Civilization("PLAIN", 100, "a plain civilization", Profile())

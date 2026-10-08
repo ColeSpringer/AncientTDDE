@@ -61,6 +61,12 @@ class LaneSites:
     siege: tuple[Tile, ...]
 
 
+def within(region: Rect, x: float, y: float) -> bool:
+    """Whether a position's tile lies in an inclusive region."""
+    x1, y1, x2, y2 = region
+    return x1 <= math.floor(x) <= x2 and y1 <= math.floor(y) <= y2
+
+
 def anchor(anchors: Mapping[str, object], key: str) -> dict[str, object]:
     return object_value(anchors.get(key), key)
 

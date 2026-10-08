@@ -52,9 +52,9 @@ def test_each_wave_states_the_damage_a_lane_must_deal() -> None:
     balance = inputs().balance
     assert len(needs) == len(balance.waves)
     first = needs[0]
-    assert (first.key, first.enemies, first.pierce_armor) == ("Villagers", 60, 0)
+    assert (first.key, first.enemies, first.pierce_armor) == ("Villagers", 30, 0)
     assert first.hit_points == balance.hit_points(0, balance.difficulty.index("normal"))
-    assert first.total_hit_points == 60 * first.hit_points
+    assert first.total_hit_points == 30 * first.hit_points
     # Enemies spawn for the batch window and walk the lane at the configured speed.
     assert first.spawn_seconds == (balance.waves[0].batches - 1) * balance.waves[0].interval
     assert first.crossing_seconds == pytest.approx(48 / 0.65, abs=0.1)
@@ -62,6 +62,9 @@ def test_each_wave_states_the_damage_a_lane_must_deal() -> None:
         first.total_hit_points / (first.spawn_seconds + first.crossing_seconds)
     )
     assert needs[-1].required_dps > needs[0].required_dps * 20
+    # The schedule's own armor replaces the unit's in the demand table.
+    rams = next(need for need in needs if need.unit == "SIEGE_RAM")
+    assert rams.pierce_armor == 40 and inputs().stock.unit("SIEGE_RAM").armor(PIERCE) == 195
 
 
 def test_baseline_income_counts_every_source_of_kings() -> None:

@@ -38,17 +38,35 @@ def controls(group: ControlGroup) -> tuple[Control, ...]:
     return tuple(control for control in CONTROLS if control.group == group)
 
 
-def control_captions(balance: Balance) -> dict[str, str]:
-    """The name each control shows when selected."""
+def control_texts(balance: Balance) -> dict[str, tuple[str, str]]:
+    """Each control's short label, which it carries as a caption, and the name it shows when
+    selected."""
     practice = balance.practice
     return {
-        "standard": "Run option: Standard (solo) - the scheduled waves, then victory",
-        "endless": "Run option: Endless (solo) - the waves keep coming after the finale",
-        "practice": "Run option: Practice (solo) - practice controls, assisted result",
-        "pvp_on": "Run option: PvP on (competitive) - raiders and siege for sale",
-        "pvp_off": "Run option: PvP off (competitive) - no raiders or siege",
-        "next_wave": "Practice: start the next wave now",
-        "kings": f"Practice: {practice.kings} more Kings",
-        "resources": f"Practice: {practice.resources} more food, wood, stone and gold",
-        "lives": "Practice: all lives back",
+        "standard": ("Standard", "Run option: Standard (solo) - the scheduled waves, then victory"),
+        "endless": (
+            "Endless",
+            "Run option: Endless (solo) - the waves keep coming after the finale",
+        ),
+        "practice": (
+            "Practice",
+            "Run option: Practice (solo) - practice controls, assisted result",
+        ),
+        "pvp_on": ("PvP on", "Run option: PvP on (competitive) - raiders and siege for sale"),
+        "pvp_off": ("PvP off", "Run option: PvP off (competitive) - no raiders or siege"),
+        "next_wave": ("Next wave", "Practice: start the next wave now"),
+        "kings": (f"+{practice.kings} Kings", f"Practice: {practice.kings} more Kings"),
+        "resources": (
+            f"+{practice.resources} resources",
+            f"Practice: {practice.resources} more food, wood, stone and gold",
+        ),
+        "lives": ("Lives back", "Practice: all lives back"),
     }
+
+
+def control_labels(balance: Balance) -> dict[str, str]:
+    return {key: label for key, (label, _) in control_texts(balance).items()}
+
+
+def control_captions(balance: Balance) -> dict[str, str]:
+    return {key: caption for key, (_, caption) in control_texts(balance).items()}
