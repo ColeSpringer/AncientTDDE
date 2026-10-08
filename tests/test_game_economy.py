@@ -11,6 +11,8 @@ from conftest import (
     attr_int,
     attr_list,
     attr_text,
+    cached_json,
+    effects,
     triggers_by_name,
     variables_by_name,
 )
@@ -26,12 +28,12 @@ ATTACK, PIERCE, SET, ADD, SUBTRACT = 9, 3, 1, 2, 3
 
 def snapshot(build: GameBuild) -> ScenarioSnapshot:
     output, _ = build
-    return json.loads((output / "scenario.json").read_text())
+    return cached_json(output / "scenario.json")
 
 
 def anchors(build: GameBuild) -> dict[str, Any]:
     output, _ = build
-    return json.loads((output / "map.json").read_text())["anchors"]
+    return cached_json(output / "map.json")["anchors"]
 
 
 def catalog() -> list[dict[str, Any]]:
@@ -40,10 +42,6 @@ def catalog() -> list[dict[str, Any]]:
 
 def balance() -> dict[str, Any]:
     return json.loads((ROOT / "content/balance/game.json").read_text())
-
-
-def effects(trigger: TriggerRecord, kind: str) -> list[dict[str, Any]]:
-    return [e["attributes"] for e in trigger["effects"] if e["type"] == kind]
 
 
 def tile(point: list[float]) -> tuple[int, int]:
@@ -179,6 +177,7 @@ def test_lanes_start_with_the_original_economy(game_build: GameBuild, player: in
         (1, SET): start["wood"],
         (2, SET): start["stone"],
         (3, SET): start["gold"],
+        (4, SET): 0,
     }
     researched = {
         e["technology"]: e["force_research_technology"]
@@ -354,9 +353,14 @@ def test_no_flat_income_or_forced_population(game_build: GameBuild) -> None:
     triggers = triggers_by_name(data)
     assert not any(name.endswith(".income") for name in triggers)
     for trigger in data["triggers"]:
-        if trigger["name"].endswith(".buy.population"):
+        # The population purchase, and a civilization profile applied once, may add headroom;
+        # the lane's setup only levels it to zero.
+        if trigger["name"].endswith(".buy.population") or ".profile." in trigger["name"]:
             continue
-        assert not any(e["tribute_list"] == 4 for e in effects(trigger, "modify_resource"))
+        for e in effects(trigger, "modify_resource"):
+            if e["tribute_list"] == 4:
+                assert trigger["name"].endswith(".initialize") and e["operation"] == SET
+                assert e["quantity"] == 0
 
 
 @pytest.mark.parametrize("player", PLAYERS)
@@ -549,3 +553,17 @@ def test_objectives_show_the_wave_countdown_and_every_lane(game_build: GameBuild
         assert [(c["type"], c["attributes"]["quantity"]) for c in shown["conditions"]] == [
             ("variable_value", -1)
         ]
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_population_starts_at_zero_headroom_for_every_lane(
+    game_build: GameBuild, player: int
+) -> None:
+    init = triggers_by_name(snapshot(game_build))[f"lane.p{player}.initialize"]
+    headroom = [
+        (e["operation"], e["quantity"])
+        for e in effects(init, "modify_resource")
+        if e["tribute_list"] == 4 and e["source_player"] == player
+    ]
+    # Civilization bonuses that start with population are levelled; only purchases add it.
+    assert headroom == [(SET, 0)]

@@ -28,14 +28,9 @@ def project_path(root: Path, relative: str) -> Path:
     return result
 
 
-def prepare_output(
-    root: Path, output: Path | None, default: str, names: Iterable[str], *, kind: ManifestKind
-) -> Path:
-    """Resolve a directory the pipeline may write, without creating it.
-
-    An existing directory belongs to the pipeline whose kind its manifest declares,
-    whatever the manifest's schema; validation parses the complete manifest.
-    """
+def resolve_output(root: Path, output: Path | None, default: str) -> Path:
+    """Resolve a directory outside the sources, the project itself and its ancestors, without
+    creating it."""
     root = root.resolve()
     if output is None:
         # A configured default stays inside the project, though a directory there may link
@@ -53,6 +48,18 @@ def prepare_output(
         raise ValueError("Output must be outside source directories and their ancestors")
     if directory.exists() and not directory.is_dir():
         raise ValueError("Output must be a directory")
+    return directory
+
+
+def prepare_output(
+    root: Path, output: Path | None, default: str, names: Iterable[str], *, kind: ManifestKind
+) -> Path:
+    """Resolve a directory the pipeline may write, without creating it.
+
+    An existing directory belongs to the pipeline whose kind its manifest declares,
+    whatever the manifest's schema; validation parses the complete manifest.
+    """
+    directory = resolve_output(root, output, default)
     owned = (*names, "manifest.json")
     if any((directory / name).is_symlink() for name in owned):
         raise ValueError("Output cannot replace artifact symlinks")

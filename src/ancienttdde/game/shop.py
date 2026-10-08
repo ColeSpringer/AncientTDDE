@@ -15,6 +15,7 @@ from ancienttdde.game.catalog import (
     RelicEnclosure,
     Relics,
     Repair,
+    Resource,
     ResourceGrant,
     Shop,
     SiegePowerUp,
@@ -25,7 +26,7 @@ from ancienttdde.game.catalog import (
 )
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import around, at
-from ancienttdde.game.sites import Tile
+from ancienttdde.game.sites import Tile, TradeMedium
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.objects import technology
 from ancienttdde.scenario.triggers import STORAGE, TriggerHandle, area, effect
@@ -39,6 +40,49 @@ def hay_stack(game: Game, tile: Tile) -> int:
     return game.placement(found[0])
 
 
+def grant_resource(trigger: TriggerHandle, player: int, resource: Resource, amount: int) -> None:
+    """Add to the lane's stockpile."""
+    effect(
+        trigger,
+        "modify_resource",
+        source_player=player,
+        tribute_list=STORAGE[resource],
+        quantity=amount,
+        operation=Operation.ADD,
+    )
+
+
+def grant_population(trigger: TriggerHandle, player: int, amount: int) -> None:
+    effect(
+        trigger,
+        "modify_resource",
+        source_player=player,
+        tribute_list=Attribute.POPULATION_HEADROOM,
+        quantity=amount,
+        operation=Operation.ADD,
+    )
+
+
+def task_traders(
+    game: Game,
+    trigger: TriggerHandle,
+    lane: EngineLane,
+    medium: TradeMedium,
+    tiles: tuple[Tile, ...],
+) -> None:
+    """Send the traders standing on these spots to the lane's partner market or dock."""
+    kind, _, partner = lane.traders(medium)
+    effect(
+        trigger,
+        "task_object",
+        source_player=lane.player,
+        object_list_unit_id=game.stock(kind),
+        location_object_reference=game.placement(partner),
+        action_type=ActionType.DEFAULT,
+        **around(tiles),
+    )
+
+
 def apply(
     game: Game, trigger: TriggerHandle, lane: EngineLane, purchase: Purchase, balance: Balance
 ) -> None:
@@ -49,14 +93,7 @@ def apply(
         case TowerAttack(family=family, amount=amount):
             game.attack_bonus(trigger, player, balance.towers.family_ids(family), amount)
         case ResourceGrant(resource=resource, amount=amount):
-            effect(
-                trigger,
-                "modify_resource",
-                source_player=player,
-                tribute_list=STORAGE[resource],
-                quantity=amount,
-                operation=Operation.ADD,
-            )
+            grant_resource(trigger, player, resource, amount)
         case AgeUp(age=age):
             # XS adds the tower upgrade when the civilization has it.
             effect(
@@ -93,18 +130,7 @@ def apply(
                 **at(spawn.walk),
             )
         case Traders(medium=medium):
-            kind = "cart" if medium == "land" else "cog"
-            tiles = sites.carts if medium == "land" else sites.cogs
-            partner = lane.land_trade_partner if medium == "land" else lane.water_trade_partner
-            effect(
-                trigger,
-                "task_object",
-                source_player=player,
-                object_list_unit_id=game.stock(kind),
-                location_object_reference=game.placement(partner),
-                action_type=ActionType.DEFAULT,
-                **around(tiles),
-            )
+            task_traders(game, trigger, lane, medium, lane.traders(medium)[1])
         case RelicEnclosure():
             for kind in ("monastery", "monk"):
                 effect(
@@ -116,14 +142,7 @@ def apply(
                     **area(sites.relic_enclosure),
                 )
         case Population(amount=amount):
-            effect(
-                trigger,
-                "modify_resource",
-                source_player=player,
-                tribute_list=Attribute.POPULATION_HEADROOM,
-                quantity=amount,
-                operation=Operation.ADD,
-            )
+            grant_population(trigger, player, amount)
         case Expansion(row=row):
             for rows in sites.expansion[row]:
                 effect(

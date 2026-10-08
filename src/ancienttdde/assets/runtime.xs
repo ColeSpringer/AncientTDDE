@@ -114,6 +114,25 @@ void ancientCleanupLane(int player = 1, int berryMill = -1) {
     }
 }
 
+// What a King costs this lane: the difficulty's price, adjusted by its civilization profile.
+int ancientKingPrice(int player = 1) {
+    int price = kingGold(xsTriggerVariable(vDifficulty)) * civGoldPercent(xsGetPlayerCivilization(player)) / 100;
+    if (price < 1) price = 1;
+    return (price);
+}
+
+// The lane's civilization line: its name when the content knows it, its profile's adjustments
+// and, when they change it, the lane's own King price.
+string ancientCivilization(int player = 1) {
+    int civilization = xsGetPlayerCivilization(player);
+    string line = ancientPlayer(player);
+    string name = civName(civilization);
+    if (name != "") line = line + " " + name;
+    line = line + ": " + civText(civilization);
+    if (civGoldPercent(civilization) != 100) line = line + "; a King per " + ancientText(ancientKingPrice(player)) + " gold";
+    return (line + ".");
+}
+
 string ancientTowerAccess(int player = 1) {
     string available = "Watch Tower";
     string missing = "";
@@ -130,8 +149,59 @@ string ancientTowerAccess(int player = 1) {
     return (text);
 }
 
+// Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
+// shared trade areas are not checked, so no rival unit can hold a purchase back.
+bool ancientSpawn(int player = 1, int purchase = 0) {
+    int key = player * cSpawnStride + purchase;
+    int first = spawnStart(key);
+    int total = spawnCount(key);
+    if (ancientSpawnArray < 0) ancientSpawnArray = xsArrayCreateInt(cSpawnSlots, -1, "ancientSpawnArray");
+    int made = 0;
+    for (entry = 0; < total) {
+        if (made == entry) {
+            int owner = player;
+            if (spawnGaia(first + entry) == 1) owner = 0;
+            vector spot = xsVectorSet(0.1 * spawnX10(first + entry), 0.1 * spawnY10(first + entry), 0.0);
+            int unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, spawnShared(first + entry) == 0);
+            if (unit >= 0) {
+                xsArraySetInt(ancientSpawnArray, made, unit);
+                made = made + 1;
+            }
+        }
+    }
+    if (made == total) return (true);
+    for (undo = 0; < made) {
+        xsRemoveUnit(xsArrayGetInt(ancientSpawnArray, undo));
+    }
+    return (false);
+}
+
+// A granted purchase the lane cannot keep goes back on sale.
+void ancientUngrant(int player = 1, int purchase = 0, string reason = "") {
+    int mask = shopMask(purchase);
+    if ((mask > 0) && ancientOwns(player, mask)) laneSet(player, fOwned, laneValue(player, fOwned) - mask);
+    xsChatData(ancientPlayer(player) + ": a starting purchase " + reason + " and stays on sale.");
+}
+
+// Place the units of every purchase the lane's civilization holds from the start, as a payment
+// would, once the lane's own setup has run. A purchase for civilizations with a technology
+// this one lacks, or whose spot is blocked, goes back on sale instead.
+void ancientGrant(int player = 1, int civ = 0) {
+    for (slot = 0; < cGrantSlots) {
+        int purchase = civGrant(civ, slot);
+        if (purchase > 0) {
+            int tech = shopTech(purchase);
+            if ((tech > 0) && (xsGetTechState(tech, player) == cTechStateDisabled)) {
+                ancientUngrant(player, purchase, "is not for this civilization");
+            } else if (ancientSpawn(player, purchase) == false) {
+                ancientUngrant(player, purchase, "could not be placed");
+            }
+        }
+    }
+}
+
 // The first human lane chooses the run options. Solo runs play the lobby's difficulty;
-// competitive games play one fixed level and start with PvP on.
+// competitive games play one fixed level and start with PvP off.
 void ancientInitialize() {
     int participants = 0;
     int chooser = 0;
@@ -139,6 +209,9 @@ void ancientInitialize() {
         if (xsGetPlayerInGame(player) && (xsGetPlayerType(player) == cPlayerTypeHuman)) {
             laneSet(player, fActive, 1);
             laneSet(player, fLives, cLives);
+            int civilization = xsGetPlayerCivilization(player);
+            laneSet(player, fKings, civKings(civilization));
+            laneSet(player, fOwned, civOwned(civilization));
             ancientShowLives(player);
             participants = participants + 1;
             if (chooser == 0) chooser = player;
@@ -161,14 +234,13 @@ void ancientInitialize() {
         if ((lobby >= -1) && (lobby <= 4)) level = lobbyLevel(lobby + 1);
     }
     xsSetTriggerVariable(vDifficulty, level);
-    if (participants > 1) xsSetTriggerVariable(vPvp, 1);
     xsChatData("Ancient TD: human defense lanes = %d", participants);
     if (participants == 0) return;
     xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
     if (participants == 1) {
         xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop before the first wave.");
     } else {
-        xsChatData(ancientPlayer(chooser) + ": PvP is on; select PvP off below the shop before the first wave to play without raiders and siege.");
+        xsChatData(ancientPlayer(chooser) + ": PvP is off; select PvP on below the shop before the first wave to put raiders and the siege power-up on sale.");
     }
 }
 
@@ -645,7 +717,7 @@ bool ancientRaidersFull(int player = 1, int medium = 1) {
         int unit = raiderLine(medium * cRaiderLineSize + member);
         if (unit > 0) living = living + xsGetObjectCount(player, unit);
     }
-    int cap = raiderCap(medium) + raiderBonus(medium * cCivilizationSlots + xsGetPlayerCivilization(player));
+    int cap = raiderCap(medium) + civRaiders(medium, xsGetPlayerCivilization(player));
     return (living >= cap);
 }
 
@@ -746,33 +818,6 @@ void ancientSampleKings(int player = 1) {
         xsArraySetInt(ancientKingStill, base + record, xsArrayGetInt(ancientSampleStill, record));
     }
     xsArraySetInt(ancientKingSampled, player, kings);
-}
-
-// Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
-// shared trade areas are not checked, so no rival unit can hold a purchase back.
-bool ancientSpawn(int player = 1, int purchase = 0) {
-    int key = player * cSpawnStride + purchase;
-    int first = spawnStart(key);
-    int total = spawnCount(key);
-    if (ancientSpawnArray < 0) ancientSpawnArray = xsArrayCreateInt(cSpawnSlots, -1, "ancientSpawnArray");
-    int made = 0;
-    for (entry = 0; < total) {
-        if (made == entry) {
-            int owner = player;
-            if (spawnGaia(first + entry) == 1) owner = 0;
-            vector spot = xsVectorSet(0.1 * spawnX10(first + entry), 0.1 * spawnY10(first + entry), 0.0);
-            int unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, spawnShared(first + entry) == 0);
-            if (unit >= 0) {
-                xsArraySetInt(ancientSpawnArray, made, unit);
-                made = made + 1;
-            }
-        }
-    }
-    if (made == total) return (true);
-    for (undo = 0; < made) {
-        xsRemoveUnit(xsArrayGetInt(ancientSpawnArray, undo));
-    }
-    return (false);
 }
 
 // One request at a time: a purchase waits until the native triggers have applied the last.
@@ -878,7 +923,7 @@ void ancientUpgrades(int player = 1) {
 
 void ancientConvert(int player = 1) {
     float gold = xsPlayerAttribute(player, cAttributeGold);
-    int price = kingGold(xsTriggerVariable(vDifficulty));
+    int price = ancientKingPrice(player);
     int kings = 0;
     while (gold >= price) {
         gold = gold - price;
@@ -898,8 +943,14 @@ void ancientKillRewards(int player = 1) {
         rewards = rewards + 1;
     }
     if (rewards == 0) return;
-    xsSetPlayerAttribute(player, cAttributeStone, xsPlayerAttribute(player, cAttributeStone) + rewards * cKillStone);
-    xsSetPlayerAttribute(player, cAttributeWood, xsPlayerAttribute(player, cAttributeWood) + rewards * cKillWood);
+    // Each reward pays the scaled total so far less what was paid before, so rounding never
+    // accumulates.
+    int percent = civKillPercent(xsGetPlayerCivilization(player));
+    int total = paid + rewards;
+    int stone = total * cKillStone * percent / 100 - paid * cKillStone * percent / 100;
+    int wood = total * cKillWood * percent / 100 - paid * cKillWood * percent / 100;
+    xsSetPlayerAttribute(player, cAttributeStone, xsPlayerAttribute(player, cAttributeStone) + stone);
+    xsSetPlayerAttribute(player, cAttributeWood, xsPlayerAttribute(player, cAttributeWood) + wood);
     int kings = (paid + rewards) / cRewardsPerKing - paid / cRewardsPerKing;
     laneSet(player, fKills, paid + rewards);
     if (kings > 0) {
@@ -1007,6 +1058,15 @@ void ancientTick() {
     for (player = 1; <= 7) {
         if ((laneValue(player, fActive) == 1) &&
             ((laneValue(player, fInitialized) == 0) || (laneValue(player, fSpawn) > 0))) ready = false;
+        // Once the lane's own setup has run, its granted purchases are placed and its native
+        // effect set requested, once; -1 records that there is none to request.
+        if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 1) && (laneValue(player, fProfile) == 0)) {
+            int civilization = xsGetPlayerCivilization(player);
+            ancientGrant(player, civilization);
+            int native = civNative(civilization);
+            if (native > 0) laneSet(player, fProfile, native);
+            else laneSet(player, fProfile, -1);
+        }
     }
     if (ready == false) return;
     if ((state == sSetup) || (state == sPreparation)) {
@@ -1021,7 +1081,10 @@ void ancientTick() {
                 xsSetTriggerVariable(vRemaining, cPreparation);
                 xsChatData("Prepare your towers. First wave in %d game seconds.", cPreparation);
                 for (newcomer = 1; <= 7) {
-                    if (laneValue(newcomer, fActive) == 1) xsChatData(ancientTowerAccess(newcomer));
+                    if (laneValue(newcomer, fActive) == 1) {
+                        xsChatData(ancientTowerAccess(newcomer));
+                        xsChatData(ancientCivilization(newcomer));
+                    }
                 }
             } else ancientStartWave();
         }

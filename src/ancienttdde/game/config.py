@@ -7,11 +7,11 @@ from pathlib import Path
 from typing import cast
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
-from AoE2ScenarioParser.datasets.object_support import CivilizationOld
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
-from ancienttdde.game.sites import RAIDER_MEDIA, LaneSites, RaiderMedium, load_sites
+from ancienttdde.game.restricted import TECHNOLOGIES
+from ancienttdde.game.sites import LaneSites, RaiderMedium, Tile, TradeMedium, load_sites
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import technology
 
@@ -61,6 +61,19 @@ MAX_HIT_POINTS = 32767
 RESERVED_TECHNOLOGIES = frozenset(
     {"FEUDAL_AGE", "CASTLE_AGE", "IMPERIAL_AGE", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"}
 )
+# Technologies every lane rules out. Conversions of monks and buildings, and a longer
+# conversion range:
+CONVERSIONS = ("ATONEMENT", "REDEMPTION", "BLOCK_PRINTING")
+# range that would carry castle arrows and fire ships past the walls:
+WALL_RANGE = ("CRENELLATIONS", "GREEK_FIRE")
+# castle technologies that would multiply every tower's volley, far beyond any profile:
+TOWER_MULTIPLIERS = ("YASAMA", "STRONGHOLD")
+# and, in competitive games only, two more tiles of tower range: with Fletching, Bodkin Arrow
+# and Bracer, towers reach 11 tiles, and the nearest tiles of the next lane are 12 away.
+TOWER_RANGE = ("EUPSEONG", "ARTILLERY")
+# What every game rules out, and what no lane may research or be granted.
+RULED_OUT = CONVERSIONS + WALL_RANGE + TOWER_MULTIPLIERS
+UNRESEARCHABLE = frozenset(RULED_OUT + TOWER_RANGE)
 # DE's lobby difficulty settings, as xsGetDifficulty reports them.
 LOBBY_DIFFICULTIES = {
     "extreme": -1,
@@ -135,6 +148,15 @@ class Towers:
         raise ValueError(f"Unknown tower family: {family}")
 
     @property
+    def members(self) -> tuple[str, ...]:
+        """Every tower definition the families name, once each, in family order."""
+        return tuple(dict.fromkeys(member for _, members in self.families for member in members))
+
+    @property
+    def definitions(self) -> tuple[int, ...]:
+        return tuple(BuildingInfo[member].ID for member in self.members)
+
+    @property
     def special_id(self) -> int:
         return BuildingInfo[self.special].ID
 
@@ -195,8 +217,6 @@ class RaiderKind:
 class Raiders:
     land: RaiderKind
     naval: RaiderKind
-    # Extra living raiders a civilization may keep: civilization, medium and how many more.
-    bonuses: tuple[tuple[str, str, int], ...]
 
     def kind(self, medium: RaiderMedium) -> RaiderKind:
         match medium:
@@ -294,9 +314,11 @@ def technologies(raw: dict[str, object], key: str) -> tuple[str, ...]:
     for name in cast(list[object], names):
         if not isinstance(name, str):
             raise ValueError(f"{key} must list technology names")
-        technology(name)
+        identifier = technology(name)
         if name in RESERVED_TECHNOLOGIES:
             raise ValueError(f"{name} cannot be a starting technology: the game grants or sells it")
+        if name in UNRESEARCHABLE or identifier in TECHNOLOGIES:
+            raise ValueError(f"{name} cannot be a starting technology: the game rules it out")
         if name in listed:
             raise ValueError(f"Technology listed twice: {name}")
         listed.append(name)
@@ -359,7 +381,7 @@ def load_difficulty(raw: dict[str, object]) -> Difficulty:
             DifficultyLevel(
                 key=key,
                 name=text_field(row, "name"),
-                king_gold=integer(row, "king_gold", 1, 30000),
+                king_gold=integer(row, "king_gold", 100, 30000),
                 hit_points_percent=integer(row, "hit_points_percent", 50, 200),
             )
         )
@@ -415,31 +437,10 @@ def raider_kind(raw: dict[str, object], medium: RaiderMedium) -> RaiderKind:
     return RaiderKind(unit=unit, line=tuple(line), cap=integer(row, "cap", 1, 10))
 
 
-# Civilization IDs as xsGetPlayerCivilization reports them; Gaia and the lobby's random
-# choices are not civilizations a player plays.
-MAX_CIVILIZATION = 255
-
-
-def civilization(value: object) -> str:
-    member = CivilizationOld.__members__.get(value) if isinstance(value, str) else None
-    if member is None or not 0 < member.value <= MAX_CIVILIZATION:
-        raise ValueError(f"Unknown civilization: {value}")
-    return member.name
-
-
 def load_raiders(raw: dict[str, object]) -> Raiders:
-    bonuses: list[tuple[str, str, int]] = []
-    for row in rows(raw.get("bonuses"), "bonuses"):
-        medium = row.get("medium")
-        if medium not in RAIDER_MEDIA:
-            raise ValueError(f"medium must be one of {', '.join(RAIDER_MEDIA)}")
-        bonus = (civilization(row.get("civilization")), str(medium), integer(row, "extra", 1, 5))
-        if bonus[:2] in {b[:2] for b in bonuses}:
-            raise ValueError(f"Raider bonus listed twice: {bonus[0]} {bonus[1]}")
-        bonuses.append(bonus)
-    return Raiders(
-        land=raider_kind(raw, "land"), naval=raider_kind(raw, "naval"), bonuses=tuple(bonuses)
-    )
+    if "bonuses" in raw:
+        raise ValueError("Raider bonuses belong to content/balance/civilizations.json")
+    return Raiders(land=raider_kind(raw, "land"), naval=raider_kind(raw, "naval"))
 
 
 def load_siege(raw: dict[str, object]) -> Siege:
@@ -457,7 +458,7 @@ def load_siege(raw: dict[str, object]) -> Siege:
 
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if raw.get("schema_version") != 4:
+    if raw.get("schema_version") != 5:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):
@@ -525,6 +526,12 @@ class EngineLane:
     land_trade_partner: int
     water_trade_partner: int
     sites: LaneSites
+
+    def traders(self, medium: TradeMedium) -> tuple[str, tuple[Tile, ...], int]:
+        """The trader kind, its spots and its partner's placement for a trade medium."""
+        if medium == "land":
+            return "cart", self.sites.carts, self.land_trade_partner
+        return "cog", self.sites.cogs, self.water_trade_partner
 
 
 def load_lanes(anchors: dict[str, object]) -> tuple[EngineLane, ...]:

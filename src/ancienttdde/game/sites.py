@@ -15,6 +15,8 @@ TRANSFERS = ("build", "economy", "north", "south")
 # Raiders fight on land or water: one purchase, spot and living cap per medium.
 type RaiderMedium = Literal["land", "naval"]
 RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
+type TradeMedium = Literal["land", "water"]
+TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
 
 
 @dataclass(frozen=True)

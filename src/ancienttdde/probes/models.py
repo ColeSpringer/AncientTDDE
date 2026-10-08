@@ -15,6 +15,8 @@ class ProbeId(StrEnum):
     RAIDERS = "raiders"
     SIEGE = "siege"
     SCRIPTS_ENEMY = "scripts-enemy"
+    TRADE_INCOME = "trade-income"
+    TOWER_DAMAGE = "tower-damage"
 
 
 class Outcome(StrEnum):

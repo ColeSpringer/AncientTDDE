@@ -73,7 +73,7 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
     [
         ("tower_attack_4", "Tower attack +4: 1 King"),
         ("tower_attack_50", "Tower attack +50: 7 Kings"),
-        ("king_every_minute", "1 King every minute: 21 Kings, once"),
+        ("king_every_minute", "1 King every minute: 20 Kings, once"),
         ("imperial_age", "Imperial Age and Keep: 1 King, once, after Castle Age and Guard Tower"),
         ("fourth_row", "Fourth row of towers: 3 Kings, once, after Third row of towers"),
         (

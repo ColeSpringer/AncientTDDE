@@ -33,6 +33,8 @@ def test_suite_builds_self_contained_solo_scenarios(probe_suite: ProbeSuite) -> 
         "raiders",
         "siege",
         "scripts-enemy",
+        "trade-income",
+        "tower-damage",
     }
     for probe in manifest["probes"]:
         snapshot = probe_snapshot(directory, probe["id"])
@@ -161,7 +163,7 @@ def test_every_active_player_survives_game_start_and_unused_slots_cannot_act(
         expected = {2, 3, 4, 5, 6, 7}
         if probe["id"] == "trade":
             expected.remove(2)
-        if probe["id"] in {"payments", "towers", "scripts-enemy"}:
+        if probe["id"] in {"payments", "towers", "scripts-enemy", "tower-damage"}:
             expected.add(8)
         assert {u["player_id"] for u in markers} == expected
         # A King cannot attack, build, gather or be converted, so no enclosure is needed.
@@ -277,7 +279,18 @@ def test_probe_inspection_rejects_buildings_off_their_footprint_grid(
 
 
 @pytest.mark.parametrize(
-    "name", ["payments", "towers", "trade", "trade-gaia", "raiders", "siege", "scripts-enemy"]
+    "name",
+    [
+        "payments",
+        "towers",
+        "trade",
+        "trade-gaia",
+        "raiders",
+        "siege",
+        "scripts-enemy",
+        "trade-income",
+        "tower-damage",
+    ],
 )
 def test_explicit_selected_units_use_their_real_owner_filter(
     probe_suite: ProbeSuite, name: str

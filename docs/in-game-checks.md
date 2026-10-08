@@ -59,19 +59,43 @@ level; run options are selected in game, in the row of Outposts below the shop.
 - Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, and with Ballistics,
   Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason researched: towers
   hit moving targets and shoot adjacent enemies; a King buys 2000 wood or 1500 stone.
-- 3,500 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
+- 2,000 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
   every 25 wave kills pay 125 stone and 25 wood. Raiders killing rival traders and raiders
   earn nothing.
 - Investments pay on their period; the repair crew restores lives for stone.
+- A starting trade cart's return adds about 100 gold on the game's routes (the balance
+  tables' assumption); record the real amount for a cart and a cog.
 - Tower attack reaches existing, new and upgraded towers only; Accursed Towers appear on
   the reserved pads with 240 pierce attack.
 - Castle Age and Imperial Age add Guard Tower and Keep only for civilizations that have
   them, and the preparation message lists each lane's unavailable towers correctly.
+- Preparation also announces each lane's civilization line, with the lane's own King price
+  when its profile changes it; a civilization the content does not list (one newer than the
+  build) plays the default profile and is announced as such.
+- Achaemenids, Athenians, Thracians and Puru keep the Keep: their tech-tree screens omit it
+  but the data leaves it researchable, so Imperial Age should bring Keeps and the preparation
+  line should not list the Keep as unavailable.
+- A profile's adjustments arrive once the lane is set up and never again after a save during
+  preparation: starting Kings at the stall, resources, population, technologies researched,
+  tower attack and hit points on existing and new towers, cheaper tower stone, relics inside
+  the first monastery, and starting traders that trade at once.
+- A lane with a King price discount converts gold at its own price while the opening chat
+  names the base price; scaled kill rewards pay the scaled stone and wood.
+- A purchase a profile grants from the start is owned before the first second ends: its
+  units stand on the shop's spots (villagers walk clear, traders trade, a castle stands on
+  its site, relics wait for the monks), Castle Age arrives with Guard Towers, an investment
+  pays from the first period, and the pad refuses the Kings as already owned.
 - Transfer pads move one villager at a time between the build and resource areas.
 - Reaching the end of each resource row pays its bonus once and adds endless deposits;
   starting mines and bushes keep their normal amounts.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
-  appear and work; houses, +80 population and the castle set the population limit.
+  appear and work; a lane starts with no population headroom of its own, the Huns
+  included, so only +80 population, the castle and a profile's own population raise it.
+- An Armenian lane finds a free relic in one of its monasteries, and a Saxon lane's towers
+  and Accursed Towers fire one arrow of their own after Castle Age.
+- The trade-income probe's routes are short; on the game map, time a cart and a cog on
+  their real routes and set `trade_gold_per_trip` from that. The civilization bands are
+  tuned to the 100-gold estimate, so trade-heavy profiles may need retuning afterwards.
 
 ## Modes and competition
 
@@ -90,8 +114,8 @@ level; run options are selected in game, in the row of Outposts below the shop.
   each wave, and ends with a result when the lane falls.
 - Sudden death keeps the waves coming for every survivor, announced as sudden death waves,
   and costs lives every 30 seconds.
-- PvP on makes the defense lanes enemies at the first wave; PvP off keeps them neutral
-  and raider and siege purchases keep their Kings.
+- Competitive games start with PvP off and say so; PvP on makes the defense lanes enemies at
+  the first wave; PvP off keeps them neutral and raider and siege purchases keep their Kings.
 - Raiders arrive below their market or dock, walk clear, fight rival traders and raiders,
   and cannot leave their trade area; the third raider of a kind is refused (a fourth for
   the listed civilizations) and upgraded fire ships still count.
@@ -102,11 +126,13 @@ level; run options are selected in game, in the row of Outposts below the shop.
   or not; expiry removes both forms; competing or cooling-down purchases keep their Kings,
   and the holder buying again is told it holds the siege already; the holder's elimination
   ends it; save/load during the warning and the siege keeps both.
-- Villagers cannot build barracks, docks, castles, monasteries or town centers; docks
-  train only trade cogs; a bought castle trains nothing and fires no arrows; monks cannot
-  convert. All of this still holds after buying Castle Age and Imperial Age, and the castle
-  stays silent after Fletching, Bodkin Arrow and Bracer. Crenellations and Greek Fire
-  cannot be researched; in competitive games neither can Eupseong or Artillery.
+- Villagers build only towers, mills, camps and farms: no houses, walls, gates, outposts,
+  markets, blacksmiths, universities, barracks, docks, castles, monasteries or town
+  centers; docks train only trade cogs; a bought castle trains nothing and fires no arrows;
+  monks cannot convert. All of this still holds after buying Castle Age and Imperial Age,
+  and the castle stays silent after Fletching, Bodkin Arrow and Bracer. Crenellations,
+  Greek Fire, Yasama and Stronghold cannot be researched; in competitive games neither can
+  Eupseong or Artillery.
 - A tower or tower foundation in the resource area disappears, and its player is told why.
 - Bought monks, castles, fire galleys and siege trebuchets still appear although their
   owners cannot train or build them.
@@ -137,3 +163,12 @@ each case's action, expected observation and test settings. Record each observat
 `uv run ancienttdde probe record`; rebuilding keeps recorded results.
 `content/probes/observations.json` archives earlier results together with their schema-1
 probe manifests; nothing reads it.
+
+The `trade-income` and `tower-damage` probes measure what `docs/balance.md` assumes: how
+trade gold grows with route length, raider kill times, tower kill times per enemy kind and
+siege damage. The gold per trip on the game's own routes comes from the game (see Economy
+and shop); put it into `Assumptions` in `src/ancienttdde/game/balance.py` and regenerate.
+
+```bash
+uv run ancienttdde probe --only trade-income --only tower-damage --output .build/balance-probes
+```

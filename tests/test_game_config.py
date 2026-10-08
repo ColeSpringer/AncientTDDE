@@ -150,9 +150,6 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("interaction", "raiders", "naval", "unit"), "GALLEY", "GALLEY"),
         (("interaction", "raiders", "land", "line"), ["HUSSAR"], "LIGHT_CAVALRY"),
         (("interaction", "raiders", "land", "cap"), 0, "cap"),
-        (("interaction", "raiders", "bonuses", 0, "civilization"), "ATLANTEANS", "ATLANTEANS"),
-        (("interaction", "raiders", "bonuses", 0, "civilization"), "RANDOM", "RANDOM"),
-        (("interaction", "raiders", "bonuses", 0, "medium"), "air", "medium"),
         (("interaction", "siege", "trebuchets_per_rival"), 4, "trebuchets_per_rival"),
         (("interaction", "siege", "warning_seconds"), 0, "warning_seconds"),
         (("interaction", "siege", "buyer_cooldown"), 30, "buyer_cooldown"),
@@ -189,9 +186,21 @@ def test_reject_an_outdated_balance_schema(tmp_path: Path) -> None:
     from ancienttdde.game.config import load_balance
 
     raw = json.loads((ROOT / "content/balance/game.json").read_text())
-    assert raw["schema_version"] == 4
-    raw["schema_version"] = 3
+    assert raw["schema_version"] == 5
+    raw["schema_version"] = 4
     with pytest.raises(ValueError, match="Unsupported balance schema"):
+        load_balance(write_balance(tmp_path, raw))
+
+
+def test_raider_bonuses_belong_to_the_civilization_profiles(tmp_path: Path) -> None:
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    assert "bonuses" not in raw["interaction"]["raiders"]
+    raw["interaction"]["raiders"]["bonuses"] = [
+        {"civilization": "HUNS", "medium": "land", "extra": 1}
+    ]
+    with pytest.raises(ValueError, match="civilizations.json"):
         load_balance(write_balance(tmp_path, raw))
 
 
@@ -216,9 +225,9 @@ def test_lobby_difficulty_chooses_gold_per_king_and_wave_strength() -> None:
     balance = load_balance(ROOT / "content/balance/game.json")
     difficulty = balance.difficulty
     assert [(d.key, d.name, d.king_gold, d.hit_points_percent) for d in difficulty.levels] == [
-        ("easy", "Easy", 2500, 80),
-        ("normal", "Normal", 3500, 100),
-        ("hard", "Hard", 5000, 125),
+        ("easy", "Easy", 1500, 80),
+        ("normal", "Normal", 2000, 100),
+        ("hard", "Hard", 3000, 125),
     ]
     # DE's lobby settings, as xsGetDifficulty reports them, from Extreme (-1) to Easiest (4).
     assert LOBBY_DIFFICULTIES == {
@@ -288,9 +297,7 @@ def test_raiders_are_melee_or_short_range_and_capped() -> None:
     assert raiders.naval.line_ids == tuple(
         UnitInfo[name].ID for name in ("FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP")
     )
-    bonuses = {(civ, medium) for civ, medium, _ in raiders.bonuses}
-    assert ("MONGOLS", "land") in bonuses and ("VIKINGS", "naval") in bonuses
-    assert all(extra == 1 for _, _, extra in raiders.bonuses)
+    assert not hasattr(raiders, "bonuses")
 
 
 def test_raider_kinds_reject_unknown_media() -> None:
@@ -335,3 +342,30 @@ def test_practice_grants_and_sudden_death_pace() -> None:
     balance = load_balance(ROOT / "content/balance/game.json")
     assert (balance.practice.kings, balance.practice.resources) == (5, 5000)
     assert balance.sudden_death_interval == 30
+
+
+@pytest.mark.parametrize("name", ["YASAMA", "CRENELLATIONS", "FAST_FIRE_SHIP"])
+def test_starting_technologies_cannot_be_ones_the_lanes_rule_out(tmp_path: Path, name: str) -> None:
+    import json
+
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text(encoding="utf-8"))
+    raw["economy"]["starting_technologies"].append(name)
+    path = tmp_path / "game.json"
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match=f"{name} cannot be a starting technology"):
+        load_balance(path)
+
+
+def test_the_king_price_floor_keeps_every_profile_price_above_zero(tmp_path: Path) -> None:
+    import json
+
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text(encoding="utf-8"))
+    raw["difficulty"]["levels"]["easy"]["king_gold"] = 99
+    path = tmp_path / "game.json"
+    path.write_text(json.dumps(raw), encoding="utf-8")
+    with pytest.raises(ValueError, match="king_gold must be an integer between 100 and 30000"):
+        load_balance(path)

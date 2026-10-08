@@ -15,6 +15,8 @@ from conftest import (
     attr_int,
     attr_list,
     attr_number,
+    cached_json,
+    effects,
     triggers_by_name,
     variables_by_name,
 )
@@ -33,12 +35,12 @@ OUTPOST, KING = 598, 434
 
 def snapshot(build: GameBuild) -> ScenarioSnapshot:
     output, _ = build
-    return json.loads((output / "scenario.json").read_text())
+    return cached_json(output / "scenario.json")
 
 
 def anchors(build: GameBuild) -> dict[str, Any]:
     output, _ = build
-    return json.loads((output / "map.json").read_text())["anchors"]
+    return cached_json(output / "map.json")["anchors"]
 
 
 @cache
@@ -46,10 +48,6 @@ def balance() -> Balance:
     from ancienttdde.game.config import load_balance
 
     return load_balance(ROOT / "content/balance/game.json")
-
-
-def effects(trigger: TriggerRecord, kind: str) -> list[dict[str, Any]]:
-    return [e["attributes"] for e in trigger["effects"] if e["type"] == kind]
 
 
 def conditions(trigger: TriggerRecord, kind: str) -> list[dict[str, Any]]:
@@ -507,8 +505,30 @@ DISABLED = [
         "CONQUISTADOR",
     )
 ]
-# The Town Center villagers place, and the age forms of barracks and docks.
-AGE_FORMS = [621, 617, 484, 597, 498, 132, 20, 133, 47, 51]
+# The Town Center villagers place, the age forms of barracks and docks, and the forms the
+# ages give houses, markets, blacksmiths and universities.
+AGE_FORMS = [
+    621,
+    617,
+    484,
+    597,
+    498,
+    132,
+    20,
+    133,
+    47,
+    51,
+    463,
+    464,
+    465,
+    116,
+    137,
+    105,
+    18,
+    19,
+    210,
+]
+# Villagers build towers and economy buildings; population comes from the shop.
 ALLOWED = [
     BuildingInfo[name].ID
     for name in (
@@ -516,22 +536,41 @@ ALLOWED = [
         "GUARD_TOWER",
         "KEEP",
         "BOMBARD_TOWER",
-        "HOUSE",
         "MILL",
         "LUMBER_CAMP",
         "MINING_CAMP",
         "FARM",
-        "OUTPOST",
-        "MARKET",
+        "FOLWARK",
+        "PASTURE",
     )
 ] + [
     UnitInfo[name].ID
     for name in ("TRADE_COG", "TRADE_CART_EMPTY", "VILLAGER_MALE", "VILLAGER_FEMALE", "KING")
 ]
+NOT_BUILT = [
+    BuildingInfo[name].ID
+    for name in (
+        "HOUSE",
+        "OUTPOST",
+        "MARKET",
+        "BLACKSMITH",
+        "UNIVERSITY",
+        "PALISADE_WALL",
+        "STONE_WALL",
+        "FORTIFIED_WALL",
+        "GATE",
+        "PALISADE_GATE",
+    )
+]
 # Technologies that would make restricted objects available again when an age is reached:
 # castles, monks, Town Centers, monasteries, fire ships, trebuchets, Kreposts and Donjons,
 # and the dock upgrades, the Dragon Ship included.
 DISABLED_TECHNOLOGIES = [137, 157, 187, 210, 243, 256, 695, 775, 34, 1010]
+# Castle technologies and the Saxon bonus that would multiply every tower's output, and the
+# technologies that would bring back the buildings villagers may not raise and the newest
+# civilizations' unique units.
+TOWER_MULTIPLIERS = [TechInfo[name].ID for name in ("YASAMA", "STRONGHOLD")] + [1493]
+RETURNING = [148, 150, 189, 194, 281, 332, 523, 1114, 1124, 1134, 1288, 1300, 1325, 1461]
 KEPT_TECHNOLOGIES = [
     TechInfo[name].ID
     for name in ("FEUDAL_AGE", "CASTLE_AGE", "IMPERIAL_AGE", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER")
@@ -544,7 +583,7 @@ def test_lane_setup_closes_ways_around_the_combat_areas(game_build: GameBuild, p
     toggles = effects(init, "enable_disable_object")
     disabled = {attr_int(e, "object_list_unit_id") for e in toggles if e["enabled"] == 0}
     assert all(e["source_player"] == player for e in toggles)
-    assert set(DISABLED + AGE_FORMS) <= disabled
+    assert set(DISABLED + AGE_FORMS + NOT_BUILT) <= disabled
     assert not set(ALLOWED) & disabled
     techs = {
         attr_int(e, "technology")
@@ -555,7 +594,9 @@ def test_lane_setup_closes_ways_around_the_combat_areas(game_build: GameBuild, p
         TechInfo[name].ID
         for name in ("ATONEMENT", "REDEMPTION", "BLOCK_PRINTING", "CRENELLATIONS", "GREEK_FIRE")
     }
-    assert set(DISABLED_TECHNOLOGIES) <= techs and not set(KEPT_TECHNOLOGIES) & techs
+    assert set(DISABLED_TECHNOLOGIES + TOWER_MULTIPLIERS + RETURNING) <= techs
+    assert {2705, 2569, 2101, 2703, 2565, 2417} <= disabled
+    assert not set(KEPT_TECHNOLOGIES) & techs
     # The lane's age is set first, so its upgrades cannot undo the restrictions.
     kinds = [e["type"] for e in init["effects"]]
     research = max(i for i, kind in enumerate(kinds) if kind == "research_technology")

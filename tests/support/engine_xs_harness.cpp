@@ -63,7 +63,7 @@ int classOf(int type) {
     switch (type) {
         case 17: return 2;                                // Trade Cog
         case 68: case 129: case 130: case 131: return 3;  // Mill and its age forms
-        case 598: return 3;                               // Outpost
+        case 82: case 598: return 3;                      // Castle, Outpost
         case 83: case 293: return 4;                      // Villager
         case 125: return 18;                              // Monk
         case 128: return 19;                              // Trade Cart
@@ -132,8 +132,9 @@ void xsChatData(string message, int = -1) { chat.push_back(message); }
 // The lobby's difficulty setting, as xsGetDifficulty reports it: Moderate unless a case says otherwise.
 int lobbyDifficulty = 2;
 int xsGetDifficulty() { return lobbyDifficulty; }
-// Each player's civilization, as DE numbers them: Britons unless a case says otherwise.
-std::array<int, 9> civilizations{1, 1, 1, 1, 1, 1, 1, 1, 1};
+// Each player's civilization, as DE numbers them: the neutral test civilization (101) unless
+// a case says otherwise, so no case depends on a real profile staying neutral.
+std::array<int, 9> civilizations{101, 101, 101, 101, 101, 101, 101, 101, 101};
 int xsGetPlayerCivilization(int player) { return civilizations.at(player); }
 int xsGetObjectCount(int player, int type) {
     int count = 0;
@@ -274,10 +275,11 @@ void reachWave(int wave) {
     for(int n=0; n<40000 && xsTriggerVariable(vWave)<wave && phase()!=sVictory && phase()!=sDefeat; ++n) tick(true);
     require(xsTriggerVariable(vWave)==wave, "The wave was not reached");
 }
-// A competitive game past its first wave, so the run options are fixed.
+// A competitive game past its first wave, so the run options are fixed. PvP is off unless
+// the chooser switches it on first.
 void competitive(std::initializer_list<int> humans, bool pvp=true) {
     start(humans);
-    if (!pvp) { select(xsTriggerVariable(vChooser), cControlPvpOff); tick(); }
+    if (pvp) { select(xsTriggerVariable(vChooser), cControlPvpOn); tick(); }
     advanceTo(sWave);
 }
 int unitsOf(int player, int type) {
@@ -596,14 +598,17 @@ int main(int argc, char** argv) {
         require(kingsCreated[1]==cWaveKings && kingsCreated[7]==cWaveKings, "Clearing a wave did not pay its Kings");
         require(kingsCreated[2]==0, "A computer lane was paid for a wave");
     } else if(test=="investments") {
+        // On Hard a King costs more than the gold paid out, so none of it is converted.
+        lobbyDifficulty=1;
         start({1});
+        require(kingGold(xsTriggerVariable(vDifficulty)) > 2000, "The case needs a King price above the gold paid");
         setLane(1, fOwned, own({cBuyGold1000, cBuyKingEveryMinute}));
         for(int n=0;n<cSetup;++n) tick(true);
         require(xsTriggerVariable(vEconomy)<=1 && kingsCreated[1]==0, "Investments paid during setup");
         advanceEconomy(240-xsTriggerVariable(vEconomy));
         tick(true);
         require(resource(1, cAttributeGold)==2000, "Gold investment did not pay every two minutes");
-        require(kingsCreated[1]==4, "King investment did not pay every minute");
+        require(kingsCreated[1]==4 && lane(1, fKings)==0, "King investment did not pay every minute");
     } else if(test=="attack_investment") {
         start({1});
         setLane(1, fOwned, own({cBuyAttack1Every5}));
@@ -782,22 +787,33 @@ int main(int argc, char** argv) {
         require(xsTriggerVariable(vChooser)==3 && xsTriggerVariable(vMode)==cModeStandard,
                 "Solo did not default to a Standard run chosen by its lane");
         require(xsTriggerVariable(vPvp)==0, "A solo run had PvP on");
-        require(xsTriggerVariable(vDifficulty)==lobbyLevel(5) && kingGold(xsTriggerVariable(vDifficulty))==2500,
+        require(xsTriggerVariable(vDifficulty)==lobbyLevel(5) && kingGold(xsTriggerVariable(vDifficulty))==1500,
                 "Solo did not play the lobby's Easiest setting as Easy");
         require(mentions("Difficulty: Easy")==1, "The difficulty was not announced");
     } else if(test=="options_competitive") {
         lobbyDifficulty=4;
         start({2,5});
-        require(xsTriggerVariable(vChooser)==2 && xsTriggerVariable(vPvp)==1,
-                "Competition did not default to PvP on, chosen by the first lane");
+        require(xsTriggerVariable(vChooser)==2 && xsTriggerVariable(vPvp)==0,
+                "Competition did not default to PvP off, chosen by the first lane");
+        require(mentions("P2: PvP is off; select PvP on below the shop before the first wave")==1,
+                "The chooser was not invited to switch PvP on");
         require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "Competition ignored its fixed difficulty");
+    } else if(test=="pvp_opt_in") {
+        start({1,7});
+        advanceTo(sWave);
+        require(xsTriggerVariable(vPvp)==0 && mentions("PvP is off: no raiders or siege in this game.")==1,
+                "PvP switched itself on by the first wave");
+        kingsOn(1, cBuyLandRaider, 3);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessagePvpOff)==1,
+                "A raider was sold without opting into PvP");
     } else if(test=="difficulty_hard") {
         lobbyDifficulty=0;
         start({4});
-        require(kingGold(xsTriggerVariable(vDifficulty))==5000, "Hardest did not play Hard");
-        attributes[4][cAttributeGold]=2*5000+100;
+        require(kingGold(xsTriggerVariable(vDifficulty))==3000, "Hardest did not play Hard");
+        attributes[4][cAttributeGold]=2*3000+100;
         tick(); tick();
-        require(resource(4, cAttributeGold)==100 && kingsCreated[4]==2, "Hard did not convert 5000 gold per King");
+        require(resource(4, cAttributeGold)==100 && kingsCreated[4]==2, "Hard did not convert 3000 gold per King");
     } else if(test=="difficulty_unknown") {
         lobbyDifficulty=9;
         start({4});
@@ -821,14 +837,14 @@ int main(int argc, char** argv) {
     } else if(test=="options_chooser_only") {
         start({2,5});
         auto said = chat.size();
-        select(5, cControlPvpOff); tick();
-        require(xsTriggerVariable(vPvp)==1 && told(5, cMessageChooserOnly)==1 && chat.size()==said,
+        select(5, cControlPvpOn); tick();
+        require(xsTriggerVariable(vPvp)==0 && told(5, cMessageChooserOnly)==1 && chat.size()==said,
                 "A lane other than the chooser changed the options, or was told publicly");
-        select(2, cControlPvpOff); tick();
-        require(xsTriggerVariable(vPvp)==0 && mentions("P2 switched PvP off")==1, "The chooser could not switch PvP off");
-        select(2, 0); tick();
         select(2, cControlPvpOn); tick();
-        require(xsTriggerVariable(vPvp)==1, "PvP did not switch back on");
+        require(xsTriggerVariable(vPvp)==1 && mentions("P2 switched PvP on")==1, "The chooser could not switch PvP on");
+        select(2, 0); tick();
+        select(2, cControlPvpOff); tick();
+        require(xsTriggerVariable(vPvp)==0, "PvP did not switch back off");
     } else if(test=="options_solo_only") {
         start({2,5});
         select(2, cControlEndless); tick();
@@ -941,10 +957,116 @@ int main(int argc, char** argv) {
         for(int n=0;n<4;++n) tick(true);
         require(unitsOf(1, 1103)==0 && kingsOnPad(1, cBuyNavalRaider)==3, "Upgrading raiders freed their places");
     } else if(test=="raider_civilization") {
-        civilizations[1]=12;
+        civilizations[1]=100;
         competitive({1,7});
         for(int round=0; round<4; ++round) { kingsOn(1, cBuyLandRaider, 3); for(int n=0;n<4;++n) tick(true); }
-        require(unitsOf(1, 546)==3 && kingsOnPad(1, cBuyLandRaider)==3, "Mongols did not keep one more land raider");
+        require(unitsOf(1, 546)==3 && kingsOnPad(1, cBuyLandRaider)==3, "The profile's extra land raider was not kept");
+        for(int round=0; round<3; ++round) { kingsOn(1, cBuyNavalRaider, 3); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 1103)==2 && kingsOnPad(1, cBuyNavalRaider)==3, "A land raider bonus reached the naval cap");
+    } else if(test=="profile_default") {
+        // A civilization no content describes plays the default profile.
+        civilizations[3]=200;
+        start({3});
+        advanceTo(sPreparation);
+        require(mentions("P3: default profile: +1 starting King.")==1,
+                "The default profile was not announced for an unknown civilization");
+        require(kingsCreated[3]==1 && lane(3,fKings)==0, "An unknown civilization did not receive the default King");
+        int price = kingGold(xsTriggerVariable(vDifficulty));
+        attributes[3][cAttributeGold]=price - 1;
+        tick(true);
+        require(resource(3, cAttributeGold)==price - 1, "An unknown civilization converted gold below the price");
+        attributes[3][cAttributeGold]=price;
+        tick(true);
+        require(resource(3, cAttributeGold)==0 && lane(3,fKings)+kingsCreated[3]==2, "An unknown civilization did not convert at the full price");
+        attributes[8][cAttributeKillsByPlayer1+2]=cKillsPerReward;
+        tick(true);
+        require(resource(3, cAttributeStone)==cKillStone && resource(3, cAttributeWood)==cKillWood, "An unknown civilization's kill rewards were scaled");
+    } else if(test=="profile_kings") {
+        civilizations[2]=100;
+        start({2});
+        require(lane(2,fKings)==2, "Starting Kings were not owed at initialization");
+        for(int n=0;n<4;++n) tick();
+        require(kingsCreated[2]==2 && lane(2,fKings)==0, "Starting Kings did not arrive at the stall");
+        for(int n=0;n<300;++n) tick(true);
+        require(kingsCreated[2]==2, "Starting Kings were granted again");
+    } else if(test=="profile_gold") {
+        civilizations[2]=100;
+        start({2});
+        int price = kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100;
+        attributes[2][cAttributeGold]=price + 10;
+        tick(true);
+        require(resource(2, cAttributeGold)==10 && told(2, cMessageGold)==1, "The profile's King price was not applied");
+        require(mentions("a King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty))) + " gold")==1, "The announced base price changed");
+    } else if(test=="profile_kills") {
+        civilizations[4]=100;
+        start({4});
+        attributes[8][cAttributeKillsByPlayer1+3]=cKillsPerReward;
+        tick(true);
+        require(resource(4, cAttributeStone)==cKillStone * 150 / 100 && resource(4, cAttributeWood)==cKillWood * 150 / 100,
+                "Kill rewards were not scaled by the profile");
+        // The second reward pays the scaled total less the first, so no rounding is lost.
+        attributes[8][cAttributeKillsByPlayer1+3]=2 * cKillsPerReward;
+        tick(true);
+        require(resource(4, cAttributeStone)==2 * cKillStone * 150 / 100 && resource(4, cAttributeWood)==2 * cKillWood * 150 / 100,
+                "Scaled kill rewards lost their rounding across rewards");
+    } else if(test=="profile_purchase") {
+        // A granted once-only purchase is owned from the start; its units stand where a bought
+        // one's would once the lane's setup has run, its tower upgrade follows and it cannot
+        // be bought again.
+        civilizations[2]=100;
+        start({2});
+        require(ancientOwns(2, shopMask(cBuyCastleAge)), "The granted purchase was not owned at initialization");
+        int castleEntry = spawnStart(2 * cSpawnStride + cBuyCastle);
+        require(unitsOf(2, spawnUnit(castleEntry))==0 && lane(2, fProfile)==0,
+                "Granted units or the native set arrived before the lane's setup");
+        tick();
+        bool placed=false;
+        for(auto &[id, u] : units)
+            if(u.owner==2 && u.type==spawnUnit(castleEntry) && near(u, spawnX10(castleEntry), spawnY10(castleEntry))) placed=true;
+        require(placed && unitsOf(2, spawnUnit(castleEntry))==1 && ancientOwns(2, shopMask(cBuyCastle)),
+                "The granted castle was not placed on its site after the lane's setup");
+        require(unitsOf(3, spawnUnit(castleEntry))==0, "A lane without the grant received a castle");
+        require(civNative(100) > 0 && lane(2, fProfile)==civNative(100), "The profile's native set was not requested after setup");
+        for(int n=0;n<3;++n) tick();
+        require(unitsOf(2, spawnUnit(castleEntry))==1 && lane(2, fProfile)==civNative(100) && lane(3, fProfile)==0,
+                "Grants or the native set request repeated or reached another lane");
+        bool upgraded=false;
+        for(auto &r : researched) if(r.first==cGuardTowerTech && r.second==2) upgraded=true;
+        require(upgraded, "The granted age did not bring its tower upgrade");
+        kingsOn(2, cBuyCastleAge, 1);
+        for(int n=0;n<4;++n) tick();
+        require(bought[2].empty() && kingsOnPad(2, cBuyCastleAge)==1 && told(2, cMessageOwned)==1,
+                "A granted purchase was sold again");
+    } else if(test=="profile_text") {
+        civilizations[5]=100; civilizations[6]=101;
+        start({5,6});
+        advanceTo(sPreparation);
+        require(mentions("P5 Testone: +2 starting Kings, Kings cost 20 percent less gold, kill rewards pay 50 percent more stone and wood, Castle Age and Guard Tower from the start, Castle (+20 population) from the start, Bombard Tower attack +400 from the start, +1 land raider with PvP on; a King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100) + " gold.")==1,
+                "The civilization line was not announced with the lane's King price");
+        require(mentions("P6 Testtwo: no adjustments.")==1, "A neutral profile was not announced");
+        require(lane(6, fProfile)==-1, "A neutral profile did not record that it has no native effect set");
+    } else if(test=="profile_grant_blocked") {
+        // A granted purchase whose spot is blocked is not owned, so it stays on sale.
+        civilizations[2]=100;
+        int castleEntry = spawnStart(2 * cSpawnStride + cBuyCastle);
+        units.emplace(sequence++, Unit{598, {spawnX10(castleEntry) / 10.0f, spawnY10(castleEntry) / 10.0f, 0}, 100, 0});
+        start({2});
+        tick();
+        require(unitsOf(2, spawnUnit(castleEntry))==0, "A castle was placed on a blocked site");
+        require(!ancientOwns(2, shopMask(cBuyCastle)) && ancientOwns(2, shopMask(cBuyCastleAge)),
+                "A purchase that could not be placed was still owned");
+        require(mentions("P2: a starting purchase could not be placed and stays on sale.")==1,
+                "The blocked grant was not reported");
+    } else if(test=="profile_grant_tree") {
+        // A granted purchase for civilizations with a technology this one lacks stays on sale.
+        civilizations[2]=100;
+        techStates[{cBombardTowerTech, 2}]=cTechStateDisabled;
+        start({2});
+        tick();
+        require(mentions("P2: a starting purchase is not for this civilization and stays on sale.")==1,
+                "The grant the civilization cannot use was not reported");
+        require(unitsOf(2, spawnUnit(spawnStart(2 * cSpawnStride + cBuyCastle)))==1 && ancientOwns(2, shopMask(cBuyCastle)),
+                "The other grants did not go through");
     } else if(test=="siege_price") {
         competitive({1,3,7});
         int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;

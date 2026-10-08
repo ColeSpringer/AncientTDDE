@@ -2,19 +2,25 @@
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.datasets.support.info_dataset_base import InfoDatasetBase
+from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.capture_flag import CaptureFlag
 from AoE2ScenarioParser.datasets.units import UnitInfo
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import OBJECTS, stock
-from ancienttdde.scenario.triggers import Builder
+from ancienttdde.scenario.triggers import Builder, TriggerHandle, effect
 
 # Each probe player's life marker is a Barracks: a Keep alone does not keep a player in the
 # game, and a counted building does. The game marks a lane's life with an Outpost instead.
 PROBE_OBJECTS: dict[str, tuple[type[InfoDatasetBase], str]] = {
     **OBJECTS,
     "life": (BuildingInfo, "BARRACKS"),
+    "militia": (UnitInfo, "MILITIA"),
+    "knight": (UnitInfo, "KNIGHT"),
+    "war-elephant": (UnitInfo, "WAR_ELEPHANT"),
+    "light-cavalry": (UnitInfo, "LIGHT_CAVALRY"),
+    "fire-galley": (UnitInfo, "FIRE_GALLEY"),
 }
 
 # The engine defeats a player who owns nothing but towers (including Outposts), walls,
@@ -47,6 +53,7 @@ FOOTPRINTS: dict[str, int] = {
     "guard-tower": 1,
     "keep": 1,
     "bombard-tower": 1,
+    "accursed-tower": 1,
     "blocker": 1,
     "sign": 1,
     "life": 3,
@@ -121,6 +128,41 @@ class Arena(Builder):
         )
         self.names.register("object", key, unit.reference_id)
         return unit.reference_id
+
+    def trade_pair(
+        self,
+        start: TriggerHandle,
+        key: str,
+        kind: str,
+        trader: str,
+        home_x: int,
+        partner_x: int,
+        y: int,
+        partner_player: int,
+        partner_caption: str,
+    ) -> tuple[int, int]:
+        """P1's home market or dock, a partner that cannot be captured, and one trader six
+        tiles from home sent to trade when the start trigger fires; the two endpoints."""
+        home = self.unit(f"{key}.home", kind, 1, home_x, y, f"P1 home {kind}")
+        partner = self.unit(
+            f"{key}.partner",
+            kind,
+            partner_player,
+            partner_x,
+            y,
+            partner_caption,
+            capture_flag=CaptureFlag.NEVER,
+        )
+        unit = self.unit(f"{key}.trader", trader, 1, home_x + 6, y)
+        effect(
+            start,
+            "task_object",
+            source_player=1,
+            selected_object_ids=[unit],
+            location_object_reference=partner,
+            action_type=ActionType.DEFAULT,
+        )
+        return home, partner
 
     def kings(self, key: str, player: int, count: int, x: int, y: int) -> None:
         for index in range(count):

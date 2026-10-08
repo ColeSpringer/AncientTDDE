@@ -15,8 +15,11 @@ from ancienttdde.audit.validation import (
     validate_report,
 )
 from ancienttdde.common.manifest import read_kind
+from ancienttdde.common.output import resolve_output
+from ancienttdde.game.balance import Assumptions, load_inputs
 from ancienttdde.game.build import SCENARIO_NAME as GAME_SCENARIO
 from ancienttdde.game.build import build_game, validate_game
+from ancienttdde.game.report import REPORT_TITLE, render_report
 from ancienttdde.map.build import SCENARIO_NAME as MAP_SCENARIO
 from ancienttdde.map.build import build_map, validate_map_build
 from ancienttdde.probes.build import build_probes, validate_probes
@@ -126,6 +129,31 @@ def build(
     destination = directory / (MAP_SCENARIO if map_only else GAME_SCENARIO)
     typer.echo(f"{'Map foundation' if map_only else 'Playable game'} built: {destination}")
     typer.echo("In-game verification remains pending.")
+
+
+@app.command()
+def balance(
+    root: Root = Path("."),
+    output: Annotated[Path | None, typer.Option(help="Report directory.")] = None,
+) -> None:
+    """Write the balance tables from the content and the stock data snapshot."""
+    with reported("Balance"):
+        directory = resolve_output(root, output, ".build/balance")
+        report = directory / "balance.md"
+        if report.is_symlink() or (
+            report.exists()
+            and (
+                not report.is_file()
+                or not report.read_text(encoding="utf-8").startswith(REPORT_TITLE)
+            )
+        ):
+            raise ValueError("Output cannot overwrite unrelated artifacts; choose another output")
+        text = render_report(load_inputs(root.resolve()), Assumptions())
+        directory.mkdir(parents=True, exist_ok=True)
+        staged = report.with_name("balance.md.part")
+        staged.write_text(text, encoding="utf-8")
+        staged.replace(report)
+    typer.echo(f"Balance tables written: {report}")
 
 
 @probe_app.callback(invoke_without_command=True)

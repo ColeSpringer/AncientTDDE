@@ -10,12 +10,32 @@ from conftest import ROOT, compile_harness
 
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.game.catalog import Shop
+from ancienttdde.game.civilizations import Civilization, Profile, Profiles
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.map.models import MapAnchor
 
+# Civilizations the harness plays that no content defines, so every profile path runs
+# whatever the content says: one with every XS-applied adjustment, one neutral.
+TEST_CIVILIZATIONS = (
+    Civilization(
+        "TESTONE",
+        100,
+        "a test civilization",
+        Profile(
+            kings=2,
+            king_gold_percent=80,
+            kill_reward_percent=150,
+            raiders=(("land", 1),),
+            purchases=("castle_age", "castle", "bombard_attack_400"),
+        ),
+    ),
+    Civilization("TESTTWO", 101, "", Profile()),
+)
 
-def content() -> tuple[Balance, tuple[EngineLane, ...], Shop]:
+
+def content() -> tuple[Balance, tuple[EngineLane, ...], Shop, Profiles]:
     from ancienttdde.game.catalog import load_shop
+    from ancienttdde.game.civilizations import load_profiles
     from ancienttdde.game.config import load_balance, load_lanes
 
     balance = load_balance(ROOT / "content/balance/game.json")
@@ -24,21 +44,31 @@ def content() -> tuple[Balance, tuple[EngineLane, ...], Shop]:
     shop = load_shop(
         ROOT / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
     )
-    return balance, load_lanes(anchors), shop
+    profiles = load_profiles(ROOT / "content/balance/civilizations.json", balance, shop)
+    return balance, load_lanes(anchors), shop, profiles
+
+
+def harness_profiles(profiles: Profiles) -> Profiles:
+    return Profiles(
+        profiles.default_identity,
+        profiles.default,
+        profiles.civilizations + TEST_CIVILIZATIONS,
+        profiles.purchase_names,
+    )
 
 
 def prelude() -> str:
     from ancienttdde.game.script import render_prelude
 
-    balance, lanes, shop = content()
-    return render_prelude(balance, lanes, shop)
+    balance, lanes, shop, profiles = content()
+    return render_prelude(balance, lanes, shop, profiles)
 
 
 def harness_constants() -> str:
     """Purchase and tower technology names the harness cases use; the game needs none."""
     from ancienttdde.game.script import camel, tower_access
 
-    balance, _, shop = content()
+    balance, _, shop, _ = content()
     lines = [f"const int cBuy{camel(p.key)} = {p.index};" for p in shop.purchases]
     lines += [
         f"const int c{name.replace(' ', '')}Tech = {tech};"
@@ -51,8 +81,8 @@ def harness_constants() -> str:
 def engine_runner(tmp_path_factory: pytest.TempPathFactory) -> Path:
     from ancienttdde.game.script import render_xs
 
-    balance, lanes, shop = content()
-    script = harness_constants() + render_xs(balance, lanes, shop)
+    balance, lanes, shop, profiles = content()
+    script = harness_constants() + render_xs(balance, lanes, shop, harness_profiles(profiles))
     # XS counted loops implicitly declare/increment their integer counter.
     script = re.sub(
         r"for \((\w+) = ([^;]+); ([<]=?) (.+)\) \{",
@@ -68,7 +98,7 @@ def test_prelude_lists_tower_access_from_the_tower_families() -> None:
     from ancienttdde.game.config import Towers
     from ancienttdde.game.script import tower_access
 
-    balance, _, _ = content()
+    balance, _, _, _ = content()
     assert tower_access(balance.towers) == (
         ("Guard Tower", 140),
         ("Keep", 63),
@@ -82,7 +112,7 @@ def test_prelude_lists_tower_access_from_the_tower_families() -> None:
 
 
 def test_prelude_passes_the_whole_relic_column() -> None:
-    _, lanes, _ = content()
+    _, lanes, _, _ = content()
     text = prelude()
     x1, _, x2, _ = lanes[0].sites.relic_column
     assert f"if (index == 1) return ({x1});" in text.split("int laneRelicX1")[1]
@@ -101,7 +131,7 @@ def test_prelude_counts_transfers_and_still_samples() -> None:
 def test_prelude_declares_message_codes_and_ownership_masks() -> None:
     from ancienttdde.game.messages import MESSAGES, message_code
 
-    _, _, shop = content()
+    _, _, shop, _ = content()
     text = prelude()
     for key, _ in MESSAGES:
         assert (
@@ -116,7 +146,7 @@ def test_prelude_declares_message_codes_and_ownership_masks() -> None:
 
 
 def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
-    balance, _, _ = content()
+    balance, _, _, _ = content()
     text = prelude()
     lobby = text.split("int lobbyLevel")[1].split("}")[0]
     # xsGetDifficulty runs from Extreme (-1) to Easiest (4); the table starts at Extreme.
@@ -138,6 +168,82 @@ def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
 def test_prelude_holds_no_test_only_names() -> None:
     text = prelude()
     assert "cBuy" not in text and "Tech =" not in text
+    assert "Testone" not in text and "raiderBonus" not in text
+
+
+def test_prelude_maps_civilizations_to_their_profiles() -> None:
+    _, _, _, profiles = content()
+    text = prelude()
+    kings = text.split("int civKings")[1].split("}")[0]
+    assert kings.strip().endswith(f"return ({profiles.default.kings});")
+    gold = text.split("int civGoldPercent")[1].split("}")[0]
+    assert gold.strip().endswith(f"return ({profiles.default.king_gold_percent});")
+    kills = text.split("int civKillPercent")[1].split("}")[0]
+    assert kills.strip().endswith(f"return ({profiles.default.kill_reward_percent});")
+    native = text.split("int civNative")[1].split("}")[0]
+    assert native.strip().endswith(f"return ({profiles.native_index(profiles.default)});")
+    owned = text.split("int civOwned")[1].split("}")[0]
+    _, _, shop, _ = content()
+    from ancienttdde.game.civilizations import owned_mask
+
+    assert owned.strip().endswith(f"return ({owned_mask(profiles.default, shop)});")
+    assert f"if (index == 18) return ({2 ** shop.get('castle_age').bit});" in owned
+    raiders = text.split("int civRaiders")[1].split("}")[0]
+    assert "if ((medium == 1) && (civ == 17)) return (1);" in raiders
+    assert "if ((medium == 2) && (civ == 11)) return (1);" in raiders
+    assert "if (medium == 1) return (0);" in raiders and "if (medium == 2) return (0);" in raiders
+    names = text.split("string civName")[1].split("}")[0]
+    assert 'if (index == 1) return ("Britons");' in names
+    assert 'if (index == 62) return ("Danes");' in names and names.strip().endswith('return ("");')
+    texts = text.split("string civText")[1].split("}")[0]
+    huns = profiles.by_id(17)
+    assert huns is not None
+    assert f'if (index == 17) return ("{profiles.chat(huns)}");' in texts
+    assert texts.strip().endswith(f'return ("{profiles.chat(None)}");')
+
+
+def test_prelude_lists_granted_purchases_by_slot() -> None:
+    from ancienttdde.game.script import grant_table, render_prelude
+
+    balance, lanes, shop, profiles = content()
+    text = render_prelude(balance, lanes, shop, harness_profiles(profiles))
+    assert "const int cGrantSlots = 3;" in text and "const int cGrantSlots = 1;" in prelude()
+    grants = text.split("int civGrant")[1].split("}")[0]
+    castle_age, castle = shop.get("castle_age").index, shop.get("castle").index
+    assert f"if ((civ == 100) && (slot == 0)) return ({castle_age});" in grants
+    assert f"if ((civ == 100) && (slot == 1)) return ({castle});" in grants
+    assert (
+        f"if ((civ == 100) && (slot == 2)) return ({shop.get('bombard_attack_400').index});"
+        in grants
+    )
+    assert f"if ((civ == 18) && (slot == 0)) return ({castle_age});" in grants
+    assert "civ == 101" not in grants and grants.strip().endswith("return (-1);")
+    # A default grant reaches every civilization the content does not list, and no other.
+    generous = Profiles(
+        "",
+        Profile(purchases=("trade_carts",)),
+        (Civilization("PLAIN", 100, "", Profile()), *profiles.civilizations[:1]),
+    )
+    table = grant_table(generous, shop)
+    carts = shop.get("trade_carts").index
+    assert "    if ((civ == 100) && (slot == 0)) return (-1);" in table
+    assert "    if (slot == 0) return (" + str(carts) + ");" in table
+    assert "civ == 1)" not in table or "if ((civ == 1) && (slot == 0)) return (-1);" in table
+
+
+def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
+    from ancienttdde.game.script import raider_table
+
+    plain = Civilization("PLAIN", 100, "", Profile())
+    sailor = Civilization("SAILOR", 101, "", Profile(raiders=(("naval", 1),)))
+    table = raider_table(Profiles("", Profile(raiders=(("land", 1),)), (plain, sailor)))
+    assert "    if ((medium == 1) && (civ == 100)) return (0);" in table
+    assert "    if ((medium == 1) && (civ == 101)) return (0);" in table
+    assert "    if ((medium == 2) && (civ == 101)) return (1);" in table
+    assert "civ == 100)) return (1)" not in table
+    assert (
+        "    if (medium == 1) return (1);" in table and "    if (medium == 2) return (0);" in table
+    )
 
 
 @pytest.mark.parametrize(
@@ -194,6 +300,7 @@ def test_prelude_holds_no_test_only_names() -> None:
         "transfer_type",
         "options_default",
         "options_competitive",
+        "pvp_opt_in",
         "difficulty_hard",
         "difficulty_unknown",
         "options_choose",
@@ -222,6 +329,14 @@ def test_prelude_holds_no_test_only_names() -> None:
         "raider_cap",
         "raider_line",
         "raider_civilization",
+        "profile_default",
+        "profile_kings",
+        "profile_gold",
+        "profile_kills",
+        "profile_text",
+        "profile_grant_blocked",
+        "profile_grant_tree",
+        "profile_purchase",
         "siege_price",
         "siege_exclusive",
         "siege_timeline",
@@ -241,3 +356,14 @@ def test_prelude_holds_no_test_only_names() -> None:
 def test_shared_engine(engine_runner: Path, case: str) -> None:
     result = subprocess.run([str(engine_runner), case], capture_output=True, text=True, timeout=10)
     assert result.returncode == 0, result.stderr
+
+
+def test_xs_text_tables_reject_percent_signs() -> None:
+    from ancienttdde.game.script import sparse_strings, strings
+
+    with pytest.raises(ValueError, match="percent"):
+        strings("civName", ["Castle Age (5% off)"])
+    with pytest.raises(ValueError, match="percent"):
+        sparse_strings("civText", {1: "100% more"}, "")
+    with pytest.raises(ValueError, match="percent"):
+        sparse_strings("civText", {}, "a 10% discount")

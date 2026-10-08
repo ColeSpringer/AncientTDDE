@@ -3,9 +3,11 @@
 from dataclasses import asdict
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
+from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
 from ancienttdde.game.catalog import Shop
+from ancienttdde.game.civilizations import Profiles
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import (
     lane_attack,
@@ -17,6 +19,7 @@ from ancienttdde.game.economy import (
 )
 from ancienttdde.game.interaction import protect_kings
 from ancienttdde.game.objectives import objective
+from ancienttdde.game.profiles import lane_profiles
 from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reach
 from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
@@ -25,7 +28,9 @@ from ancienttdde.game.waves import lane_route, lane_waves
 from ancienttdde.scenario.triggers import STORAGE, area, effect
 
 
-def lane_actions(game: Game, lane: EngineLane, balance: Balance, shop: Shop) -> None:
+def lane_actions(
+    game: Game, lane: EngineLane, balance: Balance, shop: Shop, profiles: Profiles
+) -> None:
     player = lane.player
     prefix = f"lane.p{player}"
     mill = game.scenario.unit_manager.add_unit(
@@ -33,6 +38,7 @@ def lane_actions(game: Game, lane: EngineLane, balance: Balance, shop: Shop) -> 
     )
     game.names.register("object", f"{prefix}.berry_mill", mill.reference_id)
     lane_initialize(game, lane, balance)
+    lane_profiles(game, lane, balance, profiles, shop)
     lane_cleanup(game, lane, mill.reference_id)
     lane_waves(game, lane, balance)
     lane_route(game, lane)
@@ -67,6 +73,15 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
             quantity=start[resource],
             operation=Operation.SET,
         )
+    # Population comes only from the shop: no civilization starts with headroom of its own.
+    effect(
+        init,
+        "modify_resource",
+        source_player=player,
+        tribute_list=Attribute.POPULATION_HEADROOM,
+        quantity=0,
+        operation=Operation.SET,
+    )
     game.research(init, "FEUDAL_AGE", player=player)
     for technology in balance.economy.starting_technologies:
         game.research(init, technology, player=player)

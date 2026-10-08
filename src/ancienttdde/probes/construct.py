@@ -12,7 +12,16 @@ from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
 from ancienttdde.common.data import asset_text
 from ancienttdde.common.worker import capture_stdout_for_errors
-from ancienttdde.probes import payments, raiders, scripts_enemy, siege, towers, trade
+from ancienttdde.probes import (
+    damage,
+    income,
+    payments,
+    raiders,
+    scripts_enemy,
+    siege,
+    towers,
+    trade,
+)
 from ancienttdde.probes.arena import Arena
 from ancienttdde.probes.catalog import TEST_SETTINGS, select_probes
 from ancienttdde.probes.models import ProbeDefinition, ProbeId
@@ -105,6 +114,8 @@ BUILDERS: dict[ProbeId, Callable[[Arena, TriggerHandle], None]] = {
     ProbeId.RAIDERS: raiders.build,
     ProbeId.SIEGE: siege.build,
     ProbeId.SCRIPTS_ENEMY: scripts_enemy.build,
+    ProbeId.TRADE_INCOME: income.build,
+    ProbeId.TOWER_DAMAGE: damage.build,
 }
 
 

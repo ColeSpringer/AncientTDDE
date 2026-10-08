@@ -22,6 +22,7 @@ uv run ancienttdde validate --build .build/map     # reload and check the templa
 uv run ancienttdde probe                           # solo mechanic scenarios in .build/probes
 uv run ancienttdde validate --probes .build/probes # check probes and recorded observations
 uv run ancienttdde probe record --help             # record an observation from a DE run
+uv run ancienttdde balance                         # balance tables in .build/balance
 uv run ancienttdde audit                           # original-behavior evidence in .build/audit
 uv run ancienttdde validate --report .build/audit  # check an audit against current inputs
 uv run ancienttdde validate                        # check content coverage and provenance
@@ -52,9 +53,34 @@ The original package and its DAT exports are not committed; see
 and `validate` without options read them, and tests that compare against the original
 data skip when it is absent.
 
+## Balance tables
+
+`docs/balance.md` is the versioned output of `uv run ancienttdde balance`; refresh it after
+changing `content/balance/`:
+
+```bash
+uv run ancienttdde balance && cp .build/balance/balance.md docs/balance.md
+```
+
+`content/balance/stock.json` holds the stock DE numbers the tables use; regenerate it after
+a game update, with the tree-screen directory to cross-check which towers each civilization
+lacks:
+
+```bash
+uv run python tools/dat/stock_stats.py "<DE>/resources/_common/dat/empires2_x2_p1.dat" content/balance/stock.json "<DE>/resources/_common/dat/CivTechTrees"
+```
+
+The restriction tables in `src/ancienttdde/game/restricted.py` list what a lane may not train,
+build or research; check them against the same data file after a game update:
+
+```bash
+uv run python tools/dat/restricted_check.py "<DE>/resources/_common/dat/empires2_x2_p1.dat"
+```
+
 ## Documentation
 
 - [Legacy inputs](legacy/README.md): the immutable original package and its provenance.
 - [Map inputs](content/maps/README.md): map data, migration decisions and the template.
 - [Legacy behavior](docs/legacy-behavior.md): the original scenario and migration decisions.
 - [In-game checks](docs/in-game-checks.md): hosting, and what only DE can verify.
+- [Balance tables](docs/balance.md): towers, waves, investments, civilization profiles.

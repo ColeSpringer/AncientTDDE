@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Literal, cast
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
-from ancienttdde.game.sites import RAIDER_MEDIA, RaiderMedium
+from ancienttdde.game.sites import RAIDER_MEDIA, RaiderMedium, TradeMedium
 from ancienttdde.map.geometry import Cell, cells, footprint
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
 from ancienttdde.scenario.objects import technology
@@ -62,7 +62,7 @@ class Villagers:
 
 @dataclass(frozen=True)
 class Traders:
-    medium: Literal["land", "water"]
+    medium: TradeMedium
 
 
 @dataclass(frozen=True)
@@ -166,6 +166,11 @@ class Purchase:
         return isinstance(self.effect, Raider | SiegePowerUp)
 
     @property
+    def mask(self) -> int:
+        """The ownership bit as the value XS divides by; repeatable purchases have none."""
+        return 2**self.bit if self.bit >= 0 else 0
+
+    @property
     def caption(self) -> str:
         limits = (
             (", once" if self.once else "")
@@ -188,6 +193,10 @@ class Shop:
 
     def investments(self) -> tuple[Purchase, ...]:
         return tuple(p for p in self.purchases if isinstance(p.effect, Investment))
+
+    def first(self, kind: type[object]) -> Purchase | None:
+        """The first purchase with an effect of this kind, in catalog order."""
+        return next((p for p in self.purchases if isinstance(p.effect, kind)), None)
 
     def attack_family(self) -> str | None:
         """The tower family periodic attack purchases raise; loading allows only one."""

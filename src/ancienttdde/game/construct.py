@@ -15,6 +15,7 @@ from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.game.catalog import Shop, load_shop
+from ancienttdde.game.civilizations import Profiles, load_profiles
 from ancienttdde.game.config import Balance, EngineLane, Interaction, load_balance, load_lanes
 from ancienttdde.game.controls import CONTROLS
 from ancienttdde.game.economy import endless_deposits
@@ -29,6 +30,7 @@ from ancienttdde.game.selection import place_controls, retire_controls
 from ancienttdde.game.shop import place_displays, remove_shop_signs
 from ancienttdde.game.sites import numbers
 from ancienttdde.game.spawns import creation_tiles
+from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
     configure_waves,
@@ -165,7 +167,9 @@ def keeper_point(anchors: dict[str, object]) -> tuple[float, float]:
     return x, y
 
 
-def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> None:
+def add_logic(
+    game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop, profiles: Profiles
+) -> None:
     endless_lumber(game, lanes)
     endless_deposits(game, balance)
     name_objects(game, lanes, shop, balance)
@@ -180,7 +184,7 @@ def add_logic(game: Game, balance: Balance, lanes: tuple[EngineLane, ...], shop:
     retire_controls(game)
     restrict_competitive(game)
     for lane in lanes:
-        lane_actions(game, lane, balance, shop)
+        lane_actions(game, lane, balance, shop, profiles)
     declare_results(game)
 
 
@@ -192,16 +196,22 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     shop = load_shop(
         root / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
     )
+    stock = load_stock(root / "content/balance/stock.json")
+    profiles = load_profiles(root / "content/balance/civilizations.json", balance, shop, stock)
     with TemporaryDirectory(prefix="ancienttdde-map-") as temporary:
         foundation = Path(temporary) / "foundation.aoe2scenario"
         construct_scenario(root / "content/maps/format-seed.aoe2scenario", map_path, foundation)
         scenario = AoE2DEScenario.from_file(str(foundation))
     game = Game(scenario)
     settings(game, balance, lanes, shop, anchors)
-    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop))
-    prelude.write_text(render_prelude(balance, lanes, shop, extern=True), encoding="utf-8")
-    add_logic(game, balance, lanes, shop)
-    scenario.message_manager.instructions = instructions(balance, shop).replace("\n", "\r")
+    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop, profiles))
+    prelude.write_text(
+        render_prelude(balance, lanes, shop, profiles, extern=True), encoding="utf-8"
+    )
+    add_logic(game, balance, lanes, shop, profiles)
+    scenario.message_manager.instructions = instructions(balance, shop, profiles).replace(
+        "\n", "\r"
+    )
     with xs_checker(scenario):
         scenario.xs_manager.validate_scenario_xs()
         scenario.write_to_file(str(destination))

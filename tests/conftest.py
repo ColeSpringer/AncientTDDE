@@ -6,8 +6,9 @@ import json
 import shutil
 import subprocess
 from collections.abc import Mapping
+from functools import cache
 from pathlib import Path
-from typing import Literal, cast
+from typing import Any, Literal, cast
 
 import pytest
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
@@ -76,6 +77,17 @@ def tiles(scenario: ScenarioSnapshot) -> list[list[int]]:
     terrain = scenario["map"]
     assert "tiles" in terrain, "the scenario was inspected without terrain"
     return terrain["tiles"]
+
+
+def effects(trigger: TriggerRecord, kind: str) -> list[dict[str, Any]]:
+    """The attributes of a trigger's effects of one kind, in order."""
+    return [e["attributes"] for e in trigger["effects"] if e["type"] == kind]
+
+
+@cache
+def cached_json(path: Path) -> Any:
+    """A build artifact parsed once per session; callers never mutate it."""
+    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def triggers_by_name(scenario: ScenarioSnapshot) -> dict[str, TriggerRecord]:

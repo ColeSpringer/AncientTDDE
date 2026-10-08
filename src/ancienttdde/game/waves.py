@@ -16,6 +16,8 @@ from ancienttdde.scenario.triggers import PIERCE, area, condition, effect
 # Lumber-camp trees hold more wood than a run uses. DE applies this effect value as a
 # 16-bit number (1,000,000 arrived as 16,960), so it stays below 32,768.
 LUMBER_TREE_WOOD = 32_000
+# Every wave enemy walks the lane at this speed, in tiles per second.
+ENEMY_SPEED = 0.65
 
 
 def endless_lumber(game: Game, lanes: tuple[EngineLane, ...]) -> None:
@@ -73,7 +75,9 @@ def configure_waves(game: Game, balance: Balance) -> None:
                 ObjectAttribute.HIT_POINTS,
                 balance.hit_points(index - 1, level),
             )
-            game.set_attribute(configure, 8, wave.object_id, ObjectAttribute.MOVEMENT_SPEED, 0.65)
+            game.set_attribute(
+                configure, 8, wave.object_id, ObjectAttribute.MOVEMENT_SPEED, ENEMY_SPEED
+            )
             game.set_value(configure, "game.configured", index)
 
 

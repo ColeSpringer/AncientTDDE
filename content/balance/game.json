@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "lives": 30,
   "setup_seconds": 5,
   "preparation_seconds": 233,
@@ -18,9 +18,9 @@
   },
   "difficulty": {
     "levels": {
-      "easy": {"name": "Easy", "king_gold": 2500, "hit_points_percent": 80},
-      "normal": {"name": "Normal", "king_gold": 3500, "hit_points_percent": 100},
-      "hard": {"name": "Hard", "king_gold": 5000, "hit_points_percent": 125}
+      "easy": {"name": "Easy", "king_gold": 1500, "hit_points_percent": 80},
+      "normal": {"name": "Normal", "king_gold": 2000, "hit_points_percent": 100},
+      "hard": {"name": "Hard", "king_gold": 3000, "hit_points_percent": 125}
     },
     "lobby": {"easiest": "easy", "standard": "normal", "moderate": "normal", "hard": "hard", "hardest": "hard", "extreme": "hard"},
     "competitive": "normal"
@@ -33,19 +33,7 @@
   "interaction": {
     "raiders": {
       "land": {"unit": "LIGHT_CAVALRY", "line": ["LIGHT_CAVALRY", "HUSSAR", "WINGED_HUSSAR"], "cap": 2},
-      "naval": {"unit": "FIRE_GALLEY", "line": ["FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP"], "cap": 2},
-      "bonuses": [
-        {"civilization": "HUNS", "medium": "land", "extra": 1},
-        {"civilization": "MONGOLS", "medium": "land", "extra": 1},
-        {"civilization": "MAGYARS", "medium": "land", "extra": 1},
-        {"civilization": "CUMANS", "medium": "land", "extra": 1},
-        {"civilization": "TATARS", "medium": "land", "extra": 1},
-        {"civilization": "VIKINGS", "medium": "naval", "extra": 1},
-        {"civilization": "ITALIANS", "medium": "naval", "extra": 1},
-        {"civilization": "PORTUGUESE", "medium": "naval", "extra": 1},
-        {"civilization": "MALAY", "medium": "naval", "extra": 1},
-        {"civilization": "SARACENS", "medium": "naval", "extra": 1}
-      ]
+      "naval": {"unit": "FIRE_GALLEY", "line": ["FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP"], "cap": 2}
     },
     "siege": {"trebuchets_per_rival": 2, "warning_seconds": 10, "active_seconds": 60, "shared_cooldown": 60, "buyer_cooldown": 120}
   },

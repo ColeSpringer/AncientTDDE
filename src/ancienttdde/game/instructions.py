@@ -1,6 +1,7 @@
 """Hosting and play instructions written into the scenario and its sidecar."""
 
 from ancienttdde.game.catalog import Repair, ResourceGrant, Shop
+from ancienttdde.game.civilizations import DEFAULT_NAME, Profiles
 from ancienttdde.game.config import LOBBY_DIFFICULTIES, Balance
 from ancienttdde.game.script import STILL_SAMPLES
 from ancienttdde.scenario.objects import display_name
@@ -97,10 +98,10 @@ def hit_point_scales(balance: Balance) -> str:
     return listed(others)
 
 
-def raider_bonuses(balance: Balance) -> str:
+def raider_bonuses(profiles: Profiles) -> str:
     """Civilizations that keep more raiders, one sentence part per medium and amount."""
     groups: dict[tuple[str, int], list[str]] = {}
-    for civilization, medium, extra in balance.interaction.raiders.bonuses:
+    for civilization, medium, extra in profiles.raider_bonuses():
         groups.setdefault((medium, extra), []).append(display_name(civilization))
     parts = [
         f"{listed(names)} keep {'one' if extra == 1 else extra} more {medium} raider"
@@ -110,7 +111,7 @@ def raider_bonuses(balance: Balance) -> str:
     return "; ".join(parts) + ". " if parts else ""
 
 
-def interaction(balance: Balance) -> str:
+def interaction(balance: Balance, profiles: Profiles) -> str:
     raiders = balance.interaction.raiders
     siege = balance.interaction.siege
     return (
@@ -119,19 +120,27 @@ def interaction(balance: Balance) -> str:
         f"the land trade field and naval raiders ({display_name(raiders.naval.unit).lower()}) "
         "below your dock in the trade channel; they fight every rival's traders and raiders and "
         f"cannot leave those areas. Each player keeps at most {raiders.land.cap} land and "
-        f"{raiders.naval.cap} naval raiders alive; {raider_bonuses(balance)}"
+        f"{raiders.naval.cap} naval raiders alive; {raider_bonuses(profiles)}"
         f"The siege power-up puts {siege.trebuchets_per_rival} trebuchets beside every "
         f"surviving rival's towers {siege.warning_seconds} game seconds after purchase, for "
         f"{siege.active_seconds} game seconds. One player holds it at a time, and it is for "
         f"sale again after {siege.shared_cooldown} game seconds for everyone and "
         f"{siege.buyer_cooldown} for its buyer. Markets, docks, Kings, life Outposts and yurts "
-        "cannot be attacked; traders can. Lanes cannot build military buildings, docks, "
-        "monasteries or town centers, train ships other than trade cogs, monks or castle units, "
-        "or convert units, and a bought castle never fires."
+        "cannot be attacked; traders can. Villagers build towers and economy buildings only: "
+        "no houses, walls, gates, outposts, markets, blacksmiths or universities, and no "
+        "military buildings, docks, monasteries or town centers. Lanes cannot train ships "
+        "other than trade cogs, monks or castle units, or convert units, and a bought castle "
+        "never fires."
     )
 
 
-def instructions(balance: Balance, shop: Shop) -> str:
+def civilization_lines(profiles: Profiles) -> str:
+    lines = [f"- {c.name}: {profiles.text(c)}." for c in profiles.civilizations]
+    lines.append(f"- {DEFAULT_NAME}: {profiles.text(None)}.")
+    return "\n".join(lines)
+
+
+def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
     economy = balance.economy
     towers = balance.towers
     start = economy.starting_resources
@@ -169,7 +178,7 @@ def instructions(balance: Balance, shop: Shop) -> str:
         f"and Practice adds controls beside the options: start the next wave now, "
         f"{balance.practice.kings} more Kings, {balance.practice.resources} more of each "
         "resource and all lives back. A Practice run is shown as assisted. Competitive games "
-        "start with PvP on; selecting PvP off rules out raiders and the siege power-up. Each "
+        "start with PvP off; selecting PvP on puts raiders and the siege power-up on sale. Each "
         "new selection of an Outpost acts once. The options are fixed once the first wave "
         "starts or practice help is first used; then the run options leave the row, as do the "
         "practice controls unless the run is Practice.\n\n"
@@ -179,8 +188,10 @@ def instructions(balance: Balance, shop: Shop) -> str:
         "Watch Towers, villagers in its build and resource areas, eight trade carts and four "
         "trade cogs that start trading, and "
         f"{count(economy.starting_relics, 'relic', 'relics')} in its monasteries. "
-        f"{opening_stock(shop)}{starting_research(balance)}Your houses "
-        "provide population; Kings, villagers, traders and monks all use it.\n\n"
+        f"{opening_stock(shop)}{starting_research(balance)}Population comes only "
+        "from the shop's +80 population and castle, and from the civilization profiles that "
+        "add some below: houses cannot be built, and Kings, villagers, traders and monks all "
+        "use it.\n\n"
         f"Every {king_prices(balance)} becomes a King at your stall above the "
         "shop. Surviving a wave earns every lane "
         f"{count(economy.wave_kings, 'King', 'Kings')}, every "
@@ -202,7 +213,12 @@ def instructions(balance: Balance, shop: Shop) -> str:
         "Investments pay on every multiple of their period, counted from the start of "
         "preparation.\n\n"
         f"{catalog}\n\n"
-        f"{interaction(balance)}\n\n"
+        f"{interaction(balance, profiles)}\n\n"
+        "## Civilizations\n\n"
+        "Each civilization keeps its own technology tree and bonuses. On top of them, its "
+        "profile adjusts the lane as listed here; the game announces every lane's towers and "
+        "civilization line when preparation begins.\n\n"
+        f"{civilization_lines(profiles)}\n\n"
         "## Towers and lives\n\n"
         "Tower attack purchases raise Watch Towers, Guard Towers, Keeps and Bombard Towers, "
         "including towers built or upgraded later; Bombard Tower attack raises only Bombard "
@@ -212,8 +228,10 @@ def instructions(balance: Balance, shop: Shop) -> str:
         "Imperial Age adds Keeps for civilizations that have them; each civilization keeps "
         "its own technology tree, and the game lists your available towers when preparation "
         "begins. Towers stand only in your build rows: one built in the resource area is "
-        "removed. Competitive games rule out Eupseong and Artillery, whose range would reach "
-        "the next lane.\n\n"
+        "removed. Every game rules out Yasama and Stronghold, which would multiply every "
+        "tower's volley, and towers fire one arrow of their own whatever the civilization. "
+        "Competitive games rule out Eupseong and Artillery, whose range would reach the next "
+        "lane.\n\n"
         "Each enemy reaching the exit flags at the right-hand end of a lane costs one life. "
         "Your life Outpost below the shop shows your remaining lives, and the objectives "
         f"list every lane. {repairs}".rstrip()

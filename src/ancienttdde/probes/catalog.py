@@ -1,6 +1,15 @@
 """The probe suite, its shared test settings and its written instructions."""
 
-from ancienttdde.probes import payments, raiders, scripts_enemy, siege, towers, trade
+from ancienttdde.probes import (
+    damage,
+    income,
+    payments,
+    raiders,
+    scripts_enemy,
+    siege,
+    towers,
+    trade,
+)
 from ancienttdde.probes.models import ProbeDefinition
 
 # The scenario format stores no Reveal Map, Allow Cheats or game-speed setting, so testers
@@ -30,6 +39,8 @@ PROBES: tuple[ProbeDefinition, ...] = (
     raiders.DEFINITION,
     siege.DEFINITION,
     scripts_enemy.DEFINITION,
+    income.DEFINITION,
+    damage.DEFINITION,
 )
 
 

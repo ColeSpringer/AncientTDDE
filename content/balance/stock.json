@@ -1,0 +1,3289 @@
+{
+  "civilizations": [
+    {
+      "id": 1,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "HUSSAR",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "British"
+    },
+    {
+      "id": 2,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "BRACER",
+        "GUILDS",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "KEEP",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "French"
+    },
+    {
+      "id": 3,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GOLD_SHAFT_MINING",
+        "GUARD_TOWER",
+        "KEEP",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Goths"
+    },
+    {
+      "id": 4,
+      "lacks": [
+        "ARCHITECTURE",
+        "BRACER",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR",
+        "LIGHT_CAVALRY",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Teutons"
+    },
+    {
+      "id": 5,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Japanese"
+    },
+    {
+      "id": 6,
+      "lacks": [
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "HUSSAR",
+        "SIEGE_ENGINEERS",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Chinese"
+    },
+    {
+      "id": 7,
+      "lacks": [
+        "ARCHITECTURE",
+        "HEATED_SHOT",
+        "HERBAL_MEDICINE",
+        "MASONRY",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Byzantine"
+    },
+    {
+      "id": 8,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "KEEP",
+        "SANCTITY",
+        "SIEGE_ENGINEERS",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Persians"
+    },
+    {
+      "id": 9,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "HEATED_SHOT",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Saracens"
+    },
+    {
+      "id": 10,
+      "lacks": [
+        "FAST_FIRE_SHIP",
+        "HERBAL_MEDICINE",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Turks"
+    },
+    {
+      "id": 11,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "HERBAL_MEDICINE",
+        "HUSSAR",
+        "KEEP",
+        "SANCTITY",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Vikings"
+    },
+    {
+      "id": 12,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "HEATED_SHOT",
+        "KEEP",
+        "SANCTITY",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Mongols"
+    },
+    {
+      "id": 13,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "FAST_FIRE_SHIP",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Celts"
+    },
+    {
+      "id": 14,
+      "lacks": [
+        "GOLD_SHAFT_MINING",
+        "HEATED_SHOT",
+        "SIEGE_ENGINEERS",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Spanish"
+    },
+    {
+      "id": 15,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "HUSSAR",
+        "KEEP",
+        "LIGHT_CAVALRY",
+        "MASONRY"
+      ],
+      "name": "Aztecs"
+    },
+    {
+      "id": 16,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR",
+        "LIGHT_CAVALRY",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Mayan"
+    },
+    {
+      "id": 17,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUARD_TOWER",
+        "HEATED_SHOT",
+        "HERBAL_MEDICINE",
+        "KEEP",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Huns"
+    },
+    {
+      "id": 18,
+      "lacks": [],
+      "name": "Koreans"
+    },
+    {
+      "id": 19,
+      "lacks": [
+        "GOLD_SHAFT_MINING",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Italians"
+    },
+    {
+      "id": 20,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "HEATED_SHOT",
+        "KEEP",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Hindustanis"
+    },
+    {
+      "id": 21,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "FERVOR",
+        "HUSSAR",
+        "LIGHT_CAVALRY"
+      ],
+      "name": "Incas"
+    },
+    {
+      "id": 22,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "KEEP",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Magyars"
+    },
+    {
+      "id": 23,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "FERVOR",
+        "GUILDS",
+        "HEATED_SHOT",
+        "KEEP",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Slavs"
+    },
+    {
+      "id": 24,
+      "lacks": [
+        "ARROWSLITS",
+        "FAST_FIRE_SHIP",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR"
+      ],
+      "name": "Portuguese"
+    },
+    {
+      "id": 25,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Ethiopians"
+    },
+    {
+      "id": 26,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "HUSSAR",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Malians"
+    },
+    {
+      "id": 27,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "KEEP",
+        "SANCTITY"
+      ],
+      "name": "Berbers"
+    },
+    {
+      "id": 28,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Khmer"
+    },
+    {
+      "id": 29,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "FERVOR",
+        "HUSSAR"
+      ],
+      "name": "Malay"
+    },
+    {
+      "id": 30,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Burmese"
+    },
+    {
+      "id": 31,
+      "lacks": [
+        "ARCHITECTURE",
+        "FAST_FIRE_SHIP",
+        "FERVOR",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR"
+      ],
+      "name": "Vietnamese"
+    },
+    {
+      "id": 32,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "SANCTITY",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Bulgarians"
+    },
+    {
+      "id": 33,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "KEEP",
+        "SANCTITY",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Tatars"
+    },
+    {
+      "id": 34,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "GUARD_TOWER",
+        "KEEP",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Cumans"
+    },
+    {
+      "id": 35,
+      "lacks": [
+        "ARROWSLITS",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Lithuanians"
+    },
+    {
+      "id": 36,
+      "lacks": [
+        "HEATED_SHOT",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Burgundians"
+    },
+    {
+      "id": 37,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "GUARD_TOWER",
+        "HUSSAR",
+        "KEEP",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Sicilians"
+    },
+    {
+      "id": 38,
+      "lacks": [
+        "ARCHITECTURE",
+        "GOLD_SHAFT_MINING",
+        "GUILDS",
+        "HEATED_SHOT",
+        "HUSSAR"
+      ],
+      "name": "Poles"
+    },
+    {
+      "id": 39,
+      "lacks": [
+        "FAST_FIRE_SHIP",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Bohemians"
+    },
+    {
+      "id": 40,
+      "lacks": [
+        "ARCHITECTURE",
+        "FERVOR",
+        "GOLD_SHAFT_MINING",
+        "HUSSAR",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Dravidians"
+    },
+    {
+      "id": 41,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "HUSSAR",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Bengalis"
+    },
+    {
+      "id": 42,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "GUILDS",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Gurjaras"
+    },
+    {
+      "id": 43,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "SANCTITY",
+        "STONE_SHAFT_MINING",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Romans"
+    },
+    {
+      "id": 44,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "FAST_FIRE_SHIP",
+        "HUSSAR",
+        "KEEP",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Armenians"
+    },
+    {
+      "id": 45,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "GOLD_SHAFT_MINING",
+        "HEATED_SHOT"
+      ],
+      "name": "Georgians"
+    },
+    {
+      "id": 46,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "SANCTITY"
+      ],
+      "name": "Achaemenids"
+    },
+    {
+      "id": 47,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "HUSSAR"
+      ],
+      "name": "Athenians"
+    },
+    {
+      "id": 48,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FERVOR",
+        "GOLD_SHAFT_MINING",
+        "HERBAL_MEDICINE",
+        "HUSSAR",
+        "KEEP",
+        "MASONRY",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Spartans"
+    },
+    {
+      "id": 49,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "HUSSAR",
+        "KEEP",
+        "SANCTITY",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Shu"
+    },
+    {
+      "id": 50,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Wu"
+    },
+    {
+      "id": 51,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "HERBAL_MEDICINE",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Wei"
+    },
+    {
+      "id": 52,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "HEATED_SHOT"
+      ],
+      "name": "Jurchens"
+    },
+    {
+      "id": 53,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GOLD_SHAFT_MINING",
+        "HERBAL_MEDICINE",
+        "KEEP"
+      ],
+      "name": "Khitans"
+    },
+    {
+      "id": 54,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "BRACER",
+        "HUSSAR",
+        "KEEP",
+        "SANCTITY"
+      ],
+      "name": "Macedonians"
+    },
+    {
+      "id": 55,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "SIEGE_ENGINEERS",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Thracians"
+    },
+    {
+      "id": 56,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FERVOR",
+        "GOLD_SHAFT_MINING",
+        "SANCTITY",
+        "SIEGE_ENGINEERS"
+      ],
+      "name": "Puru"
+    },
+    {
+      "id": 57,
+      "lacks": [
+        "ARCHITECTURE",
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "LIGHT_CAVALRY"
+      ],
+      "name": "Muisca"
+    },
+    {
+      "id": 58,
+      "lacks": [
+        "BRACER",
+        "GUARD_TOWER",
+        "GUILDS",
+        "HEATED_SHOT",
+        "HUSSAR",
+        "KEEP",
+        "LIGHT_CAVALRY"
+      ],
+      "name": "Mapuche"
+    },
+    {
+      "id": 59,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "FERVOR",
+        "GUILDS",
+        "HUSSAR",
+        "LIGHT_CAVALRY",
+        "MASONRY",
+        "SIEGE_ENGINEERS",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Tupi"
+    },
+    {
+      "id": 60,
+      "lacks": [
+        "BOMBARD_TOWER",
+        "FAST_FIRE_SHIP",
+        "FERVOR",
+        "STONE_SHAFT_MINING"
+      ],
+      "name": "Saxons"
+    },
+    {
+      "id": 61,
+      "lacks": [
+        "ARROWSLITS",
+        "BOMBARD_TOWER",
+        "GOLD_SHAFT_MINING",
+        "KEEP",
+        "SANCTITY"
+      ],
+      "name": "Varangians"
+    },
+    {
+      "id": 62,
+      "lacks": [
+        "ARCHITECTURE",
+        "BOMBARD_TOWER",
+        "GUILDS",
+        "HERBAL_MEDICINE",
+        "HUSSAR",
+        "TREADMILL_CRANE"
+      ],
+      "name": "Danes"
+    }
+  ],
+  "relic_gold_per_minute": 30,
+  "schema_version": 1,
+  "source": {
+    "civilizations": 63,
+    "file": "empires2_x2_p1.dat",
+    "sha256": "4aa2f0a719e88e5f1502517eddb27c669aeb40c2fe9d8c4f3eec7751c01e7baa",
+    "version": "VER 8.9"
+  },
+  "technologies": {
+    "ARCHITECTURE": {
+      "cost": {
+        "food": 300,
+        "wood": 200
+      },
+      "id": 51,
+      "time": 70,
+      "towers": {
+        "hit_points_percent": 10,
+        "melee_armor": 1,
+        "pierce_armor": 1
+      }
+    },
+    "ARROWSLITS": {
+      "cost": {
+        "food": 250,
+        "wood": 250
+      },
+      "id": 608,
+      "time": 25,
+      "towers": {
+        "attack": 1
+      }
+    },
+    "BALLISTICS": {
+      "cost": {
+        "gold": 175,
+        "wood": 300
+      },
+      "id": 93,
+      "time": 60,
+      "towers": {}
+    },
+    "BODKIN_ARROW": {
+      "cost": {
+        "food": 200,
+        "gold": 100
+      },
+      "id": 200,
+      "time": 35,
+      "towers": {
+        "attack": 1,
+        "range": 1
+      }
+    },
+    "BOMBARD_TOWER": {
+      "cost": {
+        "food": 800,
+        "wood": 400
+      },
+      "id": 64,
+      "time": 60,
+      "towers": {}
+    },
+    "BRACER": {
+      "cost": {
+        "food": 300,
+        "gold": 200
+      },
+      "id": 201,
+      "time": 40,
+      "towers": {
+        "attack": 1,
+        "range": 1
+      }
+    },
+    "CARAVAN": {
+      "cost": {
+        "food": 200,
+        "gold": 200
+      },
+      "id": 48,
+      "time": 40,
+      "towers": {}
+    },
+    "CASTLE_AGE": {
+      "cost": {
+        "food": 800,
+        "gold": 200
+      },
+      "id": 102,
+      "time": 160,
+      "towers": {
+        "hit_points_percent": 20
+      }
+    },
+    "CHEMISTRY": {
+      "cost": {
+        "food": 300,
+        "gold": 200
+      },
+      "id": 47,
+      "time": 100,
+      "towers": {
+        "attack": 1
+      }
+    },
+    "FAST_FIRE_SHIP": {
+      "cost": {},
+      "id": 246,
+      "time": 0,
+      "towers": {}
+    },
+    "FERVOR": {
+      "cost": {
+        "gold": 140
+      },
+      "id": 252,
+      "time": 50,
+      "towers": {}
+    },
+    "FLETCHING": {
+      "cost": {
+        "food": 100,
+        "gold": 50
+      },
+      "id": 199,
+      "time": 30,
+      "towers": {
+        "attack": 1,
+        "range": 1
+      }
+    },
+    "GOLD_MINING": {
+      "cost": {
+        "food": 100,
+        "wood": 75
+      },
+      "id": 55,
+      "time": 30,
+      "towers": {}
+    },
+    "GOLD_SHAFT_MINING": {
+      "cost": {
+        "food": 175,
+        "wood": 75
+      },
+      "id": 182,
+      "time": 75,
+      "towers": {}
+    },
+    "GUARD_TOWER": {
+      "cost": {
+        "food": 100,
+        "wood": 250
+      },
+      "id": 140,
+      "time": 30,
+      "towers": {}
+    },
+    "GUILDS": {
+      "cost": {
+        "food": 300,
+        "gold": 200
+      },
+      "id": 15,
+      "time": 50,
+      "towers": {}
+    },
+    "HAND_CART": {
+      "cost": {
+        "food": 300,
+        "wood": 200
+      },
+      "id": 249,
+      "time": 55,
+      "towers": {}
+    },
+    "HEATED_SHOT": {
+      "cost": {
+        "food": 350,
+        "gold": 100
+      },
+      "id": 380,
+      "time": 30,
+      "towers": {}
+    },
+    "HERBAL_MEDICINE": {
+      "cost": {
+        "gold": 200
+      },
+      "id": 441,
+      "time": 35,
+      "towers": {}
+    },
+    "HUSSAR": {
+      "cost": {
+        "food": 500,
+        "gold": 600
+      },
+      "id": 428,
+      "time": 50,
+      "towers": {}
+    },
+    "IMPERIAL_AGE": {
+      "cost": {
+        "food": 1000,
+        "gold": 800
+      },
+      "id": 103,
+      "time": 190,
+      "towers": {}
+    },
+    "KEEP": {
+      "cost": {
+        "food": 500,
+        "wood": 350
+      },
+      "id": 63,
+      "time": 75,
+      "towers": {}
+    },
+    "LIGHT_CAVALRY": {
+      "cost": {
+        "food": 150,
+        "gold": 50
+      },
+      "id": 254,
+      "time": 45,
+      "towers": {}
+    },
+    "MASONRY": {
+      "cost": {
+        "food": 150,
+        "wood": 175
+      },
+      "id": 50,
+      "time": 50,
+      "towers": {
+        "hit_points_percent": 10,
+        "melee_armor": 1,
+        "pierce_armor": 1
+      }
+    },
+    "MURDER_HOLES": {
+      "cost": {
+        "food": 200,
+        "stone": 100
+      },
+      "id": 322,
+      "time": 35,
+      "towers": {
+        "minimum_range_removed": true
+      }
+    },
+    "SANCTITY": {
+      "cost": {
+        "gold": 175
+      },
+      "id": 231,
+      "time": 60,
+      "towers": {}
+    },
+    "SIEGE_ENGINEERS": {
+      "cost": {
+        "food": 500,
+        "wood": 600
+      },
+      "id": 377,
+      "time": 45,
+      "towers": {}
+    },
+    "STONE_MINING": {
+      "cost": {
+        "food": 100,
+        "wood": 75
+      },
+      "id": 278,
+      "time": 30,
+      "towers": {}
+    },
+    "STONE_SHAFT_MINING": {
+      "cost": {
+        "food": 175,
+        "wood": 75
+      },
+      "id": 279,
+      "time": 75,
+      "towers": {}
+    },
+    "TOWN_WATCH": {
+      "cost": {
+        "food": 75
+      },
+      "id": 8,
+      "time": 25,
+      "towers": {}
+    },
+    "TREADMILL_CRANE": {
+      "cost": {
+        "stone": 50,
+        "wood": 200
+      },
+      "id": 54,
+      "time": 20,
+      "towers": {}
+    },
+    "WAR_GALLEY": {
+      "cost": {
+        "gold": 100,
+        "wood": 150
+      },
+      "id": 34,
+      "time": 50,
+      "towers": {}
+    },
+    "WHEELBARROW": {
+      "cost": {
+        "food": 175,
+        "wood": 50
+      },
+      "id": 213,
+      "time": 75,
+      "towers": {}
+    },
+    "WINGED_HUSSAR": {
+      "cost": {
+        "food": 600,
+        "gold": 800
+      },
+      "id": 786,
+      "time": 60,
+      "towers": {}
+    }
+  },
+  "units": {
+    "BOMBARD_TOWER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          23,
+          0
+        ],
+        [
+          31,
+          3
+        ]
+      ],
+      "attack": [
+        [
+          16,
+          40
+        ],
+        [
+          3,
+          120
+        ],
+        [
+          30,
+          1
+        ]
+      ],
+      "build_time": 80,
+      "cost": {
+        "gold": 100,
+        "stone": 125
+      },
+      "hit_points": 2220,
+      "id": 236,
+      "line_of_sight": 10,
+      "min_range": 1,
+      "range": 8,
+      "reload": 6,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "CAMEL_RIDER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          39,
+          -3
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          6
+        ],
+        [
+          8,
+          9
+        ],
+        [
+          16,
+          5
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          30,
+          5
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 22,
+      "cost": {
+        "food": 55,
+        "gold": 60
+      },
+      "hit_points": 100,
+      "id": 329,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.45,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "CASTLE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          26,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          8
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          31,
+          8
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          2
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          3,
+          11
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "build_time": 200,
+      "cost": {
+        "stone": 650
+      },
+      "hit_points": 4800,
+      "id": 82,
+      "line_of_sight": 11,
+      "min_range": 1,
+      "range": 8,
+      "reload": 2,
+      "speed": 0,
+      "storage": 20,
+      "work_rate": 1
+    },
+    "CAVALIER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          12
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 120,
+      "id": 283,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.8,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "CHAMPION": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          9
+        ],
+        [
+          21,
+          4
+        ],
+        [
+          4,
+          14
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "cost": {
+        "food": 50,
+        "gold": 20
+      },
+      "hit_points": 70,
+      "id": 567,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "DONJON": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          31,
+          1
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "build_time": 125,
+      "cost": {
+        "stone": 175,
+        "wood": 50
+      },
+      "hit_points": 625,
+      "id": 1665,
+      "line_of_sight": 10,
+      "min_range": 1,
+      "range": 0,
+      "reload": 2,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "FAST_FIRE_SHIP": {
+      "accuracy": 0,
+      "armor": [
+        [
+          16,
+          0
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          41,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          60,
+          1
+        ]
+      ],
+      "build_time": 27,
+      "cost": {
+        "gold": 45,
+        "wood": 75
+      },
+      "hit_points": 140,
+      "id": 532,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 2.5,
+      "reload": 0.25,
+      "speed": 1.56,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "FIRE_GALLEY": {
+      "accuracy": 0,
+      "armor": [
+        [
+          16,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          41,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          0
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          60,
+          1
+        ]
+      ],
+      "build_time": 49,
+      "cost": {
+        "gold": 45,
+        "wood": 75
+      },
+      "hit_points": 110,
+      "id": 1103,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 2.5,
+      "reload": 0.25,
+      "speed": 1.36,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "FIRE_SHIP": {
+      "accuracy": 0,
+      "armor": [
+        [
+          16,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          41,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          2
+        ],
+        [
+          16,
+          0
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          60,
+          1
+        ]
+      ],
+      "build_time": 27,
+      "cost": {
+        "gold": 45,
+        "wood": 75
+      },
+      "hit_points": 120,
+      "id": 529,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 2.5,
+      "reload": 0.25,
+      "speed": 1.47,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "FORAGE_BUSH": {
+      "accuracy": 100,
+      "armor": [],
+      "attack": [],
+      "build_time": 0,
+      "cost": {},
+      "hit_points": 0,
+      "id": 59,
+      "line_of_sight": 0,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 125,
+      "work_rate": 0
+    },
+    "GOLD_MINE": {
+      "accuracy": 100,
+      "armor": [],
+      "attack": [],
+      "build_time": 0,
+      "cost": {},
+      "hit_points": 0,
+      "id": 66,
+      "line_of_sight": 0,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 800,
+      "work_rate": 0
+    },
+    "GUARD_TOWER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          31,
+          2
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          2
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          16,
+          7
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          30,
+          1
+        ]
+      ],
+      "build_time": 80,
+      "cost": {
+        "stone": 125,
+        "wood": 35
+      },
+      "hit_points": 1500,
+      "id": 234,
+      "line_of_sight": 10,
+      "min_range": 1,
+      "range": 8,
+      "reload": 2,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "HEAVY_CAMEL_RIDER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          39,
+          -3
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          7
+        ],
+        [
+          8,
+          18
+        ],
+        [
+          16,
+          9
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          30,
+          9
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          35,
+          7
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 22,
+      "cost": {
+        "food": 55,
+        "gold": 60
+      },
+      "hit_points": 120,
+      "id": 330,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.45,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "HUSSAR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          25,
+          12
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 80
+      },
+      "hit_points": 75,
+      "id": 441,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.9,
+      "speed": 1.5,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "KEEP": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          9
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          31,
+          3
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          2
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          16,
+          8
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          30,
+          1
+        ]
+      ],
+      "build_time": 80,
+      "cost": {
+        "stone": 125,
+        "wood": 35
+      },
+      "hit_points": 2250,
+      "id": 235,
+      "line_of_sight": 10,
+      "min_range": 1,
+      "range": 8,
+      "reload": 2,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "KING": {
+      "accuracy": 0,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ],
+        [
+          36,
+          0
+        ]
+      ],
+      "attack": [],
+      "build_time": 30,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 75,
+      "id": 434,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 1.32,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "KNIGHT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          10
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 100,
+      "id": 38,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.8,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "LIGHT_CAVALRY": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          25,
+          10
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 80
+      },
+      "hit_points": 60,
+      "id": 546,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.5,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "LONG_SWORDSMAN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          8
+        ],
+        [
+          21,
+          3
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "cost": {
+        "food": 50,
+        "gold": 20
+      },
+      "hit_points": 60,
+      "id": 77,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "MAN_AT_ARMS": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          3
+        ],
+        [
+          21,
+          2
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "cost": {
+        "food": 50,
+        "gold": 20
+      },
+      "hit_points": 45,
+      "id": 75,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "MILITIA": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "cost": {
+        "food": 50,
+        "gold": 20
+      },
+      "hit_points": 40,
+      "id": 74,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.9,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "MONK": {
+      "accuracy": 38,
+      "armor": [
+        [
+          25,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [],
+      "build_time": 51,
+      "cost": {
+        "gold": 100
+      },
+      "hit_points": 30,
+      "id": 125,
+      "line_of_sight": 11,
+      "min_range": 0,
+      "range": 9,
+      "reload": 1.6,
+      "speed": 0.7,
+      "storage": 1,
+      "work_rate": 1.25
+    },
+    "OUTPOST": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [],
+      "build_time": 15,
+      "cost": {
+        "stone": 5,
+        "wood": 25
+      },
+      "hit_points": 500,
+      "id": 598,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "PALADIN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          4,
+          14
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 60,
+        "gold": 75
+      },
+      "hit_points": 160,
+      "id": 569,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.9,
+      "speed": 1.35,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "PIKEMAN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          27,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          1
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          5,
+          25
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          8,
+          22
+        ],
+        [
+          16,
+          16
+        ],
+        [
+          30,
+          18
+        ],
+        [
+          35,
+          7
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 22,
+      "cost": {
+        "food": 35,
+        "wood": 25
+      },
+      "hit_points": 55,
+      "id": 358,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 3,
+      "speed": 1,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "RELIC": {
+      "accuracy": 0,
+      "armor": [],
+      "attack": [],
+      "build_time": 30,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 30,
+      "id": 285,
+      "line_of_sight": 1,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SCOUT_CAVALRY": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          25,
+          6
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 80
+      },
+      "hit_points": 45,
+      "id": 448,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 1.2,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "SPEARMAN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          27,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          1
+        ],
+        [
+          21,
+          1
+        ],
+        [
+          5,
+          15
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          8,
+          15
+        ],
+        [
+          16,
+          9
+        ],
+        [
+          30,
+          12
+        ],
+        [
+          35,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 22,
+      "cost": {
+        "food": 35,
+        "wood": 25
+      },
+      "hit_points": 45,
+      "id": 93,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 3,
+      "speed": 1,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "STONE_MINE": {
+      "accuracy": 100,
+      "armor": [],
+      "attack": [],
+      "build_time": 0,
+      "cost": {},
+      "hit_points": 0,
+      "id": 102,
+      "line_of_sight": 0,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 350,
+      "work_rate": 0
+    },
+    "THE_ACCURSED_TOWER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          31,
+          4
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          8
+        ],
+        [
+          16,
+          12
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          30,
+          1
+        ]
+      ],
+      "build_time": 80,
+      "cost": {
+        "stone": 150
+      },
+      "hit_points": 3500,
+      "id": 684,
+      "line_of_sight": 14,
+      "min_range": 1,
+      "range": 13,
+      "reload": 3,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "TRADE_CART_EMPTY": {
+      "accuracy": 0,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [],
+      "build_time": 51,
+      "cost": {
+        "gold": 50,
+        "wood": 100
+      },
+      "hit_points": 70,
+      "id": 128,
+      "line_of_sight": 7,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 1.25,
+      "storage": 1,
+      "work_rate": 0.2875
+    },
+    "TRADE_COG": {
+      "accuracy": 0,
+      "armor": [
+        [
+          16,
+          0
+        ],
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          6
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [],
+      "build_time": 36,
+      "cost": {
+        "gold": 50,
+        "wood": 100
+      },
+      "hit_points": 80,
+      "id": 17,
+      "line_of_sight": 6,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 1.65,
+      "storage": 1,
+      "work_rate": 0.37538
+    },
+    "TREBUCHET": {
+      "accuracy": 15,
+      "armor": [
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          150
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          250
+        ],
+        [
+          3,
+          200
+        ]
+      ],
+      "build_time": 50,
+      "cost": {
+        "gold": 200,
+        "wood": 200
+      },
+      "hit_points": 150,
+      "id": 42,
+      "line_of_sight": 19,
+      "min_range": 4,
+      "range": 16,
+      "reload": 10,
+      "speed": 0,
+      "storage": 1,
+      "work_rate": 4.5
+    },
+    "TREBUCHET_PACKED": {
+      "accuracy": 92,
+      "armor": [
+        [
+          4,
+          2
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          250
+        ],
+        [
+          3,
+          200
+        ]
+      ],
+      "build_time": 50,
+      "cost": {
+        "gold": 200,
+        "wood": 200
+      },
+      "hit_points": 150,
+      "id": 331,
+      "line_of_sight": 19,
+      "min_range": 4,
+      "range": 16,
+      "reload": 10,
+      "speed": 0.8,
+      "storage": 1,
+      "work_rate": 4.5
+    },
+    "TREE_A": {
+      "accuracy": 100,
+      "armor": [],
+      "attack": [],
+      "build_time": 0,
+      "cost": {},
+      "hit_points": 20,
+      "id": 399,
+      "line_of_sight": 0,
+      "min_range": 0,
+      "range": 0,
+      "reload": 0,
+      "speed": 0,
+      "storage": 125,
+      "work_rate": 0
+    },
+    "TWO_HANDED_SWORDSMAN": {
+      "accuracy": 100,
+      "armor": [
+        [
+          1,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          1
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          29,
+          9
+        ],
+        [
+          21,
+          4
+        ],
+        [
+          4,
+          12
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          30,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ],
+      "build_time": 21,
+      "cost": {
+        "food": 50,
+        "gold": 20
+      },
+      "hit_points": 65,
+      "id": 473,
+      "line_of_sight": 5,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.96,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "VILLAGER_MALE": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          0
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          3
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          13,
+          6
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          17,
+          0
+        ],
+        [
+          37,
+          6
+        ]
+      ],
+      "build_time": 25,
+      "cost": {
+        "food": 50
+      },
+      "hit_points": 25,
+      "id": 83,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.8,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "WAR_ELEPHANT": {
+      "accuracy": 100,
+      "armor": [
+        [
+          5,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          19,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          11,
+          30
+        ],
+        [
+          4,
+          15
+        ],
+        [
+          13,
+          30
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 25,
+      "cost": {
+        "food": 170,
+        "gold": 85
+      },
+      "hit_points": 450,
+      "id": 239,
+      "line_of_sight": 7,
+      "min_range": 0,
+      "range": 0,
+      "reload": 2,
+      "speed": 0.8,
+      "storage": 1,
+      "work_rate": 1
+    },
+    "WATCH_TOWER": {
+      "accuracy": 100,
+      "armor": [
+        [
+          21,
+          0
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          3,
+          7
+        ],
+        [
+          13,
+          0
+        ],
+        [
+          31,
+          1
+        ]
+      ],
+      "attack": [
+        [
+          27,
+          2
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          16,
+          5
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          30,
+          1
+        ]
+      ],
+      "build_time": 80,
+      "cost": {
+        "stone": 125,
+        "wood": 35
+      },
+      "hit_points": 850,
+      "id": 79,
+      "line_of_sight": 10,
+      "min_range": 1,
+      "range": 8,
+      "reload": 2,
+      "speed": 0,
+      "storage": 0,
+      "work_rate": 1
+    },
+    "WINGED_HUSSAR": {
+      "accuracy": 100,
+      "armor": [
+        [
+          4,
+          1
+        ],
+        [
+          8,
+          0
+        ],
+        [
+          3,
+          2
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "attack": [
+        [
+          25,
+          14
+        ],
+        [
+          4,
+          9
+        ],
+        [
+          11,
+          0
+        ],
+        [
+          21,
+          0
+        ],
+        [
+          15,
+          0
+        ],
+        [
+          23,
+          4
+        ],
+        [
+          38,
+          0
+        ],
+        [
+          39,
+          -3
+        ],
+        [
+          20,
+          0
+        ],
+        [
+          31,
+          0
+        ]
+      ],
+      "build_time": 30,
+      "cost": {
+        "food": 80
+      },
+      "hit_points": 80,
+      "id": 1707,
+      "line_of_sight": 4,
+      "min_range": 0,
+      "range": 0,
+      "reload": 1.9,
+      "speed": 1.5,
+      "storage": 1,
+      "work_rate": 1
+    }
+  }
+}

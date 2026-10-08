@@ -2,9 +2,7 @@
 
 from typing import Literal
 
-from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
-from AoE2ScenarioParser.datasets.trigger_lists.capture_flag import CaptureFlag
 
 from ancienttdde.probes.arena import Arena, tile_text
 from ancienttdde.probes.models import ProbeCase, ProbeDefinition, ProbeId
@@ -76,26 +74,19 @@ def trade_routes(arena: Arena, init: TriggerHandle, partner_player: Literal[0, 2
     condition(start, "timer", timer=2)
     partner_name = "Gaia" if partner_player == 0 else "P2"
     for kind, trader, y in (("market", "cart", LAND_Y), ("dock", "cog", WATER_Y)):
-        key = f"trade.{trader}"
-        endpoints.append(arena.unit(f"{key}.home", kind, 1, HOME_X, y, f"P1 home {kind}"))
-        partner = arena.unit(
-            f"{key}.partner",
-            kind,
-            partner_player,
-            PARTNER_X,
-            y,
-            f"{partner_name} partner {kind}",
-            capture_flag=CaptureFlag.NEVER,
-        )
-        endpoints.append(partner)
-        unit = arena.unit(f"{key}.trader", trader, 1, 14, y)
-        effect(
-            start,
-            "task_object",
-            source_player=1,
-            selected_object_ids=[unit],
-            location_object_reference=partner,
-            action_type=ActionType.DEFAULT,
+        caption = f"{partner_name} partner {kind}"
+        endpoints.extend(
+            arena.trade_pair(
+                start,
+                f"trade.{trader}",
+                kind,
+                trader,
+                HOME_X,
+                PARTNER_X,
+                y,
+                partner_player,
+                caption,
+            )
         )
     arena.protect(init, endpoints)
     pad = arena.pad("trade.attack.pad", *ATTACK_PAD, "Start endpoint attack test")

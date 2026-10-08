@@ -4,7 +4,6 @@ from collections.abc import Mapping
 from enum import IntEnum
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
-from AoE2ScenarioParser.datasets.object_support import CivilizationOld
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.techs import TechInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
@@ -20,6 +19,7 @@ from ancienttdde.game.catalog import (
     Shop,
     SiegePowerUp,
 )
+from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
 from ancienttdde.game.config import Balance, EngineLane, Towers
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
@@ -44,8 +44,6 @@ class State(IntEnum):
 STAGES = ("scheduled", "endless", "sudden")
 # The pierce armor endless waves may add stays within the engine's 16-bit armor values.
 ARMOR_LIMIT = 30000
-# Civilization bonuses are looked up by medium and civilization ID, this many IDs per medium.
-CIVILIZATION_SLOTS = 256
 # Siege positions per lane in the siege tables.
 SIEGE_SLOTS = 3
 
@@ -119,6 +117,8 @@ LANE_VARIABLES = (
     "control_held",
     # Seconds until this lane may buy the siege power-up again.
     "siege_cooldown",
+    # The native effect set of the lane's civilization profile, 0 for none.
+    "profile",
 )
 # Seconds between repeated explanations of the same refused purchase.
 NOTICE_SECONDS = 10
@@ -157,20 +157,124 @@ def table(name: str, values: list[int]) -> str:
     return f"int {name}(int index = 0) {{\n{cases}\n    return (0);\n}}\n"
 
 
-def sparse(name: str, values: Mapping[int, int]) -> str:
-    """A table over scattered indexes; any index it does not list reads 0."""
-    cases = "\n".join(f"    if (index == {i}) return ({v});" for i, v in sorted(values.items()))
-    return f"int {name}(int index = 0) {{\n{cases}\n    return (0);\n}}\n"
+def sparse(name: str, values: Mapping[int, int], fallback: int = 0) -> str:
+    """A table over scattered indexes; any index it does not list reads the fallback."""
+    cases = "\n".join(
+        f"    if (index == {i}) return ({v});" for i, v in sorted(values.items()) if v != fallback
+    )
+    return f"int {name}(int index = 0) {{\n{cases}\n    return ({fallback});\n}}\n"
 
 
-def mask(bit: int) -> int:
-    """The ownership bit as the value XS divides by; repeatable purchases have none."""
-    return 2**bit if bit >= 0 else 0
+def sparse_strings(name: str, values: Mapping[int, str], fallback: str) -> str:
+    """A string table over scattered indexes; any index it does not list reads the fallback."""
+    for value in (*values.values(), fallback):
+        xs_text(value, name)
+    cases = "\n".join(
+        f'    if (index == {i}) return ("{v}");' for i, v in sorted(values.items()) if v != fallback
+    )
+    return f'string {name}(int index = 0) {{\n{cases}\n    return ("{fallback}");\n}}\n'
+
+
+def raider_table(profiles: Profiles) -> str:
+    """Extra living raiders by medium (1 upward, in RAIDER_MEDIA order) and civilization ID: a
+    listed civilization reads its own profile, any other the default."""
+    default = profiles.default
+    lines = [
+        f"    if ((medium == {number}) && (civ == {c.id})) return ({extra});"
+        for number, medium in enumerate(RAIDER_MEDIA, 1)
+        for c in profiles.civilizations
+        if (extra := c.profile.raider_extra(medium)) != default.raider_extra(medium)
+    ]
+    lines += [
+        f"    if (medium == {number}) return ({default.raider_extra(medium)});"
+        for number, medium in enumerate(RAIDER_MEDIA, 1)
+    ]
+    return (
+        "int civRaiders(int medium = 1, int civ = 0) {\n"
+        + "\n".join(lines)
+        + "\n    return (0);\n}\n"
+    )
+
+
+def granted_indexes(profile: Profile, shop: Shop) -> list[int]:
+    return [shop.get(key).index for key in profile.purchases]
+
+
+def grant_slots(profiles: Profiles, shop: Shop) -> int:
+    """How many purchases the longest grant list holds; the XS loops over this many slots."""
+    lists = [profiles.default, *(c.profile for c in profiles.civilizations)]
+    return max(1, *(len(granted_indexes(profile, shop)) for profile in lists))
+
+
+def grant_table(profiles: Profiles, shop: Shop) -> str:
+    """Granted purchase indexes by civilization ID and slot (0 upward), -1 past the last: a
+    listed civilization reads its own list, any other the default's."""
+    default = granted_indexes(profiles.default, shop)
+    slots = grant_slots(profiles, shop)
+
+    def at(listed: list[int], slot: int) -> int:
+        return listed[slot] if slot < len(listed) else -1
+
+    lines: list[str] = []
+    for civilization in profiles.civilizations:
+        own = granted_indexes(civilization.profile, shop)
+        lines += [
+            f"    if ((civ == {civilization.id}) && (slot == {slot})) return ({at(own, slot)});"
+            for slot in range(slots)
+            if at(own, slot) != at(default, slot)
+        ]
+    lines += [f"    if (slot == {slot}) return ({index});" for slot, index in enumerate(default)]
+    return (
+        "int civGrant(int civ = 0, int slot = 0) {\n" + "\n".join(lines) + "\n    return (-1);\n}\n"
+    )
+
+
+def civilization_tables(profiles: Profiles, shop: Shop) -> str:
+    """Per-civilization profile values the XS applies; unlisted civilizations read the default."""
+    default = profiles.default
+    tables = {
+        "civOwned": (
+            {c.id: owned_mask(c.profile, shop) for c in profiles.civilizations},
+            owned_mask(default, shop),
+        ),
+        "civKings": ({c.id: c.profile.kings for c in profiles.civilizations}, default.kings),
+        "civGoldPercent": (
+            {c.id: c.profile.king_gold_percent for c in profiles.civilizations},
+            default.king_gold_percent,
+        ),
+        "civKillPercent": (
+            {c.id: c.profile.kill_reward_percent for c in profiles.civilizations},
+            default.kill_reward_percent,
+        ),
+        "civNative": (
+            {c.id: profiles.native_index(c.profile) for c in profiles.civilizations},
+            profiles.native_index(default),
+        ),
+    }
+    return (
+        "".join(sparse(name, values, fallback) for name, (values, fallback) in tables.items())
+        + raider_table(profiles)
+        + grant_table(profiles, shop)
+        + sparse_strings("civName", {c.id: c.name for c in profiles.civilizations}, "")
+        + sparse_strings(
+            "civText",
+            {c.id: profiles.chat(c) for c in profiles.civilizations},
+            profiles.chat(None),
+        )
+    )
+
+
+def xs_text(value: str, name: str) -> str:
+    """Text an XS string table may hold: no quotes or backslashes, and no percent signs, which
+    xsChatData reads as format specifiers and refuses."""
+    if any(character in value for character in '"\\%'):
+        raise ValueError(f"XS text cannot hold quotes, backslashes or percent signs: {name}")
+    return value
 
 
 def strings(name: str, values: list[str]) -> str:
-    if any('"' in value or "\\" in value for value in values):
-        raise ValueError(f"XS text cannot hold quotes or backslashes: {name}")
+    for value in values:
+        xs_text(value, name)
     cases = "\n".join(
         f'    if (index == {i}) return ("{value}");' for i, value in enumerate(values)
     )
@@ -178,7 +282,12 @@ def strings(name: str, values: list[str]) -> str:
 
 
 def render_prelude(
-    balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop, *, extern: bool = False
+    balance: Balance,
+    lanes: tuple[EngineLane, ...],
+    shop: Shop,
+    profiles: Profiles,
+    *,
+    extern: bool = False,
 ) -> str:
     """Declare this build's constants and lookup tables for assets/runtime.xs.
 
@@ -189,10 +298,10 @@ def render_prelude(
     difficulty = balance.difficulty
     purchases = shop.purchases
     investments = shop.investments()
-    repair = next((p for p in purchases if isinstance(p.effect, Repair)), None)
+    repair = shop.first(Repair)
     repairs = repair.effect if repair and isinstance(repair.effect, Repair) else Repair(1, 0)
-    relics = next((p for p in purchases if isinstance(p.effect, Relics)), None)
-    siege = next((p for p in purchases if isinstance(p.effect, SiegePowerUp)), None)
+    relics = shop.first(Relics)
+    siege = shop.first(SiegePowerUp)
     interaction = balance.interaction
     lines = [interaction.raiders.kind(medium).line_ids for medium in RAIDER_MEDIA]
     line_size = max(len(line) for line in lines)
@@ -231,7 +340,7 @@ def render_prelude(
         cShopCount=len(purchases),
         cInvestCount=len(investments),
         cRelicsPurchase=relics.index if relics else 0,
-        cRepairMask=mask(repair.bit) if repair else 0,
+        cRepairMask=repair.mask if repair else 0,
         cRepairInterval=repairs.interval,
         cRepairStone=repairs.stone,
         cTowerKinds=len(access),
@@ -244,7 +353,6 @@ def render_prelude(
         cArmorStep=balance.endless.armor_step,
         cArmorLimit=ARMOR_LIMIT,
         cRaiderLineSize=line_size,
-        cCivilizationSlots=CIVILIZATION_SLOTS,
         cSiegePurchase=siege.index if siege else 0,
         cSiegeRivalKings=siege.effect.kings_per_rival
         if siege and isinstance(siege.effect, SiegePowerUp)
@@ -268,7 +376,11 @@ def render_prelude(
                 starts[lane.player * stride + purchase.index] = len(entries)
                 counts[lane.player * stride + purchase.index] = len(made)
                 entries.extend(made)
-    constants.update(cSpawnStride=stride, cSpawnSlots=max(counts.values(), default=1))
+    constants.update(
+        cSpawnStride=stride,
+        cSpawnSlots=max(counts.values(), default=1),
+        cGrantSlots=grant_slots(profiles, shop),
+    )
     transfers = [(0, 0, 0, 0, 0, 0)] * len(TRANSFERS) + [
         (*lane.sites.transfers[name].pad, *center(lane.sites.transfers[name].arrival))
         for lane in lanes
@@ -340,7 +452,7 @@ def render_prelude(
         "shopX2": [pad[2] for pad in pads],
         "shopY2": [pad[3] for pad in pads],
         "shopPrice": [0] + [p.kings for p in purchases],
-        "shopMask": [0] + [mask(p.bit) for p in purchases],
+        "shopMask": [0] + [p.mask for p in purchases],
         "shopRequires": [0] + [shop.get(p.requires).index if p.requires else 0 for p in purchases],
         "shopUpgrade": [0]
         + [TechInfo[p.effect.upgrade].ID if isinstance(p.effect, AgeUp) else 0 for p in purchases],
@@ -356,7 +468,7 @@ def render_prelude(
         "transferY2": [t[3] for t in transfers],
         "transferX10": [t[4] for t in transfers],
         "transferY10": [t[5] for t in transfers],
-        "investMask": [mask(p.bit) for p in investments],
+        "investMask": [p.mask for p in investments],
         "investPeriod": [e.period for e in invested],
         "investPays": [PAYOUTS.index(e.pays) for e in invested],
         "investAmount": [e.amount for e in invested],
@@ -381,23 +493,18 @@ def render_prelude(
         + "\n".join(table(name, values) for name, values in tables.items())
         + sparse("spawnStart", starts)
         + sparse("spawnCount", counts)
-        + sparse(
-            "raiderBonus",
-            {
-                (RAIDER_MEDIA.index(medium) + 1) * CIVILIZATION_SLOTS
-                + CivilizationOld[civilization].value: extra
-                for civilization, medium, extra in interaction.raiders.bonuses
-            },
-        )
+        + civilization_tables(profiles, shop)
         + "\n".join(strings(name, values) for name, values in texts.items())
     )
 
 
-def render_xs(balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop) -> str:
+def render_xs(
+    balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop, profiles: Profiles
+) -> str:
     """Prefix the shared runtime with this build's constants and lookup tables.
 
     The runtime eliminates a lane once xsGetPlayerInGame turns false, which DE reports for
     defeated, resigned and dropped players. assets/runtime.xs is embedded verbatim in the
     game scenario, so notes about it live here rather than in its comments.
     """
-    return render_prelude(balance, lanes, shop) + asset_text("runtime.xs")
+    return render_prelude(balance, lanes, shop, profiles) + asset_text("runtime.xs")

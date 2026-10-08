@@ -6,6 +6,7 @@ import pytest
 from conftest import (
     BARRACKS,
     KING,
+    ROOT,
     ProbeSuite,
     attr_int,
     attr_list,
@@ -17,7 +18,7 @@ from conftest import (
     variables_by_name,
 )
 
-from ancienttdde.scenario.snapshot import ScenarioSnapshot, TriggerRecord
+from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerRecord
 
 
 def test_siege_life_markers_are_counted_objects_distinct_from_payment_kings(
@@ -395,3 +396,181 @@ def test_siege_visible_countdowns_use_game_seconds(probe_suite: ProbeSuite) -> N
     for row in snapshot["triggers"]:
         shown = [e["attributes"] for e in row["effects"] if e["type"] == "display_timer"]
         assert len({attr_int(d, "timer") for d in shown}) == len(shown), row["name"]
+
+
+def units_of(snapshot: ScenarioSnapshot, player: int, kind: int) -> list[MapUnit]:
+    return [u for u in snapshot["units"] if u["player_id"] == player and u["unit_const"] == kind]
+
+
+def test_trade_income_routes_pair_each_trader_with_a_partner_at_a_known_distance(
+    probe_suite: ProbeSuite,
+) -> None:
+    directory, _ = probe_suite
+    snapshot = probe_snapshot(directory, "trade-income")
+    triggers = triggers_by_name(snapshot)
+    for building, trader in ((84, 128), (45, 17)):
+        homes = units_of(snapshot, 1, building)
+        partners = units_of(snapshot, 0, building)
+        assert len(homes) == 2 and len(partners) == 2
+        assert all(p.get("capture_flag") == 0 for p in partners)
+        traders = units_of(snapshot, 1, trader)
+        assert len(traders) == 2
+        lengths: list[float] = []
+        for unit in traders:
+            task = next(
+                e["attributes"]
+                for e in triggers["income.start"]["effects"]
+                if e["type"] == "task_object"
+                and e["attributes"]["selected_object_ids"] == [unit["reference_id"]]
+            )
+            partner = next(
+                p for p in partners if p["reference_id"] == task["location_object_reference"]
+            )
+            home = min(homes, key=lambda h: abs(h["y"] - partner["y"]))
+            assert home["y"] == partner["y"]
+            lengths.append(partner["x"] - home["x"])
+        # A short and a long route, so the income's growth with distance can be read.
+        assert sorted(lengths) == [20, 46]
+
+
+def test_trade_income_raid_pairs_wait_for_their_pads(probe_suite: ProbeSuite) -> None:
+    directory, _ = probe_suite
+    snapshot = probe_snapshot(directory, "trade-income")
+    triggers = triggers_by_name(snapshot)
+    for name, raider, victim in (("cart", 546, 128), ("cog", 1103, 17)):
+        [attacker] = units_of(snapshot, 1, raider)
+        prey = [u for u in units_of(snapshot, 8, victim)]
+        assert len(prey) == 1
+        [held] = [
+            e["attributes"]
+            for e in triggers["probe.initialize"]["effects"]
+            if e["type"] == "change_object_stance"
+            and e["attributes"]["selected_object_ids"] == [prey[0]["reference_id"]]
+        ]
+        assert held["attack_stance"] == 3
+        order = next(
+            e["attributes"]
+            for e in triggers[f"income.raid.{name}"]["effects"]
+            if e["type"] == "task_object"
+        )
+        assert order["selected_object_ids"] == [attacker["reference_id"]]
+        assert order["location_object_reference"] == prey[0]["reference_id"]
+        assert any(
+            c["type"] == "objects_in_area" for c in triggers[f"income.raid.{name}"]["conditions"]
+        )
+        assert (
+            math.dist(
+                (attacker["x"], attacker["y"]),
+                (prey[0]["x"], prey[0]["y"]),
+            )
+            <= 8
+        )
+
+
+def test_tower_damage_lines_up_one_tower_of_each_kind_with_its_own_target_spot(
+    probe_suite: ProbeSuite,
+) -> None:
+    directory, _ = probe_suite
+    snapshot = probe_snapshot(directory, "tower-damage")
+    triggers = triggers_by_name(snapshot)
+    # The siege Keep stands far south; the measured towers share one row.
+    towers = {
+        u["unit_const"]: u
+        for u in snapshot["units"]
+        if u["player_id"] == 1 and u["unit_const"] in (79, 234, 235, 236, 684) and u["y"] < 20
+    }
+    assert set(towers) == {79, 234, 235, 236, 684}
+    spots: dict[str, list[tuple[int, int]]] = {}
+    for enemy in ("militia", "knight", "elephant"):
+        trigger = triggers[f"damage.{enemy}"]
+        created = [e["attributes"] for e in trigger["effects"] if e["type"] == "create_object"]
+        assert len(created) == 5 and all(e["source_player"] == 8 for e in created)
+        spots[enemy] = [(attr_int(e, "location_x"), attr_int(e, "location_y")) for e in created]
+        assert any(c["type"] == "objects_in_area" for c in trigger["conditions"])
+        [stance] = [
+            e["attributes"] for e in trigger["effects"] if e["type"] == "change_object_stance"
+        ]
+        assert stance["attack_stance"] == 2 and stance["source_player"] == 8
+    assert spots["militia"] == spots["knight"] == spots["elephant"]
+    # Each spot lies within its own tower's range and beyond every other tower's.
+    ranges = {79: 8, 234: 8, 235: 8, 236: 8, 684: 13}
+    for spot in spots["militia"]:
+        center = (spot[0] + 0.5, spot[1] + 0.5)
+        near = [
+            kind
+            for kind, tower in towers.items()
+            if math.dist(center, (tower["x"], tower["y"])) <= ranges[kind]
+        ]
+        assert len(near) == 1, spot
+
+
+def test_tower_damage_enemies_take_the_scheduled_hit_points(probe_suite: ProbeSuite) -> None:
+    from ancienttdde.game.config import load_balance
+
+    directory, _ = probe_suite
+    snapshot = probe_snapshot(directory, "tower-damage")
+    init = triggers_by_name(snapshot)["probe.initialize"]
+    balance = load_balance(ROOT / "content/balance/game.json")
+    normal = balance.difficulty.index("normal")
+    hit_points = {
+        attr_int(e["attributes"], "object_list_unit_id"): attr_number(e["attributes"], "quantity")
+        for e in init["effects"]
+        if e["type"] == "modify_attribute"
+        and e["attributes"]["source_player"] == 8
+        and e["attributes"]["object_attributes"] == 0
+    }
+    waves: dict[str, int] = {}
+    for index, wave in enumerate(balance.waves):
+        waves.setdefault(wave.unit, index)
+    assert hit_points == {
+        74: balance.hit_points(waves["MILITIA"], normal),
+        38: balance.hit_points(waves["KNIGHT"], normal),
+        239: balance.hit_points(waves["WAR_ELEPHANT"], normal),
+    }
+
+
+def test_tower_damage_attack_pad_raises_the_four_towers_and_the_siege_pad_places_trebuchets(
+    probe_suite: ProbeSuite,
+) -> None:
+    directory, _ = probe_suite
+    snapshot = probe_snapshot(directory, "tower-damage")
+    triggers = triggers_by_name(snapshot)
+    attack = triggers["damage.attack"]
+    raised = {
+        attr_int(e["attributes"], "object_list_unit_id"): attr_int(
+            e["attributes"], "armour_attack_quantity"
+        )
+        for e in attack["effects"]
+        if e["type"] == "modify_attribute"
+    }
+    assert raised == {79: 100, 234: 100, 235: 100, 236: 100}
+    siege = triggers["damage.siege"]
+    trebuchets = [e["attributes"] for e in siege["effects"] if e["type"] == "create_object"]
+    assert len(trebuchets) == 2 and all(e["object_list_unit_id"] == 42 for e in trebuchets)
+    [keep] = [
+        u
+        for u in snapshot["units"]
+        if u["player_id"] == 1 and u["unit_const"] == 235 and u["y"] > 40
+    ]
+    for trebuchet in trebuchets:
+        distance = math.dist(
+            (attr_int(trebuchet, "location_x") + 0.5, attr_int(trebuchet, "location_y") + 0.5),
+            (keep["x"], keep["y"]),
+        )
+        assert 8 < distance <= 16
+    stuck = [
+        e["attributes"]
+        for e in triggers["probe.initialize"]["effects"]
+        if e["type"] == "modify_attribute"
+        and e["attributes"]["source_player"] == 8
+        and e["attributes"]["object_list_unit_id"] in (42, 331)
+    ]
+    assert all(e["object_attributes"] == 5 and attr_number(e, "quantity") == 0 for e in stuck)
+    assert len(stuck) == 2
+
+
+def test_the_damage_probe_uses_the_games_accursed_tower_pierce() -> None:
+    from ancienttdde.game.config import load_balance
+    from ancienttdde.probes.damage import ACCURSED_PIERCE
+
+    assert ACCURSED_PIERCE == load_balance(ROOT / "content/balance/game.json").towers.special_pierce
