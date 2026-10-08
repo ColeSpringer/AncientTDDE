@@ -9,7 +9,8 @@ import math
 from collections.abc import Iterable
 
 from ancienttdde.game.catalog import Shop, display_captions
-from ancienttdde.game.config import EngineLane
+from ancienttdde.game.config import Balance, EngineLane
+from ancienttdde.game.controls import control_captions
 from ancienttdde.game.instructions import CREDIT
 from ancienttdde.game.sites import Tile
 from ancienttdde.game.triggers import Game
@@ -57,9 +58,11 @@ def arrival_text(origin: str, arrival: Tile, bought: tuple[Tile, ...]) -> str:
     return text
 
 
-def name_objects(game: Game, lanes: Iterable[EngineLane], shop: Shop) -> None:
+def name_objects(game: Game, lanes: Iterable[EngineLane], shop: Shop, balance: Balance) -> None:
     trigger = game.trigger("game.labels", looping=False)
     owners = game.owners()
+    for key, caption in control_captions(balance).items():
+        game.rename(trigger, game.names.resolve("object", f"control.{key}"), caption, owners=owners)
     for placed, caption in display_captions(shop).items():
         game.rename(trigger, game.placement(placed), caption, owners=owners)
     for purchase in shop.purchases:

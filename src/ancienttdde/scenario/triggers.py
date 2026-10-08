@@ -38,6 +38,8 @@ type EffectName = Literal[
     "create_garrisoned_object",
     "change_ownership",
     "change_object_name",
+    "enable_disable_technology",
+    "clear_timer",
 ]
 type ConditionName = Literal[
     "timer",
@@ -46,6 +48,8 @@ type ConditionName = Literal[
     "own_objects",
     "variable_value",
     "player_defeated",
+    "object_selected_multiplayer",
+    "technology_state",
 ]
 
 
@@ -224,6 +228,20 @@ class Builder:
                 armour_attack_class=PIERCE,
                 armour_attack_quantity=amount,
             )
+
+    def set_attribute(
+        self, trigger: TriggerHandle, player: int, unit: int, attribute: int, quantity: float
+    ) -> None:
+        """Set an attribute of a player's object definition, for copies made now and later."""
+        effect(
+            trigger,
+            "modify_attribute",
+            source_player=player,
+            object_list_unit_id=unit,
+            object_attributes=attribute,
+            operation=Operation.SET,
+            quantity=quantity,
+        )
 
     def tower_attack_bonus(self, trigger: TriggerHandle, amount: int, *, player: int = 1) -> None:
         """Add pierce attack to the stock arrow-tower definitions."""

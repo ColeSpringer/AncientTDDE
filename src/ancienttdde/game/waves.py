@@ -2,14 +2,16 @@
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
 from ancienttdde.game.config import Balance, EngineLane
+from ancienttdde.game.objectives import objective
 from ancienttdde.game.script import State
 from ancienttdde.game.triggers import Game
-from ancienttdde.scenario.triggers import area, condition, effect
+from ancienttdde.scenario.triggers import PIERCE, area, condition, effect
 
 # Lumber-camp trees hold more wood than a run uses. DE applies this effect value as a
 # 16-bit number (1,000,000 arrived as 16,960), so it stays below 32,768.
@@ -58,32 +60,70 @@ def game_clock(game: Game) -> None:
 
 
 def configure_waves(game: Game, balance: Balance) -> None:
+    """Each scheduled wave's enemies get the hit points of the difficulty the run plays."""
     for index, wave in enumerate(balance.waves, 1):
-        configure = game.trigger(f"game.wave.{index}.configure", looping=False)
-        game.value(configure, "game.wave", index - 1)
+        for level, difficulty in enumerate(balance.difficulty.levels):
+            configure = game.trigger(f"game.wave.{index}.configure.{difficulty.key}", looping=False)
+            game.value(configure, "game.wave", index - 1)
+            game.value(configure, "game.difficulty", level)
+            game.set_attribute(
+                configure,
+                8,
+                wave.object_id,
+                ObjectAttribute.HIT_POINTS,
+                balance.hit_points(index - 1, level),
+            )
+            game.set_attribute(configure, 8, wave.object_id, ObjectAttribute.MOVEMENT_SPEED, 0.65)
+            game.set_value(configure, "game.configured", index)
+
+
+def endless_growth(game: Game, balance: Balance) -> None:
+    """Endless enemies take each new level's hit points, and armor one step at a time."""
+    units = [balance.waves[t].object_id for t in balance.endless.templates]
+    for level in range(1, balance.endless_levels + 1):
+        for index, difficulty in enumerate(balance.difficulty.levels):
+            grow = game.trigger(f"game.endless.{level}.{difficulty.key}", looping=True)
+            game.value(grow, "game.endless_request", level)
+            game.value(grow, "game.difficulty", index)
+            for position, unit in enumerate(units):
+                hit_points = balance.endless_hit_points(level, position, index)
+                game.set_attribute(grow, 8, unit, ObjectAttribute.HIT_POINTS, hit_points)
+            game.set_value(grow, "game.endless_request", 0)
+    armor = game.trigger("game.endless.armor", looping=True)
+    game.value(armor, "game.armor_request", 1, Comparison.LARGER_OR_EQUAL)
+    for unit in dict.fromkeys(units):
         effect(
-            configure,
+            armor,
             "modify_attribute",
             source_player=8,
-            object_list_unit_id=wave.object_id,
-            object_attributes=ObjectAttribute.HIT_POINTS,
-            operation=Operation.SET,
-            quantity=wave.hit_points,
+            object_list_unit_id=unit,
+            object_attributes=ObjectAttribute.ARMOR,
+            operation=Operation.ADD,
+            armour_attack_class=PIERCE,
+            armour_attack_quantity=balance.endless.armor_step,
         )
-        effect(
-            configure,
-            "modify_attribute",
-            source_player=8,
-            object_list_unit_id=wave.object_id,
-            object_attributes=ObjectAttribute.MOVEMENT_SPEED,
-            operation=Operation.SET,
-            quantity=0.65,
-        )
-        game.set_value(configure, "game.configured", index)
+    game.set_value(armor, "game.armor_request", 1, Operation.SUBTRACT)
 
 
 def wave_warnings(game: Game, balance: Balance) -> None:
-    """Count down to each wave once its preparation or intermission begins."""
+    """Count down to each wave once its preparation or intermission begins; the engine asks
+    for the countdown before each wave after the schedule."""
+    endless = game.trigger("game.wave.endless.warning", looping=True)
+    game.value(endless, "game.wave_display", 1)
+    effect(
+        endless,
+        "display_timer",
+        display_time=balance.intermission_seconds,
+        time_unit=TimeUnit.SECONDS,
+        message="Next wave in %d",
+        reset_timer=1,
+        timer=0,
+    )
+    game.set_value(endless, "game.wave_display", 0)
+    clear = game.trigger("game.wave.timer.clear", looping=True)
+    game.value(clear, "game.wave_display", 2)
+    effect(clear, "clear_timer", timer=0)
+    game.set_value(clear, "game.wave_display", 0)
     for number, wave in enumerate(balance.waves, 1):
         trigger = game.trigger(f"game.wave.{number}.warning", looping=False)
         game.value(trigger, "game.phase", State.PREPARATION)
@@ -103,23 +143,15 @@ def wave_warnings(game: Game, balance: Balance) -> None:
 def game_status(game: Game, balance: Balance) -> None:
     wave = game.names.resolve("variable", "game.display_wave")
     countdown = game.names.resolve("variable", "game.countdown")
-    objective = game.scenario.trigger_manager.add_trigger(
+    objective(
+        game,
         "game.status",
-        short_description=(
-            f"Wave <Variable {wave}> of {len(balance.waves)}: <Variable {countdown}> s"
-        ),
-        description=(
-            "Survive every wave. Before a wave, the seconds until it starts; during a wave, "
-            "the seconds its enemies keep spawning; in sudden death, the seconds until the "
-            "next loss of lives."
-        ),
-        display_as_objective=True,
-        display_on_screen=True,
-        enabled=True,
-        execute_on_load=False,
+        f"Wave <Variable {wave}>: <Variable {countdown}> s",
+        f"Survive {len(balance.waves)} scheduled waves; Endless runs and sudden death "
+        "continue past them. Before a wave, the seconds until it starts; during a wave, "
+        "the seconds its enemies keep spawning.",
+        shown=True,
     )
-    # Never fires: its sole purpose is displaying the persisted wave and countdown.
-    game.value(objective, "game.phase", -1)
 
 
 def lane_waves(game: Game, lane: EngineLane, balance: Balance) -> None:

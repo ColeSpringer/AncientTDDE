@@ -15,6 +15,10 @@ from ancienttdde.game.economy import (
     lane_transfers,
     starting_relics,
 )
+from ancienttdde.game.interaction import protect_kings
+from ancienttdde.game.objectives import objective
+from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reach
+from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import lane_route, lane_waves
@@ -41,6 +45,10 @@ def lane_actions(game: Game, lane: EngineLane, balance: Balance, shop: Shop) -> 
     lane_messages(game, lane, balance)
     lane_bonuses(game, lane, balance)
     lane_purchases(game, lane, shop, balance)
+    lane_controls(game, player)
+    protect_kings(game, player)
+    restrict_ages(game, player)
+    restrict_reach(game, player)
 
 
 def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
@@ -62,6 +70,8 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
     game.research(init, "FEUDAL_AGE", player=player)
     for technology in balance.economy.starting_technologies:
         game.research(init, technology, player=player)
+    # After the lane's age, so nothing it upgrades or enables undoes them.
+    restrict(game, init, player)
     effect(
         init,
         "enable_disable_object",
@@ -124,14 +134,10 @@ def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:
     player = lane.player
     prefix = f"lane.p{player}"
     lives = game.names.resolve("variable", f"{prefix}.lives")
-    objective = game.scenario.trigger_manager.add_trigger(
+    objective(
+        game,
         f"{prefix}.status",
-        short_description=f"P{player} lives: <Variable {lives}>/{balance.lives}",
-        description=f"P{player}: prevent enemies reaching the right-hand exit.",
-        display_as_objective=True,
-        display_on_screen=True,
-        enabled=True,
-        execute_on_load=False,
+        f"P{player} lives: <Variable {lives}>/{balance.lives}",
+        f"P{player}: prevent enemies reaching the right-hand exit.",
+        shown=True,
     )
-    # Never fires: its sole purpose is displaying the persisted life total.
-    game.value(objective, "game.phase", -1)

@@ -48,8 +48,24 @@ def test_every_original_purchase_family_has_one_modern_purchase() -> None:
     legacy = json.loads((ROOT / "content/legacy/purchases.json").read_text(encoding="utf-8"))
     families = {p["name"].split("(p")[0].strip() for p in legacy["purchases"]}
     assert len(families) == 36
-    replaced = [p.legacy for p in shop().purchases]
+    replaced = [p.legacy for p in shop().purchases if p.legacy is not None]
     assert sorted(replaced) == sorted(families)
+
+
+def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() -> None:
+    from ancienttdde.game.catalog import Raider, SiegePowerUp
+
+    catalog = shop()
+    land, naval, siege = (catalog.get(k) for k in ("land_raider", "naval_raider", "siege"))
+    assert (land.effect, land.kings, land.legacy) == (Raider("land"), 3, None)
+    assert (naval.effect, naval.kings, naval.legacy) == (Raider("naval"), 3, None)
+    assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(5), 20, None)
+    assert not any(p.once for p in (land, naval, siege))
+    assert [p.pad for p in (land, naval, siege)] == [
+        "shop.land_raider",
+        "shop.naval_raider",
+        "shop.siege",
+    ]
 
 
 @pytest.mark.parametrize(
@@ -64,6 +80,9 @@ def test_every_original_purchase_family_has_one_modern_purchase() -> None:
             "bombard_attack_400",
             "Bombard Tower attack +400: 18 Kings, for civilizations with Bombard Towers",
         ),
+        ("land_raider", "Land raider (light cavalry): 3 Kings, when PvP is on"),
+        ("naval_raider", "Naval raider (fire galley): 3 Kings, when PvP is on"),
+        ("siege", "Siege power-up: 20 Kings plus 5 per surviving rival, when PvP is on"),
     ],
 )
 def test_captions_state_the_name_price_and_limits(key: str, caption: str) -> None:
@@ -71,7 +90,12 @@ def test_captions_state_the_name_price_and_limits(key: str, caption: str) -> Non
 
 
 @pytest.mark.parametrize(
-    ("key", "price"), [("tower_attack_4", "1 King"), ("tower_attack_50", "7 Kings")]
+    ("key", "price"),
+    [
+        ("tower_attack_4", "1 King"),
+        ("tower_attack_50", "7 Kings"),
+        ("siege", "20 Kings plus 5 per surviving rival"),
+    ],
 )
 def test_prices_are_written_once_for_captions_and_messages(key: str, price: str) -> None:
     assert shop().get(key).price == price
@@ -88,7 +112,7 @@ def test_every_purchase_names_a_display_object_beside_its_pad() -> None:
     placed = [p.display for p in catalog.purchases if p.display is not None]
     created = [p for p in catalog.purchases if p.display_at is not None]
     assert len(placed) + len(created) == len(catalog.purchases)
-    assert [p.key for p in created] == ["fourth_row"]
+    assert [p.key for p in created] == ["fourth_row", "land_raider", "naval_raider", "siege"]
     assert created[0].display_at == (167.5, 36.5)
     assert catalog.get("tower_attack_4").display == 18941
     assert catalog.get("left_accursed_tower").display == catalog.get("right_accursed_tower").display
@@ -204,6 +228,12 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("no_display", "exactly one of display or display_at"),
         ("two_displays", "exactly one of display or display_at"),
         ("old_schema", "Unsupported shop schema"),
+        ("previous_schema", "Unsupported shop schema"),
+        ("second_siege", "At most one siege purchase"),
+        ("second_land_raider", "At most one land raider purchase"),
+        ("siege_kings_per_rival", "kings_per_rival"),
+        ("unknown_medium", "medium"),
+        ("blank_legacy", "legacy"),
     ],
 )
 def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path) -> None:
@@ -243,6 +273,18 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
         first["display_at"] = [150.5, 15.5]
     elif defect == "old_schema":
         raw["schema_version"] = 1
+    elif defect == "previous_schema":
+        raw["schema_version"] = 2
+    elif defect == "second_siege":
+        first["effect"] = {"kind": "siege", "kings_per_rival": 5}
+    elif defect == "second_land_raider":
+        first["effect"] = {"kind": "raider", "medium": "land"}
+    elif defect == "siege_kings_per_rival":
+        next(p for p in purchases if p["key"] == "siege")["effect"]["kings_per_rival"] = 0
+    elif defect == "unknown_medium":
+        first["effect"] = {"kind": "raider", "medium": "air"}
+    elif defect == "blank_legacy":
+        first["legacy"] = " "
     elif defect in ("second_repair", "second_relics"):
         kind = defect.removeprefix("second_")
         first["effect"] = next(p for p in purchases if p["effect"]["kind"] == kind)["effect"]

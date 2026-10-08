@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from ancienttdde.game.sites import RAIDER_MEDIA
 from ancienttdde.map.foundation import migrate_map
 from ancienttdde.map.geometry import Cell, cells, flood, footprint, neighbors
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
@@ -194,6 +195,83 @@ def test_monks_reach_bought_relics_and_their_monasteries(player: int) -> None:
         assert perimeter & walkable
 
 
+def monk_ground(player: int) -> set[Cell]:
+    """Where the lane's monks stand and walk: beside bought relics and in its relic enclosure."""
+    enclosure = placed(125, 0, region(f"lane.p{player}.relic_enclosure"))
+    return reachable([tile(p) for p in points(f"lane.p{player}.monks")] + enclosure) | set(
+        enclosure
+    )
+
+
+def test_monks_never_stand_beside_another_players_units() -> None:
+    """Monks convert at no range, so nothing another player moves may come next to them."""
+    monks = {player: monk_ground(player) for player in PLAYERS}
+    shop = reachable([tile(points("lane.p1.kings")[1])])
+    trade = set[Cell]().union(
+        *(reachable([tile(points(f"lane.p1.raiders.{m}")[0])], MEDIA[m]) for m in RAIDER_MEDIA)
+    )
+    for player in PLAYERS:
+        beside = {
+            (x + dx, y + dy) for x, y in monks[player] for dx in (-1, 0, 1) for dy in (-1, 0, 1)
+        }
+        others = shop.union(trade, *(monks[q] for q in PLAYERS if q != player))
+        assert not beside & others, player
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_map_validation_keeps_monks_in_their_enclosures(player: int) -> None:
+    _, config = content()
+    checks = {c["key"]: c for c in config["isolation"]}
+    monks, enclosure = checks[f"monks.p{player}"], checks[f"relic_enclosure.p{player}"]
+    assert (monks["start"], monks["medium"]) == (f"lane.p{player}.monks", "land")
+    assert (enclosure["start"], enclosure["medium"]) == (f"lane.p{player}.relic_enclosure", "land")
+    x1, y1, x2, y2 = monks["region"]
+    assert reachable([tile(p) for p in points(f"lane.p{player}.monks")]) <= cells((x1, y1, x2, y2))
+    assert tuple(enclosure["region"]) == rect(f"lane.p{player}.relic_enclosure")
+
+
+# Fletching, Bodkin Arrow and Bracer bring towers to 11 tiles; competitive games rule out the
+# unique technologies that add more.
+TOWER_REACH = 11
+# Grass, leaves, forest and road: the terrain towers can be built on.
+TOWER_TERRAIN = (0, 5, 10, 24)
+ROWS = ("build.north", "build.south") + tuple(
+    f"expansion.{row}.{side}" for row in ("third", "fourth") for side in ("north", "south")
+)
+
+
+def tower_ground(player: int) -> set[Cell]:
+    data, _ = content()
+    width, tiles = data["map"]["width"], data["map"]["tiles"]
+    return {
+        (x, y)
+        for row in ROWS
+        for x, y in region(f"lane.p{player}.{row}")
+        if tiles[y * width + x][0] in TOWER_TERRAIN
+    }
+
+
+def lane_ground(player: int) -> set[Cell]:
+    """Every land tile of the lane's rows and the walkable rows beyond its outer rows."""
+    x1, y1, x2, _ = rect(f"lane.p{player}.expansion.fourth.north")
+    _, _, _, y2 = rect(f"lane.p{player}.expansion.fourth.south")
+    return cells((x1 - 1, y1 - 1, x2 + 1, y2 + 1)) & terrain("land")
+
+
+@pytest.mark.parametrize("player", PLAYERS[:-1])
+def test_towers_cannot_reach_the_next_lane(player: int) -> None:
+    for towers, other in (
+        (tower_ground(player), lane_ground(player + 1)),
+        (tower_ground(player + 1), lane_ground(player)),
+    ):
+        gap = min(
+            math.hypot(max(abs(x - u) - 1, 0), max(abs(y - v) - 1, 0))
+            for x, y in towers
+            for u, v in other
+        )
+        assert gap > TOWER_REACH
+
+
 @pytest.mark.parametrize("player", PLAYERS)
 def test_castle_sites_are_clear_land(player: int) -> None:
     x, y = point(f"lane.p{player}.castle")
@@ -228,3 +306,105 @@ def test_bought_traders_reach_their_partner(
     occupied = footprint(unit, sizes[unit["unit_const"]])
     perimeter = {n for c in occupied for n in neighbors(c)} - occupied
     assert perimeter & reachable(spawns, medium)
+
+
+# Raiders stay where traders run: the land field east of the shop and the water channel.
+TRADE_AREAS = {"land": (164, 0, 199, 199), "naval": (96, 0, 128, 199)}
+MEDIA = {"land": "land", "naval": "water"}
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+@pytest.mark.parametrize("kind", RAIDER_MEDIA)
+def test_raiders_arrive_in_their_trade_area_and_cannot_leave_it(player: int, kind: str) -> None:
+    medium = MEDIA[kind]
+    spawn, walk = (tile(p) for p in points(f"lane.p{player}.raiders.{kind}"))
+    assert spawn in open_ground(medium) and walk in open_ground(medium)
+    area = reachable([spawn], medium)
+    assert walk in area
+    assert area <= cells(TRADE_AREAS[kind])
+    # Raiders arrive beside their own market or dock and meet every lane's traders there.
+    route = "land" if kind == "land" else "water"
+    assert math.dist(point(f"trade.{route}.p{player}.home"), [spawn[0] + 0.5, spawn[1] + 0.5]) <= 8
+    _, rally = (tile(p) for p in points("lane.p1.kings"))
+    assert not area & reachable([rally])
+
+
+def test_every_lane_raids_the_same_trade_areas() -> None:
+    for kind in RAIDER_MEDIA:
+        areas = [
+            frozenset(reachable([tile(points(f"lane.p{p}.raiders.{kind}")[0])], MEDIA[kind]))
+            for p in PLAYERS
+        ]
+        assert len(set(areas)) == 1, kind
+
+
+def test_run_controls_stand_free_in_the_row_below_the_shop() -> None:
+    run = [tile(p) for p in points("controls.run")]
+    practice = [tile(p) for p in points("controls.practice")]
+    assert len(run) == 5 and len(practice) == 4
+    spots = run + practice
+    assert len(set(spots)) == len(spots)
+    assert all(spot in open_ground() for spot in spots)
+    assert all(121 <= x <= 169 and 55 <= y <= 57 for x, y in spots)
+    # Controls stand apart so each can be clicked on its own.
+    assert all(math.dist(a, b) >= 3 for i, a in enumerate(spots) for b in spots[i + 1 :])
+
+
+def test_the_enemy_keeper_stands_alone_off_the_siege_islets() -> None:
+    keeper = tile(point("enemy.keeper"))
+    assert keeper in open_ground()
+    islet = reachable([keeper])
+    assert islet <= cells((141, 87, 143, 89))
+    for player in PLAYERS:
+        for index in (1, 2, 3):
+            assert keeper not in region(f"siege.p{player}.{index}")
+    # No lane's enemies are counted or removed there.
+    assert all(not 13 + 28 * (p - 1) <= keeper[1] <= 18 + 28 * (p - 1) for p in PLAYERS)
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_only_arrivals_every_lane_reaches_ignore_units_standing_there(player: int) -> None:
+    """Units standing on a lane's own arrival spots are its own and can move away; trade area
+    spots and the King stall are open to every lane, so nothing standing there holds them."""
+    from typing import cast
+
+    from ancienttdde.game.catalog import load_shop
+    from ancienttdde.game.config import load_balance, load_lanes
+    from ancienttdde.game.spawns import purchase_spawns
+
+    data, _ = content()
+    anchors = data.get("anchors", {})
+    balance = load_balance(ROOT / "content/balance/game.json")
+    families = [name for name, _ in balance.towers.families]
+    shop = load_shop(ROOT / "content/balance/shop.json", anchors, families)
+    lane = load_lanes(cast(dict[str, object], anchors))[player - 1]
+    trade = set[Cell]().union(
+        *(reachable([tile(points(f"lane.p1.raiders.{m}")[0])], MEDIA[m]) for m in RAIDER_MEDIA)
+    )
+    for purchase in shop.purchases:
+        for spawned in purchase_spawns(lane, purchase, balance.interaction.raiders):
+            spot = (spawned.x10 // 10, spawned.y10 // 10)
+            assert spawned.shared == (spot in trade), purchase.key
+    rival = 2 if player == 1 else 1
+    stall = tile(points(f"lane.p{player}.kings")[0])
+    assert stall in reachable([tile(points(f"lane.p{rival}.kings")[1])])
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_lane_sites_read_the_raider_arrivals(player: int) -> None:
+    from ancienttdde.game.sites import load_sites
+
+    data, _ = content()
+    sites = load_sites(data.get("anchors", {}), player)
+    for kind in RAIDER_MEDIA:
+        spawn, walk = (tile(p) for p in points(f"lane.p{player}.raiders.{kind}"))
+        assert sites.raiders[kind].tiles == (spawn,) and sites.raiders[kind].walk == walk
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_lane_sites_read_the_siege_positions_near_the_lane(player: int) -> None:
+    from ancienttdde.game.sites import load_sites
+
+    data, _ = content()
+    sites = load_sites(data.get("anchors", {}), player)
+    assert sites.siege == tuple(tile(point(f"siege.p{player}.{i}")) for i in (1, 2, 3))

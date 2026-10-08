@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Literal, cast
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
+from ancienttdde.game.sites import RAIDER_MEDIA, RaiderMedium
 from ancienttdde.map.geometry import Cell, cells, footprint
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
 from ancienttdde.scenario.objects import technology
@@ -97,6 +98,20 @@ class Repair:
     stone: int
 
 
+@dataclass(frozen=True)
+class Raider:
+    """A living raider for the buyer's side of a trade area, while PvP is on."""
+
+    medium: RaiderMedium
+
+
+@dataclass(frozen=True)
+class SiegePowerUp:
+    """Exclusive temporary siege near every rival; the price rises with each surviving rival."""
+
+    kings_per_rival: int
+
+
 type Effect = (
     TowerAttack
     | Investment
@@ -111,6 +126,8 @@ type Effect = (
     | Castle
     | Expansion
     | Repair
+    | Raider
+    | SiegePowerUp
 )
 
 
@@ -119,7 +136,8 @@ class Purchase:
     index: int
     key: str
     name: str
-    legacy: str
+    # The original purchase this one restores; purchases the original lacked have none.
+    legacy: str | None
     kings: int
     pad: str
     pad_region: tuple[int, int, int, int]
@@ -137,7 +155,15 @@ class Purchase:
 
     @property
     def price(self) -> str:
-        return f"{self.kings} King" + ("" if self.kings == 1 else "s")
+        price = f"{self.kings} King" + ("" if self.kings == 1 else "s")
+        if isinstance(self.effect, SiegePowerUp):
+            price += f" plus {self.effect.kings_per_rival} per surviving rival"
+        return price
+
+    @property
+    def pvp(self) -> bool:
+        """Sold only while PvP is on: these purchases act on rivals."""
+        return isinstance(self.effect, Raider | SiegePowerUp)
 
     @property
     def caption(self) -> str:
@@ -145,6 +171,7 @@ class Purchase:
             (", once" if self.once else "")
             + (f", after {self.required_name}" if self.required_name else "")
             + (f", for civilizations with {self.only_with[1]}" if self.only_with else "")
+            + (", when PvP is on" if self.pvp else "")
         )
         return f"{self.name}: {self.price}{limits}"
 
@@ -224,6 +251,10 @@ def effect(row: dict[str, object], families: Collection[str]) -> Effect:
             return Expansion(choice(row, "row", ("third", "fourth")))
         case "repair":
             return Repair(integer(row, "interval", 1, 600), integer(row, "stone", 0, 10000))
+        case "raider":
+            return Raider(choice(row, "medium", RAIDER_MEDIA))
+        case "siege":
+            return SiegePowerUp(integer(row, "kings_per_rival", 1, 20))
         case kind:
             raise ValueError(f"Unknown purchase effect: {kind}")
 
@@ -278,7 +309,7 @@ def check_requirements(keys: dict[str, dict[str, object]]) -> None:
 def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection[str]) -> Shop:
     """Read and check the catalog against the map's shop pads and the tower families."""
     raw = read_object(path)
-    if raw.get("schema_version") != 2:
+    if raw.get("schema_version") != 3:
         raise ValueError("Unsupported shop schema")
     entries = rows(raw.get("purchases"), "purchases")
     keys: dict[str, dict[str, object]] = {}
@@ -315,7 +346,7 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
                 index=index,
                 key=key,
                 name=text_field(row, "name"),
-                legacy=text_field(row, "legacy"),
+                legacy=text_field(row, "legacy") if "legacy" in row else None,
                 kings=integer(row, "kings", 1, 100),
                 pad=pad_key,
                 pad_region=pad_region,
@@ -337,10 +368,13 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
     }
     if len(attacks) > 1:
         raise ValueError("Periodic attack purchases must share one tower family")
-    # The engine keeps one repair schedule and one relic delivery per lane.
-    for kind, name in ((Repair, "repair"), (Relics, "relics")):
+    # The engine keeps one repair schedule, one relic delivery and one siege holder.
+    for kind, name in ((Repair, "repair"), (Relics, "relics"), (SiegePowerUp, "siege")):
         if sum(isinstance(p.effect, kind) for p in purchases) > 1:
             raise ValueError(f"At most one {name} purchase is supported")
+    for medium in RAIDER_MEDIA:
+        if sum(p.effect == Raider(medium) for p in purchases) > 1:
+            raise ValueError(f"At most one {medium} raider purchase is supported")
     return Shop(tuple(purchases))
 
 

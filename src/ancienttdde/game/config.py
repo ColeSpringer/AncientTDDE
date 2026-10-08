@@ -1,14 +1,17 @@
 """Validate the finite wave schedule at the JSON input boundary."""
 
+from collections.abc import Collection
 from dataclasses import dataclass
+from functools import cached_property
 from pathlib import Path
 from typing import cast
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
+from AoE2ScenarioParser.datasets.object_support import CivilizationOld
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
-from ancienttdde.game.sites import LaneSites, load_sites
+from ancienttdde.game.sites import RAIDER_MEDIA, LaneSites, RaiderMedium, load_sites
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import technology
 
@@ -58,6 +61,37 @@ MAX_HIT_POINTS = 32767
 RESERVED_TECHNOLOGIES = frozenset(
     {"FEUDAL_AGE", "CASTLE_AGE", "IMPERIAL_AGE", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"}
 )
+# DE's lobby difficulty settings, as xsGetDifficulty reports them.
+LOBBY_DIFFICULTIES = {
+    "extreme": -1,
+    "hardest": 0,
+    "hard": 1,
+    "moderate": 2,
+    "standard": 3,
+    "easiest": 4,
+}
+DIFFICULTY_LEVELS = ("easy", "normal", "hard")
+# Endless waves stop growing once every one has reached the hit point limit; more growth
+# levels than this would need a trigger per level and difficulty for little difference.
+MAX_ENDLESS_LEVELS = 30
+# Raiders cannot reach across a one-tile wall: land raiders fight in melee, naval raiders at
+# the fire ships' short range.
+RAIDERS: dict[RaiderMedium, frozenset[str]] = {
+    "land": frozenset(
+        {
+            "SCOUT_CAVALRY",
+            "LIGHT_CAVALRY",
+            "HUSSAR",
+            "WINGED_HUSSAR",
+            "KNIGHT",
+            "CAVALIER",
+            "PALADIN",
+            "CAMEL_RIDER",
+            "HEAVY_CAMEL_RIDER",
+        }
+    ),
+    "naval": frozenset({"FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP"}),
+}
 
 
 @dataclass(frozen=True)
@@ -73,7 +107,6 @@ class Economy:
     # Each lane starts with these resources and technologies.
     starting_resources: Resources
     starting_technologies: tuple[str, ...]
-    king_gold: int
     wave_kings: int
     kills_per_reward: int
     kill_stone: int
@@ -107,6 +140,97 @@ class Towers:
 
 
 @dataclass(frozen=True)
+class DifficultyLevel:
+    key: str
+    name: str
+    king_gold: int
+    hit_points_percent: int
+
+
+@dataclass(frozen=True)
+class Difficulty:
+    levels: tuple[DifficultyLevel, ...]
+    # Each lobby setting's xsGetDifficulty value and the level it plays.
+    lobby: tuple[tuple[int, int], ...]
+    # The level every competitive game plays, whatever the lobby says.
+    competitive: int
+
+    def index(self, key: str) -> int:
+        for index, level in enumerate(self.levels):
+            if level.key == key:
+                return index
+        raise ValueError(f"Unknown difficulty level: {key}")
+
+    def level(self, key: str) -> DifficultyLevel:
+        return self.levels[self.index(key)]
+
+
+@dataclass(frozen=True)
+class Endless:
+    # Positions in the wave schedule that endless waves repeat in turn.
+    templates: tuple[int, ...]
+    # Hit points grow by this percentage each time the templates repeat.
+    growth_percent: int
+    # Pierce armor every endless wave adds to the template enemies.
+    armor_step: int
+
+
+@dataclass(frozen=True)
+class RaiderKind:
+    unit: str
+    # The unit and its upgrades: a living cap counts them all, so upgrading frees no slot.
+    line: tuple[str, ...]
+    cap: int
+
+    @property
+    def unit_id(self) -> int:
+        return UnitInfo[self.unit].ID
+
+    @property
+    def line_ids(self) -> tuple[int, ...]:
+        return tuple(UnitInfo[name].ID for name in self.line)
+
+
+@dataclass(frozen=True)
+class Raiders:
+    land: RaiderKind
+    naval: RaiderKind
+    # Extra living raiders a civilization may keep: civilization, medium and how many more.
+    bonuses: tuple[tuple[str, str, int], ...]
+
+    def kind(self, medium: RaiderMedium) -> RaiderKind:
+        match medium:
+            case "land":
+                return self.land
+            case "naval":
+                return self.naval
+            case _:
+                raise ValueError(f"Unknown raider medium: {medium}")
+
+
+@dataclass(frozen=True)
+class Siege:
+    # Trebuchets created near each surviving rival.
+    trebuchets_per_rival: int
+    warning_seconds: int
+    active_seconds: int
+    shared_cooldown: int
+    buyer_cooldown: int
+
+
+@dataclass(frozen=True)
+class Interaction:
+    raiders: Raiders
+    siege: Siege
+
+
+@dataclass(frozen=True)
+class Practice:
+    kings: int
+    resources: int
+
+
+@dataclass(frozen=True)
 class Balance:
     lives: int
     setup_seconds: int
@@ -116,6 +240,10 @@ class Balance:
     sudden_death_interval: int
     sudden_death_damage: int
     economy: Economy
+    difficulty: Difficulty
+    endless: Endless
+    interaction: Interaction
+    practice: Practice
     towers: Towers
     waves: tuple[WaveDefinition, ...]
 
@@ -127,6 +255,29 @@ class Balance:
             + sum(w.duration for w in self.waves)
             + self.intermission_seconds * (len(self.waves) - 1)
         )
+
+    def hit_points(self, wave: int, difficulty: int) -> int:
+        """A scheduled wave's enemy hit points at a difficulty level, within the engine limit."""
+        percent = self.difficulty.levels[difficulty].hit_points_percent
+        return min(MAX_HIT_POINTS, (self.waves[wave].hit_points * percent + 50) // 100)
+
+    def endless_hit_points(self, level: int, position: int, difficulty: int) -> int:
+        """Hit points of an endless template's enemies after `level` rounds of growth."""
+        base = self.hit_points(self.endless.templates[position], difficulty)
+        growth = 100 + self.endless.growth_percent
+        return min(MAX_HIT_POINTS, base * growth**level // 100**level)
+
+    @cached_property
+    def endless_levels(self) -> int:
+        """Growth levels until every endless enemy has reached the limit at every difficulty."""
+        level = 1
+        while any(
+            self.endless_hit_points(level, position, difficulty) < MAX_HIT_POINTS
+            for position in range(len(self.endless.templates))
+            for difficulty in range(len(self.difficulty.levels))
+        ):
+            level += 1
+        return level
 
 
 def tower(name: object) -> str:
@@ -161,7 +312,6 @@ def load_economy(raw: dict[str, object]) -> Economy:
             *(integer(start, name, 0, 30000) for name in ("food", "wood", "stone", "gold"))
         ),
         starting_technologies=technologies(raw, "starting_technologies"),
-        king_gold=integer(raw, "king_gold", 1, 30000),
         wave_kings=integer(raw, "wave_kings", 0, 10),
         kills_per_reward=integer(kills, "kills", 1, 1000),
         kill_stone=integer(kills, "stone", 0, 10000),
@@ -192,9 +342,122 @@ def load_towers(raw: dict[str, object]) -> Towers:
     )
 
 
+def level_key(value: object, levels: Collection[str]) -> str:
+    if not isinstance(value, str) or value not in levels:
+        raise ValueError(f"Unknown difficulty level: {value}")
+    return value
+
+
+def load_difficulty(raw: dict[str, object]) -> Difficulty:
+    entries = object_value(raw.get("levels"), "levels")
+    if set(entries) != set(DIFFICULTY_LEVELS):
+        raise ValueError(f"difficulty levels must be {', '.join(DIFFICULTY_LEVELS)}")
+    levels: list[DifficultyLevel] = []
+    for key in DIFFICULTY_LEVELS:
+        row = object_value(entries[key], key)
+        levels.append(
+            DifficultyLevel(
+                key=key,
+                name=text_field(row, "name"),
+                king_gold=integer(row, "king_gold", 1, 30000),
+                hit_points_percent=integer(row, "hit_points_percent", 50, 200),
+            )
+        )
+    lobby = object_value(raw.get("lobby"), "lobby")
+    if set(lobby) != set(LOBBY_DIFFICULTIES):
+        raise ValueError(f"lobby must map {', '.join(LOBBY_DIFFICULTIES)}")
+    return Difficulty(
+        levels=tuple(levels),
+        lobby=tuple(
+            (value, DIFFICULTY_LEVELS.index(level_key(lobby[name], DIFFICULTY_LEVELS)))
+            for name, value in LOBBY_DIFFICULTIES.items()
+        ),
+        competitive=DIFFICULTY_LEVELS.index(level_key(raw.get("competitive"), DIFFICULTY_LEVELS)),
+    )
+
+
+def load_endless(raw: dict[str, object], waves: tuple[WaveDefinition, ...]) -> Endless:
+    names = raw.get("templates")
+    if not isinstance(names, list) or not names:
+        raise ValueError("endless templates must list wave keys")
+    keys = [wave.key for wave in waves]
+    templates: list[int] = []
+    for name in cast(list[object], names):
+        if not isinstance(name, str) or name not in keys:
+            raise ValueError(f"Unknown endless template: {name}")
+        if keys.index(name) in templates:
+            raise ValueError(f"Endless template listed twice: {name}")
+        # Each template's enemies get their own hit points, so no two may share a unit.
+        if waves[keys.index(name)].unit in {waves[t].unit for t in templates}:
+            raise ValueError(f"Endless templates share a unit: {name}")
+        templates.append(keys.index(name))
+    return Endless(
+        templates=tuple(templates),
+        growth_percent=integer(raw, "hit_point_growth_percent", 10, 200),
+        armor_step=integer(raw, "armor_step", 0, 1000),
+    )
+
+
+def raider_kind(raw: dict[str, object], medium: RaiderMedium) -> RaiderKind:
+    row = object_value(raw.get(medium), medium)
+    allowed = RAIDERS[medium]
+    unit = row.get("unit")
+    if not isinstance(unit, str) or unit not in allowed:
+        raise ValueError(f"Not a {medium} raider: {unit}")
+    names = row.get("line")
+    if not isinstance(names, list) or not names or cast(list[object], names)[0] != unit:
+        raise ValueError(f"The {medium} raider line must start with {unit}")
+    line: list[str] = []
+    for name in cast(list[object], names):
+        if not isinstance(name, str) or name not in allowed or name in line:
+            raise ValueError(f"Not a {medium} raider: {name}")
+        line.append(name)
+    return RaiderKind(unit=unit, line=tuple(line), cap=integer(row, "cap", 1, 10))
+
+
+# Civilization IDs as xsGetPlayerCivilization reports them; Gaia and the lobby's random
+# choices are not civilizations a player plays.
+MAX_CIVILIZATION = 255
+
+
+def civilization(value: object) -> str:
+    member = CivilizationOld.__members__.get(value) if isinstance(value, str) else None
+    if member is None or not 0 < member.value <= MAX_CIVILIZATION:
+        raise ValueError(f"Unknown civilization: {value}")
+    return member.name
+
+
+def load_raiders(raw: dict[str, object]) -> Raiders:
+    bonuses: list[tuple[str, str, int]] = []
+    for row in rows(raw.get("bonuses"), "bonuses"):
+        medium = row.get("medium")
+        if medium not in RAIDER_MEDIA:
+            raise ValueError(f"medium must be one of {', '.join(RAIDER_MEDIA)}")
+        bonus = (civilization(row.get("civilization")), str(medium), integer(row, "extra", 1, 5))
+        if bonus[:2] in {b[:2] for b in bonuses}:
+            raise ValueError(f"Raider bonus listed twice: {bonus[0]} {bonus[1]}")
+        bonuses.append(bonus)
+    return Raiders(
+        land=raider_kind(raw, "land"), naval=raider_kind(raw, "naval"), bonuses=tuple(bonuses)
+    )
+
+
+def load_siege(raw: dict[str, object]) -> Siege:
+    shared = integer(raw, "shared_cooldown", 0, 600)
+    return Siege(
+        # Each rival has three siege positions; the third stays in reserve.
+        trebuchets_per_rival=integer(raw, "trebuchets_per_rival", 1, 3),
+        warning_seconds=integer(raw, "warning_seconds", 1, 60),
+        active_seconds=integer(raw, "active_seconds", 10, 300),
+        shared_cooldown=shared,
+        # The buyer waits at least as long as everyone else.
+        buyer_cooldown=integer(raw, "buyer_cooldown", shared, 1200),
+    )
+
+
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if raw.get("schema_version") != 3:
+    if raw.get("schema_version") != 4:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):
@@ -221,7 +484,9 @@ def load_balance(path: Path) -> Balance:
         waves.append(wave)
     if not waves or len(waves) > 30 or not waves[-1].boss:
         raise ValueError("waves must contain 1–30 entries ending in a boss")
-    return Balance(
+    interaction = object_value(raw.get("interaction"), "interaction")
+    practice = object_value(raw.get("practice"), "practice")
+    balance = Balance(
         lives=integer(raw, "lives", 1, 100),
         setup_seconds=integer(raw, "setup_seconds", 2, 30),
         preparation_seconds=integer(raw, "preparation_seconds", 1, 600),
@@ -230,9 +495,22 @@ def load_balance(path: Path) -> Balance:
         sudden_death_interval=integer(raw, "sudden_death_interval", 1, 60),
         sudden_death_damage=integer(raw, "sudden_death_damage", 1, 10),
         economy=load_economy(object_value(raw.get("economy"), "economy")),
+        difficulty=load_difficulty(object_value(raw.get("difficulty"), "difficulty")),
+        endless=load_endless(object_value(raw.get("endless"), "endless"), tuple(waves)),
+        interaction=Interaction(
+            raiders=load_raiders(object_value(interaction.get("raiders"), "raiders")),
+            siege=load_siege(object_value(interaction.get("siege"), "siege")),
+        ),
+        practice=Practice(
+            kings=integer(practice, "kings", 1, 50),
+            resources=integer(practice, "resources", 1, 30000),
+        ),
         towers=load_towers(object_value(raw.get("towers"), "towers")),
         waves=tuple(waves),
     )
+    if balance.endless_levels > MAX_ENDLESS_LEVELS:
+        raise ValueError("hit_point_growth_percent is too small for the endless wave levels")
+    return balance
 
 
 @dataclass(frozen=True)

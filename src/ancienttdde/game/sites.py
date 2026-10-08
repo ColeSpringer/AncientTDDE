@@ -3,7 +3,7 @@
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import cast
+from typing import Literal, cast
 
 from ancienttdde.common.data import object_value
 from ancienttdde.models import Rect
@@ -12,6 +12,9 @@ from ancienttdde.models import Rect
 type Tile = tuple[int, int]
 RESOURCES = ("gold", "food", "stone")
 TRANSFERS = ("build", "economy", "north", "south")
+# Raiders fight on land or water: one purchase, spot and living cap per medium.
+type RaiderMedium = Literal["land", "naval"]
+RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
 
 
 @dataclass(frozen=True)
@@ -50,6 +53,10 @@ class LaneSites:
     carts: tuple[Tile, ...]
     cogs: tuple[Tile, ...]
     expansion: Mapping[str, tuple[Rect, Rect]]
+    # Where bought raiders appear in the land and water trade areas, by medium.
+    raiders: Mapping[str, Spawn]
+    # The islets where a rival's trebuchets stand near this lane's towers, in order.
+    siege: tuple[Tile, ...]
 
 
 def anchor(anchors: Mapping[str, object], key: str) -> dict[str, object]:
@@ -83,6 +90,11 @@ def single(anchors: Mapping[str, object], key: str) -> Tile:
     if (x1, y1) != (x2, y2):
         raise ValueError(f"Anchor must be a single tile: {key}")
     return x1, y1
+
+
+def point_tile(anchors: Mapping[str, object], key: str) -> Tile:
+    x, y = numbers(anchor(anchors, key).get("point"), key, 2)
+    return math.floor(x), math.floor(y)
 
 
 def spawn(anchors: Mapping[str, object], key: str) -> Spawn:
@@ -131,4 +143,6 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
             )
             for row in ("third", "fourth")
         },
+        raiders={medium: spawn(anchors, f"{prefix}.raiders.{medium}") for medium in RAIDER_MEDIA},
+        siege=tuple(point_tile(anchors, f"siege.p{player}.{index}") for index in (1, 2, 3)),
     )

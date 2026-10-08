@@ -11,11 +11,13 @@ from ancienttdde.game.catalog import (
     Investment,
     Population,
     Purchase,
+    Raider,
     RelicEnclosure,
     Relics,
     Repair,
     ResourceGrant,
     Shop,
+    SiegePowerUp,
     SpecialTower,
     TowerAttack,
     Traders,
@@ -131,8 +133,20 @@ def apply(
                     object_list_unit_id=game.stock("hay-stack"),
                     **area(rows),
                 )
-        case Investment() | Repair() | Relics() | Castle():
-            # XS pays investments and repairs, and creates relics, monks and castles.
+        case Raider(medium=medium):
+            spawn = sites.raiders[medium]
+            effect(
+                trigger,
+                "task_object",
+                source_player=player,
+                object_list_unit_id=balance.interaction.raiders.kind(medium).unit_id,
+                action_type=ActionType.MOVE,
+                **around(spawn.tiles),
+                **at(spawn.walk),
+            )
+        case Investment() | Repair() | Relics() | Castle() | SiegePowerUp():
+            # XS pays investments and repairs, creates relics, monks and castles, and runs
+            # the siege.
             pass
 
 
@@ -145,12 +159,8 @@ def lane_purchases(game: Game, lane: EngineLane, shop: Shop, balance: Balance) -
         game.value(trigger, f"{prefix}.active", 1)
         game.value(trigger, f"{prefix}.purchase", purchase.index)
         apply(game, trigger, lane, purchase, balance)
-        effect(
-            trigger,
-            "send_chat",
-            source_player=player,
-            message=f"Bought {purchase.name} for {purchase.price}.",
-        )
+        paid = "" if isinstance(purchase.effect, SiegePowerUp) else f" for {purchase.price}"
+        effect(trigger, "send_chat", source_player=player, message=f"Bought {purchase.name}{paid}.")
         game.set_value(trigger, f"{prefix}.purchase", 0)
 
 

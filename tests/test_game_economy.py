@@ -281,7 +281,10 @@ def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: i
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
     texts = message_texts(load_balance(ROOT / "content/balance/game.json"))
-    assert texts["gold"] == "Gold converted: a King per 3500 gold arrives at your stall."
+    # The gold per King depends on the difficulty, which the game announces when it starts.
+    assert texts["gold"] == "Gold converted into Kings; they arrive at your stall."
+    # The objectives show only the shared siege cooldown; the last buyer waits longer.
+    assert "longer for its last buyer" in texts["siege_cooldown"]
     for key, _ in MESSAGES:
         trigger = triggers[f"lane.p{player}.message.{key}"]
         assert trigger["looping"]
@@ -370,8 +373,10 @@ def test_purchases_place_units_at_their_lane_sites(game_build: GameBuild, player
     shop = load_shop(ROOT / "content/balance/shop.json", sites, families)
     lane = load_lanes(object_value(sites, "anchors"))[player - 1]
 
+    raiders = load_balance(ROOT / "content/balance/game.json").interaction.raiders
+
     def spawned(key: str, kind: int) -> list[tuple[int, int]]:
-        made = purchase_spawns(lane, shop.get(key))
+        made = purchase_spawns(lane, shop.get(key), raiders)
         return sorted((s.x10 // 10, s.y10 // 10) for s in made if s.unit == kind)
 
     def points(key: str, count: int | None = None) -> list[tuple[int, int]]:
@@ -383,8 +388,13 @@ def test_purchases_place_units_at_their_lane_sites(game_build: GameBuild, player
     assert spawned("relics", MONK) == points("monks")
     assert spawned("trade_carts", 128) == points("carts")
     assert spawned("trade_cogs", 17) == points("cogs")
-    assert all(s.gaia == (s.unit == RELIC) for s in purchase_spawns(lane, shop.get("relics")))
-    [castle] = purchase_spawns(lane, shop.get("castle"))
+    assert spawned("land_raider", raiders.land.unit_id) == points("raiders.land", 1)
+    assert spawned("naval_raider", raiders.naval.unit_id) == points("raiders.naval", 1)
+    assert purchase_spawns(lane, shop.get("siege"), raiders) == ()
+    assert all(
+        s.gaia == (s.unit == RELIC) for s in purchase_spawns(lane, shop.get("relics"), raiders)
+    )
+    [castle] = purchase_spawns(lane, shop.get("castle"), raiders)
     assert castle.unit == CASTLE
     assert (castle.x10, castle.y10) == tuple(
         10 * int(v) for v in sites[f"lane.p{player}.castle"]["point"]
@@ -485,8 +495,12 @@ def test_creation_tiles_hold_no_placed_objects(game_build: GameBuild, player: in
     ]
     shop = load_shop(ROOT / "content/balance/shop.json", sites, families)
     lane = load_lanes(object_value(sites, "anchors"))[player - 1]
-    tiles = creation_tiles(lane, shop)
+    balance = load_balance(ROOT / "content/balance/game.json")
+    tiles = creation_tiles(lane, shop, balance.interaction)
     assert lane.sites.king_spawn in tiles and len(tiles) >= 18
+    # Trebuchets arrive on this lane's islets for whoever holds the siege.
+    assert set(lane.sites.siege[: balance.interaction.siege.trebuchets_per_rival]) <= tiles
+    assert {spawn.tiles[0] for spawn in lane.sites.raiders.values()} <= tiles
     standing = [
         (u["unit_const"], math.floor(u["x"]), math.floor(u["y"]))
         for u in snapshot(game_build)["units"]
@@ -529,3 +543,9 @@ def test_objectives_show_the_wave_countdown_and_every_lane(game_build: GameBuild
         assert lane["display_as_objective"]
         lives = variables[f"lane.p{player}.lives"]
         assert f"<Variable {lives}>/{balance()['lives']}" in lane["short_description"]
+    # Shown from the start and never fired: they only display their variables.
+    for shown in [status] + [triggers[f"lane.p{p}.status"] for p in PLAYERS]:
+        assert shown["enabled"] and shown["display_on_screen"] and not shown["effects"]
+        assert [(c["type"], c["attributes"]["quantity"]) for c in shown["conditions"]] == [
+            ("variable_value", -1)
+        ]

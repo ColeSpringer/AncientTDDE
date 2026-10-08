@@ -60,6 +60,23 @@ string ancientPlayer(int player = 1) {
     return ("P" + ancientText(player));
 }
 
+// The whole part of a non-negative attribute, built bit by bit to stay an integer.
+int ancientWhole(float value = 0.0) {
+    int whole = 0;
+    int step = 1048576;
+    while (step > 0) {
+        if (whole + step <= value) whole = whole + step;
+        step = step / 2;
+    }
+    return (whole);
+}
+
+// Kills of the enemy's units alone: rival traders, raiders and siege a lane kills count for
+// nothing.
+int ancientWaveKills(int player = 1) {
+    return (ancientWhole(xsPlayerAttribute(8, cAttributeKillsByPlayer1 + player - 1)));
+}
+
 string ancientCount(int count = 0, string single = "", string plural = "") {
     if (count == 1) return ("1 " + single);
     return (ancientText(count) + " " + plural);
@@ -113,14 +130,18 @@ string ancientTowerAccess(int player = 1) {
     return (text);
 }
 
+// The first human lane chooses the run options. Solo runs play the lobby's difficulty;
+// competitive games play one fixed level and start with PvP on.
 void ancientInitialize() {
     int participants = 0;
+    int chooser = 0;
     for (player = 1; <= 7) {
         if (xsGetPlayerInGame(player) && (xsGetPlayerType(player) == cPlayerTypeHuman)) {
             laneSet(player, fActive, 1);
             laneSet(player, fLives, cLives);
             ancientShowLives(player);
             participants = participants + 1;
+            if (chooser == 0) chooser = player;
         } else {
             laneSet(player, fCleanup, 1);
         }
@@ -132,7 +153,266 @@ void ancientInitialize() {
     xsSetTriggerVariable(vCountdown, cSetup + cPreparation);
     xsSetTriggerVariable(vDisplayWave, 1);
     xsSetTriggerVariable(vWave, -1);
+    xsSetTriggerVariable(vChooser, chooser);
+    xsSetTriggerVariable(vMode, cModeStandard);
+    int level = cCompetitiveLevel;
+    if (participants == 1) {
+        int lobby = xsGetDifficulty();
+        if ((lobby >= -1) && (lobby <= 4)) level = lobbyLevel(lobby + 1);
+    }
+    xsSetTriggerVariable(vDifficulty, level);
+    if (participants > 1) xsSetTriggerVariable(vPvp, 1);
     xsChatData("Ancient TD: human defense lanes = %d", participants);
+    if (participants == 0) return;
+    xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
+    if (participants == 1) {
+        xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop before the first wave.");
+    } else {
+        xsChatData(ancientPlayer(chooser) + ": PvP is on; select PvP off below the shop before the first wave to play without raiders and siege.");
+    }
+}
+
+// The schedule position whose enemies and timing a wave uses: endless waves repeat the
+// templates in turn.
+int ancientTemplate(int wave = 0) {
+    if (wave < cWaveCount) return (wave);
+    return (endlessTemplate((wave - cWaveCount) % cEndlessTemplates));
+}
+
+// Endless enemies grow each time the templates come round again, up to the last level.
+int ancientEndlessLevel(int endless = 0) {
+    int level = endless / cEndlessTemplates + 1;
+    if (level > cEndlessLevels) level = cEndlessLevels;
+    return (level);
+}
+
+// Every endless wave adds pierce armor, until the next step would pass the limit.
+int ancientEndlessArmor(int endless = 0) {
+    if (cArmorStep <= 0) return (0);
+    int steps = endless + 1;
+    if (steps > cArmorLimit / cArmorStep) steps = cArmorLimit / cArmorStep;
+    return (steps * cArmorStep);
+}
+
+string ancientWaveText(int wave = 0) {
+    int pattern = ancientTemplate(wave);
+    int level = xsTriggerVariable(vDifficulty);
+    int hitpoints = waveHitPoints(level * cWaveCount + wave);
+    string armor = "";
+    if (wave >= cWaveCount) {
+        int endless = wave - cWaveCount;
+        int position = endless % cEndlessTemplates;
+        hitpoints = endlessHitPoints((level * cEndlessTemplates + position) * cEndlessLevels + ancientEndlessLevel(endless) - 1);
+        armor = ", +" + ancientText(ancientEndlessArmor(endless)) + " pierce armor";
+    }
+    string text = ancientText(waveEnemies(pattern)) + " " + waveKey(pattern) + ", " + ancientText(hitpoints) + " HP each" + armor;
+    if (waveBoss(pattern) == 1) text = text + " (boss)";
+    return (text);
+}
+
+// Native triggers set the endless enemies' hit points for a new level and add each armor step,
+// clearing the requests; the wave spawns once they have.
+void ancientConfigureEndless(int wave = 0) {
+    int endless = wave - cWaveCount;
+    int level = ancientEndlessLevel(endless);
+    if (level > xsTriggerVariable(vEndlessLevel)) {
+        xsSetTriggerVariable(vEndlessLevel, level);
+        xsSetTriggerVariable(vEndlessRequest, level);
+    }
+    int armor = xsTriggerVariable(vArmor);
+    int target = ancientEndlessArmor(endless);
+    while (armor < target) {
+        armor = armor + cArmorStep;
+        xsSetTriggerVariable(vArmorRequest, xsTriggerVariable(vArmorRequest) + 1);
+    }
+    xsSetTriggerVariable(vArmor, armor);
+    xsSetTriggerVariable(vConfigured, ancientTemplate(wave) + 1);
+}
+
+// The options become fixed when the first wave starts or the first practice control is used.
+void ancientLock() {
+    if (xsTriggerVariable(vLocked) == 1) return;
+    xsSetTriggerVariable(vLocked, 1);
+    if (xsTriggerVariable(vParticipants) > 1) {
+        if (xsTriggerVariable(vPvp) == 1) xsChatData("PvP is on: raiders and the siege power-up are for sale.");
+        else xsChatData("PvP is off: no raiders or siege in this game.");
+    } else {
+        xsChatData(modeName(xsTriggerVariable(vMode)) + " run on " + difficultyName(xsTriggerVariable(vDifficulty)) + ".");
+    }
+}
+
+void ancientChoose(int player = 1, int code = 0) {
+    if (player != xsTriggerVariable(vChooser)) {
+        ancientMessage(player, cMessageChooserOnly);
+        return;
+    }
+    if (xsTriggerVariable(vLocked) == 1) {
+        ancientMessage(player, cMessageOptionsFixed);
+        return;
+    }
+    bool solo = (xsTriggerVariable(vParticipants) == 1);
+    if (code <= cControlPractice) {
+        if (solo == false) {
+            ancientMessage(player, cMessageSoloModes);
+            return;
+        }
+        int mode = code - cControlStandard;
+        if (mode == xsTriggerVariable(vMode)) return;
+        xsSetTriggerVariable(vMode, mode);
+        xsChatData(ancientPlayer(player) + " chose " + modeName(mode) + ": " + modeText(mode) + ".");
+        return;
+    }
+    if (solo) {
+        ancientMessage(player, cMessageNeedsRivals);
+        return;
+    }
+    int pvp = 0;
+    if (code == cControlPvpOn) pvp = 1;
+    if (pvp == xsTriggerVariable(vPvp)) return;
+    xsSetTriggerVariable(vPvp, pvp);
+    if (pvp == 1) xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
+    else xsChatData(ancientPlayer(player) + " switched PvP off: no raiders or siege in this game.");
+}
+
+void ancientPractice(int player = 1, int code = 0) {
+    if (xsTriggerVariable(vMode) != cModePractice) {
+        ancientMessage(player, cMessagePracticeOnly);
+        return;
+    }
+    string who = ancientPlayer(player);
+    if (code == cControlNextWave) {
+        if (xsTriggerVariable(vPhase) != sPreparation) {
+            ancientMessage(player, cMessagePracticeWave);
+            return;
+        }
+        xsSetTriggerVariable(vRemaining, 1);
+        xsChatData("Practice: " + who + " started the next wave.");
+    } else if (code == cControlKings) {
+        laneSet(player, fKings, laneValue(player, fKings) + cPracticeKings);
+        xsChatData("Practice: " + who + " received " + ancientCount(cPracticeKings, "King", "Kings") + ".");
+    } else if (code == cControlResources) {
+        xsSetPlayerAttribute(player, cAttributeFood, xsPlayerAttribute(player, cAttributeFood) + cPracticeResources);
+        xsSetPlayerAttribute(player, cAttributeWood, xsPlayerAttribute(player, cAttributeWood) + cPracticeResources);
+        xsSetPlayerAttribute(player, cAttributeStone, xsPlayerAttribute(player, cAttributeStone) + cPracticeResources);
+        xsSetPlayerAttribute(player, cAttributeGold, xsPlayerAttribute(player, cAttributeGold) + cPracticeResources);
+        xsChatData("Practice: " + who + " received " + ancientText(cPracticeResources) + " of each resource.");
+    } else {
+        laneSet(player, fLives, cLives);
+        ancientShowLives(player);
+        xsChatData("Practice: " + who + " has all lives back.");
+    }
+    xsSetTriggerVariable(vAssists, xsTriggerVariable(vAssists) + 1);
+    if (xsTriggerVariable(vLocked) == 0) {
+        xsChatData("Practice help used: this run stays an assisted Practice run.");
+        ancientLock();
+    }
+}
+
+// The lane's native triggers record each new selection of a control; it acts once and is
+// cleared here, so holding it, or reloading while it is held, does nothing more.
+void ancientControl(int player = 1) {
+    int code = laneValue(player, fControl);
+    if (code <= 0) return;
+    laneSet(player, fControl, 0);
+    if (code <= cRunOptions) ancientChoose(player, code);
+    else ancientPractice(player, code);
+}
+
+void ancientResult() {
+    int participants = xsTriggerVariable(vParticipants);
+    string text = "Result: ";
+    if (participants > 1) text = text + "Competitive game";
+    else text = text + modeName(xsTriggerVariable(vMode)) + " run";
+    int cleared = xsTriggerVariable(vCleared);
+    text = text + " on " + difficultyName(xsTriggerVariable(vDifficulty)) + ": " + ancientCount(cleared, "wave", "waves") + " cleared";
+    if (cleared > cWaveCount) text = text + " (" + ancientText(cleared - cWaveCount) + " endless)";
+    if (participants == 1) {
+        int player = xsTriggerVariable(vChooser);
+        int lives = laneValue(player, fLives);
+        if (lives < 0) lives = 0;
+        int kills = ancientWaveKills(player);
+        text = text + ", " + ancientCount(lives, "life", "lives") + " left, " + ancientCount(kills, "kill", "kills");
+    }
+    text = text + ", " + ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
+    int assists = xsTriggerVariable(vAssists);
+    if (assists > 0) text = text + ", assisted by " + ancientCount(assists, "practice action", "practice actions");
+    xsChatData(text + ".");
+}
+
+// Only one player holds the siege: a short warning, then trebuchets on every surviving rival's
+// islets for a while. A claim made earlier in the same second keeps the holder.
+void ancientClaimSiege(int player = 1, int price = 0) {
+    xsSetTriggerVariable(vSiegeOwner, player);
+    xsSetTriggerVariable(vSiegePhase, 1);
+    xsSetTriggerVariable(vSiegeLeft, cSiegeWarning);
+    xsSetTriggerVariable(vSiegeDisplay, 1);
+    xsChatData(ancientPlayer(player) + " bought the siege power-up for " + ancientCount(price, "King", "Kings") + ": trebuchets reach every rival in " + ancientText(cSiegeWarning) + " game seconds.");
+}
+
+int ancientPlaceSiege(int owner = 1) {
+    int made = 0;
+    for (rival = 1; <= 7) {
+        if ((rival != owner) && (laneValue(rival, fActive) == 1)) {
+            for (spot = 0; < cSiegeTrebuchets) {
+                int key = rival * cSiegeSlots + spot;
+                vector place = xsVectorSet(0.1 * siegeX10(key), 0.1 * siegeY10(key), 0.0);
+                if (xsCreateUnit(cTrebuchet, owner, place, false, true, true) >= 0) made = made + 1;
+            }
+        }
+    }
+    return (made);
+}
+
+// Expiry or the holder's elimination removes every trebuchet, packed or not, and starts the
+// shared cooldown and the holder's longer one.
+void ancientEndSiege(bool eliminated = false) {
+    int owner = xsTriggerVariable(vSiegeOwner);
+    if (owner == 0) return;
+    for (form = 0; < 2) {
+        int kind = cTrebuchet;
+        if (form == 1) kind = cPackedTrebuchet;
+        ancientUnitArray = xsGetPlayerUnitIds(owner, kind, ancientUnitArray);
+        for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
+            xsRemoveUnit(xsArrayGetInt(ancientUnitArray, index));
+        }
+    }
+    xsSetTriggerVariable(vSiegeOwner, 0);
+    xsSetTriggerVariable(vSiegePhase, 0);
+    xsSetTriggerVariable(vSiegeLeft, 0);
+    xsSetTriggerVariable(vSiegeCooldown, cSiegeSharedCooldown);
+    laneSet(owner, fSiegeCooldown, cSiegeBuyerCooldown);
+    xsSetTriggerVariable(vSiegeDisplay, 3);
+    string ended = ancientPlayer(owner) + "'s siege has ended";
+    if (eliminated) ended = ended + " with the lane";
+    xsChatData(ended + ". It can be bought again in " + ancientText(cSiegeSharedCooldown) + " game seconds, by " + ancientPlayer(owner) + " in " + ancientText(cSiegeBuyerCooldown) + ".");
+}
+
+void ancientSiege() {
+    int cooldown = xsTriggerVariable(vSiegeCooldown);
+    if (cooldown > 0) {
+        xsSetTriggerVariable(vSiegeCooldown, cooldown - 1);
+        if (cooldown == 1) xsChatData("The siege power-up can be bought again.");
+    }
+    for (buyer = 1; <= 7) {
+        int wait = laneValue(buyer, fSiegeCooldown);
+        if (wait > 0) laneSet(buyer, fSiegeCooldown, wait - 1);
+    }
+    int owner = xsTriggerVariable(vSiegeOwner);
+    if (owner == 0) return;
+    int left = xsTriggerVariable(vSiegeLeft) - 1;
+    if (left > 0) {
+        xsSetTriggerVariable(vSiegeLeft, left);
+        return;
+    }
+    if (xsTriggerVariable(vSiegePhase) == 1) {
+        int made = ancientPlaceSiege(owner);
+        xsSetTriggerVariable(vSiegePhase, 2);
+        xsSetTriggerVariable(vSiegeLeft, cSiegeActive);
+        xsSetTriggerVariable(vSiegeDisplay, 2);
+        xsChatData(ancientPlayer(owner) + "'s siege is active: " + ancientCount(made, "trebuchet", "trebuchets") + " for " + ancientText(cSiegeActive) + " game seconds.");
+        return;
+    }
+    ancientEndSiege(false);
 }
 
 // Collect every lane's losses before changing state or selecting a winner.
@@ -183,6 +463,7 @@ int ancientCollect() {
     for (player = 1; <= 7) {
         if (laneValue(player, fActive) == 1) {
             if ((laneValue(player, fLives) <= 0) || (xsGetPlayerInGame(player) == false)) {
+                if (xsTriggerVariable(vSiegeOwner) == player) ancientEndSiege(true);
                 laneSet(player, fActive, 0);
                 laneSet(player, fLives, 0);
                 laneSet(player, fSpawn, 0);
@@ -198,6 +479,16 @@ int ancientCollect() {
         }
     }
     xsSetTriggerVariable(vSurvivors, survivors);
+    // The chooser passes to the next lane still playing; a fallen solo lane stays the chooser,
+    // so the result reads its own lives and kills.
+    int chooser = xsTriggerVariable(vChooser);
+    if ((chooser > 0) && (laneValue(chooser, fActive) == 0)) {
+        int heir = 0;
+        for (candidate = 1; <= 7) {
+            if ((heir == 0) && (laneValue(candidate, fActive) == 1)) heir = candidate;
+        }
+        if (heir > 0) xsSetTriggerVariable(vChooser, heir);
+    }
     return (losses);
 }
 
@@ -218,23 +509,92 @@ void ancientFinish(bool victory = false) {
     for (slot = 1; <= 7) {
         laneSet(slot, fSpawn, 0);
     }
+    ancientResult();
+}
+
+// Waves after the finale: endless ones in a solo Endless run, sudden death in competition.
+string ancientExtraWave(bool capital = false) {
+    bool sudden = (xsTriggerVariable(vStage) == cStageSudden);
+    if (sudden && capital) return ("Sudden death wave");
+    if (sudden) return ("sudden death wave");
+    if (capital) return ("Endless wave");
+    return ("endless wave");
 }
 
 void ancientStartWave() {
     int wave = xsTriggerVariable(vWave) + 1;
+    int pattern = ancientTemplate(wave);
     xsSetTriggerVariable(vWave, wave);
     xsSetTriggerVariable(vDisplayWave, wave + 1);
-    xsSetTriggerVariable(vCountdown, waveDuration(wave));
+    xsSetTriggerVariable(vCountdown, waveDuration(pattern));
     xsSetTriggerVariable(vElapsed, 0);
     xsSetTriggerVariable(vBatches, 0);
     xsSetTriggerVariable(vSpawnClock, 0);
-    if (waveBoss(wave) == 1) xsSetTriggerVariable(vPhase, sBoss);
+    if (waveBoss(pattern) == 1) xsSetTriggerVariable(vPhase, sBoss);
     else xsSetTriggerVariable(vPhase, sWave);
-    string number = ancientText(wave + 1) + " of " + ancientText(cWaveCount);
-    xsChatData("Wave " + number + ": " + waveName(wave) + ".");
+    // The countdown to this wave ends now, even when practice started it early.
+    xsSetTriggerVariable(vWaveDisplay, 2);
+    if (wave == 0) ancientLock();
+    if (wave < cWaveCount) {
+        string number = ancientText(wave + 1) + " of " + ancientText(cWaveCount);
+        xsChatData("Wave " + number + ": " + ancientWaveText(wave) + ".");
+        return;
+    }
+    ancientConfigureEndless(wave);
+    string extra = ancientExtraWave(true) + " " + ancientText(wave - cWaveCount + 1) + " (wave " + ancientText(wave + 1) + ")";
+    xsChatData(extra + ": " + ancientWaveText(wave) + ".");
+}
+
+// After the finale, a solo Endless run and competitors who all survived it play on.
+void ancientNextWave(int wave = 0) {
+    int stage = xsTriggerVariable(vStage);
+    if ((wave + 1 >= cWaveCount) && (stage == cStageScheduled)) {
+        if (xsTriggerVariable(vParticipants) > 1) {
+            stage = cStageSudden;
+            xsSetTriggerVariable(vDrain, cSuddenInterval);
+            xsChatData("Sudden death: the waves keep growing, and every survivor loses lives every " + ancientText(cSuddenInterval) + " game seconds, more each time.");
+        } else if (xsTriggerVariable(vMode) == cModeEndless) {
+            stage = cStageEndless;
+            xsChatData("Endless: the waves keep coming and growing until your lane falls.");
+        } else {
+            ancientFinish(true);
+            return;
+        }
+        xsSetTriggerVariable(vStage, stage);
+    }
+    xsSetTriggerVariable(vPhase, sPreparation);
+    xsSetTriggerVariable(vRemaining, cIntermission);
+    xsSetTriggerVariable(vCountdown, cIntermission);
+    xsSetTriggerVariable(vDisplayWave, wave + 2);
+    string next = "wave " + ancientText(wave + 2);
+    if (stage != cStageScheduled) {
+        xsSetTriggerVariable(vWaveDisplay, 1);
+        next = ancientExtraWave(false) + " " + ancientText(wave + 2 - cWaveCount) + " (" + next + ")";
+    }
+    xsChatData("Next: " + next + ", " + ancientWaveText(wave + 1) + ", in " + ancientText(cIntermission) + " game seconds.");
+}
+
+// Sudden death costs every survivor lives at each interval, more each time.
+void ancientDrain() {
+    int left = xsTriggerVariable(vDrain) - 1;
+    if (left <= 0) {
+        int damage = cSuddenDamage + xsTriggerVariable(vSuddenRound);
+        if (damage > 10) damage = 10;
+        for (survivor = 1; <= 7) {
+            if (laneValue(survivor, fActive) == 1) {
+                laneSet(survivor, fLives, laneValue(survivor, fLives) - damage);
+                ancientShowLives(survivor);
+            }
+        }
+        xsSetTriggerVariable(vSuddenRound, xsTriggerVariable(vSuddenRound) + 1);
+        xsChatData("Sudden death: every survivor loses " + ancientCount(damage, "life", "lives") + ".");
+        left = cSuddenInterval;
+    }
+    xsSetTriggerVariable(vDrain, left);
 }
 
 void ancientWaveCleared(int wave = 0) {
+    xsSetTriggerVariable(vCleared, xsTriggerVariable(vCleared) + 1);
     if (cWaveKings <= 0) return;
     for (payee = 1; <= 7) {
         if (laneValue(payee, fActive) == 1) laneSet(payee, fKings, laneValue(payee, fKings) + cWaveKings);
@@ -265,6 +625,36 @@ bool ancientRelicsWaiting(int player = 1) {
     return (false);
 }
 
+// Raiders and siege are for sale only in a competitive game with PvP on, once it has started.
+bool ancientInteraction() {
+    return ((xsTriggerVariable(vPvp) == 1) && (xsTriggerVariable(vLocked) == 1) && (xsTriggerVariable(vParticipants) > 1));
+}
+
+int ancientRivals(int player = 1) {
+    int rivals = 0;
+    for (rival = 1; <= 7) {
+        if ((rival != player) && (laneValue(rival, fActive) == 1)) rivals = rivals + 1;
+    }
+    return (rivals);
+}
+
+// Living raiders of a medium, upgraded forms included, against the player's cap.
+bool ancientRaidersFull(int player = 1, int medium = 1) {
+    int living = 0;
+    for (member = 0; < cRaiderLineSize) {
+        int unit = raiderLine(medium * cRaiderLineSize + member);
+        if (unit > 0) living = living + xsGetObjectCount(player, unit);
+    }
+    int cap = raiderCap(medium) + raiderBonus(medium * cCivilizationSlots + xsGetPlayerCivilization(player));
+    return (living >= cap);
+}
+
+// The siege costs more for every surviving rival it reaches.
+int ancientPrice(int player = 1, int purchase = 0) {
+    if (purchase == cSiegePurchase) return (shopPrice(purchase) + cSiegeRivalKings * ancientRivals(player));
+    return (shopPrice(purchase));
+}
+
 // The message explaining why a purchase cannot be made now, or 0 when it can.
 int ancientRefusal(int player = 1, int purchase = 0) {
     if (ancientOwns(player, shopMask(purchase))) return (cMessageOwned);
@@ -272,13 +662,25 @@ int ancientRefusal(int player = 1, int purchase = 0) {
     if ((needed > 0) && (ancientOwns(player, shopMask(needed)) == false)) return (cMessageRequires);
     if ((purchase == cRelicsPurchase) && ancientRelicsWaiting(player)) return (cMessageRelics);
     if ((shopTech(purchase) > 0) && (xsGetTechState(shopTech(purchase), player) == cTechStateDisabled)) return (cMessageCivilization);
+    int medium = shopRaider(purchase);
+    if ((medium == 0) && (purchase != cSiegePurchase)) return (0);
+    if (ancientInteraction() == false) return (cMessagePvpOff);
+    if (ancientRivals(player) == 0) return (cMessageNoRival);
+    if (medium > 0) {
+        if (ancientRaidersFull(player, medium)) return (cMessageRaiderCap);
+        return (0);
+    }
+    int holder = xsTriggerVariable(vSiegeOwner);
+    if (holder == player) return (cMessageSiegeYours);
+    if (holder > 0) return (cMessageSiegeHeld);
+    if ((xsTriggerVariable(vSiegeCooldown) > 0) || (laneValue(player, fSiegeCooldown) > 0)) return (cMessageSiegeCooldown);
     return (0);
 }
 
 // Explain a refusal once, again after a pause, and at once when the refusal changes.
 void ancientNotice(int player = 1, int purchase = 0, int code = 0) {
     if (ancientLastNotice < 0) ancientLastNotice = xsArrayCreateInt(8, 0, "ancientLastNotice");
-    int key = purchase * 16 + code;
+    int key = purchase * 100 + code;
     if ((laneValue(player, fNotice) > 0) && (xsArrayGetInt(ancientLastNotice, player) == key)) return;
     if (laneValue(player, fMessage) != 0) return;
     laneSet(player, fMessage, code);
@@ -346,7 +748,8 @@ void ancientSampleKings(int player = 1) {
     xsArraySetInt(ancientKingSampled, player, kings);
 }
 
-// Create every unit a purchase places, or none: a blocked spot keeps the Kings.
+// Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
+// shared trade areas are not checked, so no rival unit can hold a purchase back.
 bool ancientSpawn(int player = 1, int purchase = 0) {
     int key = player * cSpawnStride + purchase;
     int first = spawnStart(key);
@@ -358,7 +761,7 @@ bool ancientSpawn(int player = 1, int purchase = 0) {
             int owner = player;
             if (spawnGaia(first + entry) == 1) owner = 0;
             vector spot = xsVectorSet(0.1 * spawnX10(first + entry), 0.1 * spawnY10(first + entry), 0.0);
-            int unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, true);
+            int unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, spawnShared(first + entry) == 0);
             if (unit >= 0) {
                 xsArraySetInt(ancientSpawnArray, made, unit);
                 made = made + 1;
@@ -380,7 +783,7 @@ void ancientShop(int player = 1) {
     int refused = 0;
     int reason = 0;
     for (candidate = 1; <= cShopCount) {
-        if (xsArrayGetInt(ancientPadCounts, candidate) >= shopPrice(candidate)) {
+        if (xsArrayGetInt(ancientPadCounts, candidate) >= ancientPrice(player, candidate)) {
             int code = ancientRefusal(player, candidate);
             if (code == 0) {
                 if (ready == 0) ready = candidate;
@@ -397,24 +800,27 @@ void ancientShop(int player = 1) {
     }
     if (reason > 0) ancientNotice(player, refused, reason);
     if (ready == 0) return;
+    int price = ancientPrice(player, ready);
     int paid = 0;
     int kings = xsArrayGetSize(ancientUnitArray);
     if (kings > cKingSlots) kings = cKingSlots;
     for (payment = 0; < kings) {
-        if ((paid < shopPrice(ready)) && (xsArrayGetInt(ancientKingPads, payment) == ready)) {
+        if ((paid < price) && (xsArrayGetInt(ancientKingPads, payment) == ready)) {
             xsRemoveUnit(xsArrayGetInt(ancientUnitArray, payment));
             paid = paid + 1;
         }
     }
     if (shopMask(ready) > 0) laneSet(player, fOwned, laneValue(player, fOwned) + shopMask(ready));
+    if (ready == cSiegePurchase) ancientClaimSiege(player, price);
     laneSet(player, fPurchase, ready);
 }
 
-// Owed Kings appear one per second at the lane's stall once it is clear.
+// Owed Kings appear one per second at the lane's stall. Every lane's Kings walk the shop, so
+// the stall is not checked: no King standing there can hold new ones back.
 void ancientKings(int player = 1) {
     if (laneValue(player, fKings) <= 0) return;
     vector stall = xsVectorSet(0.1 * laneStallX10(player), 0.1 * laneStallY10(player), 0.0);
-    if (xsCreateUnit(cKing, player, stall, false, true, true) >= 0) laneSet(player, fKings, laneValue(player, fKings) - 1);
+    if (xsCreateUnit(cKing, player, stall, false, true, false) >= 0) laneSet(player, fKings, laneValue(player, fKings) - 1);
 }
 
 // A villager on a transfer pad reappears, unchanged, in the area the pad leads to once there is room.
@@ -442,6 +848,24 @@ void ancientTransfers(int player = 1) {
 }
 
 // Age purchases bring their tower upgrade only to civilizations that have it.
+// Towers belong in the build rows. One in the resource area could reach the trade channel
+// beside it, so it is removed.
+void ancientEconomyTowers(int player = 1) {
+    ancientUnitArray = xsGetPlayerUnitIds(player, cTowerClass, ancientUnitArray);
+    bool removed = false;
+    for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
+        int tower = xsArrayGetInt(ancientUnitArray, index);
+        vector position = xsGetUnitPosition(tower);
+        float x = xsVectorGetX(position);
+        float y = xsVectorGetY(position);
+        if ((x >= laneEconomyX1(player)) && (x < laneEconomyX2(player) + 1) && (y >= laneEconomyY1(player)) && (y < laneEconomyY2(player) + 1)) {
+            xsRemoveUnit(tower);
+            removed = true;
+        }
+    }
+    if (removed) ancientMessage(player, cMessageEconomyTower);
+}
+
 void ancientUpgrades(int player = 1) {
     for (upgrade = 1; <= cShopCount) {
         int tech = shopUpgrade(upgrade);
@@ -454,9 +878,10 @@ void ancientUpgrades(int player = 1) {
 
 void ancientConvert(int player = 1) {
     float gold = xsPlayerAttribute(player, cAttributeGold);
+    int price = kingGold(xsTriggerVariable(vDifficulty));
     int kings = 0;
-    while (gold >= cKingGold) {
-        gold = gold - cKingGold;
+    while (gold >= price) {
+        gold = gold - price;
         kings = kings + 1;
     }
     if (kings == 0) return;
@@ -466,7 +891,7 @@ void ancientConvert(int player = 1) {
 }
 
 void ancientKillRewards(int player = 1) {
-    float kills = xsPlayerAttribute(player, cAttributeKills);
+    int kills = ancientWaveKills(player);
     int paid = laneValue(player, fKills);
     int rewards = 0;
     while ((paid + rewards + 1) * cKillsPerReward <= kills) {
@@ -512,17 +937,28 @@ void ancientRepair(int player = 1, int clock = 0) {
     ancientShowLives(player);
 }
 
+// The lane that takes this turn in a second. The order rotates and reverses every other
+// second, so over fourteen seconds each lane goes first against every other seven times and
+// no slot wins contested siege claims more often.
+int ancientTurn(int clock = 0, int turn = 0) {
+    if (clock % 2 == 0) return ((clock + turn) % 7 + 1);
+    return (7 - (clock + turn) % 7);
+}
+
 void ancientEconomy(int state = 0) {
     int clock = xsTriggerVariable(vEconomy);
     if (state != sSetup) {
         clock = clock + 1;
         xsSetTriggerVariable(vEconomy, clock);
     }
-    for (player = 1; <= 7) {
+    for (turn = 0; < 7) {
+        int player = ancientTurn(clock, turn);
         if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 1)) {
+            ancientControl(player);
             ancientShop(player);
             ancientUpgrades(player);
             ancientTransfers(player);
+            ancientEconomyTowers(player);
             ancientConvert(player);
             ancientKillRewards(player);
             if (state != sSetup) {
@@ -561,9 +997,13 @@ void ancientTick() {
         ancientFinish(false);
         return;
     }
+    // The siege clock runs before the shop, so a claim made this second keeps its full warning.
+    ancientSiege();
     ancientEconomy(state);
+    // Losses resolve as one batch on the next clock event.
+    if (xsTriggerVariable(vStage) == cStageSudden) ancientDrain();
     // Native requests are acknowledged once. Waiting preserves a common wave schedule.
-    bool ready = true;
+    bool ready = (xsTriggerVariable(vEndlessRequest) == 0) && (xsTriggerVariable(vArmorRequest) == 0);
     for (player = 1; <= 7) {
         if ((laneValue(player, fActive) == 1) &&
             ((laneValue(player, fInitialized) == 0) || (laneValue(player, fSpawn) > 0))) ready = false;
@@ -587,26 +1027,8 @@ void ancientTick() {
         }
         return;
     }
-    if (state == sSuddenDeath) {
-        int suddenRemaining = xsTriggerVariable(vRemaining) - 1;
-        if (suddenRemaining <= 0) {
-            int damage = cSuddenDamage + xsTriggerVariable(vSuddenRound);
-            if (damage > 10) damage = 10;
-            for (survivor = 1; <= 7) {
-                if (laneValue(survivor, fActive) == 1) {
-                    laneSet(survivor, fLives, laneValue(survivor, fLives) - damage);
-                    ancientShowLives(survivor);
-                }
-            }
-            xsSetTriggerVariable(vSuddenRound, xsTriggerVariable(vSuddenRound) + 1);
-            suddenRemaining = cSuddenInterval;
-        }
-        xsSetTriggerVariable(vRemaining, suddenRemaining);
-        xsSetTriggerVariable(vCountdown, suddenRemaining);
-        // Resolve pressure losses as one batch on the next clock event.
-        return;
-    }
     int wave = xsTriggerVariable(vWave);
+    int pattern = ancientTemplate(wave);
     int elapsed = xsTriggerVariable(vElapsed) + 1;
     int batches = xsTriggerVariable(vBatches);
     int cooldown = xsTriggerVariable(vSpawnClock);
@@ -616,36 +1038,24 @@ void ancientTick() {
         if (laneValue(defender, fActive) == 1) {
             int count = laneValue(defender, fCount);
             alive = alive + count;
-            if (count + waveCount(wave) > cEnemyCap) capacity = false;
+            if (count + waveCount(pattern) > cEnemyCap) capacity = false;
         }
     }
-    if ((batches < waveBatches(wave)) && (cooldown <= 0) && capacity) {
+    if ((batches < waveBatches(pattern)) && (cooldown <= 0) && capacity) {
         for (slot = 1; <= 7) {
-            if (laneValue(slot, fActive) == 1) laneSet(slot, fSpawn, wave + 1);
+            if (laneValue(slot, fActive) == 1) laneSet(slot, fSpawn, pattern + 1);
         }
         xsSetTriggerVariable(vBatches, batches + 1);
-        cooldown = waveInterval(wave);
+        cooldown = waveInterval(pattern);
     }
     xsSetTriggerVariable(vSpawnClock, cooldown - 1);
     xsSetTriggerVariable(vElapsed, elapsed);
-    int spawning = waveDuration(wave) - elapsed;
+    int spawning = waveDuration(pattern) - elapsed;
     if (spawning < 0) spawning = 0;
     xsSetTriggerVariable(vCountdown, spawning);
     // The final batch must already have been acknowledged and all enemies resolved.
-    if ((elapsed >= waveDuration(wave)) && (batches == waveBatches(wave)) && (alive == 0)) {
+    if ((elapsed >= waveDuration(pattern)) && (batches == waveBatches(pattern)) && (alive == 0)) {
         ancientWaveCleared(wave);
-        if (wave + 1 < cWaveCount) {
-            xsSetTriggerVariable(vPhase, sPreparation);
-            xsSetTriggerVariable(vRemaining, cIntermission);
-            xsSetTriggerVariable(vCountdown, cIntermission);
-            xsSetTriggerVariable(vDisplayWave, wave + 2);
-            xsChatData("Next: wave " + ancientText(wave + 2) + ", " + waveName(wave + 1) + ", in " + ancientText(cIntermission) + " game seconds.");
-        } else if (xsTriggerVariable(vParticipants) == 1) ancientFinish(true);
-        else {
-            xsSetTriggerVariable(vPhase, sSuddenDeath);
-            xsSetTriggerVariable(vRemaining, cSuddenInterval);
-            xsSetTriggerVariable(vCountdown, cSuddenInterval);
-            xsChatData("Sudden death: all survivors lose increasing lives every %d seconds.", cSuddenInterval);
-        }
+        ancientNextWave(wave);
     }
 }

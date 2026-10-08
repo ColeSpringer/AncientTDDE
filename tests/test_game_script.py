@@ -115,6 +115,26 @@ def test_prelude_declares_message_codes_and_ownership_masks() -> None:
     assert "int shopName" not in text
 
 
+def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
+    balance, _, _ = content()
+    text = prelude()
+    lobby = text.split("int lobbyLevel")[1].split("}")[0]
+    # xsGetDifficulty runs from Extreme (-1) to Easiest (4); the table starts at Extreme.
+    assert [
+        f"if (index == {i}) return ({level});" in lobby
+        for i, level in enumerate([2, 2, 2, 1, 1, 0])
+    ] == [True] * 6
+    gold = text.split("int kingGold")[1].split("}")[0]
+    assert all(f"return ({level.king_gold});" in gold for level in balance.difficulty.levels)
+    assert f"const int cCompetitiveLevel = {balance.difficulty.competitive};" in text
+    hit_points = text.split("int waveHitPoints")[1].split("}")[0]
+    last = 2 * len(balance.waves) + len(balance.waves) - 1
+    assert (
+        f"if (index == {last}) return ({balance.hit_points(len(balance.waves) - 1, 2)});"
+        in hit_points
+    )
+
+
 def test_prelude_holds_no_test_only_names() -> None:
     text = prelude()
     assert "cBuy" not in text and "Tech =" not in text
@@ -162,7 +182,7 @@ def test_prelude_holds_no_test_only_names() -> None:
         "shop_settle",
         "spawn_blocked",
         "transfer",
-        "king_stall_blocked",
+        "king_stall_shared",
         "shop_civ_lacks",
         "age_upgrades",
         "status_display",
@@ -172,6 +192,50 @@ def test_prelude_holds_no_test_only_names() -> None:
         "shop_requires_together",
         "notice_change",
         "transfer_type",
+        "options_default",
+        "options_competitive",
+        "difficulty_hard",
+        "difficulty_unknown",
+        "options_choose",
+        "options_reload_held",
+        "options_chooser_only",
+        "options_solo_only",
+        "options_pvp_solo",
+        "options_chooser_leaves",
+        "options_locked",
+        "practice_controls",
+        "practice_next_wave",
+        "practice_refused",
+        "results_victory",
+        "results_practice",
+        "results_defeat",
+        "sudden_survivor",
+        "endless_continues",
+        "endless_growth",
+        "endless_waits",
+        "endless_result",
+        "resume_endless",
+        "raider_pvp_off",
+        "raider_before_first_wave",
+        "raider_solo",
+        "raider_buy",
+        "raider_cap",
+        "raider_line",
+        "raider_civilization",
+        "siege_price",
+        "siege_exclusive",
+        "siege_timeline",
+        "siege_buyer_waits",
+        "siege_owner_eliminated",
+        "siege_resume",
+        "siege_tie",
+        "turns_fair",
+        "kill_rewards_waves_only",
+        "siege_holder_again",
+        "sudden_labels",
+        "practice_repeat",
+        "shared_arrivals",
+        "economy_towers",
     ],
 )
 def test_shared_engine(engine_runner: Path, case: str) -> None:

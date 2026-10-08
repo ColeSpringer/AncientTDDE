@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "purchases": [
     {"key": "tower_attack_4", "name": "Tower attack +4", "legacy": "Tower Attack +4", "kings": 1, "pad": "shop.tower_attack_4", "display": 18941, "effect": {"kind": "tower_attack", "family": "towers", "amount": 4}},
     {"key": "tower_attack_10", "name": "Tower attack +10", "legacy": "Tower Attack +10", "kings": 2, "pad": "shop.tower_attack_10", "display": 19245, "effect": {"kind": "tower_attack", "family": "towers", "amount": 10}},
@@ -36,6 +36,9 @@
     {"key": "castle", "name": "Castle (+20 population)", "legacy": "Castle", "kings": 3, "once": true, "pad": "shop.castle", "display": 19181, "effect": {"kind": "castle"}},
     {"key": "third_row", "name": "Third row of towers", "legacy": "3rd Row of Towers", "kings": 2, "once": true, "pad": "shop.3rd_row_of_towers", "display": 39329, "effect": {"kind": "expansion", "row": "third"}},
     {"key": "fourth_row", "name": "Fourth row of towers", "legacy": "4th Row of Towers", "kings": 3, "once": true, "requires": "third_row", "pad": "shop.4th_row_of_towers", "display_at": [167.5, 36.5], "effect": {"kind": "expansion", "row": "fourth"}},
-    {"key": "repair", "name": "Repair crew", "legacy": "Repair villie", "kings": 10, "once": true, "pad": "shop.repair_villie", "display": 39733, "effect": {"kind": "repair", "interval": 20, "stone": 50}}
+    {"key": "repair", "name": "Repair crew", "legacy": "Repair villie", "kings": 10, "once": true, "pad": "shop.repair_villie", "display": 39733, "effect": {"kind": "repair", "interval": 20, "stone": 50}},
+    {"key": "land_raider", "name": "Land raider (light cavalry)", "kings": 3, "pad": "shop.land_raider", "display_at": [170.5, 16.5], "effect": {"kind": "raider", "medium": "land"}},
+    {"key": "naval_raider", "name": "Naval raider (fire galley)", "kings": 3, "pad": "shop.naval_raider", "display_at": [170.5, 21.5], "effect": {"kind": "raider", "medium": "naval"}},
+    {"key": "siege", "name": "Siege power-up", "kings": 20, "pad": "shop.siege", "display_at": [170.5, 29.5], "effect": {"kind": "siege", "kings_per_rival": 5}}
   ]
 }

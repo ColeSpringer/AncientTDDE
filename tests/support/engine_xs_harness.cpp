@@ -23,10 +23,13 @@ constexpr int cAttributeWood = 1;
 constexpr int cAttributeStone = 2;
 constexpr int cAttributeGold = 3;
 constexpr int cAttributeKills = 20;
+// Kept by the enemy (player 8): how many of its units each player has killed.
+constexpr int cAttributeKillsByPlayer1 = 326;
 constexpr int cTechStateDisabled = -1;
 constexpr int cTechStateDone = 3;
 constexpr int cHitpoints = 0;
 constexpr int cVillagerClass = 904;
+constexpr int cTowerClass = 952;
 std::array<int, 9> playerTypes{};
 std::array<std::map<int, float>, 9> attributes{};
 std::map<std::pair<int, int>, int> techStates;
@@ -65,7 +68,11 @@ int classOf(int type) {
         case 125: return 18;                              // Monk
         case 128: return 19;                              // Trade Cart
         case 601: return 30;                              // Flag
-        case 79: return 52;                               // Watch Tower
+        case 79: case 234: case 235: case 236: return 52; // Watch Tower, Guard Tower, Keep, Bombard Tower
+        case 546: case 441: return 12;                    // Light Cavalry, Hussar
+        case 1103: case 529: return 22;                   // Fire Galley, Fire Ship
+        case 331: return 51;                              // Packed Trebuchet
+        case 42: return 54;                               // Trebuchet
         case 434: return 59;                              // King
     }
     std::cerr << "No class recorded for object " << type << '\n';
@@ -122,6 +129,17 @@ float xsVectorGetX(vector pos) { return pos[0]; }
 float xsVectorGetY(vector pos) { return pos[1]; }
 bool xsRemoveUnit(int id) { return units.erase(id) == 1; }
 void xsChatData(string message, int = -1) { chat.push_back(message); }
+// The lobby's difficulty setting, as xsGetDifficulty reports it: Moderate unless a case says otherwise.
+int lobbyDifficulty = 2;
+int xsGetDifficulty() { return lobbyDifficulty; }
+// Each player's civilization, as DE numbers them: Britons unless a case says otherwise.
+std::array<int, 9> civilizations{1, 1, 1, 1, 1, 1, 1, 1, 1};
+int xsGetPlayerCivilization(int player) { return civilizations.at(player); }
+int xsGetObjectCount(int player, int type) {
+    int count = 0;
+    for (auto &[id, u] : units) if (u.owner == player && u.type == type && u.hp > 0) ++count;
+    return count;
+}
 // EMBEDDED_XS
 void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n'; std::exit(1); } }
 int lane(int player, int field) { return xsTriggerVariable(laneVariable(player, field)); }
@@ -142,8 +160,22 @@ void resetXsBuffers() {
     ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientLastNotice=-1;
     ancientSpawnArray=-1; ancientVillagerArray=-1;
 }
+// Endless growth levels and armor steps the native triggers applied, and countdowns shown.
+std::vector<int> endlessLevels;
+int armorSteps = 0, waveTimers = 0, timerClears = 0;
 // Native triggers acknowledge one request per lane each pass, as the generated ones do.
 void nativeEffects() {
+    if (xsTriggerVariable(vEndlessRequest) > 0) {
+        endlessLevels.push_back(xsTriggerVariable(vEndlessRequest));
+        xsSetTriggerVariable(vEndlessRequest, 0);
+    }
+    if (xsTriggerVariable(vArmorRequest) > 0) {
+        ++armorSteps;
+        xsSetTriggerVariable(vArmorRequest, xsTriggerVariable(vArmorRequest) - 1);
+    }
+    if (xsTriggerVariable(vWaveDisplay) == 1) ++waveTimers;
+    if (xsTriggerVariable(vWaveDisplay) == 2) ++timerClears;
+    xsSetTriggerVariable(vWaveDisplay, 0);
     for (int p=1; p<=7; ++p) {
         if (lane(p, fActive) && !lane(p, fInitialized)) { ++grants[p]; setLane(p, fInitialized, 1); }
         if (lane(p, fCleanup)) {
@@ -157,7 +189,7 @@ void nativeEffects() {
             int key = p * cSpawnStride + purchase;
             for (int entry = spawnStart(key); entry < spawnStart(key) + spawnCount(key); ++entry)
                 for (auto &[id, u] : units)
-                    if (u.owner == p && (u.type == 83 || u.type == 128 || u.type == 17) && near(u, spawnX10(entry), spawnY10(entry)))
+                    if (u.owner == p && (u.type == 83 || u.type == 128 || u.type == 17 || u.type == 546 || u.type == 1103) && near(u, spawnX10(entry), spawnY10(entry)))
                         u.pos[1] += 3;
             setLane(p, fPurchase, 0);
         }
@@ -232,6 +264,27 @@ int mentions(string text) {
 int told(int player, int code) { return std::count(sent[player].begin(), sent[player].end(), code); }
 int toldAnything(int player) { return sent[player].size(); }
 float resource(int player, int attribute) { return attributes.at(player)[attribute]; }
+void select(int player, int control) { setLane(player, fControl, control); }
+// Run every wave to its end, clearing the field each second, until the game is decided.
+void finishSchedule() {
+    for(int n=0; n<20000 && phase()!=sVictory && phase()!=sDefeat; ++n) tick(true);
+}
+// Clear waves until the given wave has started.
+void reachWave(int wave) {
+    for(int n=0; n<40000 && xsTriggerVariable(vWave)<wave && phase()!=sVictory && phase()!=sDefeat; ++n) tick(true);
+    require(xsTriggerVariable(vWave)==wave, "The wave was not reached");
+}
+// A competitive game past its first wave, so the run options are fixed.
+void competitive(std::initializer_list<int> humans, bool pvp=true) {
+    start(humans);
+    if (!pvp) { select(xsTriggerVariable(vChooser), cControlPvpOff); tick(); }
+    advanceTo(sWave);
+}
+int unitsOf(int player, int type) {
+    int count = 0;
+    for (auto &[id, u] : units) if (u.owner == player && u.type == type) ++count;
+    return count;
+}
 int own(std::initializer_list<int> purchases) {
     int owned = 0;
     for (int purchase : purchases) owned += shopMask(purchase);
@@ -329,10 +382,80 @@ int main(int argc, char** argv) {
         for(int n=0;n<30;++n) tick();
         require(kingsCreated[2]==paid && lane(2,fActive)==0, "Eliminated lane still receives Kings");
     } else if(test=="sudden") {
-        start({1,7}); advanceTo(sSuddenDeath);
+        start({1,7});
+        reachWave(cWaveCount);
+        require(xsTriggerVariable(vStage)==cStageSudden, "Survivors of the finale did not enter sudden death");
         int lives=lane(1,fLives); for(int n=0;n<cSuddenInterval;++n) tick(true);
         require(lane(1,fLives)<lives && lane(1,fLives)==lane(7,fLives), "Sudden death pressure is asymmetric");
+        require(spawns[1]>0 && spawns[1]==spawns[7], "Sudden death waves differ between survivors");
         advanceTo(sDefeat); require(xsTriggerVariable(vWinner)==8, "Tied sudden death favored a slot");
+    } else if(test=="sudden_survivor") {
+        start({1,7});
+        reachWave(cWaveCount);
+        setLane(1, fLives, 1);
+        for(int n=0;n<2*cSuddenInterval && phase()!=sVictory;++n) tick(true);
+        require(phase()==sVictory && xsTriggerVariable(vWinner)==7, "The last survivor of sudden death did not win");
+    } else if(test=="endless_continues") {
+        start({4});
+        select(4, cControlEndless); tick();
+        reachWave(cWaveCount + 1);
+        require(phase()!=sVictory && xsTriggerVariable(vStage)==cStageEndless, "Endless stopped at the finale");
+        require(mentions("Endless wave 1 (wave 16)")==1 && mentions("Endless wave 2 (wave 17)")==1,
+                "Endless waves were not announced");
+        int first = endlessTemplate(0), second = endlessTemplate(1);
+        require(spawns[4] > 0 && xsTriggerVariable(vConfigured)==second + 1, "Endless waves did not spawn their template");
+        require(first != second, "Endless waves did not move through their templates");
+        require(waveTimers >= 2, "Endless waves were not counted down");
+    } else if(test=="endless_growth") {
+        start({4});
+        select(4, cControlEndless); tick();
+        reachWave(cWaveCount);
+        require(endlessLevels==std::vector<int>{1} && armorSteps==1, "The first endless wave was not configured once");
+        reachWave(cWaveCount + cEndlessTemplates);
+        require(endlessLevels==std::vector<int>({1, 2}) && armorSteps==cEndlessTemplates + 1,
+                "A new round of templates did not grow, or armor did not rise every wave");
+        require(xsTriggerVariable(vArmor)==(cEndlessTemplates + 1) * cArmorStep, "Armor total was not kept");
+        int hitpoints = endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates) * cEndlessLevels + 1);
+        require(mentions(ancientText(hitpoints) + " HP each")>=1, "The grown hit points were not announced");
+    } else if(test=="endless_waits") {
+        start({4});
+        select(4, cControlEndless); tick();
+        reachWave(cWaveCount - 1);
+        for(int n=0;n<10000 && phase()!=sPreparation;++n) tick(true);
+        // Without the native triggers, the endless wave starts but waits for its configuration.
+        for(int n=0;n<10000 && xsTriggerVariable(vWave)<cWaveCount;++n) { clearEnemies(); ancientTick(); }
+        require(xsTriggerVariable(vEndlessRequest)==1 && xsTriggerVariable(vArmorRequest)==1, "The endless wave did not ask for its configuration");
+        int before = spawns[4];
+        for(int n=0;n<5;++n) { clearEnemies(); ancientTick(); }
+        require(spawns[4]==before && lane(4,fSpawn)==0, "An endless wave spawned before its configuration applied");
+        nativeEffects(); nativeEffects();
+        for(int n=0;n<5;++n) tick(true);
+        require(spawns[4]>before, "The endless wave did not spawn after its configuration applied");
+    } else if(test=="endless_result") {
+        start({4});
+        select(4, cControlEndless); tick();
+        reachWave(cWaveCount + 2);
+        attributes[8][cAttributeKillsByPlayer1+3]=4567;
+        setLane(4, fLives, 0); tick(); tick();
+        require(phase()==sDefeat, "The endless run did not end when its lane fell");
+        string minutes = ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
+        require(mentions("Result: Endless run on Normal: 17 waves cleared (2 endless), 0 lives left, 4567 kills, " + minutes + ".")==1,
+                "The endless result was not shown");
+    } else if(test=="resume_endless") {
+        start({4});
+        select(4, cControlEndless); tick();
+        reachWave(cWaveCount + 1);
+        for(int n=0;n<20;++n) tick(true);
+        auto saved=variables; auto savedUnits=units; auto savedAttributes=attributes; auto savedSpawns=spawns;
+        auto savedLevels=endlessLevels; int savedArmor=armorSteps;
+        for(int n=0;n<400;++n) tick(true);
+        auto expected=variables; auto expectedSpawns=spawns; auto expectedLevels=endlessLevels; int expectedArmor=armorSteps;
+        variables=saved; units=savedUnits; attributes=savedAttributes; spawns=savedSpawns;
+        endlessLevels=savedLevels; armorSteps=savedArmor;
+        resetXsBuffers();
+        for(int n=0;n<400;++n) tick(true);
+        require(variables==expected && spawns==expectedSpawns, "Reload changed endless progress or spawns");
+        require(endlessLevels==expectedLevels && armorSteps==expectedArmor, "Reload repeated or lost endless growth");
     } else if(test=="resume") {
         start({2,7});
         setLane(2, fOwned, own({cBuyGold1000, cBuyKingEveryMinute, cBuyAttack1Every5}));
@@ -448,20 +571,20 @@ int main(int argc, char** argv) {
         require(bought[1].empty() && kingsOnPad(1, cBuyTowerAttack4)==3, "A computer-filled lane bought");
     } else if(test=="gold_kings") {
         start({3});
-        attributes[3][cAttributeGold]=2*cKingGold+600;
+        attributes[3][cAttributeGold]=2*kingGold(xsTriggerVariable(vDifficulty))+600;
         tick();
         require(resource(3, cAttributeGold)==600, "Gold was not converted in whole Kings");
-        require(told(3, cMessageGold)==1 && mentions("gold")==0, "The conversion was not told to its player alone");
+        require(told(3, cMessageGold)==1 && mentions("onverted")==0, "The conversion was not told to its player alone");
         tick();
         require(kingsCreated[3]==2 && lane(3,fKings)==0, "Converted Kings did not arrive");
     } else if(test=="kill_rewards") {
         start({4});
-        attributes[4][cAttributeKills]=cKillsPerReward-1;
+        attributes[8][cAttributeKillsByPlayer1+3]=cKillsPerReward-1;
         tick(); require(resource(4, cAttributeStone)==0, "A reward came early");
-        attributes[4][cAttributeKills]=cKillsPerReward;
+        attributes[8][cAttributeKillsByPlayer1+3]=cKillsPerReward;
         tick();
         require(resource(4, cAttributeStone)==cKillStone && resource(4, cAttributeWood)==cKillWood, "Kill reward wrong");
-        attributes[4][cAttributeKills]=cKillsPerReward*cRewardsPerKing;
+        attributes[8][cAttributeKillsByPlayer1+3]=cKillsPerReward*cRewardsPerKing;
         tick(); tick();
         require(resource(4, cAttributeStone)==cKillStone*cRewardsPerKing, "Kill rewards were not all paid");
         require(kingsCreated[4]==1 && told(4, cMessageKillKing)==1, "The kill King was not granted and announced once");
@@ -562,16 +685,14 @@ int main(int argc, char** argv) {
         units.erase(blocker);
         tick();
         require(units.count(villager)==0 && created[2][293]==1, "The villager was not moved to the other area");
-    } else if(test=="king_stall_blocked") {
-        start({3});
-        int blocker = sequence++;
-        units.emplace(blocker, Unit{79, {laneStallX10(3) / 10.0f, laneStallY10(3) / 10.0f, 0}, 100, 3});
-        attributes[3][cAttributeGold]=cKingGold;
+    } else if(test=="king_stall_shared") {
+        // Every King walks the shop, so a King standing on another lane's stall cannot hold
+        // back that lane's new Kings.
+        start({3,5});
+        units.emplace(sequence++, Unit{cKing, {laneStallX10(3) / 10.0f, laneStallY10(3) / 10.0f, 0}, 75, 5});
+        attributes[3][cAttributeGold]=kingGold(xsTriggerVariable(vDifficulty));
         tick(); tick();
-        require(kingsCreated[3]==0 && lane(3,fKings)==1, "A King was lost to a blocked stall");
-        units.erase(blocker);
-        tick();
-        require(kingsCreated[3]==1 && lane(3,fKings)==0, "The waiting King did not arrive");
+        require(kingsCreated[3]==1 && lane(3,fKings)==0, "A King on the stall held back a new King");
     } else if(test=="shop_civ_lacks") {
         start({5});
         techStates[{cBombardTowerTech, 5}]=cTechStateDisabled;
@@ -655,5 +776,339 @@ int main(int argc, char** argv) {
         units.emplace(sequence++, Unit{293, {transferX1(slot) + 0.5f, transferY1(slot) + 0.5f, 0}, 25, 2});
         tick();
         require(created[2][293]==1 && created[2][83]==0, "The transferred villager changed type");
+    } else if(test=="options_default") {
+        lobbyDifficulty=4;
+        start({3});
+        require(xsTriggerVariable(vChooser)==3 && xsTriggerVariable(vMode)==cModeStandard,
+                "Solo did not default to a Standard run chosen by its lane");
+        require(xsTriggerVariable(vPvp)==0, "A solo run had PvP on");
+        require(xsTriggerVariable(vDifficulty)==lobbyLevel(5) && kingGold(xsTriggerVariable(vDifficulty))==2500,
+                "Solo did not play the lobby's Easiest setting as Easy");
+        require(mentions("Difficulty: Easy")==1, "The difficulty was not announced");
+    } else if(test=="options_competitive") {
+        lobbyDifficulty=4;
+        start({2,5});
+        require(xsTriggerVariable(vChooser)==2 && xsTriggerVariable(vPvp)==1,
+                "Competition did not default to PvP on, chosen by the first lane");
+        require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "Competition ignored its fixed difficulty");
+    } else if(test=="difficulty_hard") {
+        lobbyDifficulty=0;
+        start({4});
+        require(kingGold(xsTriggerVariable(vDifficulty))==5000, "Hardest did not play Hard");
+        attributes[4][cAttributeGold]=2*5000+100;
+        tick(); tick();
+        require(resource(4, cAttributeGold)==100 && kingsCreated[4]==2, "Hard did not convert 5000 gold per King");
+    } else if(test=="difficulty_unknown") {
+        lobbyDifficulty=9;
+        start({4});
+        require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "An unknown lobby setting did not play Normal");
+    } else if(test=="options_choose") {
+        start({3});
+        select(3, cControlEndless); tick();
+        require(xsTriggerVariable(vMode)==cModeEndless && mentions("P3 chose Endless")==1, "Endless was not chosen");
+        tick(); tick();
+        require(mentions("P3 chose Endless")==1, "A held selection acted again");
+        select(3, 0); tick();
+        select(3, cControlPractice); tick();
+        require(xsTriggerVariable(vMode)==cModePractice, "Practice was not chosen");
+        select(3, cControlStandard); tick();
+        require(xsTriggerVariable(vMode)==cModeStandard, "Standard was not chosen back");
+    } else if(test=="options_reload_held") {
+        start({3});
+        select(3, cControlEndless); tick();
+        resetXsBuffers(); tick(); tick();
+        require(mentions("P3 chose Endless")==1, "A reload repeated a held selection");
+    } else if(test=="options_chooser_only") {
+        start({2,5});
+        auto said = chat.size();
+        select(5, cControlPvpOff); tick();
+        require(xsTriggerVariable(vPvp)==1 && told(5, cMessageChooserOnly)==1 && chat.size()==said,
+                "A lane other than the chooser changed the options, or was told publicly");
+        select(2, cControlPvpOff); tick();
+        require(xsTriggerVariable(vPvp)==0 && mentions("P2 switched PvP off")==1, "The chooser could not switch PvP off");
+        select(2, 0); tick();
+        select(2, cControlPvpOn); tick();
+        require(xsTriggerVariable(vPvp)==1, "PvP did not switch back on");
+    } else if(test=="options_solo_only") {
+        start({2,5});
+        select(2, cControlEndless); tick();
+        require(xsTriggerVariable(vMode)==cModeStandard && told(2, cMessageSoloModes)==1, "Competition chose a solo mode");
+    } else if(test=="options_pvp_solo") {
+        start({1});
+        select(1, cControlPvpOn); tick();
+        require(xsTriggerVariable(vPvp)==0 && told(1, cMessageNeedsRivals)==1, "A solo run switched PvP on");
+    } else if(test=="options_chooser_leaves") {
+        start({2,5,6});
+        occupied[2]=false; tick(); tick();
+        require(xsTriggerVariable(vChooser)==5, "The run options lost their chooser");
+    } else if(test=="options_locked") {
+        start({1});
+        advanceTo(sWave);
+        require(xsTriggerVariable(vLocked)==1, "Options did not lock at the first wave");
+        select(1, cControlEndless); tick(true);
+        require(xsTriggerVariable(vMode)==cModeStandard && told(1, cMessageOptionsFixed)==1, "Options changed after the first wave");
+    } else if(test=="practice_controls") {
+        start({6});
+        select(6, cControlPractice); tick();
+        select(6, cControlKings); tick();
+        require(lane(6,fKings)+kingsCreated[6]==cPracticeKings, "Practice did not grant its Kings");
+        select(6, cControlResources); tick();
+        for(int r : {cAttributeFood, cAttributeWood, cAttributeStone})
+            require(resource(6, r)==cPracticeResources, "Practice did not grant its resources");
+        // Granted gold converts into Kings as soon as it reaches their price.
+        require(resource(6, cAttributeGold)==cPracticeResources % kingGold(xsTriggerVariable(vDifficulty)),
+                "Practice did not grant its gold");
+        setLane(6, fLives, cLives-5);
+        select(6, cControlLives); tick();
+        require(lane(6,fLives)==cLives, "Practice did not restore the lives");
+        require(xsTriggerVariable(vAssists)==3 && xsTriggerVariable(vLocked)==1, "Assists were not counted or did not fix the run");
+        select(6, cControlStandard); tick();
+        require(xsTriggerVariable(vMode)==cModePractice, "An assisted run became a Standard run");
+    } else if(test=="practice_next_wave") {
+        start({6});
+        select(6, cControlPractice); tick();
+        advanceTo(sPreparation);
+        select(6, cControlNextWave); tick(true);
+        require(phase()==sWave && xsTriggerVariable(vWave)==0, "Practice did not start the first wave on request");
+        require(timerClears==1, "The countdown to the wave kept running after it started");
+        select(6, 0); tick(true);
+        select(6, cControlNextWave); tick(true);
+        require(xsTriggerVariable(vWave)==0 && told(6, cMessagePracticeWave)==1, "A wave started over a running one");
+    } else if(test=="practice_refused") {
+        start({6});
+        select(6, cControlKings); tick();
+        require(lane(6,fKings)==0 && kingsCreated[6]==0 && told(6, cMessagePracticeOnly)==1,
+                "A practice control worked outside a Practice run");
+        require(xsTriggerVariable(vAssists)==0, "A refused control counted as help");
+    } else if(test=="results_victory") {
+        start({7});
+        finishSchedule();
+        require(phase()==sVictory, "The solo run was not won");
+        require(mentions("Result: Standard run on Normal: 15 waves cleared")==1, "The result did not summarize the run");
+        require(xsTriggerVariable(vCleared)==cWaveCount, "The cleared waves were not counted");
+    } else if(test=="results_practice") {
+        start({7});
+        select(7, cControlPractice); tick();
+        select(7, cControlLives); tick();
+        finishSchedule();
+        require(phase()==sVictory && mentions("Result: Practice run on Normal")==1, "The practice result was not shown");
+        require(mentions("assisted by 1 practice action")==1, "The result hid the practice help");
+    } else if(test=="results_defeat") {
+        start({7});
+        advanceTo(sWave);
+        attributes[8][cAttributeKillsByPlayer1+6]=123;
+        setLane(7, fLives, 0); tick(); tick();
+        string minutes = ancientCount((xsTriggerVariable(vEconomy) + cSetup) / 60, "game minute", "game minutes");
+        require(phase()==sDefeat && mentions("Result: Standard run on Normal: 0 waves cleared, 0 lives left, 123 kills, " + minutes + ".")==1,
+                "A defeat did not summarize the run");
+    } else if(test=="raider_pvp_off") {
+        competitive({1,7}, false);
+        kingsOn(1, cBuyLandRaider, 3);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessagePvpOff)==1,
+                "A raider was sold with PvP off");
+    } else if(test=="raider_before_first_wave") {
+        start({1,7});
+        kingsOn(1, cBuyNavalRaider, 3);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && told(1, cMessagePvpOff)==1, "A raider was sold before the first wave");
+    } else if(test=="raider_solo") {
+        start({1}); advanceTo(sWave);
+        kingsOn(1, cBuyLandRaider, 3);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3, "A solo run bought a raider");
+    } else if(test=="raider_buy") {
+        competitive({1,7});
+        kingsOn(1, cBuyLandRaider, 3);
+        kingsOn(7, cBuyNavalRaider, 3);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuyLandRaider} && unitsOf(1, 546)==1 && kingsOnPad(1, cBuyLandRaider)==0,
+                "The land raider was not bought for its price");
+        require(bought[7]==std::vector<int>{cBuyNavalRaider} && unitsOf(7, 1103)==1, "The naval raider was not bought");
+    } else if(test=="raider_cap") {
+        competitive({1,7});
+        for(int round=0; round<3; ++round) { kingsOn(1, cBuyLandRaider, 3); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessageRaiderCap)==1,
+                "The land raider cap was not kept, or the refused Kings were taken");
+        for(auto it=units.begin(); it!=units.end(); ++it) if(it->second.owner==1 && it->second.type==546) { units.erase(it); break; }
+        for(int n=0;n<4;++n) tick(true);
+        require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==0, "A lost raider did not free its place");
+    } else if(test=="raider_line") {
+        competitive({1,7});
+        for(int round=0; round<2; ++round) { kingsOn(1, cBuyNavalRaider, 3); for(int n=0;n<4;++n) tick(true); }
+        for(auto &[id, u] : units) if(u.owner==1 && u.type==1103) u.type=529;
+        kingsOn(1, cBuyNavalRaider, 3);
+        for(int n=0;n<4;++n) tick(true);
+        require(unitsOf(1, 1103)==0 && kingsOnPad(1, cBuyNavalRaider)==3, "Upgrading raiders freed their places");
+    } else if(test=="raider_civilization") {
+        civilizations[1]=12;
+        competitive({1,7});
+        for(int round=0; round<4; ++round) { kingsOn(1, cBuyLandRaider, 3); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 546)==3 && kingsOnPad(1, cBuyLandRaider)==3, "Mongols did not keep one more land raider");
+    } else if(test=="siege_price") {
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price - 1);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && xsTriggerVariable(vSiegeOwner)==0, "Siege sold below its price");
+        kingsOn(1, cBuySiege, 1);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuySiege} && kingsOnPad(1, cBuySiege)==0 && xsTriggerVariable(vSiegeOwner)==1,
+                "Siege did not cost its base price plus each surviving rival's share");
+    } else if(test=="siege_exclusive") {
+        competitive({1,7});
+        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        kingsOn(7, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].size() + bought[7].size()==1, "Two players held the siege at once");
+        int loser = bought[1].empty() ? 1 : 7;
+        require(kingsOnPad(loser, cBuySiege)==price && told(loser, cMessageSiegeHeld)==1, "The competing purchase lost its Kings");
+    } else if(test=="siege_timeline") {
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<3;++n) tick(true);
+        require(xsTriggerVariable(vSiegeOwner)==1 && xsTriggerVariable(vSiegePhase)==1, "The siege warning did not start");
+        for(int n=0;n<cSiegeWarning;++n) tick(true);
+        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, 42)==2 * cSiegeTrebuchets, "Trebuchets did not arrive near every rival");
+        for(auto &[id, u] : units) if(u.owner==1 && u.type==42) {
+            bool near3 = std::abs(u.pos[1] - siegeY10(3 * 3) / 10.0f) < 0.6f, near7 = std::abs(u.pos[1] - siegeY10(7 * 3) / 10.0f) < 0.6f;
+            require(near3 || near7, "A trebuchet was placed away from the rivals' islets");
+        }
+        for(auto &[id, u] : units) if(u.owner==1 && u.type==42) { u.type=331; break; }
+        for(int n=0;n<cSiegeActive;++n) tick(true);
+        require(xsTriggerVariable(vSiegeOwner)==0 && unitsOf(1, 42)==0 && unitsOf(1, 331)==0, "Expiry left siege behind");
+        require(xsTriggerVariable(vSiegeCooldown)==cSiegeSharedCooldown && lane(1, fSiegeCooldown)==cSiegeBuyerCooldown,
+                "Expiry did not start both cooldowns");
+        kingsOn(7, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[7].empty() && told(7, cMessageSiegeCooldown)==1, "The siege sold during its cooldown");
+        for(int n=0;n<cSiegeSharedCooldown;++n) tick(true);
+        require(bought[7]==std::vector<int>{cBuySiege}, "Another player could not buy after the shared cooldown");
+    } else if(test=="siege_buyer_waits") {
+        competitive({1,7});
+        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4+cSiegeWarning+cSiegeActive+cSiegeSharedCooldown;++n) tick(true);
+        require(xsTriggerVariable(vSiegeCooldown)==0 && lane(1, fSiegeCooldown)>0, "The buyer's cooldown is not longer");
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].size()==1 && kingsOnPad(1, cBuySiege)==price, "The buyer skipped its own cooldown");
+    } else if(test=="siege_owner_eliminated") {
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<3;++n) tick(true);
+        setLane(1, fLives, 0);
+        for(int n=0;n<cSiegeWarning+2;++n) tick(true);
+        require(xsTriggerVariable(vSiegeOwner)==0 && unitsOf(1, 42)==0, "An eliminated owner's siege went ahead");
+        require(xsTriggerVariable(vSiegeCooldown)>0, "Ending the siege did not start the cooldown");
+    } else if(test=="siege_resume") {
+        competitive({1,7});
+        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<3+cSiegeWarning+5;++n) tick(true);
+        auto saved=variables; auto savedUnits=units; auto savedBought=bought;
+        for(int n=0;n<cSiegeActive+5;++n) tick(true);
+        auto expected=variables; auto expectedUnits=units.size();
+        variables=saved; units=savedUnits; bought=savedBought;
+        resetXsBuffers();
+        for(int n=0;n<cSiegeActive+5;++n) tick(true);
+        require(variables==expected && units.size()==expectedUnits, "Reload changed the siege's ownership, timing or units");
+    } else if(test=="siege_tie") {
+        // Claims made in the same second go to the lane the rotating order reaches first,
+        // never always to the lower slot.
+        competitive({1,7});
+        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        // The purchase lands on the third clock after the Kings arrive; make that clock put P7 first.
+        auto before=[](int clock){
+            for(int turn=0;turn<7;++turn) {
+                if(ancientTurn(clock, turn)==7) return true;
+                if(ancientTurn(clock, turn)==1) return false;
+            }
+            return false;
+        };
+        for(int n=0;n<20 && !before(xsTriggerVariable(vEconomy) + 3);++n) tick(true);
+        kingsOn(1, cBuySiege, price);
+        kingsOn(7, cBuySiege, price);
+        for(int n=0;n<3;++n) tick(true);
+        require(xsTriggerVariable(vSiegeOwner)==7 && bought[1].empty(), "The lower slot won a tie it should have lost");
+    } else if(test=="kill_rewards_waves_only") {
+        // Raiders taking rival traders and raiders kill nothing of the enemy's, so pay nothing.
+        competitive({4,7});
+        attributes[4][cAttributeKills]=5*cKillsPerReward;
+        tick(true); tick(true);
+        require(resource(4, cAttributeStone)==0, "Kills of rival units paid a reward");
+        attributes[8][cAttributeKillsByPlayer1+3]=cKillsPerReward;
+        tick(true);
+        require(resource(4, cAttributeStone)==cKillStone && resource(7, cAttributeStone)==0,
+                "Wave kills did not pay their killer alone");
+    } else if(test=="siege_holder_again") {
+        competitive({1,7});
+        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(xsTriggerVariable(vSiegeOwner)==1, "The siege was not bought");
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(kingsOnPad(1, cBuySiege)==price && told(1, cMessageSiegeYours)==1 && told(1, cMessageSiegeHeld)==0,
+                "The holder was told that another player holds the siege");
+    } else if(test=="sudden_labels") {
+        start({1,7});
+        reachWave(cWaveCount + 1);
+        require(mentions("Sudden death wave 1 (wave 16)")==1 && mentions("Next: sudden death wave 2 (wave 17)")==1,
+                "Sudden death waves were not announced as such");
+        require(mentions("ndless wave")==0, "Sudden death waves were announced as Endless");
+    } else if(test=="practice_repeat") {
+        // Each new selection acts once, even when the same control is selected again soon after.
+        start({6});
+        select(6, cControlPractice); tick();
+        select(6, cControlKings); tick();
+        require(lane(6, fControl)==0, "A handled selection stayed pending");
+        tick();
+        select(6, cControlKings); tick();
+        require(lane(6,fKings)+kingsCreated[6]==2*cPracticeKings && xsTriggerVariable(vAssists)==2,
+                "Selecting a control again did not act again");
+    } else if(test=="shared_arrivals") {
+        // Rival units parked on a lane's raider and trader arrival spots block nothing.
+        competitive({1,7});
+        for(int purchase : {cBuyLandRaider, cBuyTradeCarts}) {
+            int key = cSpawnStride + purchase;
+            for(int e = spawnStart(key); e < spawnStart(key) + spawnCount(key); ++e)
+                units.emplace(sequence++, Unit{546, {spawnX10(e) / 10.0f, spawnY10(e) / 10.0f, 0}, 100, 7});
+            kingsOn(1, purchase, shopPrice(purchase));
+            for(int n=0;n<4;++n) tick(true);
+        }
+        require(bought[1]==std::vector<int>({cBuyLandRaider, cBuyTradeCarts}) && unitsOf(1, 546)==1
+                && created[1][128]==spawnCount(cSpawnStride + cBuyTradeCarts), "A rival unit blocked an arrival");
+        require(told(1, cMessageNoRoom)==0, "A shared arrival was refused for lack of room");
+    } else if(test=="economy_towers") {
+        // Towers belong in the build rows: one in the resource area is removed, wherever it stands.
+        start({2});
+        int inside = sequence++;
+        units.emplace(inside, Unit{236, {laneEconomyX2(2) + 0.5f, laneEconomyY1(2) + 0.5f, 0}, 100, 2});
+        int corner = sequence++;
+        units.emplace(corner, Unit{79, {laneEconomyX1(2) + 0.5f, laneEconomyY2(2) + 0.5f, 0}, 100, 2});
+        int row = sequence++;
+        units.emplace(row, Unit{235, {30.5f, float(laneY(2)) - 3.5f, 0}, 100, 2});
+        int life = laneLife(2);
+        tick(); tick();
+        require(units.count(inside)==0 && units.count(corner)==0, "A tower stayed in the resource area");
+        require(units.count(row)==1 && units.count(life)==1, "A tower or Outpost outside the resource area was removed");
+        require(told(2, cMessageEconomyTower)==1, "The removal was not explained once");
+    } else if(test=="turns_fair") {
+        // Over fourteen seconds every lane goes first against every other exactly seven times.
+        for(int a=1;a<=7;++a) for(int b=a+1;b<=7;++b) {
+            int first=0;
+            for(int clock=0;clock<14;++clock) {
+                std::vector<int> order;
+                for(int turn=0;turn<7;++turn) order.push_back(ancientTurn(clock, turn));
+                std::vector<int> sorted=order; std::sort(sorted.begin(), sorted.end());
+                require(sorted==std::vector<int>({1,2,3,4,5,6,7}), "A second skipped or repeated a lane");
+                if(std::find(order.begin(), order.end(), a) < std::find(order.begin(), order.end(), b)) ++first;
+            }
+            require(first==7, "A pair of lanes did not share going first");
+        }
     } else require(false,"Unknown case");
 }

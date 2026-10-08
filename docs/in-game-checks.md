@@ -18,7 +18,8 @@ Keep all eight slots occupied. Put humans in any of slots 1–7 and computers in
 others; slot 8 must be the computer enemy. Only human-controlled defense lanes take part:
 the game clears computer-filled lanes at the start, apart from their berry mills, and
 gives them no resources, enemies or say in victory. Civilization choices stay unlocked,
-and a solo player may use any defense lane.
+and a solo player may use any defense lane. The lobby's Difficulty sets a solo run's
+level; run options are selected in game, in the row of Outposts below the shop.
 
 ## Full game
 
@@ -47,8 +48,9 @@ and a solo player may use any defense lane.
   without Bombard Towers, and a different refusal is explained at once.
 - New Kings, bought units and transferred villagers appear on their spots, where the build
   removed the map's marker flags; a transferred villager keeps its type. A unit on an
-  arrival spot delays a purchase, a new King or a transfer without losing anything; the
-  arrival clears once the unit moves.
+  arrival spot in the lane's own areas delays a purchase or a transfer without losing
+  anything, and the arrival clears once the unit moves. Kings, traders and raiders appear
+  even with another lane's unit on their spot.
 - Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
   leak and elimination messages reach everyone.
 - Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
@@ -57,8 +59,9 @@ and a solo player may use any defense lane.
 - Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, and with Ballistics,
   Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason researched: towers
   hit moving targets and shoot adjacent enemies; a King buys 2000 wood or 1500 stone.
-- 3,500 gold, each cleared wave and every 100 kills bring a King to the lane's stall;
-  every 25 kills pay 125 stone and 25 wood.
+- 3,500 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
+  every 25 wave kills pay 125 stone and 25 wood. Raiders killing rival traders and raiders
+  earn nothing.
 - Investments pay on their period; the repair crew restores lives for stone.
 - Tower attack reaches existing, new and upgraded towers only; Accursed Towers appear on
   the reserved pads with 240 pierce attack.
@@ -69,6 +72,45 @@ and a solo player may use any defense lane.
   starting mines and bushes keep their normal amounts.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
   appear and work; houses, +80 population and the castle set the population limit.
+
+## Modes and competition
+
+- Selecting each Outpost below the shop shows its option; only the first human lane's
+  selection changes a run option, once per selection, even when something else is
+  selected within the same second. Options stay fixed after the first wave or the first
+  practice control; the run options then disappear, and the practice controls too unless
+  the run is Practice.
+- Solo: Easiest plays Easy and Hard plays Hard (the opening chat names the level and gold
+  per King); competitive games play Normal whatever the lobby says.
+- Practice: start next wave, Kings, resources and lives each work once per selection, and
+  again after selecting something else; the Practice objective appears and the result says
+  the run was assisted.
+- The Endless, sudden death, siege and result objectives stay hidden until they apply.
+- Endless continues past the finale with the announced hit points and armor, counts down
+  each wave, and ends with a result when the lane falls.
+- Sudden death keeps the waves coming for every survivor, announced as sudden death waves,
+  and costs lives every 30 seconds.
+- PvP on makes the defense lanes enemies at the first wave; PvP off keeps them neutral
+  and raider and siege purchases keep their Kings.
+- Raiders arrive below their market or dock, walk clear, fight rival traders and raiders,
+  and cannot leave their trade area; the third raider of a kind is refused (a fourth for
+  the listed civilizations) and upgraded fire ships still count.
+- Kings, markets, docks, life Outposts and yurts cannot be attacked, including from the
+  channel edge by fire galleys.
+- Siege: the price grows by 5 Kings per surviving rival; after the countdown two
+  trebuchets stand on each rival's islets, attack chosen towers and cannot move, packed
+  or not; expiry removes both forms; competing or cooling-down purchases keep their Kings,
+  and the holder buying again is told it holds the siege already; the holder's elimination
+  ends it; save/load during the warning and the siege keeps both.
+- Villagers cannot build barracks, docks, castles, monasteries or town centers; docks
+  train only trade cogs; a bought castle trains nothing and fires no arrows; monks cannot
+  convert. All of this still holds after buying Castle Age and Imperial Age, and the castle
+  stays silent after Fletching, Bodkin Arrow and Bracer. Crenellations and Greek Fire
+  cannot be researched; in competitive games neither can Eupseong or Artillery.
+- A tower or tower foundation in the resource area disappears, and its player is told why.
+- Bought monks, castles, fire galleys and siege trebuchets still appear although their
+  owners cannot train or build them.
+- The enemy's protected King stands alone on the islet below the life Outposts.
 
 ## Map template
 

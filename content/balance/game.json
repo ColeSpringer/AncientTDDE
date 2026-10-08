@@ -1,22 +1,55 @@
 {
-  "schema_version": 3,
+  "schema_version": 4,
   "lives": 30,
   "setup_seconds": 5,
   "preparation_seconds": 233,
   "intermission_seconds": 30,
   "max_enemies_per_lane": 80,
-  "sudden_death_interval": 10,
+  "sudden_death_interval": 30,
   "sudden_death_damage": 1,
   "economy": {
     "starting_resources": {"food": 750, "wood": 1500, "stone": 1500, "gold": 400},
     "starting_technologies": ["BALLISTICS", "MURDER_HOLES", "CARAVAN", "WHEELBARROW", "HAND_CART", "SPIES_AND_TREASON"],
-    "king_gold": 3500,
     "wave_kings": 1,
     "kill_reward": {"kills": 25, "stone": 125, "wood": 25, "rewards_per_king": 4},
     "resource_bonus": {"gold": 10000, "food": 1000, "stone": 3000},
     "endless_deposit": 32000,
     "starting_relics": 2
   },
+  "difficulty": {
+    "levels": {
+      "easy": {"name": "Easy", "king_gold": 2500, "hit_points_percent": 80},
+      "normal": {"name": "Normal", "king_gold": 3500, "hit_points_percent": 100},
+      "hard": {"name": "Hard", "king_gold": 5000, "hit_points_percent": 125}
+    },
+    "lobby": {"easiest": "easy", "standard": "normal", "moderate": "normal", "hard": "hard", "hardest": "hard", "extreme": "hard"},
+    "competitive": "normal"
+  },
+  "endless": {
+    "templates": ["Two-Handed Swords", "Cavaliers", "Champions", "Paladins", "Elephant Finale"],
+    "hit_point_growth_percent": 50,
+    "armor_step": 25
+  },
+  "interaction": {
+    "raiders": {
+      "land": {"unit": "LIGHT_CAVALRY", "line": ["LIGHT_CAVALRY", "HUSSAR", "WINGED_HUSSAR"], "cap": 2},
+      "naval": {"unit": "FIRE_GALLEY", "line": ["FIRE_GALLEY", "FIRE_SHIP", "FAST_FIRE_SHIP"], "cap": 2},
+      "bonuses": [
+        {"civilization": "HUNS", "medium": "land", "extra": 1},
+        {"civilization": "MONGOLS", "medium": "land", "extra": 1},
+        {"civilization": "MAGYARS", "medium": "land", "extra": 1},
+        {"civilization": "CUMANS", "medium": "land", "extra": 1},
+        {"civilization": "TATARS", "medium": "land", "extra": 1},
+        {"civilization": "VIKINGS", "medium": "naval", "extra": 1},
+        {"civilization": "ITALIANS", "medium": "naval", "extra": 1},
+        {"civilization": "PORTUGUESE", "medium": "naval", "extra": 1},
+        {"civilization": "MALAY", "medium": "naval", "extra": 1},
+        {"civilization": "SARACENS", "medium": "naval", "extra": 1}
+      ]
+    },
+    "siege": {"trebuchets_per_rival": 2, "warning_seconds": 10, "active_seconds": 60, "shared_cooldown": 60, "buyer_cooldown": 120}
+  },
+  "practice": {"kings": 5, "resources": 5000},
   "towers": {
     "families": {
       "towers": ["WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER"],

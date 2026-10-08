@@ -73,7 +73,10 @@ def anchor_cells(anchor: MapAnchor, units: dict[int, MapUnit], sizes: dict[int, 
         return {(math.floor(x), math.floor(y))}
     region = anchor.get("region")
     if region is None:
-        raise ValueError("Route anchor needs a point or region")
+        points = anchor.get("points", [])
+        if not points:
+            raise ValueError("Route anchor needs a point or region")
+        return {(math.floor(x), math.floor(y)) for x, y in points}
     x1, y1, x2, y2 = region
     return cells((x1, y1, x2, y2))
 

@@ -70,11 +70,16 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
             and e["attributes"]["variable"] == variables[f"lane.p{player}.initialized"]
             for e in init["effects"]
         )
-    assert not any(
-        e["type"] in ("activate_trigger", "deactivate_trigger")
-        for t in snapshot["triggers"]
-        for e in t["effects"]
-    )
+    # Logic triggers stay enabled and are gated by variables; only display-only objectives
+    # are revealed by activation, and nothing is ever deactivated.
+    objectives = {
+        t["id"] for t in snapshot["triggers"] if t["display_as_objective"] and not t["effects"]
+    }
+    for trigger in snapshot["triggers"]:
+        for change in trigger["effects"]:
+            assert change["type"] != "deactivate_trigger"
+            if change["type"] == "activate_trigger":
+                assert change["attributes"]["trigger_id"] in objectives
     enemy = [u for u in snapshot["units"] if u["player_id"] == 8]
     assert any(u["unit_const"] == 434 for u in enemy)
 

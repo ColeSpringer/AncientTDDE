@@ -84,3 +84,84 @@ def test_instructions_and_the_hero_share_the_credit() -> None:
     from ancienttdde.game.instructions import CREDIT, instructions
 
     assert instructions(balance(), shop()).rstrip().endswith(f"{CREDIT}.")
+
+
+def test_instructions_explain_the_run_options_and_difficulty() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "row of Outposts below the shop" in text
+    assert "Standard, Endless or Practice" in text and "PvP off" in text
+    assert (
+        "Easiest plays Easy; Standard and Moderate play Normal; Hard, Hardest and Extreme "
+        "play Hard" in text
+    )
+    assert "Competitive games always play Normal" in text
+    assert "Every 2500 gold on Easy, 3500 on Normal or 5000 on Hard" in text
+    assert "Every 3500 gold you hold" not in text
+
+
+def test_instructions_scale_the_schedule_by_difficulty() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "Hit points below are for Normal: 80% on Easy and 125% on Hard" in text
+    assert "1. Villagers: 60 enemies with 150 HP each" in text
+
+
+def test_the_schedule_shows_hit_points_at_the_competitive_level(tmp_path: Path) -> None:
+    from ancienttdde.game.instructions import instructions
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    raw["difficulty"]["competitive"] = "hard"
+    path = tmp_path / "game.json"
+    path.write_text(json.dumps(raw))
+    text = instructions(balance(path), shop())
+    assert "Hit points below are for Hard: 80% on Easy and 100% on Normal" in text
+    # 150 hit points at 125%, rounded half up.
+    assert "1. Villagers: 60 enemies with 188 HP each" in text
+
+
+def test_instructions_explain_endless_practice_and_sudden_death() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "Two-Handed Swords, Cavaliers, Champions, Paladins and Elephant Finale repeat" in text
+    assert "50% more hit points each round" in text and "+25 pierce armor" in text
+    assert "5 more Kings" in text and "5000 more of each resource" in text
+    assert "assisted" in text
+    assert "every 30 game seconds" in text and "the waves keep growing" in text
+
+
+def test_instructions_explain_raiders_and_the_siege() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "at most 2 land and 2 naval raiders alive" in text
+    assert "Huns, Mongols, Magyars, Cumans and Tatars keep one more land raider" in text
+    assert "Vikings, Italians, Portuguese, Malay and Saracens keep one more naval raider" in text
+    assert "2 trebuchets beside every surviving rival's towers" in text
+    assert "10 game seconds" in text and "for 60 game seconds" in text
+    assert "60 game seconds for everyone and 120 for its buyer" in text
+    assert "cannot build military buildings, docks, monasteries or town centers" in text
+
+
+def test_instructions_explain_what_keeps_lanes_apart() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop())
+    assert "every 25 wave kills pay 125 stone and 25 wood" in text
+    assert "every 100 wave kills earn a King" in text
+    assert "Towers stand only in your build rows" in text
+    assert "Competitive games rule out Eupseong and Artillery" in text
+    assert "Markets, docks, Kings, life Outposts and yurts cannot be attacked" in text
+    assert "a bought castle never fires" in text
+    assert "Each new selection of an Outpost acts once" in text
+    assert "then the run options leave the row" in text
+
+
+def test_the_kill_king_message_counts_wave_kills() -> None:
+    from ancienttdde.game.messages import message_texts
+
+    text = message_texts(balance())["kill_king"]
+    assert text == "Kill reward: every 100 wave kills earn a King; one arrives at your stall."

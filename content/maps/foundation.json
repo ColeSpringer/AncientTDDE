@@ -2730,6 +2730,32 @@
       ],
       "label": "Bought trade cogs"
     },
+    "lane.p1.raiders.land": {
+      "points": [
+        [
+          196.5,
+          7.5
+        ],
+        [
+          196.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p1.raiders.naval": {
+      "points": [
+        [
+          116.5,
+          7.5
+        ],
+        [
+          116.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
+    },
     "trade.land.p1.home": {
       "point": [
         198.0,
@@ -3215,6 +3241,32 @@
         ]
       ],
       "label": "Bought trade cogs"
+    },
+    "lane.p2.raiders.land": {
+      "points": [
+        [
+          192.5,
+          7.5
+        ],
+        [
+          192.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p2.raiders.naval": {
+      "points": [
+        [
+          113.5,
+          7.5
+        ],
+        [
+          113.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
     },
     "trade.land.p2.home": {
       "point": [
@@ -3702,6 +3754,32 @@
       ],
       "label": "Bought trade cogs"
     },
+    "lane.p3.raiders.land": {
+      "points": [
+        [
+          188.5,
+          7.5
+        ],
+        [
+          188.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p3.raiders.naval": {
+      "points": [
+        [
+          110.5,
+          7.5
+        ],
+        [
+          110.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
+    },
     "trade.land.p3.home": {
       "point": [
         190.0,
@@ -4187,6 +4265,32 @@
         ]
       ],
       "label": "Bought trade cogs"
+    },
+    "lane.p4.raiders.land": {
+      "points": [
+        [
+          184.5,
+          7.5
+        ],
+        [
+          184.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p4.raiders.naval": {
+      "points": [
+        [
+          107.5,
+          7.5
+        ],
+        [
+          107.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
     },
     "trade.land.p4.home": {
       "point": [
@@ -4674,6 +4778,32 @@
       ],
       "label": "Bought trade cogs"
     },
+    "lane.p5.raiders.land": {
+      "points": [
+        [
+          180.5,
+          7.5
+        ],
+        [
+          180.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p5.raiders.naval": {
+      "points": [
+        [
+          104.5,
+          7.5
+        ],
+        [
+          104.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
+    },
     "trade.land.p5.home": {
       "point": [
         182.0,
@@ -5159,6 +5289,32 @@
         ]
       ],
       "label": "Bought trade cogs"
+    },
+    "lane.p6.raiders.land": {
+      "points": [
+        [
+          176.5,
+          7.5
+        ],
+        [
+          176.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p6.raiders.naval": {
+      "points": [
+        [
+          101.5,
+          7.5
+        ],
+        [
+          101.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
     },
     "trade.land.p6.home": {
       "point": [
@@ -5646,6 +5802,32 @@
       ],
       "label": "Bought trade cogs"
     },
+    "lane.p7.raiders.land": {
+      "points": [
+        [
+          172.5,
+          7.5
+        ],
+        [
+          172.5,
+          12.5
+        ]
+      ],
+      "label": "Bought land raiders: arrival below the market, walk target"
+    },
+    "lane.p7.raiders.naval": {
+      "points": [
+        [
+          98.5,
+          7.5
+        ],
+        [
+          98.5,
+          13.5
+        ]
+      ],
+      "label": "Bought naval raiders: arrival below the dock, walk target"
+    },
     "trade.land.p7.home": {
       "point": [
         174.0,
@@ -6064,6 +6246,86 @@
         49
       ],
       "label": "Repair villie (10 Kings; legacy price)"
+    },
+    "shop.land_raider": {
+      "region": [
+        167,
+        15,
+        169,
+        17
+      ],
+      "label": "Land raider (3 Kings)"
+    },
+    "shop.naval_raider": {
+      "region": [
+        167,
+        20,
+        169,
+        22
+      ],
+      "label": "Naval raider (3 Kings)"
+    },
+    "shop.siege": {
+      "region": [
+        166,
+        25,
+        169,
+        33
+      ],
+      "label": "Siege power-up (20 Kings plus 5 per rival)"
+    },
+    "controls.run": {
+      "points": [
+        [
+          124.5,
+          56.5
+        ],
+        [
+          128.5,
+          56.5
+        ],
+        [
+          132.5,
+          56.5
+        ],
+        [
+          136.5,
+          56.5
+        ],
+        [
+          140.5,
+          56.5
+        ]
+      ],
+      "label": "Run options: Standard, Endless, Practice, PvP on, PvP off"
+    },
+    "controls.practice": {
+      "points": [
+        [
+          150.5,
+          56.5
+        ],
+        [
+          154.5,
+          56.5
+        ],
+        [
+          158.5,
+          56.5
+        ],
+        [
+          162.5,
+          56.5
+        ]
+      ],
+      "label": "Practice controls: next wave, Kings, resources, lives"
+    },
+    "enemy.keeper": {
+      "point": [
+        142.5,
+        87.5
+      ],
+      "label": "The enemy's protected King, alone on an islet"
     }
   },
   "placement_overrides": [
@@ -9591,6 +9853,42 @@
         169,
         49
       ]
+    },
+    {
+      "key": "shop.land_raider",
+      "start": "shop.entry",
+      "end": "shop.land_raider",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.naval_raider",
+      "start": "shop.entry",
+      "end": "shop.naval_raider",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
+    },
+    {
+      "key": "shop.siege",
+      "start": "shop.entry",
+      "end": "shop.siege",
+      "medium": "land",
+      "region": [
+        123,
+        7,
+        169,
+        49
+      ]
     }
   ],
   "isolation": [
@@ -9900,6 +10198,325 @@
         169,
         42,
         171
+      ]
+    },
+    {
+      "key": "raiders.land.p1",
+      "start": "lane.p1.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p1",
+      "start": "lane.p1.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p2",
+      "start": "lane.p2.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p2",
+      "start": "lane.p2.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p3",
+      "start": "lane.p3.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p3",
+      "start": "lane.p3.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p4",
+      "start": "lane.p4.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p4",
+      "start": "lane.p4.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p5",
+      "start": "lane.p5.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p5",
+      "start": "lane.p5.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p6",
+      "start": "lane.p6.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p6",
+      "start": "lane.p6.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "raiders.land.p7",
+      "start": "lane.p7.raiders.land",
+      "medium": "land",
+      "region": [
+        164,
+        0,
+        199,
+        199
+      ]
+    },
+    {
+      "key": "raiders.naval.p7",
+      "start": "lane.p7.raiders.naval",
+      "medium": "water",
+      "region": [
+        96,
+        0,
+        128,
+        199
+      ]
+    },
+    {
+      "key": "enemy.keeper",
+      "start": "enemy.keeper",
+      "medium": "land",
+      "region": [
+        141,
+        87,
+        143,
+        89
+      ]
+    },
+    {
+      "key": "monks.p1",
+      "start": "lane.p1.monks",
+      "medium": "land",
+      "region": [
+        134,
+        118,
+        141,
+        125
+      ]
+    },
+    {
+      "key": "relic_enclosure.p1",
+      "start": "lane.p1.relic_enclosure",
+      "medium": "land",
+      "region": [
+        149,
+        192,
+        153,
+        199
+      ]
+    },
+    {
+      "key": "monks.p2",
+      "start": "lane.p2.monks",
+      "medium": "land",
+      "region": [
+        126,
+        118,
+        132,
+        125
+      ]
+    },
+    {
+      "key": "relic_enclosure.p2",
+      "start": "lane.p2.relic_enclosure",
+      "medium": "land",
+      "region": [
+        143,
+        192,
+        147,
+        199
+      ]
+    },
+    {
+      "key": "monks.p3",
+      "start": "lane.p3.monks",
+      "medium": "land",
+      "region": [
+        134,
+        110,
+        141,
+        116
+      ]
+    },
+    {
+      "key": "relic_enclosure.p3",
+      "start": "lane.p3.relic_enclosure",
+      "medium": "land",
+      "region": [
+        137,
+        192,
+        141,
+        199
+      ]
+    },
+    {
+      "key": "monks.p4",
+      "start": "lane.p4.monks",
+      "medium": "land",
+      "region": [
+        126,
+        110,
+        132,
+        116
+      ]
+    },
+    {
+      "key": "relic_enclosure.p4",
+      "start": "lane.p4.relic_enclosure",
+      "medium": "land",
+      "region": [
+        131,
+        192,
+        135,
+        199
+      ]
+    },
+    {
+      "key": "monks.p5",
+      "start": "lane.p5.monks",
+      "medium": "land",
+      "region": [
+        134,
+        102,
+        141,
+        108
+      ]
+    },
+    {
+      "key": "relic_enclosure.p5",
+      "start": "lane.p5.relic_enclosure",
+      "medium": "land",
+      "region": [
+        149,
+        183,
+        153,
+        190
+      ]
+    },
+    {
+      "key": "monks.p6",
+      "start": "lane.p6.monks",
+      "medium": "land",
+      "region": [
+        126,
+        101,
+        132,
+        108
+      ]
+    },
+    {
+      "key": "relic_enclosure.p6",
+      "start": "lane.p6.relic_enclosure",
+      "medium": "land",
+      "region": [
+        143,
+        183,
+        147,
+        190
+      ]
+    },
+    {
+      "key": "monks.p7",
+      "start": "lane.p7.monks",
+      "medium": "land",
+      "region": [
+        134,
+        93,
+        141,
+        100
+      ]
+    },
+    {
+      "key": "relic_enclosure.p7",
+      "start": "lane.p7.relic_enclosure",
+      "medium": "land",
+      "region": [
+        137,
+        183,
+        141,
+        190
       ]
     }
   ],
