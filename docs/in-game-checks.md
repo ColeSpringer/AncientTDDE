@@ -114,8 +114,11 @@ level; run options are selected in game, in the row of Outposts below the shop.
 
 - The chooser's view opens on the run options, with "Run options close in" counting down
   60 game seconds and two on-screen lines naming the options and practice controls left to
-  right; whether DE draws each Outpost's and pad unit's caption beside it (the one-word
-  labels) or shows them nowhere. Selecting an Outpost shows its full option.
+  right. DE draws each Outpost's one-word caption and each pad exhibit's short tag above it
+  (never a Sign's) in a font that does not shrink with the view; the exhibits stand on the
+  walkway side of their pads and the controls two tiles further down, so no captions run into
+  each other from the native zoom down to half of it. Selecting an Outpost shows its full
+  option, and an exhibit its full purchase.
 - The first human lane's first selection fixes the options and begins preparation at once,
   even when it is the default (Standard in a competitive game keeps PvP off); a later
   selection, or one by another lane, changes nothing
@@ -167,7 +170,7 @@ exercise routes.
 | Open and save with stock DE | 200×200 map opens without mod, missing assets or external scripts. |
 | Native blockers and expansion rows | Boundaries stop units and construction; removable row blockers retain the intended build space. |
 | Every lane, including first and last | Representative infantry and cavalry can reach the exit and cannot escape the lane. |
-| Every purchase pad | A King can reach each pad; captions display the corresponding legacy purchase. |
+| Every purchase pad | A King can reach each pad; the signs' captions name the legacy purchase. |
 | Land trade, every endpoint pair | Stock carts can reach both markets and complete a trade trip. |
 | Water trade, every endpoint pair | Stock cogs can reach both docks and complete a trade trip. |
 | Economy and life displays | Stock resources, buildings and life Outposts appear correctly without overlap or unwanted attacks. |

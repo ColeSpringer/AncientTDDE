@@ -197,7 +197,8 @@ def beside_pad(shop: Shop, x: float, y: float, reach: float) -> bool:
 
 
 def remove_shop_signs(game: Game, shop: Shop) -> None:
-    """Take the signs beside the pads out: DE cannot rename them, and every pad has a named unit."""
+    """Take the signs beside the pads out: DE neither renames nor captions a Sign, and every
+    pad has a named exhibit."""
     doomed = {
         ref for ref, (x, y) in game.gaia("sign").items() if beside_pad(shop, x, y, SIGN_REACH)
     }
@@ -209,24 +210,27 @@ def remove_shop_signs(game: Game, shop: Shop) -> None:
 
 
 def place_displays(game: Game, shop: Shop) -> None:
-    """Place a Gaia King beside each pad whose original label was an object only the mod named."""
+    """Stand each exhibit where the catalog puts it: a placed object is moved there, and a
+    Gaia King is placed beside a pad whose original label was an object only the mod named."""
+    placed = {unit.reference_id: unit for unit in game.scenario.unit_manager.units[0]}
     for purchase in shop.purchases:
-        if purchase.display_at is not None:
-            x, y = purchase.display_at
-            king = game.scenario.unit_manager.add_unit(
-                player=0,
-                unit_const=game.stock("king"),
-                x=x,
-                y=y,
-                caption_string=purchase.brief,
-            )
-            game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
-    game.forget_gaia("king")
+        if purchase.display_at is None:
+            continue
+        x, y = purchase.display_at
+        if purchase.display is not None:
+            exhibit = placed[game.placement(purchase.display)]
+            exhibit.x, exhibit.y = x, y
+            continue
+        king = game.scenario.unit_manager.add_unit(
+            player=0, unit_const=game.stock("king"), x=x, y=y, caption_string=purchase.tag
+        )
+        game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
+    game.forget_gaia()
 
 
 def caption_displays(game: Game, shop: Shop) -> None:
-    """Each placed display unit carries its purchases' brief lines as its caption."""
-    briefs = display_captions(shop, brief=True)
+    """Each placed display unit carries its purchases' tags as the caption DE draws above it."""
+    tags = display_captions(shop, overhead=True)
     for unit in game.scenario.unit_manager.get_all_units():
-        if unit.reference_id in briefs:
-            unit.caption_string = briefs[unit.reference_id]
+        if unit.reference_id in tags:
+            unit.caption_string = tags[unit.reference_id]

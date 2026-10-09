@@ -345,7 +345,7 @@ def test_run_controls_stand_free_in_the_row_below_the_shop() -> None:
     spots = run + practice
     assert len(set(spots)) == len(spots)
     assert all(spot in open_ground() for spot in spots)
-    assert all(121 <= x <= 169 and 55 <= y <= 57 for x, y in spots)
+    assert all(121 <= x <= 169 and 55 <= y <= 58 for x, y in spots)
     # Controls stand apart so each can be clicked on its own.
     assert all(math.dist(a, b) >= 3 for i, a in enumerate(spots) for b in spots[i + 1 :])
 

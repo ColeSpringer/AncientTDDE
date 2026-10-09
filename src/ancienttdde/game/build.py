@@ -18,10 +18,11 @@ from ancienttdde.common.manifest import (
 )
 from ancienttdde.common.output import prepare_output, project_path, publish
 from ancienttdde.common.worker import run_module, run_parallel
-from ancienttdde.game.catalog import check_pads, load_shop
+from ancienttdde.game.catalog import check_displays, check_pads, load_shop
 from ancienttdde.game.civilizations import load_profiles
 from ancienttdde.game.config import load_balance, load_lanes
 from ancienttdde.game.instructions import instructions
+from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.waves import check_lumber_room
 from ancienttdde.map.build import CONTENT_INPUTS as MAP_INPUTS
@@ -126,7 +127,15 @@ def build_game(root: Path, output: Path | None = None) -> Path:
     stock.check_waves(balance)
     profiles = load_profiles(root / "content/balance/civilizations.json", balance, shop, stock)
     check_pads(shop, data, config)
-    check_lumber_room(load_lanes(object_value(data.get("anchors"), "anchors")), data, config)
+    lanes = load_lanes(object_value(data.get("anchors"), "anchors"))
+    check_displays(
+        shop,
+        data,
+        config,
+        reserved={t for lane in lanes for t in creation_tiles(lane, shop, balance.interaction)},
+        entrances={lane.sites.king_rally for lane in lanes},
+    )
+    check_lumber_room(lanes, data, config)
     directory.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="ancienttdde-game-", dir=directory.parent) as temporary:
         staging = Path(temporary)

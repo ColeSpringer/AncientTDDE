@@ -66,7 +66,7 @@ def name_objects(game: Game, lanes: Iterable[EngineLane], shop: Shop, balance: B
     for placed, caption in display_captions(shop).items():
         game.rename(trigger, game.placement(placed), caption, owners=owners)
     for purchase in shop.purchases:
-        if purchase.display_at is not None:
+        if purchase.display is None:
             king = game.names.resolve("object", f"shop.{purchase.key}.display")
             game.rename(trigger, king, purchase.caption, owners=owners)
     for lane in lanes:

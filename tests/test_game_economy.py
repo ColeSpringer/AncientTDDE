@@ -484,6 +484,39 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
     assert names[21492] == "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
 
 
+def test_pad_exhibits_stand_where_the_catalog_puts_them_with_their_captions(
+    game_build: GameBuild,
+) -> None:
+    """A placed exhibit with a display_at is moved there and a King is created there
+    otherwise; each carries its purchases' tags as the caption DE draws above it."""
+    from ancienttdde.game.catalog import display_captions, load_shop
+    from ancienttdde.game.config import load_balance
+
+    data = snapshot(game_build)
+    units = {u["reference_id"]: u for u in data["units"]}
+    balance = load_balance(ROOT / "content/balance/game.json")
+    shop = load_shop(
+        ROOT / "content/balance/shop.json",
+        anchors(game_build),
+        [name for name, _ in balance.towers.families],
+    )
+    tags = display_captions(shop, overhead=True)
+    for purchase in shop.purchases:
+        if purchase.display is not None:
+            unit = units[purchase.display]
+            assert unit.get("caption_string") == tags[purchase.display], purchase.key
+            if purchase.display_at is not None:
+                assert (unit["x"], unit["y"]) == purchase.display_at, purchase.key
+        else:
+            [king] = [
+                u
+                for u in units.values()
+                if u["unit_const"] == KING and (u["x"], u["y"]) == purchase.display_at
+            ]
+            assert king["player_id"] == 0 and king.get("caption_string") == purchase.tag
+    assert tags[shop.get("tower_attack_4").display or 0] == "+4 attack: 1 King"
+
+
 @pytest.mark.parametrize("player", PLAYERS)
 def test_creation_tiles_hold_no_placed_objects(game_build: GameBuild, player: int) -> None:
     """XS creates Kings, bought units and transferred villagers with collision checks, so even
