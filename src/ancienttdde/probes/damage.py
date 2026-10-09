@@ -21,10 +21,11 @@ TOWERS = (
 ACCURSED_PIERCE = 232
 # Enemies at the scheduled waves' Normal hit points: Militia, Knights and War Elephants.
 ENEMIES = (
-    ("militia", "militia", 70),
-    ("knight", "knight", 440),
-    ("elephant", "war-elephant", 230),
+    ("militia", "militia", 95),
+    ("knight", "knight", 2000),
+    ("elephant", "war-elephant", 520),
 )
+MILITIA, KNIGHT, ELEPHANT = (hit_points for _, _, hit_points in ENEMIES)
 ATTACK_BONUS = 100
 PADS = {
     "militia": (4, 30),
@@ -52,17 +53,20 @@ DEFINITION = ProbeDefinition(
         ProbeCase(
             "tower-damage.militia",
             f"Put one King on {tile_text(PADS['militia'])} and time each tower.",
-            "Record the seconds each tower takes to kill its militia (220 HP, 1 pierce armor).",
+            f"Record the seconds each tower takes to kill its militia ({MILITIA} HP, 1 pierce "
+            "armor).",
         ),
         ProbeCase(
             "tower-damage.knight",
             f"Put one King on {tile_text(PADS['knight'])} and time each tower.",
-            "Record the seconds each tower takes to kill its knight (1100 HP, 2 pierce armor).",
+            f"Record the seconds each tower takes to kill its knight ({KNIGHT} HP, 2 pierce "
+            "armor).",
         ),
         ProbeCase(
             "tower-damage.elephant",
             f"Put one King on {tile_text(PADS['elephant'])} and time each tower.",
-            "Record the seconds each tower takes to kill its elephant (2500 HP, 2 pierce armor).",
+            f"Record the seconds each tower takes to kill its elephant ({ELEPHANT} HP, 2 pierce "
+            "armor).",
         ),
         ProbeCase(
             "tower-damage.attack",

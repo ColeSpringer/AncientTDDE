@@ -127,11 +127,13 @@ def test_native_effects_are_the_part_native_triggers_apply() -> None:
         raiders=(("land", 1),),
     )
     assert profile.native == NativeEffects(
-        resources=Resources(0, 0, 500, 0), attack=(("towers", 2),), technologies=("MASONRY",)
+        resources=Resources(0, 0, 500, 0), technologies=("MASONRY",)
     )
     assert not profile.neutral
-    # Kings and raiders are applied by the XS, so profiles differing only there share triggers.
+    # Kings, raiders and tower attack are applied by the XS, so profiles differing only there
+    # share triggers.
     assert Profile(kings=2).native is None and Profile(raiders=(("naval", 1),)).native is None
+    assert Profile(attack=(("towers", 2),)).native is None
 
 
 @pytest.mark.parametrize(
@@ -289,6 +291,17 @@ def test_invalid_profiles_are_rejected(defect: str, message: str, tmp_path: Path
             raise AssertionError(defect)
     with pytest.raises(ValueError, match=message):
         load(write(tmp_path, data))
+
+
+def test_a_granted_attack_purchase_may_join_the_profiles_own_attack(tmp_path: Path) -> None:
+    """The XS adds both, so they may raise the same towers past 255 together."""
+    data = json.loads(CONTENT.read_text(encoding="utf-8"))
+    turks = next(row for row in data["civilizations"] if row["key"] == "TURKS")
+    assert turks["profile"]["attack"] == {"bombard": 25}
+    turks["profile"]["purchases"] = ["bombard_attack_400"]
+    loaded = next(c for c in load(write(tmp_path, data)).civilizations if c.key == "TURKS")
+    assert loaded.profile.purchases == ("bombard_attack_400",)
+    assert loaded.profile.attack == (("bombard", 25),)
 
 
 def test_the_default_profile_is_light_and_needs_no_native_triggers() -> None:

@@ -3,6 +3,7 @@ import copy
 import pytest
 from conftest import FoundationInputs
 
+from ancienttdde.map.models import PlacementAddition
 from ancienttdde.scenario.snapshot import MapUnit
 
 
@@ -104,6 +105,65 @@ def test_connected_siege_islets_fail_validation(foundation_inputs: FoundationInp
     result["map"]["tiles"][2 * 16 + 10] = [0, 0, -1]
     with pytest.raises(ValueError, match="siege.p1.1.*isolation"):
         validate_map(result, config)
+
+
+def test_placements_can_be_added_and_removed(foundation_inputs: FoundationInputs) -> None:
+    from ancienttdde.map.foundation import migrate_map
+
+    legacy, config = foundation_inputs
+    config["placement_additions"] = [
+        {"key": "divider", "object_key": "blocker", "player_id": 0, "x": 5.5, "y": 5.5}
+    ]
+    config["placement_removals"] = [{"reference_id": 11}]
+    result = migrate_map(legacy, config)
+    units = {u["reference_id"]: u for u in result["units"]}
+    assert 11 not in units and len(units) == len(legacy["units"])
+    added = units[15]
+    assert (added["unit_const"], added["player_id"], added["x"], added["y"]) == (1776, 0, 5.5, 5.5)
+    assert added.get("object_key") == "blocker" and added["garrisoned_in_id"] == -1
+    migration = result.get("migration")
+    assert migration is not None
+    assert (migration["placement_additions"], migration["placement_removals"]) == (1, 1)
+
+
+@pytest.mark.parametrize(
+    ("defect", "message"),
+    [
+        ("unknown_removal", "Missing placement removal instance"),
+        ("removed_override", "both removed and overridden: 12"),
+        ("unknown_object", "Unknown object for placement addition: extra"),
+        ("outside", "Placement addition outside map: extra"),
+        ("duplicate_key", "Duplicate placement addition: extra"),
+        ("duplicate_removal", "Duplicate placement removal: 11"),
+    ],
+)
+def test_invalid_placement_changes_fail(
+    foundation_inputs: FoundationInputs, defect: str, message: str
+) -> None:
+    from ancienttdde.map.foundation import migrate_map
+
+    legacy, config = foundation_inputs
+    extra: PlacementAddition = {
+        "key": "extra",
+        "object_key": "blocker",
+        "player_id": 0,
+        "x": 1.5,
+        "y": 1.5,
+    }
+    if defect == "unknown_removal":
+        config["placement_removals"] = [{"reference_id": 99}]
+    elif defect == "removed_override":
+        config["placement_removals"] = [{"reference_id": 12}]
+    elif defect == "unknown_object":
+        config["placement_additions"] = [{**extra, "object_key": "nothing"}]
+    elif defect == "outside":
+        config["placement_additions"] = [{**extra, "x": 16.5}]
+    elif defect == "duplicate_removal":
+        config["placement_removals"] = [{"reference_id": 11}, {"reference_id": 11}]
+    else:
+        config["placement_additions"] = [extra, extra]
+    with pytest.raises(ValueError, match=message):
+        migrate_map(legacy, config)
 
 
 @pytest.mark.parametrize(

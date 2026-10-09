@@ -10,7 +10,6 @@ from ancienttdde.game.catalog import Shop
 from ancienttdde.game.civilizations import Profiles
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.economy import (
-    lane_attack,
     lane_bonuses,
     lane_gatherers,
     lane_kings,
@@ -33,21 +32,16 @@ def lane_actions(
     game: Game, lane: EngineLane, balance: Balance, shop: Shop, profiles: Profiles
 ) -> None:
     player = lane.player
-    prefix = f"lane.p{player}"
-    mill = game.scenario.unit_manager.add_unit(
+    # Every lane starts with a mill beside its berries; a cleared lane loses it.
+    game.scenario.unit_manager.add_unit(
         player=player, unit_const=game.stock("mill"), x=84, y=lane.center_y
     )
-    game.names.register("object", f"{prefix}.berry_mill", mill.reference_id)
     lane_initialize(game, lane, balance)
     lane_profiles(game, lane, balance, profiles, shop)
-    lane_cleanup(game, lane, mill.reference_id)
     lane_spawned(game, lane)
     lane_route(game, lane)
     lane_status(game, lane, balance)
     lane_kings(game, lane)
-    family = shop.attack_family()
-    if family is not None:
-        lane_attack(game, lane, balance.towers.family_ids(family))
     lane_transfers(game, lane)
     lane_messages(game, lane, balance)
     lane_bonuses(game, lane, balance)
@@ -56,6 +50,8 @@ def lane_actions(
     protect_kings(game, player)
     restrict_ages(game, player)
     restrict_reach(game, player)
+    # Last, so it can end every other trigger of the lane.
+    lane_cleanup(game, lane)
 
 
 def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
@@ -133,7 +129,11 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
     game.set_value(init, f"{prefix}.initialized", 1)
 
 
-def lane_cleanup(game: Game, lane: EngineLane, mill: int) -> None:
+def lane_cleanup(game: Game, lane: EngineLane) -> None:
+    """Clear a computer-filled or eliminated lane, mill included. The XS leaves one King on the
+    lane's spare siege islet, which can be neither attacked nor deleted, so DE does not defeat
+    the slot. Then end the lane's other triggers: they could never act again, and its lives
+    line leaves the objectives."""
     player = lane.player
     prefix = f"lane.p{player}"
     cleanup = game.trigger(f"{prefix}.cleanup", looping=True)
@@ -141,10 +141,15 @@ def lane_cleanup(game: Game, lane: EngineLane, mill: int) -> None:
     effect(
         cleanup,
         "script_call",
-        message=f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}, {mill}); }}",
+        message=f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}",
     )
+    for protection in ("disable_unit_attackable", "disable_object_deletion"):
+        effect(cleanup, protection, source_player=player, object_list_unit_id=game.stock("king"))
     effect(cleanup, "remove_object", source_player=8, **area(lane.path))
     game.set_value(cleanup, f"{prefix}.cleanup", 0)
+    for identifier in game.names.registered("trigger", f"{prefix}."):
+        if identifier != cleanup.trigger_id:
+            effect(cleanup, "deactivate_trigger", trigger_id=identifier)
 
 
 def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:

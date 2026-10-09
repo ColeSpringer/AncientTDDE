@@ -106,3 +106,11 @@ class NameTable:
 
     def resolve(self, kind: str, key: str) -> int:
         return self._references[kind, key]
+
+    def registered(self, kind: str, prefix: str) -> list[int]:
+        """Identifiers of this kind whose key starts with the prefix, in registration order."""
+        return [
+            identifier
+            for (reference_kind, key), identifier in self._references.items()
+            if reference_kind == kind and key.startswith(prefix)
+        ]

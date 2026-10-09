@@ -10,6 +10,7 @@ from ancienttdde.game.balance import (
     attack_ladder,
     baseline_income,
     investment_returns,
+    lane_pressure,
     profile_table,
     rates,
     rivalry,
@@ -19,7 +20,6 @@ from ancienttdde.game.balance import (
 from ancienttdde.game.catalog import Investment, Purchase, ResourceGrant, SiegePowerUp, TowerAttack
 from ancienttdde.game.civilizations import DEFAULT_NAME, adjustments
 from ancienttdde.game.stock import PIERCE_CLASS
-from ancienttdde.game.waves import ENEMY_SPEED
 from ancienttdde.scenario.objects import display_name
 
 # The report's first line, which marks a balance.md as this command's own output.
@@ -55,7 +55,6 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
     rows += [
         ["food per King", str(FOOD_PER_KING)],
         ["Kings per tile of tower range", str(RANGE_KINGS)],
-        ["enemy speed (tiles per second)", str(ENEMY_SPEED)],
         ["lane length (tiles)", str(inputs.lane_tiles)],
         ["land trade route (tiles)", f"{inputs.land_route:.0f}"],
         ["water trade route (tiles)", f"{inputs.water_route:.0f}"],
@@ -111,17 +110,74 @@ def waves_section(inputs: Inputs) -> str:
             f"{need.pierce_armor:g}",
             str(need.total_hit_points),
             str(need.spawn_seconds),
+            f"{need.speed:g}",
+            f"{need.crossing_seconds:.0f}",
             f"{need.required_dps:.0f}",
         ]
         for index, need in enumerate(needs, 1)
     ]
-    crossing = needs[0].crossing_seconds
     return (
-        f"{level_name(inputs)} hit points. An enemy crosses the lane in {crossing:.0f} seconds; "
-        "the required damage per second kills the whole wave before its last enemy reaches the "
+        f"{level_name(inputs)} hit points. Each enemy crosses the lane at its own speed; the "
+        "required damage per second kills the whole wave before its last enemy reaches the "
         "exit.\n\n"
         + table(
-            ["#", "Wave", "Enemies", "HP", "Pierce armor", "Total HP", "Spawn s", "DPS needed"],
+            [
+                "#",
+                "Wave",
+                "Enemies",
+                "HP",
+                "Pierce armor",
+                "Total HP",
+                "Spawn s",
+                "Speed",
+                "Crossing s",
+                "DPS needed",
+            ],
+            rows,
+        )
+    )
+
+
+def pressure_section(inputs: Inputs, assumptions: Assumptions) -> str:
+    levels = inputs.balance.difficulty.levels
+    others = [index for index in range(len(levels)) if index != inputs.level]
+    elsewhere = [lane_pressure(inputs, assumptions, index) for index in others]
+    rows = [
+        [
+            str(number),
+            wave.key,
+            f"{wave.minutes:.1f}",
+            kings(wave.kings),
+            f"{wave.attack:.0f}",
+            f"{wave.towers:.0f}",
+            f"{wave.expected_dps:.0f}",
+            f"{wave.required_dps:.0f}",
+            f"{wave.ratio:.2f}",
+        ]
+        + [f"{pressure[number - 1].ratio:.2f}" for pressure in elsewhere]
+        for number, wave in enumerate(lane_pressure(inputs, assumptions), 1)
+    ]
+    names = " and ".join(levels[index].name for index in others)
+    return (
+        "Each wave against the lane the assumptions expect at the minute it starts: the Kings "
+        f"it has, the tower attack {assumptions.attack_share * 100:.0f} percent of them buy, its "
+        "Watch Towers and, from minute "
+        f"{assumptions.accursed_from_minute:g}, both Accursed Towers. Pressure is the damage per "
+        "second the wave needs over what those towers deal; above 1 the wave leaks. The last "
+        f"columns are the pressure on {names}, with their own King price and hit points.\n\n"
+        + table(
+            [
+                "#",
+                "Wave",
+                "Minute",
+                "Kings",
+                "Attack",
+                "Towers",
+                "Expected DPS",
+                "DPS needed",
+                "Pressure",
+                *(levels[index].name for index in others),
+            ],
             rows,
         )
     )
@@ -281,6 +337,7 @@ def render_report(inputs: Inputs, assumptions: Assumptions) -> str:
         ("Assumptions", assumptions_section(inputs, assumptions)),
         ("Towers", towers_section(inputs)),
         ("Waves", waves_section(inputs)),
+        ("Pressure", pressure_section(inputs, assumptions)),
         ("Shop", shop_section(inputs)),
         ("Investments", investments_section(inputs)),
         ("Income", income_section(inputs, assumptions)),

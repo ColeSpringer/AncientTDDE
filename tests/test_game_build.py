@@ -5,7 +5,10 @@ import re
 from pathlib import Path
 
 import pytest
+from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
+from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from conftest import (
+    KING,
     ROOT,
     GameBuild,
     attr_int,
@@ -52,7 +55,6 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
         for suffix in (
             "initialize",
             "king",
-            "attack",
             "spawned",
             "buy.tower_attack_4",
             "transfer.build",
@@ -73,17 +75,76 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
             for e in init["effects"]
         )
     # Logic triggers stay enabled and are gated by variables; only display-only objectives
-    # are revealed by activation, and nothing is ever deactivated.
+    # are revealed by activation. A cleared lane's cleanup deactivates that lane's other
+    # triggers, and the game.hide triggers deactivate display-only objectives.
     objectives = {
         t["id"] for t in snapshot["triggers"] if t["display_as_objective"] and not t["effects"]
     }
+    by_id = {t["id"]: t for t in snapshot["triggers"]}
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
-            assert change["type"] != "deactivate_trigger"
             if change["type"] == "activate_trigger":
                 assert change["attributes"]["trigger_id"] in objectives
+            if change["type"] == "deactivate_trigger":
+                target = by_id[change["attributes"]["trigger_id"]]
+                if trigger["name"].startswith("game.hide."):
+                    assert target["id"] in objectives
+                    continue
+                lane = re.fullmatch(r"(lane\.p[1-7])\.cleanup", trigger["name"])
+                assert lane is not None, trigger["name"]
+                assert target["name"].startswith(f"{lane[1]}.") and target is not trigger
     enemy = [u for u in snapshot["units"] if u["player_id"] == 8]
     assert any(u["unit_const"] == 434 for u in enemy)
+
+
+def test_a_cleared_lanes_cleanup_ends_exactly_its_own_lanes_other_triggers(
+    game_build: GameBuild,
+) -> None:
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    owned = {
+        player: {t["id"] for t in snapshot["triggers"] if t["name"].startswith(f"lane.p{player}.")}
+        for player in range(1, 8)
+    }
+    for player in range(1, 8):
+        cleanup = triggers[f"lane.p{player}.cleanup"]
+        ended = [
+            e["attributes"]["trigger_id"]
+            for e in cleanup["effects"]
+            if e["type"] == "deactivate_trigger"
+        ]
+        assert len(ended) == len(set(ended))
+        assert set(ended) == owned[player] - {cleanup["id"]}
+        assert triggers[f"lane.p{player}.status"]["id"] in ended
+        for other in range(1, 8):
+            if other != player:
+                assert owned[other].isdisjoint(ended)
+        # The cleanup clears the lane before ending the rest of its triggers.
+        kinds = [e["type"] for e in cleanup["effects"]]
+        assert kinds.index("script_call") < kinds.index("deactivate_trigger")
+
+
+def test_every_pad_shows_one_flag_per_king_of_its_price(game_build: GameBuild) -> None:
+    """The map's flags mark where a pad's Kings stand: one Gaia flag a tile and one flagged
+    tile per King of the price, the siege's base price."""
+    from ancienttdde.game.catalog import load_shop
+    from ancienttdde.game.config import load_balance
+    from ancienttdde.scenario.objects import marker_flags
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    balance = load_balance(ROOT / "content/balance/game.json")
+    families = [name for name, _ in balance.towers.families]
+    catalog = load_shop(ROOT / "content/balance/shop.json", anchors, families)
+    flags = [u for u in snapshot["units"] if u["unit_const"] in marker_flags()]
+    for purchase in catalog.purchases:
+        x1, y1, x2, y2 = purchase.pad_region
+        marked = [u for u in flags if x1 <= u["x"] < x2 + 1 and y1 <= u["y"] < y2 + 1]
+        tiles = {(int(u["x"]), int(u["y"])) for u in marked}
+        assert len(marked) == len(tiles) == purchase.kings, purchase.key
+        assert all(u["player_id"] == 0 for u in marked), purchase.key
 
 
 def test_ai_fillers_use_embedded_passive_ai(game_build: GameBuild) -> None:
@@ -157,10 +218,36 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBui
             assert set(orders[0]["selected_object_ids"]) == traders
 
 
+def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
+    game_build: GameBuild,
+) -> None:
+    """The original's one-way alliance: the enemy's units attack nothing while every lane's
+    towers fire at them, and they walk at their stock speed."""
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    players = snapshot["players"]
+    assert [p["player_id"] for p in players[:9]] == list(range(9))
+    assert players[8]["diplomacy"][:7] == [DiplomacyState.ALLY] * 7
+    for player in range(1, 8):
+        assert players[player]["diplomacy"][7] == DiplomacyState.ENEMY
+    for trigger in snapshot["triggers"]:
+        for change in trigger["effects"]:
+            assert change["type"] != "change_object_stance"
+            attributes = change["attributes"]
+            # The protected keeper King is the one enemy unit held in place.
+            if (
+                change["type"] == "modify_attribute"
+                and attributes["source_player"] == 8
+                and attributes["object_list_unit_id"] != KING
+            ):
+                assert attributes["object_attributes"] != ObjectAttribute.MOVEMENT_SPEED
+
+
 def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: GameBuild) -> None:
     """The XS creates every batch itself; no trigger creates an enemy. Each lane's
-    acknowledgment and its three-second route hold the enemies to the lane and walk each row
-    band to its own exit tile, so pairs created side by side stay side by side."""
+    acknowledgment orders the new batch in the spawn column, and its ten-second route keeps
+    every enemy in the lane walking, each row band to its own exit tile, so pairs created side
+    by side stay side by side."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.config import load_lanes
 
@@ -180,13 +267,13 @@ def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: Ga
     for lane in load_lanes(object_value(anchors, "anchors")):
         x1, y1, x2, y2 = lane.path
         center = lane.center_y
-        for name in (f"lane.p{lane.player}.spawned", f"lane.p{lane.player}.route"):
+        # The XS creates each batch at the spawn tile's center.
+        for name, columns in (
+            (f"lane.p{lane.player}.spawned", (lane.spawn_x, lane.spawn_x + 1)),
+            (f"lane.p{lane.player}.route", (x1, x2)),
+        ):
             trigger = triggers[name]
             assert trigger["looping"]
-            [stance] = [e for e in trigger["effects"] if e["type"] == "change_object_stance"]
-            held = stance["attributes"]
-            assert (held["source_player"], held["attack_stance"]) == (8, 2)
-            assert (held["area_x1"], held["area_y1"], held["area_x2"], held["area_y2"]) == lane.path
             orders = [e["attributes"] for e in trigger["effects"] if e["type"] == "task_object"]
             bands = [(o["area_y1"], o["area_y2"], o["location_x"], o["location_y"]) for o in orders]
             assert bands == [
@@ -195,7 +282,11 @@ def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: Ga
                 (center + 1, y2, lane.exit_x, center + 1),
             ]
             assert all(o["source_player"] == 8 and o["action_type"] == MOVE for o in orders)
-            assert all((o["area_x1"], o["area_x2"]) == (x1, x2) for o in orders)
+            assert all((o["area_x1"], o["area_x2"]) == columns for o in orders)
+        route = triggers[f"lane.p{lane.player}.route"]
+        assert [c["attributes"]["timer"] for c in route["conditions"] if c["type"] == "timer"] == [
+            10
+        ]
         spawned = triggers[f"lane.p{lane.player}.spawned"]
         requested = {
             c["attributes"]["variable"]: c["attributes"]["quantity"]
@@ -482,22 +573,24 @@ def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: Gam
         assert all(position in reachable for position in gatherers)
 
 
-def test_lane_cleanup_preserves_the_preplaced_mill_reference(game_build: GameBuild) -> None:
+def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(
+    game_build: GameBuild,
+) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     triggers = {t["name"]: t for t in snapshot["triggers"]}
     for player in range(1, 8):
-        mill = next(
-            u for u in snapshot["units"] if u["player_id"] == player and u["unit_const"] == 68
-        )
         cleanup = triggers[f"lane.p{player}.cleanup"]
         calls = [
             e["attributes"]["message"] for e in cleanup["effects"] if e["type"] == "script_call"
         ]
-        assert len(calls) == 1
-        binding = re.search(r"ancientCleanupLane\((\d+), (\d+)\)", calls[0])
-        assert binding is not None
-        assert tuple(map(int, binding.groups())) == (player, mill["reference_id"])
+        # The mill goes too: the XS leaves only one King on the lane's spare siege islet.
+        assert calls == [f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}"]
+        kinds = [e["type"] for e in cleanup["effects"]]
+        for protection in ("disable_unit_attackable", "disable_object_deletion"):
+            [protect] = [e["attributes"] for e in cleanup["effects"] if e["type"] == protection]
+            assert (protect["source_player"], protect["object_list_unit_id"]) == (player, KING)
+            assert kinds.index("script_call") < kinds.index(protection)
         assert not any(
             e["type"] in ("remove_object", "change_ownership")
             and e["attributes"]["source_player"] == player

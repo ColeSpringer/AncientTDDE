@@ -11,6 +11,7 @@ from conftest import (
     attr_int,
     attr_list,
     attr_number,
+    attr_text,
     load_scenario,
     probe_snapshot,
     tiles,
@@ -133,6 +134,40 @@ def test_tower_bonus_targets_explicit_types_and_upgrade_controls(probe_suite: Pr
         if e["type"] == "research_technology"
     }
     assert {101, 102, 103, 140, 63} <= technologies
+
+
+def test_tower_script_pads_add_attack_past_255_and_test_the_class_packing(
+    probe_suite: ProbeSuite,
+) -> None:
+    from ancienttdde.probes.towers import DEFINITION
+
+    directory, _ = probe_suite
+    triggers = triggers_by_name(probe_snapshot(directory, "towers"))
+    calls: dict[str, list[str]] = {}
+    for name in ("tower.beyond", "tower.encoding"):
+        trigger = triggers[name]
+        assert not trigger["looping"]
+        assert any(c["type"] == "objects_in_area" for c in trigger["conditions"])
+        calls[name] = [
+            attr_text(e["attributes"], "message")
+            for e in trigger["effects"]
+            if e["type"] == "script_call"
+        ]
+    # The pierce class (3) packed with each step: 3 * 256 + 255, then 3 * 256 + 45, on the
+    # Watch Tower, Guard Tower and Keep, as the game raises them, so upgrades keep the bonus.
+    [beyond] = calls["tower.beyond"]
+    [encoding] = calls["tower.encoding"]
+    # Each pad says in the chat that its script ran, so a script call DE skipped is not read
+    # as a result.
+    assert 'xsChatData("Script pad: ' in beyond and 'xsChatData("Encoding pad: ' in encoding
+    for tower in (79, 234, 235):
+        assert f"xsEffectAmount(cAddAttribute, {tower}, cAttack, 1023.0, 1);" in beyond
+        assert f"xsEffectAmount(cAddAttribute, {tower}, cAttack, 813.0, 1);" in beyond
+        # The same class in the upper 16 bits instead: 3 * 65536 + 7.
+        assert f"xsEffectAmount(cAddAttribute, {tower}, cAttack, 196615.0, 1);" in encoding
+    assert {"towers.beyond-255", "towers.encoding", "towers.beyond-persists"} <= {
+        case.id for case in DEFINITION.cases
+    }
 
 
 @pytest.mark.parametrize("name", ["trade", "trade-gaia", "raiders"])

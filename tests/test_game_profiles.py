@@ -131,29 +131,20 @@ def test_each_native_effect_set_gets_one_gated_trigger_per_lane(
     snapshot, _ = profile_scenario
     triggers = triggers_by_name(snapshot)
     variables = variables_by_name(snapshot)
-    assert [name for name in triggers if ".profile." in name] == [
-        "lane.p1.profile.1",
-        "lane.p1.profile.2",
-    ]
+    assert [name for name in triggers if ".profile." in name] == ["lane.p1.profile.1"]
+    # SHARP only adds tower attack, which the XS applies, so it needs no native set.
     assert [TEST_PROFILES.native_index(c.profile) for c in TEST_PROFILES.civilizations] == [
         1,
         1,
-        2,
+        0,
         0,
     ]
     # The XS sets the profile field only for an active lane whose setup has run, so the set
     # number is the one condition; the sets the lane does not play cost one check a pass.
-    for index in (1, 2):
-        trigger = triggers[f"lane.p1.profile.{index}"]
-        assert not trigger["looping"] and trigger["enabled"]
-        assert requested(trigger, variables["lane.p1.profile"]) == index
-        assert len(trigger["conditions"]) == 1
-    sharp = triggers["lane.p1.profile.2"]
-    assert [e["type"] for e in sharp["effects"]] == ["modify_attribute"] * 4
-    assert {
-        (e["object_list_unit_id"], e["armour_attack_quantity"])
-        for e in effects(sharp, "modify_attribute")
-    } == {(tower, 5) for tower in TOWERS}
+    trigger = triggers["lane.p1.profile.1"]
+    assert not trigger["looping"] and trigger["enabled"]
+    assert requested(trigger, variables["lane.p1.profile"]) == 1
+    assert len(trigger["conditions"]) == 1
 
 
 def test_resources_population_and_technologies_are_granted_once(
@@ -176,24 +167,15 @@ def test_resources_population_and_technologies_are_granted_once(
     ]
 
 
-def test_tower_attack_hit_points_and_stone_cost_reach_every_tower_definition(
+def test_tower_hit_points_and_stone_cost_reach_every_tower_definition(
     profile_scenario: tuple[ScenarioSnapshot, dict[str, MapAnchor]],
 ) -> None:
     snapshot, _ = profile_scenario
     trigger = triggers_by_name(snapshot)["lane.p1.profile.1"]
     changes = effects(trigger, "modify_attribute")
     assert all(c["source_player"] == 1 for c in changes)
-    attack = [
-        (c["object_list_unit_id"], c["armour_attack_quantity"])
-        for c in changes
-        if c["object_attributes"] == ATTACK
-    ]
-    assert attack == [(t, 2) for t in TOWERS] + [(236, 50)]
-    assert all(
-        c["armour_attack_class"] == PIERCE and c["operation"] == ADD
-        for c in changes
-        if c["object_attributes"] == ATTACK
-    )
+    # Tower attack is the XS's: a native attack change stops at 255.
+    assert not [c for c in changes if c["object_attributes"] == ATTACK]
     hit_points = {
         c["object_list_unit_id"]: (attr_int(c, "quantity"), c["operation"])
         for c in changes
@@ -321,9 +303,13 @@ def test_the_built_game_holds_one_trigger_per_lane_and_native_effect_set(
         for player in range(1, 8)
         for index in range(1, len(profiles.native_groups()) + 1)
     ]
+    for trigger in snapshot["triggers"]:
+        if ".profile." in trigger["name"]:
+            assert not [
+                e for e in effects(trigger, "modify_attribute") if e["object_attributes"] == ATTACK
+            ]
     prelude = (output / "runtime-prelude.xs").read_text(encoding="utf-8")
-    native = prelude.split("int civNative")[1].split("}")[0]
     for civilization in profiles.civilizations:
         index = profiles.native_index(civilization.profile)
         if index != profiles.native_index(profiles.default):
-            assert f"if (index == {civilization.id}) return ({index});" in native
+            assert f"xsArraySetInt(civNativeTable, {civilization.id}, {index});" in prelude

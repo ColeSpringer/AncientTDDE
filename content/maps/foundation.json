@@ -6020,7 +6020,7 @@
         130,
         22
       ],
-      "label": "Activate King every 2.5 min (13 Kings; legacy price)"
+      "label": "Activate King every 2.5 min (8 Kings)"
     },
     "shop.activate_king_every_1_minute": {
       "region": [
@@ -6029,7 +6029,7 @@
         130,
         29
       ],
-      "label": "Activate King Every 1 Minute (21 Kings; legacy price)"
+      "label": "Activate King Every 1 Minute (20 Kings)"
     },
     "shop.activate_1000_gold_every_2_minutes": {
       "region": [
@@ -6038,7 +6038,7 @@
         130,
         33
       ],
-      "label": "Activate 1000 Gold every 2 minutes (6 Kings; legacy price)"
+      "label": "Activate 1000 Gold every 2 minutes (4 Kings)"
     },
     "shop.activate_450_gold_every_2minutes": {
       "region": [
@@ -6047,7 +6047,7 @@
         131,
         35
       ],
-      "label": "Activate 450 Gold every 2minutes (3 Kings; legacy price)"
+      "label": "Activate 450 Gold every 2minutes (2 Kings)"
     },
     "shop.activate_175_gold_every_2_minutes": {
       "region": [
@@ -6074,7 +6074,7 @@
         140,
         35
       ],
-      "label": "Activate 375 Stone Every 2 Minutes (3 Kings; legacy price)"
+      "label": "Activate 375 Stone Every 2 Minutes (2 Kings)"
     },
     "shop.activate_800_stone_every_2_minutes": {
       "region": [
@@ -6083,7 +6083,7 @@
         140,
         32
       ],
-      "label": "Activate 800 Stone Every 2 Minutes (6 Kings; legacy price)"
+      "label": "Activate 800 Stone Every 2 Minutes (5 Kings)"
     },
     "shop.activate_1_atttack_every_30_seconds": {
       "region": [
@@ -6092,7 +6092,7 @@
         140,
         28
       ],
-      "label": "Activate +1 Atttack Every 30 Seconds (8 Kings; legacy price)"
+      "label": "Activate +1 Atttack Every 30 Seconds (4 Kings)"
     },
     "shop.activate_3_attack_every_minute": {
       "region": [
@@ -6182,7 +6182,7 @@
         151,
         49
       ],
-      "label": "Castle (3 Kings; legacy price)"
+      "label": "Castle (1 King)"
     },
     "shop.trade_carts": {
       "region": [
@@ -6215,19 +6215,19 @@
       "region": [
         162,
         46,
-        164,
+        162,
         49
       ],
-      "label": "3rd Row of Towers (2 Kings; legacy price)"
+      "label": "3rd Row of Towers (3 Kings)"
     },
     "shop.4th_row_of_towers": {
       "region": [
-        168,
-        36,
-        169,
-        38
+        164,
+        46,
+        164,
+        49
       ],
-      "label": "4th Row of Towers (3 Kings; legacy price)"
+      "label": "4th Row of Towers (3 Kings)"
     },
     "shop.activate_1_ap_every_5_seconds": {
       "region": [
@@ -6249,10 +6249,10 @@
     },
     "shop.land_raider": {
       "region": [
-        167,
-        15,
+        168,
+        36,
         169,
-        17
+        38
       ],
       "label": "Land raider (3 Kings)"
     },
@@ -6268,11 +6268,11 @@
     "shop.siege": {
       "region": [
         166,
-        25,
+        24,
         169,
         33
       ],
-      "label": "Siege power-up (20 Kings plus 5 per rival)"
+      "label": "Siege power-up (15 Kings plus 3 per rival)"
     },
     "controls.run": {
       "points": [
@@ -8626,15 +8626,7 @@
       "owner": 0
     },
     {
-      "reference_id": 39332,
-      "owner": 0
-    },
-    {
       "reference_id": 39739,
-      "owner": 0
-    },
-    {
-      "reference_id": 39334,
       "owner": 0
     },
     {
@@ -8724,6 +8716,222 @@
     {
       "reference_id": 40687,
       "owner": 0
+    }
+  ],
+  "placement_additions": [
+    {
+      "key": "shop.tower_rows.divider.45",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 163.5,
+      "y": 45.5
+    },
+    {
+      "key": "shop.tower_rows.divider.46",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 163.5,
+      "y": 46.5
+    },
+    {
+      "key": "shop.tower_rows.divider.47",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 163.5,
+      "y": 47.5
+    },
+    {
+      "key": "shop.tower_rows.divider.48",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 163.5,
+      "y": 48.5
+    },
+    {
+      "key": "shop.tower_rows.divider.49",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 163.5,
+      "y": 49.5
+    },
+    {
+      "key": "shop.naval_raider.border.167.19",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 167.5,
+      "y": 19.5
+    },
+    {
+      "key": "shop.naval_raider.border.168.19",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 168.5,
+      "y": 19.5
+    },
+    {
+      "key": "shop.naval_raider.border.169.19",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 169.5,
+      "y": 19.5
+    },
+    {
+      "key": "shop.naval_raider.border.170.19",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 19.5
+    },
+    {
+      "key": "shop.naval_raider.border.166.23",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 166.5,
+      "y": 23.5
+    },
+    {
+      "key": "shop.naval_raider.border.167.23",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 167.5,
+      "y": 23.5
+    },
+    {
+      "key": "shop.naval_raider.border.168.23",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 168.5,
+      "y": 23.5
+    },
+    {
+      "key": "shop.naval_raider.border.169.23",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 169.5,
+      "y": 23.5
+    },
+    {
+      "key": "shop.naval_raider.border.170.23",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 23.5
+    },
+    {
+      "key": "shop.naval_raider.border.170.20",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 20.5
+    },
+    {
+      "key": "shop.naval_raider.border.170.22",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 22.5
+    },
+    {
+      "key": "shop.siege.border.166.34",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 166.5,
+      "y": 34.5
+    },
+    {
+      "key": "shop.siege.border.167.34",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 167.5,
+      "y": 34.5
+    },
+    {
+      "key": "shop.siege.border.168.34",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 168.5,
+      "y": 34.5
+    },
+    {
+      "key": "shop.siege.border.169.34",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 169.5,
+      "y": 34.5
+    },
+    {
+      "key": "shop.siege.border.170.34",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 34.5
+    },
+    {
+      "key": "shop.siege.border.170.24",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 24.5
+    },
+    {
+      "key": "shop.siege.border.170.25",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 25.5
+    },
+    {
+      "key": "shop.siege.border.170.26",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 26.5
+    },
+    {
+      "key": "shop.siege.border.170.27",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 27.5
+    },
+    {
+      "key": "shop.siege.border.170.30",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 30.5
+    },
+    {
+      "key": "shop.siege.border.170.31",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 31.5
+    },
+    {
+      "key": "shop.siege.border.170.32",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 32.5
+    },
+    {
+      "key": "shop.siege.border.170.33",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 170.5,
+      "y": 33.5
+    }
+  ],
+  "placement_removals": [
+    {
+      "reference_id": 39332
+    },
+    {
+      "reference_id": 39334
+    },
+    {
+      "reference_id": 40666
     }
   ],
   "terrain_patches": [
@@ -8998,6 +9206,45 @@
       "terrain_id": 0,
       "allowed_source_terrain": [
         1
+      ]
+    },
+    {
+      "key": "shop.tower_rows.divider",
+      "region": [
+        163,
+        45,
+        163,
+        49
+      ],
+      "terrain_id": 35,
+      "allowed_source_terrain": [
+        24
+      ]
+    },
+    {
+      "key": "shop.naval_raider",
+      "region": [
+        167,
+        20,
+        169,
+        22
+      ],
+      "terrain_id": 24,
+      "allowed_source_terrain": [
+        0
+      ]
+    },
+    {
+      "key": "shop.siege",
+      "region": [
+        166,
+        24,
+        169,
+        33
+      ],
+      "terrain_id": 24,
+      "allowed_source_terrain": [
+        0
       ]
     }
   ],

@@ -39,6 +39,15 @@ def cells(region: Rect) -> set[Cell]:
     return {(x, y) for y in range(y1, y2 + 1) for x in range(x1, x2 + 1)}
 
 
+def blocking_sizes(config: FoundationConfig) -> dict[int, int]:
+    """Each mapped stock object's conservative footprint: the tiles a side it blocks."""
+    return {
+        row["stock_id"]: row.get("blocking_size", 0)
+        for row in config["objects"]
+        if row["stock_id"] is not None
+    }
+
+
 def footprint(unit: Position, size: int) -> set[Cell]:
     x1 = math.ceil(unit["x"] - size / 2)
     y1 = math.ceil(unit["y"] - size / 2)
@@ -84,11 +93,7 @@ def anchor_cells(anchor: MapAnchor, units: dict[int, MapUnit], sizes: dict[int, 
 def check_connectivity(data: MapDocument, config: FoundationConfig) -> MapValidation:
     width, height = data["map"]["width"], data["map"]["height"]
     units = {u["reference_id"]: u for u in data["units"]}
-    sizes = {
-        r["stock_id"]: r.get("blocking_size", 0)
-        for r in config["objects"]
-        if r["stock_id"] is not None
-    }
+    sizes = blocking_sizes(config)
     blocked = {cell for u in units.values() for cell in footprint(u, sizes[u["unit_const"]])}
     terrain_ids = {"land": config["land_terrain"], "water": config["water_terrain"]}
     walkable = {

@@ -30,6 +30,12 @@ TEST_CIVILIZATIONS = (
         ),
     ),
     Civilization("TESTTWO", 101, "", Profile()),
+    Civilization(
+        "TESTTHREE",
+        102,
+        "",
+        Profile(attack=(("towers", 3), ("bombard", 5)), purchases=("bombard_attack_400",)),
+    ),
 )
 
 
@@ -62,6 +68,21 @@ def prelude() -> str:
 
     balance, lanes, shop, profiles = content()
     return render_prelude(balance, lanes, shop, profiles)
+
+
+def filled(text: str, name: str) -> dict[int, int]:
+    """An array table's values by index: its fills over the default it was created with."""
+    [(size, default)] = re.findall(rf'xsArrayCreateInt\((\d+), (-?\d+), "{name}"\)', text)
+    values = dict.fromkeys(range(int(size)), int(default))
+    for index, value in re.findall(rf"xsArraySetInt\({name}Table, (\d+), (-?\d+)\);", text):
+        values[int(index)] = int(value)
+    return values
+
+
+def fallback(text: str, name: str) -> int:
+    """What an array table's accessor reads past its last index."""
+    [value] = re.findall(rf"int {name}\(int index = 0\) {{\n.*\n.*return \((-?\d+)\);", text)
+    return int(value)
 
 
 def harness_constants() -> str:
@@ -112,12 +133,50 @@ def test_prelude_lists_tower_access_from_the_tower_families() -> None:
     assert 'if (index == 2) return ("Bombard Tower");' in text.split("string towerName")[1]
 
 
+def test_prelude_tables_are_arrays_filled_once() -> None:
+    text = prelude()
+    # Integer tables are arrays; only the setup and message tables stay if-chains.
+    assert not re.search(r"if \(index == \d+\) return \(-?\d+\);", text)
+    assert "int shopX1Table = -1;" in text
+    assert "void ancientTables()" in text and 'xsArrayCreateInt(40, 0, "shopX1")' in text
+    accessor = (
+        "int shopX1(int index = 0) {\n    ancientEnsureTables();\n"
+        "    if ((index < 0) || (index >= 40)) return (0);\n"
+        "    return (xsArrayGetInt(shopX1Table, index));\n}"
+    )
+    assert accessor in text
+    order = [
+        "int shopX1Table = -1;",
+        "bool ancientTablesReady = false;",
+        "void ancientTables() {",
+        "void ancientEnsureTables() {",
+        "int shopX1(int index = 0) {",
+    ]
+    assert [text.index(line) for line in order] == sorted(text.index(line) for line in order)
+    _, _, shop, _ = content()
+    assert filled(text, "shopX1") == {0: 0} | {p.index: p.pad_region[0] for p in shop.purchases}
+
+
+def test_each_table_fills_in_its_own_function() -> None:
+    """No generated function grows past one table's values: the size the earlier lookup
+    functions ran at in DE."""
+    text = prelude()
+    names = re.findall(r'xsArrayCreateInt\(\d+, -?\d+, "(\w+)"\)', text)
+    fillers = [f"ancientFill{name[0].upper()}{name[1:]}" for name in names]
+    body = text.split("void ancientTables() {\n")[1].split("}")[0]
+    assert body.split() == [f"{filler}();" for filler in fillers]
+    for name, filler in zip(names, fillers, strict=True):
+        fill = text.split(f"void {filler}() {{\n")[1].split("}")[0]
+        assert fill.count("xsArrayCreateInt") == 1 and f'"{name}")' in fill
+        assert text.index(f"void {filler}()") < text.index("void ancientTables()")
+
+
 def test_prelude_passes_the_whole_relic_column() -> None:
     _, lanes, _, _ = content()
     text = prelude()
     x1, _, x2, _ = lanes[0].sites.relic_column
-    assert f"if (index == 1) return ({x1});" in text.split("int laneRelicX1")[1]
-    assert f"if (index == 1) return ({x2});" in text.split("int laneRelicX2")[1]
+    assert filled(text, "laneRelicX1")[1] == x1
+    assert filled(text, "laneRelicX2")[1] == x2
 
 
 def test_prelude_counts_transfers_and_still_samples() -> None:
@@ -140,30 +199,22 @@ def test_prelude_declares_message_codes_and_ownership_masks() -> None:
             in text
         )
     assert "const int cRepairMask = " in text and "shopBit" not in text
-    masks = text.split("int shopMask")[1].split("}")[0]
-    once = [p for p in shop.purchases if p.once]
-    assert all(f"return ({2**p.bit});" in masks for p in once)
+    masks = filled(text, "shopMask")
+    assert all(masks[p.index] == (2**p.bit if p.once else 0) for p in shop.purchases)
     assert "int shopName" not in text
 
 
 def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
     balance, _, _, _ = content()
     text = prelude()
-    lobby = text.split("int lobbyLevel")[1].split("}")[0]
     # xsGetDifficulty runs from Extreme (-1) to Easiest (4); the table starts at Extreme.
-    assert [
-        f"if (index == {i}) return ({level});" in lobby
-        for i, level in enumerate([2, 2, 2, 1, 1, 0])
-    ] == [True] * 6
-    gold = text.split("int kingGold")[1].split("}")[0]
-    assert all(f"return ({level.king_gold});" in gold for level in balance.difficulty.levels)
+    assert list(filled(text, "lobbyLevel").values()) == [2, 2, 2, 1, 1, 0]
+    assert list(filled(text, "kingGold").values()) == [
+        level.king_gold for level in balance.difficulty.levels
+    ]
     assert f"const int cCompetitiveLevel = {balance.difficulty.competitive};" in text
-    hit_points = text.split("int waveHitPoints")[1].split("}")[0]
     last = 2 * len(balance.waves) + len(balance.waves) - 1
-    assert (
-        f"if (index == {last}) return ({balance.hit_points(len(balance.waves) - 1, 2)});"
-        in hit_points
-    )
+    assert filled(text, "waveHitPoints")[last] == balance.hit_points(len(balance.waves) - 1, 2)
 
 
 def test_prelude_holds_no_test_only_names() -> None:
@@ -175,20 +226,24 @@ def test_prelude_holds_no_test_only_names() -> None:
 def test_prelude_maps_civilizations_to_their_profiles() -> None:
     _, _, _, profiles = content()
     text = prelude()
-    kings = text.split("int civKings")[1].split("}")[0]
-    assert kings.strip().endswith(f"return ({profiles.default.kings});")
-    gold = text.split("int civGoldPercent")[1].split("}")[0]
-    assert gold.strip().endswith(f"return ({profiles.default.king_gold_percent});")
-    kills = text.split("int civKillPercent")[1].split("}")[0]
-    assert kills.strip().endswith(f"return ({profiles.default.kill_reward_percent});")
-    native = text.split("int civNative")[1].split("}")[0]
-    assert native.strip().endswith(f"return ({profiles.native_index(profiles.default)});")
-    owned = text.split("int civOwned")[1].split("}")[0]
     _, _, shop, _ = content()
     from ancienttdde.game.civilizations import owned_mask
 
-    assert owned.strip().endswith(f"return ({owned_mask(profiles.default, shop)});")
-    assert f"if (index == 18) return ({2 ** shop.get('castle_age').bit});" in owned
+    # A civilization the content does not list reads the default profile, inside the table's
+    # range and past it.
+    default = profiles.default
+    for name, value in (
+        ("civKings", default.kings),
+        ("civGoldPercent", default.king_gold_percent),
+        ("civKillPercent", default.kill_reward_percent),
+        ("civNative", profiles.native_index(default)),
+        ("civOwned", owned_mask(default, shop)),
+    ):
+        listed = {c.id for c in profiles.civilizations}
+        values = filled(text, name)
+        assert fallback(text, name) == value, name
+        assert all(values[i] == value for i in values if i not in listed), name
+    assert filled(text, "civOwned")[18] == 2 ** shop.get("castle_age").bit
     raiders = text.split("int civRaiders")[1].split("}")[0]
     assert "if ((medium == 1) && (civ == 17)) return (1);" in raiders
     assert "if ((medium == 2) && (civ == 11)) return (1);" in raiders
@@ -250,7 +305,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
 @pytest.mark.parametrize(
     "case",
     [
-        "berry_mills",
+        "cleared_lanes",
         "slots",
         "ai_departures",
         "no_humans",
@@ -280,6 +335,8 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "wave_kings",
         "investments",
         "attack_investment",
+        "attack_chunks",
+        "attack_750",
         "repair",
         "life_display",
         "tower_access",
@@ -321,6 +378,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "endless_continues",
         "endless_growth",
         "endless_waits",
+        "endless_armor_past_255",
         "endless_result",
         "resume_endless",
         "raider_pvp_off",
@@ -338,6 +396,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "profile_grant_blocked",
         "profile_grant_tree",
         "profile_purchase",
+        "profile_attack",
         "siege_price",
         "siege_exclusive",
         "siege_timeline",
@@ -355,6 +414,9 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "choice_timeout",
         "choice_once",
         "spawn_rows",
+        "spawn_silent",
+        "shop_cached_pad_moves",
+        "collect_sweep",
         "boss_hitpoints",
         "boss_leak",
         "pvp_waits_for_first_wave",

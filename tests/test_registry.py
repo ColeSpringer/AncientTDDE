@@ -103,6 +103,17 @@ def test_named_trigger_and_variable_references() -> None:
         names.register("object", "king", -1)
 
 
+def test_name_table_lists_one_kinds_identifiers_under_a_key_prefix() -> None:
+    names = NameTable()
+    names.register("trigger", "lane.p1.spawned", 3)
+    names.register("trigger", "lane.p10.spawned", 4)
+    names.register("variable", "lane.p1.lives", 5)
+    names.register("trigger", "lane.p1.route", 1)
+    names.register("trigger", "game.clock", 2)
+    assert names.registered("trigger", "lane.p1.") == [3, 1]
+    assert names.registered("object", "lane.p1.") == []
+
+
 def test_map_identity_verification_does_not_approve_gameplay() -> None:
     identity: MapIdentity = {"dataset": "OtherInfo", "name": "BLOCKER", "parser_version": "0.9.4"}
     row: ObjectMapping = {

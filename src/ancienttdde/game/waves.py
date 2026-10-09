@@ -2,8 +2,6 @@
 
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
-from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
-from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
@@ -13,7 +11,7 @@ from ancienttdde.game.objectives import objective
 from ancienttdde.game.script import State
 from ancienttdde.game.sites import Tile, within
 from ancienttdde.game.triggers import Game
-from ancienttdde.map.geometry import footprint
+from ancienttdde.map.geometry import blocking_sizes, footprint
 from ancienttdde.map.models import FoundationConfig, MapDocument
 from ancienttdde.models import Rect
 from ancienttdde.scenario.triggers import PIERCE, TriggerHandle, area, condition, effect
@@ -21,8 +19,8 @@ from ancienttdde.scenario.triggers import PIERCE, TriggerHandle, area, condition
 # Lumber-camp trees hold more wood than a run uses. DE applies this effect value as a
 # 16-bit number (1,000,000 arrived as 16,960), so it stays below 32,768.
 LUMBER_TREE_WOOD = 32_000
-# Every wave enemy walks the lane at this speed, in tiles per second.
-ENEMY_SPEED = 0.65
+# Seconds between the orders that keep every enemy in a lane walking.
+ROUTE_SECONDS = 10
 
 
 def lumber_trees(game: Game, lane: EngineLane) -> list[Tile]:
@@ -47,7 +45,7 @@ def check_lumber_room(
 ) -> None:
     """The tile east of each placed lumber tree, where an endless tree grows, lies under no
     placed object's footprint."""
-    sizes = {r["stock_id"]: r.get("blocking_size", 0) for r in config["objects"]}
+    sizes = blocking_sizes(config)
     blocked = {c for u in data["units"] for c in footprint(u, sizes.get(u["unit_const"], 0))}
     tree = OtherInfo["TREE_A"].ID
     for lane in lanes:
@@ -116,9 +114,6 @@ def configure_waves(game: Game, balance: Balance) -> None:
                 ObjectAttribute.HIT_POINTS,
                 min(MAX_HIT_POINTS, balance.hit_points(index - 1, level)),
             )
-            game.set_attribute(
-                configure, 8, wave.object_id, ObjectAttribute.MOVEMENT_SPEED, ENEMY_SPEED
-            )
             if wave.pierce_armor is not None:
                 effect(
                     configure,
@@ -134,7 +129,8 @@ def configure_waves(game: Game, balance: Balance) -> None:
 
 
 def endless_growth(game: Game, balance: Balance) -> None:
-    """Endless enemies take each new level's hit points, and armor one step at a time."""
+    """Endless enemies take each new level's hit points. The XS adds their armor, which a
+    native effect could not raise past 255."""
     units = [balance.waves[t].object_id for t in balance.endless.templates]
     for level in range(1, balance.endless_levels + 1):
         for index, difficulty in enumerate(balance.difficulty.levels):
@@ -145,20 +141,6 @@ def endless_growth(game: Game, balance: Balance) -> None:
                 hit_points = balance.endless_hit_points(level, position, index)
                 game.set_attribute(grow, 8, unit, ObjectAttribute.HIT_POINTS, hit_points)
             game.set_value(grow, "game.endless_request", 0)
-    armor = game.trigger("game.endless.armor", looping=True)
-    game.value(armor, "game.armor_request", 1, Comparison.LARGER_OR_EQUAL)
-    for unit in dict.fromkeys(units):
-        effect(
-            armor,
-            "modify_attribute",
-            source_player=8,
-            object_list_unit_id=unit,
-            object_attributes=ObjectAttribute.ARMOR,
-            operation=Operation.ADD,
-            armour_attack_class=PIERCE,
-            armour_attack_quantity=balance.endless.armor_step,
-        )
-    game.set_value(armor, "game.armor_request", 1, Operation.SUBTRACT)
 
 
 def wave_warnings(game: Game, balance: Balance) -> None:
@@ -223,7 +205,10 @@ def game_status(game: Game, balance: Balance) -> None:
     )
 
 
-def lane_rows(lane: EngineLane) -> tuple[tuple[Rect, int], ...]:
+type Band = tuple[Rect, int]
+
+
+def lane_rows(lane: EngineLane) -> tuple[Band, ...]:
     """The lane's path in three bands, each with the exit row its enemies walk to: enemies
     created side by side keep their files instead of converging on one tile."""
     x1, y1, x2, y2 = lane.path
@@ -235,16 +220,17 @@ def lane_rows(lane: EngineLane) -> tuple[tuple[Rect, int], ...]:
     )
 
 
-def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane) -> None:
-    """Every enemy in the lane holds its ground and walks its band to the exit."""
-    effect(
-        trigger,
-        "change_object_stance",
-        source_player=8,
-        attack_stance=AttackStance.STAND_GROUND,
-        **area(lane.path),
+def spawn_rows(lane: EngineLane) -> tuple[Band, ...]:
+    """The lane's bands in the spawn column alone, where the XS creates each batch."""
+    return tuple(
+        ((lane.spawn_x, y1, lane.spawn_x + 1, y2), row) for (_, y1, _, y2), row in lane_rows(lane)
     )
-    for band, row in lane_rows(lane):
+
+
+def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane, bands: tuple[Band, ...]) -> None:
+    """Every enemy in the bands walks its band to the exit. The enemy is allied to every lane,
+    so nothing stops it on the way; each new order makes a walking unit pause."""
+    for band, row in bands:
         effect(
             trigger,
             "task_object",
@@ -257,21 +243,23 @@ def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane) -> None:
 
 
 def lane_spawned(game: Game, lane: EngineLane) -> None:
-    """The XS creates each batch of enemies; this acknowledges it by sending them off."""
+    """The XS creates each batch of enemies; this acknowledges it by sending the new batch
+    off."""
     prefix = f"lane.p{lane.player}"
     spawned = game.trigger(f"{prefix}.spawned", looping=True)
     game.value(spawned, f"{prefix}.active", 1)
     game.value(spawned, f"{prefix}.spawn", 1)
-    send_down_the_lane(spawned, lane)
+    send_down_the_lane(spawned, lane, spawn_rows(lane))
     game.set_value(spawned, f"{prefix}.spawn", 0)
 
 
 def lane_route(game: Game, lane: EngineLane) -> None:
+    """Every enemy in the lane is ordered on again now and then, in case one lost its way."""
     prefix = f"lane.p{lane.player}"
     move = game.trigger(f"{prefix}.route", looping=True)
-    condition(move, "timer", timer=3)
+    condition(move, "timer", timer=ROUTE_SECONDS)
     game.value(move, f"{prefix}.active", 1)
-    send_down_the_lane(move, lane)
+    send_down_the_lane(move, lane, lane_rows(lane))
 
 
 def declare_results(game: Game) -> None:

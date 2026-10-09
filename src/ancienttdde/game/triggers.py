@@ -25,13 +25,9 @@ class Game(Builder):
             }
         return self.gaia_positions[kind]
 
-    def forget_gaia(self, kind: str | None = None) -> None:
-        """Drop the cached Gaia objects of a kind, or of every kind, after adding, moving or
-        removing some."""
-        if kind is None:
-            self.gaia_positions.clear()
-        else:
-            self.gaia_positions.pop(kind, None)
+    def forget_gaia(self, kind: str) -> None:
+        """Drop the cached Gaia objects of a kind after adding or removing some."""
+        self.gaia_positions.pop(kind, None)
 
     def placement(self, reference_id: int) -> int:
         """Return the ID of an instance the map placed, rejecting any other ID."""

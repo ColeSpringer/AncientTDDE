@@ -15,7 +15,7 @@ from ancienttdde.game.controls import (
     control_labels,
     controls,
 )
-from ancienttdde.game.objectives import listed
+from ancienttdde.game.objectives import objective
 from ancienttdde.game.sites import numbers
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
@@ -63,12 +63,12 @@ def chooser_view(game: Game, anchors: Mapping[str, object]) -> None:
 
 
 def options_objectives(game: Game, balance: Balance) -> None:
-    """On-screen lines naming the controls left to right, listed while they stand: an
-    objective completes, and leaves the screen, once its conditions hold."""
+    """On-screen lines naming the controls left to right, listed until the options lock: a
+    deactivated objective leaves the box, a fired one would stay struck through."""
     labels = control_labels(balance)
     run = ", ".join(labels[c.key] for c in controls("run"))
     practice = ", ".join(labels[c.key] for c in controls("practice"))
-    options = listed(
+    options = objective(
         game,
         "game.objective.options",
         f"Run options below the shop, left to right: {run}",
@@ -76,23 +76,27 @@ def options_objectives(game: Game, balance: Balance) -> None:
         f"{balance.choice_seconds} game seconds.",
         shown=True,
     )
-    game.value(options, "game.locked", 1)
-    helpers = listed(
+    helpers = objective(
         game,
         "game.objective.practice_controls",
         f"Practice controls (solo Practice runs) to their right: {practice}",
         "They work in a Practice run and leave with the options otherwise.",
         shown=True,
     )
-    game.value(helpers, "game.locked", 1)
+    hide = game.trigger("game.hide.options", looping=False)
+    game.value(hide, "game.locked", 1)
+    effect(hide, "deactivate_trigger", trigger_id=options)
+    hide_helpers = game.trigger("game.hide.practice_controls", looping=False)
+    game.value(hide_helpers, "game.locked", 1)
     condition(
-        helpers,
+        hide_helpers,
         "variable_value",
         variable=game.names.resolve("variable", "game.mode"),
         quantity=MODES.index("practice"),
         comparison=Comparison.EQUAL,
         inverted=1,
     )
+    effect(hide_helpers, "deactivate_trigger", trigger_id=helpers)
 
 
 def lane_controls(game: Game, player: int) -> None:

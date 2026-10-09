@@ -120,9 +120,9 @@ def test_instructions_scale_the_schedule_by_difficulty() -> None:
     from ancienttdde.game.instructions import instructions
 
     text = instructions(balance(), shop(), profiles())
-    assert "Hit points below are for Normal: 80% on Easy and 125% on Hard" in text
-    assert "1. Villagers: 30 enemies with 60 HP each, 45 game seconds" in text
-    assert "56. Abraha Elephant: boss with 1162000 HP" in text
+    assert "Hit points below are for Normal: 80% on Easy and 110% on Hard" in text
+    assert "1. Villagers: 30 enemies with 45 HP each, 45 game seconds" in text
+    assert "56. Abraha Elephant: boss with 980000 HP" in text
     assert "in threes from wave 31, and each boss comes alone" in text
     assert "costs one life, a boss 5" in text
     assert "restored from its whole amount as it takes damage" in text
@@ -137,8 +137,8 @@ def test_the_schedule_shows_hit_points_at_the_competitive_level(tmp_path: Path) 
     path.write_text(json.dumps(raw))
     text = instructions(balance(path), shop(), profiles())
     assert "Hit points below are for Hard: 80% on Easy and 100% on Normal" in text
-    # 60 hit points at 125%.
-    assert "1. Villagers: 30 enemies with 75 HP each" in text
+    # 45 hit points at 110%, rounded.
+    assert "1. Villagers: 30 enemies with 50 HP each" in text
 
 
 def test_instructions_explain_endless_practice_and_sudden_death() -> None:

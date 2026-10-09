@@ -1,9 +1,8 @@
-"""Native triggers for a lane's Kings, periodic tower attack, villager transfers and bonuses."""
+"""Native triggers for a lane's Kings, villager transfers and bonuses."""
 
 import math
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
-from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
@@ -94,17 +93,6 @@ def lane_kings(game: Game, lane: EngineLane) -> None:
         **around((stall,)),
         **at(lane.sites.king_rally),
     )
-
-
-def lane_attack(game: Game, lane: EngineLane, units: tuple[int, ...]) -> None:
-    """Apply periodic tower attack one point per firing, as the XS accrues it."""
-    player = lane.player
-    prefix = f"lane.p{player}"
-    trigger = game.trigger(f"{prefix}.attack", looping=True)
-    game.value(trigger, f"{prefix}.active", 1)
-    game.value(trigger, f"{prefix}.attack", 1, Comparison.LARGER_OR_EQUAL)
-    game.attack_bonus(trigger, player, units, 1)
-    game.set_value(trigger, f"{prefix}.attack", 1, Operation.SUBTRACT)
 
 
 def lane_transfers(game: Game, lane: EngineLane) -> None:

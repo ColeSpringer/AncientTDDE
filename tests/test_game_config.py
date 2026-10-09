@@ -56,9 +56,9 @@ def test_the_schedule_follows_the_originals_roster_and_cadence() -> None:
         assert wave.enemies == expected, wave.key
     bosses = waves[46:]
     assert all(w.enemies == 1 and w.duration == 1 for w in bosses)
-    # The rams keep some of their armor, not the 195 that would turn arrows away.
+    # The rams keep half their armor, not the 195 that would turn arrows away.
     rams = next(w for w in waves if w.unit == "SIEGE_RAM")
-    assert rams.pierce_armor == 40 and all(w.pierce_armor is None for w in waves if w is not rams)
+    assert rams.pierce_armor == 100 and all(w.pierce_armor is None for w in waves if w is not rams)
     assert len({w.unit for w in bosses}) == 10 and not {w.unit for w in bosses} & set(units)
 
 
@@ -66,7 +66,7 @@ def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
     from ancienttdde.game.config import load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
-    assert waves[0].unit == "VILLAGER_MALE" and waves[0].hit_points == 60
+    assert waves[0].unit == "VILLAGER_MALE" and waves[0].hit_points == 45
     assert waves[0].hit_points < min(w.hit_points for w in waves[1:])
 
 
@@ -146,13 +146,14 @@ def test_wave_hit_points_fit_the_engine_attribute_except_for_bosses() -> None:
     assert all(MAX_HIT_POINTS < w.hit_points <= BOSS_HIT_POINTS for w in waves if w.boss)
 
 
-def test_each_boss_outclasses_the_last() -> None:
+def test_every_boss_outclasses_every_regular_wave() -> None:
     from ancienttdde.game.config import load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
+    # Each boss needs more damage per second than the last (test_game_balance.py); its hit
+    # points follow its speed.
     bosses = [w.hit_points for w in waves if w.boss]
-    assert bosses == sorted(set(bosses))
-    assert bosses[0] > 10 * max(w.hit_points for w in waves if not w.boss)
+    assert min(bosses) > 10 * max(w.hit_points for w in waves if not w.boss)
 
 
 def write_balance(tmp_path: Path, raw: dict[str, object]) -> Path:
@@ -288,7 +289,7 @@ def test_lobby_difficulty_chooses_gold_per_king_and_wave_strength() -> None:
     assert [(d.key, d.name, d.king_gold, d.hit_points_percent) for d in difficulty.levels] == [
         ("easy", "Easy", 1500, 80),
         ("normal", "Normal", 2000, 100),
-        ("hard", "Hard", 3000, 125),
+        ("hard", "Hard", 3000, 110),
     ]
     # DE's lobby settings, as xsGetDifficulty reports them, from Extreme (-1) to Easiest (4).
     assert LOBBY_DIFFICULTIES == {
@@ -313,10 +314,10 @@ def test_difficulty_scales_wave_hit_points_within_the_engine_limit() -> None:
         scaled = [balance.hit_points(index, level) for level in range(3)]
         assert scaled == sorted(scaled)
         assert wave.boss or max(scaled) <= MAX_HIT_POINTS
-    assert balance.hit_points(0, balance.difficulty.index("easy")) == 48
+    assert balance.hit_points(0, balance.difficulty.index("easy")) == 36
     last = balance.waves[-1]
     assert balance.hit_points(len(balance.waves) - 1, balance.difficulty.index("hard")) == (
-        last.hit_points * 125 // 100
+        last.hit_points * 110 // 100
     )
 
 

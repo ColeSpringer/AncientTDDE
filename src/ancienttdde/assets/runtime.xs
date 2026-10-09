@@ -5,16 +5,18 @@ int ancientRelicArray = -1;
 int ancientVillagerArray = -1;
 int ancientPadCounts = -1;
 int ancientLeakCounts = -1;
+int ancientLaneRows = -1;
 int ancientSpawnArray = -1;
 int ancientKingIds = -1;
 int ancientKingX = -1;
 int ancientKingY = -1;
 int ancientKingStill = -1;
+int ancientKingPad = -1;
 int ancientKingSampled = -1;
-int ancientKingPads = -1;
 int ancientSampleX = -1;
 int ancientSampleY = -1;
 int ancientSampleStill = -1;
+int ancientSamplePad = -1;
 int ancientLastNotice = -1;
 // Each lane's boss as last seen: the hit points its unit was left with, and the quarter of
 // its reservoir it was in.
@@ -107,15 +109,23 @@ void ancientShowLives(int player = 1) {
     xsSetUnitHitpoints(laneLife(player), hitpoints);
 }
 
-// Query the object classes a lane's units belong to; DE documents no all-objects wildcard,
-// and class N is addressed as cArcherClass + N.
-void ancientCleanupLane(int player = 1, int berryMill = -1) {
+// Clear a computer-filled or eliminated lane. Query the object classes a lane's units belong
+// to; DE documents no all-objects wildcard, and class N is addressed as cArcherClass + N.
+void ancientCleanupLane(int player = 1) {
     for (kind = 0; < cLaneClasses) {
         ancientUnitArray = xsGetPlayerUnitIds(player, cArcherClass + laneClass(kind), ancientUnitArray);
         for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
-            int unit = xsArrayGetInt(ancientUnitArray, index);
-            if (unit != berryMill) xsRemoveUnit(unit);
+            xsRemoveUnit(xsArrayGetInt(ancientUnitArray, index));
         }
+    }
+    // One unit keeps the slot in the game: the engine defeats a player who owns nothing. It
+    // stands on the lane's third siege islet, which no siege uses. A player who has left the
+    // game needs none.
+    if (xsGetPlayerInGame(player) == false) return;
+    int spare = player * cSiegeSlots + 2;
+    vector keep = xsVectorSet(0.1 * siegeX10(spare), 0.1 * siegeY10(spare), 0.0);
+    if (xsCreateUnit(cKing, player, keep, false, false, false) < 0) {
+        xsChatData(ancientPlayer(player) + "'s cleared lane could not keep its slot, so DE may report it defeated.");
     }
 }
 
@@ -154,6 +164,29 @@ string ancientTowerAccess(int player = 1) {
     return (text);
 }
 
+// Add pierce attack or armor to a player's object definition, for existing, new and upgraded
+// objects. A native Modify Attribute cannot raise a class past 255; a technology-style effect
+// can, but its value packs the class with the amount (class * 256 + amount), so the amount
+// goes in steps.
+void ancientAddPierce(int player = 1, int unit = -1, int attribute = 0, int amount = 0) {
+    int left = amount;
+    while (left > 0) {
+        int step = left;
+        if (step > cClassChunk) step = cClassChunk;
+        // The value parameter is a float; DE does not promote an int argument.
+        float value = 1.0 * (256 * cPierceClass + step);
+        xsEffectAmount(cAddAttribute, unit, attribute, value, player);
+        left = left - step;
+    }
+}
+
+// Add pierce attack to every tower definition of a family.
+void ancientAddAttack(int player = 1, int family = 0, int amount = 0) {
+    for (member = 0; < familyCount(family)) {
+        ancientAddPierce(player, familyUnit(familyStart(family) + member), cAttack, amount);
+    }
+}
+
 // Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
 // shared trade areas are not checked, so no rival unit can hold a purchase back.
 bool ancientSpawn(int player = 1, int purchase = 0) {
@@ -181,6 +214,14 @@ bool ancientSpawn(int player = 1, int purchase = 0) {
     return (false);
 }
 
+// A civilization profile's own tower attack, added like any other.
+void ancientCivAttack(int player = 1, int civ = 0) {
+    for (family = 0; < cFamilies) {
+        int amount = civAttack(family, civ);
+        if (amount > 0) ancientAddAttack(player, family, amount);
+    }
+}
+
 // A granted purchase the lane cannot keep goes back on sale.
 void ancientUngrant(int player = 1, int purchase = 0, string reason = "") {
     int mask = shopMask(purchase);
@@ -188,9 +229,10 @@ void ancientUngrant(int player = 1, int purchase = 0, string reason = "") {
     xsChatData(ancientPlayer(player) + ": a starting purchase " + reason + " and stays on sale.");
 }
 
-// Place the units of every purchase the lane's civilization holds from the start, as a payment
-// would, once the lane's own setup has run. A purchase for civilizations with a technology
-// this one lacks, or whose spot is blocked, goes back on sale instead.
+// Place the units and add the tower attack of every purchase the lane's civilization holds
+// from the start, as a payment would, once the lane's own setup has run. A purchase for
+// civilizations with a technology this one lacks, or whose spot is blocked, goes back on sale
+// instead.
 void ancientGrant(int player = 1, int civ = 0) {
     for (slot = 0; < cGrantSlots) {
         int purchase = civGrant(civ, slot);
@@ -200,6 +242,8 @@ void ancientGrant(int player = 1, int civ = 0) {
                 ancientUngrant(player, purchase, "is not for this civilization");
             } else if (ancientSpawn(player, purchase) == false) {
                 ancientUngrant(player, purchase, "could not be placed");
+            } else if (shopAttack(purchase) > 0) {
+                ancientAddAttack(player, shopAttackFamily(purchase), shopAttack(purchase));
             }
         }
     }
@@ -303,8 +347,9 @@ string ancientWaveText(int wave = 0) {
     return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
 }
 
-// Native triggers set the endless enemies' hit points for a new level and add each armor step,
-// clearing the requests; the wave spawns once they have.
+// Native triggers set the endless enemies' hit points for a new level, clearing the request;
+// the wave spawns once they have. The script adds each armor step itself, past the 255 a
+// native effect stops at.
 void ancientConfigureEndless(int wave = 0) {
     int endless = wave - cWaveCount;
     int level = ancientEndlessLevel(endless);
@@ -316,7 +361,9 @@ void ancientConfigureEndless(int wave = 0) {
     int target = ancientEndlessArmor(endless);
     while (armor < target) {
         armor = armor + cArmorStep;
-        xsSetTriggerVariable(vArmorRequest, xsTriggerVariable(vArmorRequest) + 1);
+        for (enemy = 0; < cEndlessUnits) {
+            ancientAddPierce(8, endlessUnit(enemy), cArmor, cArmorStep);
+        }
     }
     xsSetTriggerVariable(vArmor, armor);
     xsSetTriggerVariable(vConfigured, ancientTemplate(wave) + 1);
@@ -545,36 +592,49 @@ void ancientBossTrack(int player = 1, int unit = -1) {
     if (quarter < before) xsArraySetInt(ancientBossQuarter, player, quarter);
 }
 
-// Collect every lane's losses before changing state or selecting a winner.
-int ancientCollect() {
+// Collect every lane's losses before changing state or selecting a winner. A second looks at
+// the current wave's enemy type and at one slice of the others, those whose index leaves the
+// slice as its remainder, so every type is looked at once in cSweepTicks seconds and no second
+// looks at them all. Without a slice, every type is looked at.
+int ancientCollect(int live = -1, int slice = -1) {
     if (ancientLeakCounts < 0) ancientLeakCounts = xsArrayCreateInt(8, 0, "ancientLeakCounts");
+    // Each lane's first row and the row past its last, read once rather than for every enemy.
+    if (ancientLaneRows < 0) {
+        ancientLaneRows = xsArrayCreateInt(16, 0, "ancientLaneRows");
+        for (row = 1; <= 7) {
+            xsArraySetInt(ancientLaneRows, 2 * row, laneLowY(row));
+            xsArraySetInt(ancientLaneRows, 2 * row + 1, laneHighY(row) + 1);
+        }
+    }
     for (slot = 1; <= 7) {
         laneSet(slot, fCount, 0);
         xsArraySetInt(ancientLeakCounts, slot, 0);
     }
     for (kind = 0; < cEnemyTypes) {
-        ancientUnitArray = xsGetPlayerUnitIds(8, enemyType(kind), ancientUnitArray);
-        int lives = enemyLives(kind);
-        bool boss = (enemyBoss(kind) == 1);
-        for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
-            int unit = xsArrayGetInt(ancientUnitArray, index);
-            if (xsGetUnitHitpoints(unit) > 0) {
-                vector position = xsGetUnitPosition(unit);
-                float x = xsVectorGetX(position);
-                float y = xsVectorGetY(position);
-                for (defender = 1; <= 7) {
-                    if ((y >= laneLowY(defender)) && (y < laneHighY(defender) + 1)) {
-                        // Units sent to the exit tile stop just short of its west edge,
-                        // so its preceding tile, marked by the exit flags, counts as the exit.
-                        if (laneValue(defender, fActive) == 0) {
-                            xsRemoveUnit(unit);
-                        } else if (x >= laneExitX(defender) - 1) {
-                            laneSet(defender, fLives, laneValue(defender, fLives) - lives);
-                            xsArraySetInt(ancientLeakCounts, defender, xsArrayGetInt(ancientLeakCounts, defender) + lives);
-                            xsRemoveUnit(unit);
-                        } else {
-                            laneSet(defender, fCount, laneValue(defender, fCount) + 1);
-                            if (boss) ancientBossTrack(defender, unit);
+        if ((slice < 0) || (kind == live) || (kind % cSweepTicks == slice)) {
+            ancientUnitArray = xsGetPlayerUnitIds(8, enemyType(kind), ancientUnitArray);
+            int lives = enemyLives(kind);
+            bool boss = (enemyBoss(kind) == 1);
+            for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
+                int unit = xsArrayGetInt(ancientUnitArray, index);
+                if (xsGetUnitHitpoints(unit) > 0) {
+                    vector position = xsGetUnitPosition(unit);
+                    float x = xsVectorGetX(position);
+                    float y = xsVectorGetY(position);
+                    for (defender = 1; <= 7) {
+                        if ((y >= xsArrayGetInt(ancientLaneRows, 2 * defender)) && (y < xsArrayGetInt(ancientLaneRows, 2 * defender + 1))) {
+                            // Units sent to the exit tile stop just short of its west edge,
+                            // so its preceding tile, marked by the exit flags, counts as the exit.
+                            if (laneValue(defender, fActive) == 0) {
+                                xsRemoveUnit(unit);
+                            } else if (x >= laneExitX(defender) - 1) {
+                                laneSet(defender, fLives, laneValue(defender, fLives) - lives);
+                                xsArraySetInt(ancientLeakCounts, defender, xsArrayGetInt(ancientLeakCounts, defender) + lives);
+                                xsRemoveUnit(unit);
+                            } else {
+                                laneSet(defender, fCount, laneValue(defender, fCount) + 1);
+                                if (boss) ancientBossTrack(defender, unit);
+                            }
                         }
                     }
                 }
@@ -602,7 +662,6 @@ int ancientCollect() {
                 laneSet(player, fSpawn, 0);
                 laneSet(player, fPurchase, 0);
                 laneSet(player, fKings, 0);
-                laneSet(player, fAttack, 0);
                 laneSet(player, fCleanup, 1);
                 xsChatData("Defense lane eliminated: P%d", player);
                 losses = losses + 1;
@@ -716,8 +775,8 @@ int ancientRowOffset(int count = 1, int index = 0) {
     return (index - (count - 1) / 2);
 }
 
-// A batch of the wave's enemies for a lane, created without collision checks so nothing holds
-// a wave back. The lane's native trigger then sets their stance and sends them down the lane.
+// A batch of the wave's enemies for a lane, created silently and without collision checks so
+// nothing holds a wave back. The lane's native trigger then sends them down the lane.
 // A boss comes alone with the attribute's limit of hit points; the rest waits in the lane's
 // reservoir, which its unit draws on as it is hit.
 void ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
@@ -725,7 +784,7 @@ void ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
     int unit = -1;
     for (index = 0; < count) {
         vector spot = xsVectorSet(0.5 + laneSpawnX(player), 0.5 + laneY(player) + ancientRowOffset(count, index), 0.0);
-        unit = xsCreateUnit(waveUnit(pattern), 8, spot, false, true, false);
+        unit = xsCreateUnit(waveUnit(pattern), 8, spot, false, false, false);
     }
     if ((waveBoss(pattern) == 1) && (unit >= 0)) {
         ancientBossBuffers();
@@ -854,33 +913,34 @@ void ancientNotice(int player = 1, int purchase = 0, int code = 0) {
     xsArraySetInt(ancientLastNotice, player, key);
 }
 
-// How many consecutive samples this King has stayed within half a tile of where it was.
-int ancientKingStillness(int player = 1, int king = -1, float x = 0.0, float y = 0.0) {
+// Where this King was in the lane's previous sample, or -1. A list that has not changed keeps
+// each King at its place, so that place is tried first.
+int ancientKingSlot(int player = 1, int king = -1, int guess = 0) {
     int base = player * cKingSlots;
-    for (slot = 0; < xsArrayGetInt(ancientKingSampled, player)) {
-        if (xsArrayGetInt(ancientKingIds, base + slot) == king) {
-            float dx = x - xsArrayGetFloat(ancientKingX, base + slot);
-            float dy = y - xsArrayGetFloat(ancientKingY, base + slot);
-            if ((dx * dx + dy * dy) < 0.25) return (xsArrayGetInt(ancientKingStill, base + slot) + 1);
-            return (0);
-        }
+    int sampled = xsArrayGetInt(ancientKingSampled, player);
+    if ((guess < sampled) && (xsArrayGetInt(ancientKingIds, base + guess) == king)) return (guess);
+    for (slot = 0; < sampled) {
+        if (xsArrayGetInt(ancientKingIds, base + slot) == king) return (slot);
     }
-    return (0);
+    return (-1);
 }
 
 // Count the Kings standing on each pad. Walking Kings move over a tile between samples, so a
-// King counts only once it has stood still for cStillSamples whole samples.
+// King counts only once it has stayed within half a tile of where it was for cStillSamples
+// whole samples. A King that has not moved at all since it was counted stands on the pad it
+// stood on then, so idle Kings cost no pad search.
 void ancientSampleKings(int player = 1) {
     if (ancientKingIds < 0) {
         ancientKingIds = xsArrayCreateInt(8 * cKingSlots, -1, "ancientKingIds");
         ancientKingX = xsArrayCreateFloat(8 * cKingSlots, 0.0, "ancientKingX");
         ancientKingY = xsArrayCreateFloat(8 * cKingSlots, 0.0, "ancientKingY");
         ancientKingStill = xsArrayCreateInt(8 * cKingSlots, 0, "ancientKingStill");
+        ancientKingPad = xsArrayCreateInt(8 * cKingSlots, 0, "ancientKingPad");
         ancientKingSampled = xsArrayCreateInt(8, 0, "ancientKingSampled");
-        ancientKingPads = xsArrayCreateInt(cKingSlots, 0, "ancientKingPads");
         ancientSampleX = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleX");
         ancientSampleY = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleY");
         ancientSampleStill = xsArrayCreateInt(cKingSlots, 0, "ancientSampleStill");
+        ancientSamplePad = xsArrayCreateInt(cKingSlots, 0, "ancientSamplePad");
         ancientPadCounts = xsArrayCreateInt(cShopCount + 1, 0, "ancientPadCounts");
     }
     for (pad = 0; <= cShopCount) {
@@ -889,27 +949,40 @@ void ancientSampleKings(int player = 1) {
     ancientUnitArray = xsGetPlayerUnitIds(player, cKing, ancientUnitArray);
     int kings = xsArrayGetSize(ancientUnitArray);
     if (kings > cKingSlots) kings = cKingSlots;
+    int base = player * cKingSlots;
     for (index = 0; < kings) {
         int king = xsArrayGetInt(ancientUnitArray, index);
         vector position = xsGetUnitPosition(king);
         float x = xsVectorGetX(position);
         float y = xsVectorGetY(position);
-        int still = ancientKingStillness(player, king, x, y);
+        int slot = ancientKingSlot(player, king, index);
+        int still = 0;
+        bool moved = true;
+        if (slot >= 0) {
+            float dx = x - xsArrayGetFloat(ancientKingX, base + slot);
+            float dy = y - xsArrayGetFloat(ancientKingY, base + slot);
+            float distance = dx * dx + dy * dy;
+            if (distance < 0.25) still = xsArrayGetInt(ancientKingStill, base + slot) + 1;
+            moved = (distance > 0.0);
+        }
         int standing = 0;
-        if ((still >= cStillSamples) && (xsGetUnitHitpoints(king) > 0) && (xsGetGarrisonedInUnitId(king) < 0)) standing = ancientPadAt(x, y);
-        xsArraySetInt(ancientKingPads, index, standing);
+        if ((still >= cStillSamples) && (xsGetUnitHitpoints(king) > 0) && (xsGetGarrisonedInUnitId(king) < 0)) {
+            if ((still > cStillSamples) && (moved == false)) standing = xsArrayGetInt(ancientKingPad, base + slot);
+            else standing = ancientPadAt(x, y);
+        }
+        xsArraySetInt(ancientSamplePad, index, standing);
         xsArraySetInt(ancientPadCounts, standing, xsArrayGetInt(ancientPadCounts, standing) + 1);
         xsArraySetFloat(ancientSampleX, index, x);
         xsArraySetFloat(ancientSampleY, index, y);
         xsArraySetInt(ancientSampleStill, index, still);
     }
     // This sample replaces the previous one only after every King has been compared with it.
-    int base = player * cKingSlots;
     for (record = 0; < kings) {
         xsArraySetInt(ancientKingIds, base + record, xsArrayGetInt(ancientUnitArray, record));
         xsArraySetFloat(ancientKingX, base + record, xsArrayGetFloat(ancientSampleX, record));
         xsArraySetFloat(ancientKingY, base + record, xsArrayGetFloat(ancientSampleY, record));
         xsArraySetInt(ancientKingStill, base + record, xsArrayGetInt(ancientSampleStill, record));
+        xsArraySetInt(ancientKingPad, base + record, xsArrayGetInt(ancientSamplePad, record));
     }
     xsArraySetInt(ancientKingSampled, player, kings);
 }
@@ -944,12 +1017,13 @@ void ancientShop(int player = 1) {
     int kings = xsArrayGetSize(ancientUnitArray);
     if (kings > cKingSlots) kings = cKingSlots;
     for (payment = 0; < kings) {
-        if ((paid < price) && (xsArrayGetInt(ancientKingPads, payment) == ready)) {
+        if ((paid < price) && (xsArrayGetInt(ancientSamplePad, payment) == ready)) {
             xsRemoveUnit(xsArrayGetInt(ancientUnitArray, payment));
             paid = paid + 1;
         }
     }
     if (shopMask(ready) > 0) laneSet(player, fOwned, laneValue(player, fOwned) + shopMask(ready));
+    if (shopAttack(ready) > 0) ancientAddAttack(player, shopAttackFamily(ready), shopAttack(ready));
     if (ready == cSiegePurchase) ancientClaimSiege(player, price);
     laneSet(player, fPurchase, ready);
 }
@@ -1065,7 +1139,7 @@ void ancientInvest(int player = 1, int clock = 0) {
             } else if (pays == cPaysKing) {
                 laneSet(player, fKings, laneValue(player, fKings) + amount);
             } else {
-                laneSet(player, fAttack, laneValue(player, fAttack) + amount);
+                ancientAddAttack(player, investFamily(invest), amount);
             }
         }
     }
@@ -1124,7 +1198,11 @@ void ancientTick() {
         ancientInitialize();
         return;
     }
-    int losses = ancientCollect();
+    // The current wave's enemies are counted every second, every type each cSweepTicks seconds.
+    int live = -1;
+    if (xsTriggerVariable(vWave) >= 0) live = waveKind(ancientTemplate(xsTriggerVariable(vWave)));
+    int slice = (xsTriggerVariable(vEconomy) + xsTriggerVariable(vSetupElapsed)) % cSweepTicks;
+    int losses = ancientCollect(live, slice);
     if ((losses > 0) && (state != sElimination)) {
         xsSetTriggerVariable(vResumePhase, state);
         xsSetTriggerVariable(vPhase, sElimination);
@@ -1148,7 +1226,7 @@ void ancientTick() {
     // Losses resolve as one batch on the next clock event.
     if (xsTriggerVariable(vStage) == cStageSudden) ancientDrain();
     // Native requests are acknowledged once. Waiting preserves a common wave schedule.
-    bool ready = (xsTriggerVariable(vEndlessRequest) == 0) && (xsTriggerVariable(vArmorRequest) == 0);
+    bool ready = (xsTriggerVariable(vEndlessRequest) == 0);
     for (player = 1; <= 7) {
         if ((laneValue(player, fActive) == 1) &&
             ((laneValue(player, fInitialized) == 0) || (laneValue(player, fSpawn) > 0))) ready = false;
@@ -1157,6 +1235,7 @@ void ancientTick() {
         if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 1) && (laneValue(player, fProfile) == 0)) {
             int civilization = xsGetPlayerCivilization(player);
             ancientGrant(player, civilization);
+            ancientCivAttack(player, civilization);
             int native = civNative(civilization);
             if (native > 0) laneSet(player, fProfile, native);
             else laneSet(player, fProfile, -1);

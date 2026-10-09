@@ -55,16 +55,148 @@ def test_each_wave_states_the_damage_a_lane_must_deal() -> None:
     assert (first.key, first.enemies, first.pierce_armor) == ("Villagers", 30, 0)
     assert first.hit_points == balance.hit_points(0, balance.difficulty.index("normal"))
     assert first.total_hit_points == 30 * first.hit_points
-    # Enemies spawn for the batch window and walk the lane at the configured speed.
+    # Enemies spawn for the batch window, then walk the lane at their own speed.
     assert first.spawn_seconds == (balance.waves[0].batches - 1) * balance.waves[0].interval
-    assert first.crossing_seconds == pytest.approx(48 / 0.65, abs=0.1)
     assert first.required_dps == pytest.approx(
         first.total_hit_points / (first.spawn_seconds + first.crossing_seconds)
     )
     assert needs[-1].required_dps > needs[0].required_dps * 20
     # The schedule's own armor replaces the unit's in the demand table.
     rams = next(need for need in needs if need.unit == "SIEGE_RAM")
-    assert rams.pierce_armor == 40 and inputs().stock.unit("SIEGE_RAM").armor(PIERCE) == 195
+    assert rams.pierce_armor == 100 and inputs().stock.unit("SIEGE_RAM").armor(PIERCE) == 195
+    # Each boss needs more damage per second than the last, whatever its speed.
+    bosses = [need.required_dps for need in needs if need.enemies == 1]
+    assert len(bosses) == 10 and bosses == sorted(set(bosses))
+
+
+def test_crossing_time_uses_each_enemys_own_speed() -> None:
+    from ancienttdde.game.balance import wave_needs
+
+    needs = wave_needs(inputs())
+    first = needs[0]
+    assert first.unit == "VILLAGER_MALE" and first.speed == 0.8
+    assert first.crossing_seconds == pytest.approx(48 / 0.8)
+    knights = next(need for need in needs if need.unit == "KNIGHT")
+    assert knights.crossing_seconds == pytest.approx(48 / 1.35)
+
+
+def test_attack_follows_the_ladder_and_its_last_rung_repeats() -> None:
+    from ancienttdde.game.balance import attack_ladder, ladder_attack
+
+    ladder = attack_ladder(inputs().shop)
+    assert ladder_attack(ladder, 0) == 0
+    assert ladder_attack(ladder, ladder[0].kings) == ladder[0].attack
+    halfway = (ladder[1].kings + ladder[2].kings) / 2
+    middle = (ladder[1].attack + ladder[2].attack) / 2
+    assert ladder_attack(ladder, halfway) == pytest.approx(middle)
+    # The rungs can be bought again, so past the last one its price per point carries on.
+    last = ladder[-1]
+    effect = last.purchase.effect
+    assert isinstance(effect, TowerAttack)
+    assert ladder_attack(ladder, last.kings + last.purchase.kings) == pytest.approx(
+        last.attack + effect.amount
+    )
+
+
+def test_lane_pressure_follows_the_schedule_the_income_and_the_ladder() -> None:
+    from ancienttdde.game.balance import (
+        Assumptions,
+        attack_ladder,
+        baseline_income,
+        ladder_attack,
+        lane_pressure,
+        tower_dps,
+        wave_needs,
+    )
+
+    data, assumptions = inputs(), Assumptions()
+    balance, economy = data.balance, data.balance.economy
+    pressure = lane_pressure(data, assumptions)
+    needs = wave_needs(data)
+    assert [p.key for p in pressure] == [w.key for w in balance.waves]
+    # The first wave starts after the choice window and the preparation; each next one after
+    # the wave before it and an intermission.
+    first = pressure[0]
+    assert first.minutes == pytest.approx(
+        (balance.choice_seconds + balance.preparation_seconds) / 60
+    )
+    assert pressure[1].minutes - first.minutes == pytest.approx(
+        (balance.waves[0].duration + balance.intermission_seconds) / 60
+    )
+    # Towers grow from the first wave's count to the finale's and stay there.
+    assert first.towers == assumptions.towers_at_first_wave
+    assert pressure[-1].towers == assumptions.towers_at_finale
+    assert all(a.towers <= b.towers for a, b in zip(pressure, pressure[1:], strict=False))
+    # Kings: the starting ones and everything earned so far, grown by what investments return.
+    gold = baseline_income(data, assumptions).gold_per_minute
+    king_gold = balance.difficulty.levels[data.level].king_gold
+    for index in (0, 10, 45):
+        wave = pressure[index]
+        kills = sum(w.enemies for w in balance.waves[:index])
+        earned = (
+            index * economy.wave_kings
+            + gold * wave.minutes / king_gold
+            + kills // economy.kills_per_reward // economy.rewards_per_king
+        )
+        share = min(1.0, wave.minutes / assumptions.investment_minutes)
+        growth = 1 + (assumptions.investment_return - 1) * share
+        assert wave.kings == pytest.approx(assumptions.starting_kings + growth * earned)
+        assert wave.attack == pytest.approx(
+            ladder_attack(attack_ladder(data.shop), assumptions.attack_share * wave.kings)
+        )
+    # What the towers deal against the wave's armor, with both Accursed Towers once bought.
+    watch = data.stock.unit("WATCH_TOWER")
+    accursed = data.stock.unit(balance.towers.special)
+    for wave, need in zip(pressure, needs, strict=True):
+        expected = wave.towers * tower_dps(watch, wave.attack, need.pierce_armor)
+        if wave.minutes >= assumptions.accursed_from_minute:
+            expected += 2 * tower_dps(accursed, balance.towers.special_pierce, need.pierce_armor)
+        assert wave.expected_dps == pytest.approx(expected)
+        assert wave.required_dps == need.required_dps
+        assert wave.ratio == pytest.approx(need.required_dps / expected)
+
+
+# Target pressure ± 0.15: wide enough to survive price and economy tuning; the DE run, not
+# this test, calibrates the curve.
+BANDS = (
+    (2, 3, 0.35, 0.65),
+    (4, 5, 0.4, 0.7),
+    (6, 10, 0.5, 0.8),
+    (11, 20, 0.6, 0.9),
+    (21, 30, 0.65, 0.95),
+    (31, 46, 0.7, 1.0),
+    (47, 56, 0.85, 1.15),
+)
+
+
+def test_each_wave_presses_the_expected_lane_within_its_band() -> None:
+    from ancienttdde.game.balance import Assumptions, lane_pressure
+
+    pressure = lane_pressure(inputs(), Assumptions())
+    # The opening wave is tuned by playtest.
+    assert 0.2 <= pressure[0].ratio <= 0.6
+    for first, last, low, high in BANDS:
+        for wave in pressure[first - 1 : last]:
+            assert low <= wave.ratio <= high, (wave.key, wave.ratio)
+    bosses = [wave.ratio for wave in pressure[46:]]
+    assert all(later >= earlier - 0.05 for earlier, later in zip(bosses, bosses[1:], strict=False))
+
+
+def test_hard_presses_harder_than_normal_and_the_expected_lane_barely_holds() -> None:
+    """Hard has dearer Kings and more hit points: every wave presses harder than on Normal,
+    the opening stays an opening, and the expected lane holds the regular waves on Hard only
+    just, while the bosses need a stronger lane than that."""
+    from ancienttdde.game.balance import Assumptions, lane_pressure
+
+    data = inputs()
+    normal = lane_pressure(data, Assumptions())
+    hard = lane_pressure(data, Assumptions(), data.balance.difficulty.index("hard"))
+    assert all(h.ratio > n.ratio for h, n in zip(hard, normal, strict=True))
+    assert hard[0].ratio <= 0.45
+    late = [wave.ratio for wave in hard[30:46]]
+    assert 0.9 <= min(late) and max(late) <= 1.05
+    assert all(wave.ratio <= 1.05 for wave in hard[:46])
+    assert all(wave.ratio > 1.0 for wave in hard[46:])
 
 
 def test_baseline_income_counts_every_source_of_kings() -> None:
@@ -162,7 +294,7 @@ def test_rivalry_tables_scale_siege_and_raids_with_the_player_count() -> None:
     assert [row.players for row in rows] == list(range(2, 8))
     siege = inputs().shop.get("siege")
     two, seven = rows[0], rows[-1]
-    assert two.siege_price == siege.kings + 5 and seven.siege_price == siege.kings + 30
+    assert two.siege_price == siege.kings + 3 and seven.siege_price == siege.kings + 18
     assert two.trebuchets == 2 and seven.trebuchets == 12
     # Two trebuchets for a minute at a ten-second reload, 450 against buildings.
     assert two.siege_damage_per_rival == pytest.approx(2 * 6 * (200 + 250 - 9))
@@ -200,6 +332,7 @@ def test_the_report_has_every_section_and_the_versioned_copy_is_current() -> Non
         "## Assumptions",
         "## Towers",
         "## Waves",
+        "## Pressure",
         "## Shop",
         "## Investments",
         "## Income",
@@ -317,7 +450,12 @@ def test_the_report_names_the_competitive_level_and_copes_with_new_civilizations
     (root / "content/balance/civilizations.json").write_text(json.dumps(civilizations))
     text = render_report(load_inputs(root), Assumptions())
     assert "Hard hit points." in text and "on Hard without buying anything" in text
-    assert "Normal" not in text.split("## Waves")[1].split("## Civilizations")[0]
+    # Priced at the competitive level, apart from the pressure on the other levels.
+    pressure = text.split("## Pressure")[1].split("## Shop")[0]
+    assert "The last columns are the pressure on Easy and Normal" in pressure
+    assert "| Pressure | Easy | Normal |" in pressure
+    assert "Normal" not in text.split("## Waves")[1].split("## Pressure")[0]
+    assert "Normal" not in text.split("## Shop")[1].split("## Civilizations")[0]
     row = "| Atlanteans | not in the stock snapshot | +1 starting King | 1.0 | 0.0 | 1.0 | 1.0 |"
     assert row in text
 

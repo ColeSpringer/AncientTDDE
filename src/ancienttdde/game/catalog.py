@@ -8,7 +8,7 @@ from typing import Literal, cast
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
 from ancienttdde.game.sites import RAIDER_MEDIA, RaiderMedium, TradeMedium
-from ancienttdde.map.geometry import Cell, cells, flood, footprint
+from ancienttdde.map.geometry import Cell, blocking_sizes, cells, flood, footprint
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
 from ancienttdde.scenario.objects import technology
 from ancienttdde.scenario.snapshot import MapUnit
@@ -146,10 +146,10 @@ class Purchase:
     pad: str
     pad_region: tuple[int, int, int, int]
     # The exhibit beside the pad that is renamed to this purchase, as in the original map: a
-    # placed object, or a King the build places where the original's mod had a named object.
+    # placed object, which stays where the map put it, or a King the build places where the
+    # original's mod had a named object.
     display: int | None
-    # Where the exhibit stands. A placed object is moved here, out of a wall niche whose caption
-    # would float between two pads; without it the object stays where the map put it.
+    # Where the build places that King.
     display_at: tuple[float, float] | None
     once: bool
     requires: str | None
@@ -219,13 +219,6 @@ class Shop:
     def first(self, kind: type[object]) -> Purchase | None:
         """The first purchase with an effect of this kind, in catalog order."""
         return next((p for p in self.purchases if isinstance(p.effect, kind)), None)
-
-    def attack_family(self) -> str | None:
-        """The tower family periodic attack purchases raise; loading allows only one."""
-        for purchase in self.investments():
-            if isinstance(purchase.effect, Investment) and purchase.effect.family is not None:
-                return purchase.effect.family
-        return None
 
 
 def choice[T: str](row: dict[str, object], key: str, options: tuple[T, ...]) -> T:
@@ -353,16 +346,15 @@ def only_with(row: dict[str, object]) -> tuple[str, str] | None:
 
 def display(row: dict[str, object], key: str) -> tuple[int | None, tuple[float, float] | None]:
     placed, created = row.get("display"), row.get("display_at")
-    if placed is None and created is None:
-        raise ValueError(f"Purchase {key} needs a display object or a display_at point")
-    reference = integer(row, "display", 1, 2**31 - 1) if placed is not None else None
-    if created is None:
-        return reference, None
+    if (placed is None) == (created is None):
+        raise ValueError(f"Purchase {key} needs exactly one of display or display_at")
+    if placed is not None:
+        return integer(row, "display", 1, 2**31 - 1), None
     point = cast(list[object], created) if isinstance(created, list) else []
     if len(point) != 2 or any(type(v) not in (int, float) for v in point):
         raise ValueError(f"display_at must be an [x, y] point: {key}")
     x, y = (float(cast(int | float, v)) for v in point)
-    return reference, (x, y)
+    return None, (x, y)
 
 
 def check_requirements(keys: dict[str, dict[str, object]]) -> None:
@@ -432,13 +424,6 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
             )
         )
     check_requirements(keys)
-    attacks = {
-        p.effect.family
-        for p in purchases
-        if isinstance(p.effect, Investment) and p.effect.pays == "attack"
-    }
-    if len(attacks) > 1:
-        raise ValueError("Periodic attack purchases must share one tower family")
     # The engine keeps one repair schedule, one relic delivery and one siege holder.
     for kind, name in ((Repair, "repair"), (Relics, "relics"), (SiegePowerUp, "siege")):
         if sum(isinstance(p.effect, kind) for p in purchases) > 1:
@@ -451,7 +436,7 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
 
 def check_pads(shop: Shop, data: MapDocument, config: FoundationConfig) -> None:
     """Reject pads that share a tile a King can stand on: XS counts each King on one pad."""
-    sizes = {r["stock_id"]: r.get("blocking_size", 0) for r in config["objects"]}
+    sizes = blocking_sizes(config)
     blocked = {c for u in data["units"] for c in footprint(u, sizes.get(u["unit_const"], 0))}
     claimed: dict[Cell, str] = {}
     for purchase in shop.purchases:
@@ -499,59 +484,47 @@ def check_displays(
     reserved: Collection[Cell] = (),
     entrances: Collection[Cell] = (),
 ) -> None:
-    """Every exhibit is a Gaia object that stands beside its own pad, off every pad, on its
-    own kind of terrain and on a tile nothing else holds; no two exhibits share a tile; and
-    with the exhibits in place a King can still walk from every entrance to every pad."""
+    """Every exhibit stands beside its own pad and off every pad: a placed one is a Gaia
+    object, and a King the build places stands on land that nothing else holds; no two
+    exhibits share a tile; and with the exhibits in place a King can still walk from every
+    entrance to every pad."""
     units = {u["reference_id"]: u for u in data["units"]}
-    sizes = {r["stock_id"]: r.get("blocking_size", 0) for r in config["objects"]}
+    sizes = blocking_sizes(config)
     signs = {
         r["stock_id"]
         for r in config["objects"]
         if (identity := r.get("map_identity")) is not None and identity["name"] == "SIGN"
     }
     blocked = {c for u in data["units"] for c in footprint(u, sizes.get(u["unit_const"], 0))}
-    # Tiles other objects hold, less those the moved exhibits leave; signs beside pads go.
-    vacated = {
-        (math.floor(units[p.display]["x"]), math.floor(units[p.display]["y"]))
-        for p in shop.purchases
-        if p.display in units and p.display_at is not None
-    }
+    # Tiles other objects hold; the signs beside the pads go.
     held = {
         (math.floor(u["x"]), math.floor(u["y"]))
         for u in data["units"]
         if u["unit_const"] not in signs
-    } - vacated
+    }
     pads = {cell for purchase in shop.purchases for cell in cells(purchase.pad_region)}
     width, height = data["map"]["width"], data["map"]["height"]
-    land, water = set(config["land_terrain"]), set(config["water_terrain"])
+    land = set(config["land_terrain"])
 
     def terrain(cell: Cell) -> int:
         return data["map"]["tiles"][cell[1] * width + cell[0]][0]
 
-    stands: dict[int, tuple[float, float] | None] = {}
     taken: dict[Cell, str] = {}
     for purchase in shop.purchases:
-        unit = units.get(purchase.display) if purchase.display is not None else None
         if purchase.display is not None:
+            unit = units.get(purchase.display)
             if unit is None:
                 raise ValueError(f"Display of {purchase.key} is not a placed object")
             if unit["player_id"] != 0:
                 raise ValueError(f"Display of {purchase.key} must belong to Gaia")
-            agreed = stands.setdefault(purchase.display, purchase.display_at)
-            if agreed != purchase.display_at:
-                raise ValueError(f"Purchases share the display of {purchase.key} but not its place")
         x, y = exhibit_position(purchase, units)
         cell = (math.floor(x), math.floor(y))
         if purchase.display_at is not None:
             if not (0 <= cell[0] < width and 0 <= cell[1] < height):
                 raise ValueError(f"Display of {purchase.key} stands off the map")
-            origin = (math.floor(unit["x"]), math.floor(unit["y"])) if unit else None
-            on_land = origin is None or terrain(origin) in land
-            on_water = origin is not None and terrain(origin) in water
-            if (on_land and terrain(cell) not in land) or (on_water and terrain(cell) not in water):
+            if terrain(cell) not in land:
                 raise ValueError(f"Display of {purchase.key} stands on the wrong terrain")
-            own: set[Cell] = footprint(unit, sizes.get(unit["unit_const"], 0)) if unit else set()
-            if cell in blocked and cell not in own:
+            if cell in blocked:
                 raise ValueError(f"Display of {purchase.key} stands on a placed object")
             if cell in held:
                 raise ValueError(f"Display of {purchase.key} stands on another object")

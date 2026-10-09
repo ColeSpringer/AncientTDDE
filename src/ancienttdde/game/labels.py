@@ -15,6 +15,7 @@ from ancienttdde.game.instructions import CREDIT
 from ancienttdde.game.sites import Tile
 from ancienttdde.game.triggers import Game
 from ancienttdde.models import Rect
+from ancienttdde.scenario.objects import marker_flags
 
 # The original renames the hero standing here to its credit.
 CREDIT_TILE = (130, 75)
@@ -49,6 +50,24 @@ def relic_label(game: Game, region: Rect) -> int:
     return found[0]
 
 
+def caption_transfers(game: Game, lanes: Iterable[EngineLane]) -> None:
+    """The flag on each transfer pad's tile carries its destination as the caption DE draws
+    above it."""
+    marker = marker_flags()
+    flags = {
+        (math.floor(unit.x), math.floor(unit.y)): unit
+        for unit in game.scenario.unit_manager.get_all_units()
+        if unit.unit_const in marker
+    }
+    for lane in lanes:
+        for key, transfer in lane.sites.transfers.items():
+            x, y, _, _ = transfer.pad
+            flag = flags.get((x, y))
+            if flag is None:
+                raise ValueError(f"P{lane.player} has no flag on its {key} transfer pad")
+            flag.caption_string = f"Transfer pad: to the {TRANSFER_AREAS[key][0]}"
+
+
 def arrival_text(origin: str, arrival: Tile, bought: tuple[Tile, ...]) -> str:
     text = f"Villagers arrive here from the {origin}"
     if arrival in bought:
@@ -74,7 +93,12 @@ def name_objects(game: Game, lanes: Iterable[EngineLane], shop: Shop, balance: B
         game.rename(trigger, game.placement(lane.life_reference), lives, owners=owners)
         for key, transfer in lane.sites.transfers.items():
             destination, origin = TRANSFER_AREAS[key]
-            pad = f"Transfer pad: a villager standing here moves to the {destination}"
+            # The relic stands in a sealed pocket two tiles from the pad's flagged tile. DE's
+            # isometric view makes compass words ambiguous, so the text names the flag.
+            pad = (
+                "Transfer pad: the flagged tile at the walkway's dead end, two tiles from this "
+                f"relic; a villager standing on it moves to the {destination}"
+            )
             game.rename(trigger, relic_label(game, transfer.pad), pad, owners=owners)
             area = ARRIVAL_AREAS.get(key)
             bought = lane.sites.villagers[area].tiles if area else ()

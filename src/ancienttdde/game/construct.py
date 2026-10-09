@@ -1,11 +1,13 @@
 """Worker: construct the playable game over the migrated stock-DE map, and its XS prelude."""
 
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import cast
 
 from AoE2ScenarioParser.datasets.object_support import StartingAge
+from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.trigger_lists.capture_flag import CaptureFlag
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
@@ -21,7 +23,7 @@ from ancienttdde.game.controls import CONTROLS
 from ancienttdde.game.economy import endless_deposits
 from ancienttdde.game.instructions import instructions
 from ancienttdde.game.interaction import pvp_diplomacy, siege_countdowns
-from ancienttdde.game.labels import name_objects
+from ancienttdde.game.labels import caption_transfers, name_objects
 from ancienttdde.game.lanes import lane_actions
 from ancienttdde.game.objectives import run_objectives
 from ancienttdde.game.restrictions import restrict_competitive
@@ -33,7 +35,7 @@ from ancienttdde.game.selection import (
     retire_controls,
 )
 from ancienttdde.game.shop import caption_displays, place_displays, remove_shop_signs
-from ancienttdde.game.sites import numbers
+from ancienttdde.game.sites import Tile, numbers
 from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
@@ -46,7 +48,9 @@ from ancienttdde.game.waves import (
     game_status,
     wave_warnings,
 )
+from ancienttdde.map.build import read_content
 from ancienttdde.map.construct import construct_scenario
+from ancienttdde.map.geometry import blocking_sizes, cells, footprint
 from ancienttdde.map.models import MapAnchor
 from ancienttdde.scenario.objects import marker_flags
 from ancienttdde.scenario.settings import (
@@ -81,6 +85,61 @@ def clear_sites(
                 game.placements.discard(unit.reference_id)
 
 
+def reading_order(tile: Tile) -> tuple[int, int]:
+    x, y = tile
+    return y, x
+
+
+def reconcile_pad_flags(
+    game: Game,
+    lanes: tuple[EngineLane, ...],
+    shop: Shop,
+    interaction: Interaction,
+    sizes: Mapping[int, int],
+) -> None:
+    """Give each pad one Gaia flag per King of its price, the siege's base price: the map's
+    flags were placed for the original's prices. A tile keeps one flag; extra tiles lose
+    theirs from the last in reading order, and missing flags go on the first open tiles."""
+    flags = marker_flags()
+    placed = game.scenario.unit_manager.units
+    # Every marker flag's reference ID, by tile.
+    marked: dict[Tile, list[int]] = {}
+    for owned in placed:
+        for unit in owned:
+            if unit.unit_const in flags:
+                marked.setdefault((int(unit.x), int(unit.y)), []).append(unit.reference_id)
+    reserved = {tile for lane in lanes for tile in creation_tiles(lane, shop, interaction)}
+    blocked = {
+        cell
+        for owned in placed
+        for unit in owned
+        for cell in footprint({"x": unit.x, "y": unit.y}, sizes.get(unit.unit_const, 0))
+    }
+    doomed: set[int] = set()
+    for purchase in shop.purchases:
+        region = cells(purchase.pad_region)
+        flagged = sorted((tile for tile in region if tile in marked), key=reading_order)
+        for tile in flagged:
+            doomed.update(marked[tile][1:])
+        for tile in flagged[purchase.kings :]:
+            doomed.add(marked[tile][0])
+        missing = purchase.kings - len(flagged)
+        if missing <= 0:
+            continue
+        open_tiles = sorted(region - set(flagged) - reserved - blocked, key=reading_order)
+        if len(open_tiles) < missing:
+            raise ValueError(f"The {purchase.key} pad has no room for {purchase.kings} flags")
+        for x, y in open_tiles[:missing]:
+            flag = game.scenario.unit_manager.add_unit(
+                player=0, unit_const=OtherInfo["FLAG_B"].ID, x=x + 0.5, y=y + 0.5
+            )
+            game.placements.add(flag.reference_id)
+    for owned in placed:
+        for unit in [u for u in owned if u.reference_id in doomed]:
+            owned.remove(unit)
+            game.placements.discard(unit.reference_id)
+
+
 def remove_selectors(game: Game, lanes: tuple[EngineLane, ...]) -> None:
     """Take out the original's difficulty selectors: player Outposts that show no lives."""
     lives = {lane.life_reference for lane in lanes}
@@ -98,13 +157,16 @@ def settings(
     lanes: tuple[EngineLane, ...],
     shop: Shop,
     anchors: dict[str, object],
+    sizes: Mapping[int, int],
 ) -> None:
     scenario = game.scenario
     clear_sites(game, lanes, shop, balance.interaction)
+    reconcile_pad_flags(game, lanes, shop, balance.interaction, sizes)
     remove_shop_signs(game, shop)
     remove_selectors(game, lanes)
     place_displays(game, shop)
     caption_displays(game, shop)
+    caption_transfers(game, lanes)
     place_controls(game, anchors, balance)
     keeper = keeper_point(anchors)
     scenario.player_manager.active_players = 8
@@ -118,9 +180,13 @@ def settings(
             starting_age=StartingAge.FEUDAL_AGE,
         )
         diplomacy: list[int] = [DiplomacyState.NEUTRAL] * 16
-        diplomacy[7] = DiplomacyState.ENEMY
-        if not player.human:
-            diplomacy[:7] = [DiplomacyState.ENEMY] * 7
+        if player.human:
+            # Lanes shoot the enemy's units.
+            diplomacy[7] = DiplomacyState.ENEMY
+        else:
+            # The enemy treats every lane as an ally, so its units attack nothing while the
+            # lanes' towers fire at them: the original's one-way alliance.
+            diplomacy[:7] = [DiplomacyState.ALLY] * 7
         diplomacy[player.player_id - 1] = DiplomacyState.ALLY
         player.diplomacy = diplomacy
     disable_automatic_victory(scenario)
@@ -217,7 +283,9 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
         construct_scenario(root / "content/maps/format-seed.aoe2scenario", map_path, foundation)
         scenario = AoE2DEScenario.from_file(str(foundation))
     game = Game(scenario)
-    settings(game, balance, lanes, shop, anchors)
+    _, config = read_content(root)
+    sizes = blocking_sizes(config)
+    settings(game, balance, lanes, shop, anchors, sizes)
     scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop, profiles))
     prelude.write_text(
         render_prelude(balance, lanes, shop, profiles, extern=True), encoding="utf-8"

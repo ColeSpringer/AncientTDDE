@@ -65,6 +65,27 @@ def validate_structure(data: MapDocument, config: FoundationConfig) -> None:
         size = row.get("blocking_size", 0)
         if type(size) is not int or not 0 <= size <= 4:
             raise ValueError(f"Invalid conservative footprint: {row['key']}")
+    objects = {row["key"] for row in config["objects"]}
+    added: set[str] = set()
+    for addition in config.get("placement_additions", []):
+        key = addition["key"]
+        if not key or key in added:
+            raise ValueError(f"Duplicate placement addition: {key}")
+        added.add(key)
+        if addition["object_key"] not in objects:
+            raise ValueError(f"Unknown object for placement addition: {key}")
+        if type(addition["player_id"]) is not int or not 0 <= addition["player_id"] <= 8:
+            raise ValueError(f"Invalid placement addition owner: {key}")
+        if not (0 <= addition["x"] < width and 0 <= addition["y"] < height):
+            raise ValueError(f"Placement addition outside map: {key}")
+    removed: set[int] = set()
+    for removal in config.get("placement_removals", []):
+        identifier = removal["reference_id"]
+        if type(identifier) is not int:
+            raise ValueError(f"Invalid placement removal: {removal}")
+        if identifier in removed:
+            raise ValueError(f"Duplicate placement removal: {identifier}")
+        removed.add(identifier)
 
 
 def migrate_map(legacy: MapDocument, config: FoundationConfig) -> MapDocument:
@@ -78,6 +99,12 @@ def migrate_map(legacy: MapDocument, config: FoundationConfig) -> MapDocument:
     overrides = {r["reference_id"]: r for r in config["placement_overrides"]}
     if len(overrides) != len(config["placement_overrides"]):
         raise ValueError("Duplicate placement override")
+    removals = {r["reference_id"] for r in config.get("placement_removals", [])}
+    if not removals <= {u["reference_id"] for u in result["units"]}:
+        raise ValueError("Missing placement removal instance")
+    if both := sorted(removals & overrides.keys()):
+        raise ValueError(f"Placements both removed and overridden: {', '.join(map(str, both))}")
+    result["units"] = [u for u in result["units"] if u["reference_id"] not in removals]
     if not overrides.keys() <= {u["reference_id"] for u in result["units"]}:
         raise ValueError("Missing placement override instance")
     replacements: Counter[str] = Counter()
@@ -97,6 +124,28 @@ def migrate_map(legacy: MapDocument, config: FoundationConfig) -> MapDocument:
                 unit["player_id"] = override["owner"]
             if "caption" in override:
                 unit["caption_string"] = override["caption"]
+        replacements[key] += 1
+    # New placements take reference IDs above every placement of the original map.
+    additions = config.get("placement_additions", [])
+    first = max((u["reference_id"] for u in legacy["units"]), default=-1) + 1
+    for offset, addition in enumerate(additions):
+        key = addition["object_key"]
+        result["units"].append(
+            {
+                "reference_id": first + offset,
+                "player_id": addition["player_id"],
+                "unit_const": identities[key],
+                "x": addition["x"],
+                "y": addition["y"],
+                # The original map's flat-ground objects all stand at this height.
+                "z": 1.0,
+                "rotation": 0.0,
+                "status": 2,
+                "initial_animation_frame": 0,
+                "garrisoned_in_id": -1,
+                "object_key": key,
+            }
+        )
         replacements[key] += 1
     names = NameTable()
     for key, anchor in result["anchors"].items():
@@ -118,6 +167,8 @@ def migrate_map(legacy: MapDocument, config: FoundationConfig) -> MapDocument:
             tile_changes += 1
     result["migration"] = {
         "placements": dict(sorted(replacements.items())),
+        "placement_additions": len(additions),
+        "placement_removals": len(removals),
         "terrain_patch_tiles": tile_changes,
     }
     validate_structure(result, config)

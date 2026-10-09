@@ -15,6 +15,7 @@ from ancienttdde.map.models import FoundationConfig, MapDocument
 ROOT = Path(__file__).resolve().parents[1]
 KING = 434
 OUTPOST = 598
+HAY_STACK = 857
 
 
 def raw_catalog() -> dict[str, Any]:
@@ -61,7 +62,7 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
     land, naval, siege = (catalog.get(k) for k in ("land_raider", "naval_raider", "siege"))
     assert (land.effect, land.kings, land.legacy) == (Raider("land"), 3, None)
     assert (naval.effect, naval.kings, naval.legacy) == (Raider("naval"), 3, None)
-    assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(5), 20, None)
+    assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(3), 15, None)
     assert not any(p.once for p in (land, naval, siege))
     assert [p.pad for p in (land, naval, siege)] == [
         "shop.land_raider",
@@ -84,7 +85,8 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
         ),
         ("land_raider", "Land raider (light cavalry): 3 Kings, when PvP is on"),
         ("naval_raider", "Naval raider (fire galley): 3 Kings, when PvP is on"),
-        ("siege", "Siege power-up: 20 Kings plus 5 per surviving rival, when PvP is on"),
+        ("siege", "Siege power-up: 15 Kings plus 3 per surviving rival, when PvP is on"),
+        ("castle", "Castle (+20 population, castle research): 1 King, once"),
     ],
 )
 def test_captions_state_the_name_price_and_limits(key: str, caption: str) -> None:
@@ -96,7 +98,7 @@ def test_captions_state_the_name_price_and_limits(key: str, caption: str) -> Non
     [
         ("tower_attack_4", "1 King"),
         ("tower_attack_50", "7 Kings"),
-        ("siege", "20 Kings plus 5 per surviving rival"),
+        ("siege", "15 Kings plus 3 per surviving rival"),
     ],
 )
 def test_prices_are_written_once_for_captions_and_messages(key: str, price: str) -> None:
@@ -111,7 +113,8 @@ def test_prices_are_written_once_for_captions_and_messages(key: str, price: str)
         ("attack_1_every_30", "+1 attack/30 s: 4 Kings"),
         ("gold_1000", "1000 gold/2 min: 4 Kings"),
         ("left_accursed_tower", "Accursed Tower: 1 King"),
-        ("siege", "Siege power-up: 20 Kings +5/rival"),
+        ("siege", "Siege power-up: 15 Kings +3/rival"),
+        ("castle", "Castle: 1 King"),
     ],
 )
 def test_overhead_tags_are_the_short_label_and_price(key: str, tag: str) -> None:
@@ -123,60 +126,60 @@ def test_overhead_tags_are_the_short_label_and_price(key: str, tag: str) -> None
     assert catalog.get(key).tag == tag
     assert catalog.get("king_every_150").label == "1 King/2.5 min"
     assert catalog.get("king_every_minute").label == "1 King/min"
-    assert catalog.get("third_row").label == "3rd tower row"
+    assert catalog.get("third_row").label == catalog.get("fourth_row").label == "Tower row"
     assert "label" not in next(p for p in raw_catalog()["purchases"] if p["key"] == "gold_1000")
     assert max(len(p.tag) for p in catalog.purchases) <= 33
-    # The Accursed Tower pads share one exhibit; their identical tags are written once.
-    accursed = catalog.get("left_accursed_tower").display or 0
-    assert display_captions(catalog, overhead=True)[accursed] == "Accursed Tower: 1 King"
+    # The Accursed Tower pads share one exhibit, and so do the two halves of the tower-row
+    # pad; their identical tags are written once.
+    overhead = display_captions(catalog, overhead=True)
+    assert overhead[catalog.get("left_accursed_tower").display or 0] == "Accursed Tower: 1 King"
+    assert overhead[catalog.get("third_row").display or 0] == "Tower row: 3 Kings"
 
 
 def test_every_purchase_names_a_display_object_beside_its_pad() -> None:
-    """The original labels each pad with a placed unit it renames; those units stay in the map.
-    The fourth row's label was a sign the mod named, so the build places a King for it."""
+    """The original labels each pad with a placed unit it renames; those units stay where the
+    map puts them. The raider and siege pads are new, so the build places a King for each."""
     from ancienttdde.game.catalog import check_displays, display_captions
 
     catalog = shop()
     placed = [p.display for p in catalog.purchases if p.display is not None]
     created = [p for p in catalog.purchases if p.display is None]
     assert len(placed) + len(created) == len(catalog.purchases)
-    assert [p.key for p in created] == ["fourth_row", "land_raider", "naval_raider", "siege"]
+    assert [p.key for p in created] == ["land_raider", "naval_raider", "siege"]
     assert all(p.display_at is not None for p in created)
-    assert created[0].display_at == (166.5, 37.5)
     assert catalog.get("tower_attack_4").display == 18941
     assert catalog.get("left_accursed_tower").display == catalog.get("right_accursed_tower").display
     captions = display_captions(catalog)
     assert captions[18941] == "Tower attack +4: 1 King"
-    assert captions[catalog.get("third_row").display or 0] == "Third row of towers: 2 Kings, once"
+    assert captions[catalog.get("third_row").display or 0] == (
+        "Third row of towers: 3 Kings, once | "
+        "Fourth row of towers: 3 Kings, once, after Third row of towers"
+    )
     assert set(captions) == set(placed)
     data, config = map_content()
     check_displays(catalog, data, config)
 
 
-def test_displays_whose_captions_would_float_between_pads_stand_beside_their_own() -> None:
-    """The original's display units stand in wall niches shared by two pad columns, or in
-    the wall below the bottom row, where DE's captions above them float between pads and
-    into each other. The units get a display_at on the walkway side of their own pad; the
-    three buildings stay, as their captions are clear where they are."""
+def test_kings_for_new_pads_stand_centred_in_the_hay_line_at_the_far_end() -> None:
+    """Like the original's exhibits, each King the build places stands in the Hay Stack line
+    beyond its pad's far, beach side, centred on the pad and flanked by Hay Stacks."""
     catalog = shop()
-    moved = {p.key: p.display_at for p in catalog.purchases if p.display and p.display_at}
-    assert len(moved) == 28
-    assert moved["wood_2000"] == (125.5, 15.5)
-    assert moved["relic_enclosure"] == (140.5, 12.5)
-    assert moved["tower_attack_4"] == (159.5, 13.5)
-    assert moved["castle_age"] == (131.5, 42.5)
-    for building in ("left_accursed_tower", "right_accursed_tower", "population", "third_row"):
-        assert catalog.get(building).display_at is None
-    # The cog keeps to its water pocket, and the cart and the Imperial Age King to their niches.
-    for staying in ("trade_cogs", "trade_carts", "imperial_age"):
-        assert catalog.get(staying).display_at is None
+    data, _ = map_content()
+    held = {(math.floor(u["x"]), math.floor(u["y"])): u["unit_const"] for u in data["units"]}
+    for key in ("land_raider", "naval_raider", "siege"):
+        purchase = catalog.get(key)
+        _, y1, x2, y2 = purchase.pad_region
+        centre = (y1 + y2 + 1) / 2
+        assert purchase.display_at == (x2 + 1.5, centre), key
+        for row in range(y1, y2 + 1):
+            flank = abs(row + 0.5 - centre) >= 1
+            assert held.get((x2 + 1, row)) == (HAY_STACK if flank else None), (key, row)
 
 
 # DE draws a caption centred above its object in a font that does not shrink with the view.
-# At the native scale a tile is 96 by 48 pixels, a character about 12 pixels wide and a line
-# 22 pixels tall, and a caption sits above the object's sprite plus a fixed margin: these
-# sprite heights were measured on screenshots of the built game. Players zoom out to see
-# more, and DE allows about half the native scale, so the layout is checked there too.
+# A tile is 96 by 48 pixels, a character about 12 pixels wide and a line 22 pixels tall, and a
+# caption sits above the object's sprite plus a fixed margin: these sprite heights were
+# measured on screenshots of the built game at the native zoom.
 CHAR_WIDTH = 12.0
 LINE_HEIGHT = 22.0
 CAPTION_MARGIN = 20.0
@@ -184,23 +187,22 @@ SPRITE_HEIGHT = {OUTPOST: 151, 79: 140, 625: 70, 128: 50, 17: 50, 285: 35}
 UNIT_SPRITE_HEIGHT = 45
 # Captions closer than this, in pixels, read as one.
 CAPTION_GAP = 6.0
-ZOOM_SCALES = (1.0, 0.5)
 
 
 def caption_box(
-    unit_const: int, x: float, y: float, text: str, scale: float
+    unit_const: int, x: float, y: float, text: str
 ) -> tuple[float, float, float, float]:
-    """The screen rectangle of a caption at a view scale, in pixels from the map origin."""
-    centre_x = (x + y) * 48.0 * scale
-    lift = SPRITE_HEIGHT.get(unit_const, UNIT_SPRITE_HEIGHT) * scale + CAPTION_MARGIN
-    centre_y = (y - x) * 24.0 * scale - lift
+    """The screen rectangle of a caption, in pixels from the map origin."""
+    centre_x = (x + y) * 48.0
+    lift = SPRITE_HEIGHT.get(unit_const, UNIT_SPRITE_HEIGHT) + CAPTION_MARGIN
+    centre_y = (y - x) * 24.0 - lift
     half = CHAR_WIDTH * len(text) / 2
     return centre_x - half, centre_y - LINE_HEIGHT / 2, centre_x + half, centre_y + LINE_HEIGHT / 2
 
 
-@pytest.mark.parametrize("scale", ZOOM_SCALES)
-def test_captions_keep_clear_of_each_other_when_zoomed_out(scale: float) -> None:
-    """Every pad exhibit and run control carries a caption; none may run into another."""
+def test_captions_the_build_adds_keep_clear_of_every_other() -> None:
+    """The original's exhibits keep their own spots, wherever that puts their tags; the Kings
+    placed for the new pads and the run controls are placed so their captions run into none."""
     from ancienttdde.game.catalog import display_captions
     from ancienttdde.game.config import load_balance
     from ancienttdde.game.controls import CONTROLS, control_labels
@@ -208,16 +210,15 @@ def test_captions_keep_clear_of_each_other_when_zoomed_out(scale: float) -> None
     catalog = shop()
     data, config = map_content()
     units = {u["reference_id"]: u for u in data["units"]}
-    boxes: list[tuple[str, tuple[float, float, float, float]]] = []
+    placed: list[tuple[str, tuple[float, float, float, float]]] = []
     for display, text in display_captions(catalog, overhead=True).items():
-        purchase = next(p for p in catalog.purchases if p.display == display)
         unit = units[display]
-        x, y = purchase.display_at or (unit["x"], unit["y"])
-        boxes.append((text, caption_box(unit["unit_const"], x, y, text, scale)))
+        placed.append((text, caption_box(unit["unit_const"], unit["x"], unit["y"], text)))
+    added: list[tuple[str, tuple[float, float, float, float]]] = []
     for purchase in catalog.purchases:
-        if purchase.display is None:
-            x, y = purchase.display_at or (0.0, 0.0)
-            boxes.append((purchase.tag, caption_box(KING, x, y, purchase.tag, scale)))
+        if purchase.display_at is not None:
+            x, y = purchase.display_at
+            added.append((purchase.tag, caption_box(KING, x, y, purchase.tag)))
     labels = control_labels(load_balance(ROOT / "content/balance/game.json"))
     anchors = config["anchors"]
     points = anchors["controls.run"].get("points", []) + anchors["controls.practice"].get(
@@ -225,26 +226,26 @@ def test_captions_keep_clear_of_each_other_when_zoomed_out(scale: float) -> None
     )
     for control, (x, y) in zip(CONTROLS, points, strict=True):
         text = labels[control.key]
-        boxes.append((text, caption_box(OUTPOST, x, y, text, scale)))
-    for index, (first, a) in enumerate(boxes):
-        for second, b in boxes[index + 1 :]:
+        added.append((text, caption_box(OUTPOST, x, y, text)))
+    for index, (first, a) in enumerate(added):
+        for second, b in added[index + 1 :] + placed:
             apart = max(b[0] - a[2], a[0] - b[2], b[1] - a[3], a[1] - b[3])
-            assert apart >= CAPTION_GAP, f"{first!r} runs into {second!r} at scale {scale}"
+            assert apart >= CAPTION_GAP, f"{first!r} runs into {second!r}"
 
 
-def test_every_exhibit_stands_nearest_its_own_pad() -> None:
-    """A caption is read as the nearest pad's, so no exhibit may stand as near another pad."""
-    from ancienttdde.game.catalog import distance, exhibit_position
+def test_kings_placed_for_new_pads_stand_nearest_their_own_pad() -> None:
+    """A caption is read as the nearest pad's, so a King the build places stands nearer its own
+    pad than any other."""
+    from ancienttdde.game.catalog import distance
 
     catalog = shop()
-    data, _ = map_content()
-    units = {u["reference_id"]: u for u in data["units"]}
     for purchase in catalog.purchases:
-        x, y = exhibit_position(purchase, units)
+        if purchase.display_at is None:
+            continue
+        x, y = purchase.display_at
         own = distance(purchase.pad_region, x, y)
         for other in catalog.purchases:
-            shared = purchase.display is not None and other.display == purchase.display
-            if other.pad != purchase.pad and not shared:
+            if other.pad != purchase.pad:
                 assert distance(other.pad_region, x, y) > own, (purchase.key, other.key)
 
 
@@ -256,17 +257,19 @@ def entrances() -> set[Cell]:
 
 
 def test_exhibits_keep_off_creation_tiles_and_out_of_the_kings_way(tmp_path: Path) -> None:
-    from ancienttdde.game.catalog import check_displays
+    from ancienttdde.game.catalog import check_displays, exhibit_position
 
     data, config = map_content()
     catalog = shop()
     check_displays(catalog, data, config, entrances=entrances())
-    x, y = catalog.get("wood_2000").display_at or (0.0, 0.0)
+    units = {u["reference_id"]: u for u in data["units"]}
+    x, y = exhibit_position(catalog.get("wood_2000"), units)
     with pytest.raises(ValueError, match="creation tile"):
         check_displays(catalog, data, config, reserved={(math.floor(x), math.floor(y))})
     raw = raw_catalog()
     rows = {p["key"]: p for p in raw["purchases"]}
-    # The one-tile gap between Hay Stacks that leads into the Castle Age pad.
+    # A King in the one-tile gap between Hay Stacks that leads into the Castle Age pad.
+    del rows["castle_age"]["display"]
     rows["castle_age"]["display_at"] = [131.5, 45.5]
     with pytest.raises(ValueError, match="cut the castle_age pad off"):
         check_displays(load(raw, tmp_path), data, config, entrances=entrances())
@@ -277,20 +280,10 @@ def test_created_exhibits_cannot_share_a_tile(tmp_path: Path) -> None:
 
     raw = raw_catalog()
     rows = {p["key"]: p for p in raw["purchases"]}
-    rows["land_raider"]["display_at"] = rows["naval_raider"]["display_at"] = [170.5, 19.5]
+    # A free tile beside both the naval raider and the siege pads.
+    rows["naval_raider"]["display_at"] = rows["siege"]["display_at"] = [165.5, 23.5]
     data, config = map_content()
     with pytest.raises(ValueError, match="share tile"):
-        check_displays(load(raw, tmp_path), data, config)
-
-
-def test_purchases_sharing_an_exhibit_agree_where_it_stands(tmp_path: Path) -> None:
-    from ancienttdde.game.catalog import check_displays
-
-    raw = raw_catalog()
-    rows = {p["key"]: p for p in raw["purchases"]}
-    rows["right_accursed_tower"]["display_at"] = [136.5, 44.5]
-    data, config = map_content()
-    with pytest.raises(ValueError, match="share the display"):
         check_displays(load(raw, tmp_path), data, config)
 
 
@@ -302,12 +295,12 @@ def test_purchases_sharing_an_exhibit_agree_where_it_stands(tmp_path: Path) -> N
         ({"display": 40004}, "Gaia"),
         ({"display_at": [160.5, 15.5]}, "pad"),
         ({"display_at": [168.5, 36.5]}, "pad"),
-        ({"display": 18941, "display_at": "tower_attack_10"}, "share"),
-        ({"display": 18941, "display_at": [159.5, 14.5]}, "placed object"),
-        ({"display": 18941, "display_at": [159.5, 16.5]}, "another object"),
-        ({"display": 18941, "display_at": [156.5, 51.5]}, "terrain"),
-        ({"display": 18941, "display_at": [-0.5, 15.5]}, "off the map"),
-        ({"display": 18941, "display_at": [150.5, 40.5]}, "beside its pad"),
+        ({"display_at": [159.5, 14.5]}, "placed object"),
+        ({"display_at": [159.5, 16.5]}, "another object"),
+        ({"display_at": [156.5, 19.5]}, "another object"),
+        ({"display_at": [156.5, 51.5]}, "terrain"),
+        ({"display_at": [-0.5, 15.5]}, "off the map"),
+        ({"display_at": [150.5, 40.5]}, "beside its pad"),
     ],
 )
 def test_displays_must_stand_free_beside_their_pads(
@@ -317,18 +310,22 @@ def test_displays_must_stand_free_beside_their_pads(
 
     raw = raw_catalog()
     first = raw["purchases"][0]
-    first.pop("display", None)
-    first.pop("display_at", None)
-    if isinstance(change.get("display_at"), str):
-        # Another exhibit's tile, wherever the catalog puts it.
-        change = {
-            **change,
-            "display_at": list(shop().get(str(change["display_at"])).display_at or ()),
-        }
+    del first["display"]
     first.update(change)
     data, config = map_content()
     with pytest.raises(ValueError, match=message):
         check_displays(load(raw, tmp_path), data, config)
+
+
+def test_periodic_attack_purchases_may_raise_different_families(tmp_path: Path) -> None:
+    """The XS adds each investment's attack to its own family."""
+    from ancienttdde.game.catalog import Investment
+
+    raw = raw_catalog()
+    rows = {p["key"]: p for p in raw["purchases"]}
+    rows["attack_3_every_30"]["effect"]["family"] = "bombard"
+    effect = load(raw, tmp_path).get("attack_3_every_30").effect
+    assert isinstance(effect, Investment) and effect.family == "bombard"
 
 
 def test_once_purchases_have_distinct_ownership_bits() -> None:
@@ -370,12 +367,17 @@ def open_land(data: MapDocument, config: FoundationConfig) -> set[Cell]:
 
 
 def test_pads_hold_their_price_in_open_tiles_without_sharing_any() -> None:
+    from ancienttdde.game.catalog import SiegePowerUp
+
     data, config = map_content()
     walkable = open_land(data, config)
     claimed: dict[Cell, str] = {}
     for purchase in shop().purchases:
         tiles = cells(purchase.pad_region) & walkable
         assert len(tiles) >= min(purchase.kings, 4), purchase.key
+        # The siege's price grows with the rivals: six of them in a full game.
+        if isinstance(purchase.effect, SiegePowerUp):
+            assert len(tiles) >= purchase.kings + 6 * purchase.effect.kings_per_rival
         for cell in tiles:
             assert claimed.setdefault(cell, purchase.pad) == purchase.pad, (cell, purchase.key)
 
@@ -416,7 +418,8 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("too_many_once", "At most 31 purchases can be once-only"),
         ("second_repair", "At most one repair purchase"),
         ("second_relics", "At most one relics purchase"),
-        ("no_display", "display object or a display_at point"),
+        ("no_display", "exactly one of display or display_at"),
+        ("moved_display", "exactly one of display or display_at"),
         ("old_schema", "Unsupported shop schema"),
         ("previous_schema", "Unsupported shop schema"),
         ("second_siege", "At most one siege purchase"),
@@ -460,8 +463,10 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
         for purchase in purchases:
             purchase["once"] = True
     elif defect == "no_display":
-        first.pop("display")
-        first.pop("display_at")
+        del first["display"]
+    elif defect == "moved_display":
+        # The original's exhibits stay where the map puts them.
+        first["display_at"] = [156.5, 17.5]
     elif defect == "old_schema":
         raw["schema_version"] = 1
     elif defect == "previous_schema":

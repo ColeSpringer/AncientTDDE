@@ -132,29 +132,16 @@ def test_endless_levels_set_every_template_to_its_grown_hit_points(game_build: G
             assert sets(trigger, variables["game.endless_request"]) == [(0, SET)]
 
 
-def test_endless_armor_arrives_one_step_at_a_time(game_build: GameBuild) -> None:
+def test_no_native_trigger_adds_endless_armor(game_build: GameBuild) -> None:
+    """A native armor change stops at 255; the XS adds each endless armor step (see the endless
+    cases in test_game_script.py). The schedule only sets the rams' armor."""
     data = snapshot(game_build)
-    trigger = triggers_by_name(data)["game.endless.armor"]
-    variables = variables_by_name(data)
-    assert trigger["looping"]
-    [request] = conditions(trigger, "variable_value")
-    assert (request["variable"], request["quantity"], request["comparison"]) == (
-        variables["game.armor_request"],
-        1,
-        LARGER_OR_EQUAL,
-    )
-    units = {balance().waves[t].object_id for t in balance().endless.templates}
-    armor = effects(trigger, "modify_attribute")
-    assert {attr_int(e, "object_list_unit_id") for e in armor} == units
-    for change in armor:
-        assert (change["source_player"], change["object_attributes"], change["operation"]) == (
-            8,
-            ARMOR,
-            ADD,
-        )
-        assert change["armour_attack_class"] == PIERCE
-        assert change["armour_attack_quantity"] == balance().endless.armor_step
-    assert sets(trigger, variables["game.armor_request"]) == [(1, SUBTRACT)]
+    assert "game.endless.armor" not in triggers_by_name(data)
+    assert "game.armor_request" not in variables_by_name(data)
+    for trigger in data["triggers"]:
+        for change in effects(trigger, "modify_attribute"):
+            if change["source_player"] == 8 and change["object_attributes"] == ARMOR:
+                assert change["operation"] == SET, trigger["name"]
 
 
 def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild) -> None:
@@ -224,10 +211,14 @@ def test_only_display_objectives_are_ever_activated(game_build: GameBuild) -> No
     data = snapshot(game_build)
     by_id = {t["id"]: t for t in data["triggers"]}
     for trigger in data["triggers"]:
-        assert not effects(trigger, "deactivate_trigger")
         for activation in effects(trigger, "activate_trigger"):
             target = by_id[activation["trigger_id"]]
             assert target["display_as_objective"] and not target["effects"]
+        # Only a cleared lane's cleanup and the hiding of finished objectives end triggers.
+        if effects(trigger, "deactivate_trigger"):
+            assert trigger["name"].startswith("game.hide.") or trigger["name"].endswith(
+                ".cleanup"
+            ), trigger["name"]
 
 
 def control_units(build: GameBuild) -> dict[str, MapUnit]:
@@ -347,6 +338,29 @@ def test_controls_that_no_longer_apply_go_once_the_options_are_fixed(
         LESS,
     )
     assert removed(practice) == {units[c.key]["reference_id"] for c in controls("practice")}
+
+
+def test_option_lines_never_complete_and_are_deactivated_once_locked(
+    game_build: GameBuild,
+) -> None:
+    """DE keeps a fired objective listed, struck through; a deactivated one leaves the box."""
+    from ancienttdde.game.controls import MODES
+
+    data = snapshot(game_build)
+    triggers = triggers_by_name(data)
+    variables = variables_by_name(data)
+    for key in ("game.objective.options", "game.objective.practice_controls"):
+        line = triggers[key]
+        assert line["display_as_objective"] and line["enabled"] and not line["effects"]
+        assert requested(line, variables["game.phase"]) == -1
+        hider = triggers[key.replace("objective", "hide")]
+        assert not hider["looping"]
+        assert requested(hider, variables["game.locked"]) == 1
+        assert [e["trigger_id"] for e in effects(hider, "deactivate_trigger")] == [line["id"]]
+    [_, mode] = conditions(triggers["game.hide.practice_controls"], "variable_value")
+    assert mode["variable"] == variables["game.mode"]
+    assert (attr_int(mode, "quantity"), attr_int(mode, "inverted")) == (MODES.index("practice"), 1)
+    assert len(conditions(triggers["game.hide.options"], "variable_value")) == 1
 
 
 def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(

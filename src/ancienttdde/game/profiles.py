@@ -2,7 +2,7 @@
 
 The XS puts the lane's native effect set in its profile field at initialization; each set has
 one trigger per lane, gated on that field, so every civilization sharing a set shares them.
-Kings, King prices, kill rewards and raider caps are the XS's own business.
+Kings, King prices, kill rewards, raider caps and tower attack are the XS's own business.
 """
 
 from dataclasses import astuple
@@ -35,8 +35,6 @@ def apply_native(
         grant_population(trigger, player, effects.population)
     for name in effects.technologies:
         game.research(trigger, name, player=player)
-    for family, amount in effects.attack:
-        game.attack_bonus(trigger, player, balance.towers.family_ids(family), amount)
     for attribute, amount, operation in (
         (ObjectAttribute.HIT_POINTS, effects.tower_hit_points, Operation.ADD),
         (ObjectAttribute.STONE_COSTS, effects.tower_stone, Operation.SUBTRACT),

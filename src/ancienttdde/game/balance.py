@@ -43,7 +43,6 @@ from ancienttdde.game.stock import (
     StockUnit,
     load_stock,
 )
-from ancienttdde.game.waves import ENEMY_SPEED
 from ancienttdde.map.models import MapAnchor
 
 # Caravan, a starting technology, speeds traders up by this factor (DE data).
@@ -78,6 +77,18 @@ class Assumptions:
     tower_hit_point_kings: float = 0.0005
     raider_slot_kings: float = 0.5
     population_kings: float = 0.03
+    # The lane the waves are tuned against: the Kings it starts with, the share of its Kings it
+    # puts into the tower attack ladder, what investments return on what it earns once they
+    # have had this many minutes, the Watch Towers it stands at the first wave and at the
+    # finale's minute, and when it has both Accursed Towers.
+    starting_kings: float = 1.0
+    attack_share: float = 0.6
+    investment_return: float = 1.7
+    investment_minutes: float = 40.0
+    towers_at_first_wave: int = 8
+    towers_at_finale: int = 30
+    finale_minute: float = 60.0
+    accursed_from_minute: float = 20.0
 
 
 @dataclass(frozen=True)
@@ -165,6 +176,18 @@ def attack_ladder(shop: Shop) -> tuple[LadderStep, ...]:
     return tuple(steps)
 
 
+def ladder_attack(ladder: tuple[LadderStep, ...], kings: float) -> float:
+    """The tower attack this many Kings buy climbing the ladder rung by rung, part of a rung
+    pro rata. The rungs can be bought again, so past the last one its price carries on."""
+    attack = spent = rate = 0.0
+    for step in ladder:
+        rate = (step.attack - attack) / (step.kings - spent)
+        if kings <= step.kings:
+            break
+        attack, spent = float(step.attack), float(step.kings)
+    return attack + rate * (kings - spent)
+
+
 @dataclass(frozen=True)
 class Rates:
     """What a King buys, from the shop's resource grants and the attack ladder."""
@@ -221,20 +244,25 @@ class WaveNeed:
     pierce_armor: float
     total_hit_points: int
     spawn_seconds: int
+    # Tiles per second, the unit's stock speed.
+    speed: float
     crossing_seconds: float
     required_dps: float
 
 
-def wave_needs(inputs: Inputs) -> tuple[WaveNeed, ...]:
+def wave_needs(inputs: Inputs, level: int | None = None) -> tuple[WaveNeed, ...]:
     """What a lane must deal to stop every enemy of a wave before the exit, as a lower bound:
-    the wave's hit points over the time its last enemy takes to spawn and cross the lane."""
-    crossing = inputs.lane_tiles / ENEMY_SPEED
+    the wave's hit points at a difficulty level (the competitive one unless given) over the
+    time its last enemy takes to spawn and cross the lane at its own speed."""
+    level = inputs.level if level is None else level
     needs: list[WaveNeed] = []
     for index, wave in enumerate(inputs.balance.waves):
-        hit_points = inputs.balance.hit_points(index, inputs.level)
+        hit_points = inputs.balance.hit_points(index, level)
         enemies = wave.enemies
         spawn = (wave.batches - 1) * wave.interval
-        armor = inputs.stock.unit(wave.unit).armor(PIERCE_CLASS)
+        unit = inputs.stock.unit(wave.unit)
+        armor = unit.armor(PIERCE_CLASS)
+        crossing = inputs.lane_tiles / unit.speed
         needs.append(
             WaveNeed(
                 key=wave.key,
@@ -244,11 +272,72 @@ def wave_needs(inputs: Inputs) -> tuple[WaveNeed, ...]:
                 pierce_armor=armor if wave.pierce_armor is None else wave.pierce_armor,
                 total_hit_points=enemies * hit_points,
                 spawn_seconds=spawn,
+                speed=unit.speed,
                 crossing_seconds=crossing,
                 required_dps=enemies * hit_points / (spawn + crossing),
             )
         )
     return tuple(needs)
+
+
+@dataclass(frozen=True)
+class Pressure:
+    """A wave against the lane the assumptions expect at the minute the wave starts: the damage
+    per second the wave needs over what that lane's towers deal."""
+
+    key: str
+    minutes: float
+    kings: float
+    attack: float
+    towers: float
+    expected_dps: float
+    required_dps: float
+
+    @property
+    def ratio(self) -> float:
+        return self.required_dps / self.expected_dps
+
+
+def lane_pressure(
+    inputs: Inputs, assumptions: Assumptions, level: int | None = None
+) -> tuple[Pressure, ...]:
+    """Each scheduled wave against a lane that has earned the baseline income and every earlier
+    wave's Kings and kill rewards, grown by its investments, put its attack share into the
+    ladder and built its Watch Towers, with both Accursed Towers once their minute comes. A
+    difficulty level (the competitive one unless given) sets the King price and hit points."""
+    level = inputs.level if level is None else level
+    balance, economy = inputs.balance, inputs.balance.economy
+    ladder = attack_ladder(inputs.shop)
+    gold_per_minute = baseline_income(inputs, assumptions).gold_per_minute
+    king_gold = balance.difficulty.levels[level].king_gold
+    watch = inputs.stock.unit("WATCH_TOWER")
+    accursed = inputs.stock.unit(balance.towers.special)
+    seconds = balance.choice_seconds + balance.preparation_seconds
+    first = seconds / 60
+    kills = 0
+    rows: list[Pressure] = []
+    needs = wave_needs(inputs, level)
+    for index, (wave, need) in enumerate(zip(balance.waves, needs, strict=True)):
+        minutes = seconds / 60
+        share = min(1.0, minutes / assumptions.investment_minutes)
+        growth = 1 + (assumptions.investment_return - 1) * share
+        earned = (
+            index * economy.wave_kings
+            + gold_per_minute * minutes / king_gold
+            + kills // economy.kills_per_reward // economy.rewards_per_king
+        )
+        kings = assumptions.starting_kings + growth * earned
+        attack = ladder_attack(ladder, assumptions.attack_share * kings)
+        progress = min(1.0, (minutes - first) / (assumptions.finale_minute - first))
+        added = assumptions.towers_at_finale - assumptions.towers_at_first_wave
+        towers = assumptions.towers_at_first_wave + added * progress
+        expected = towers * tower_dps(watch, attack, need.pierce_armor)
+        if minutes >= assumptions.accursed_from_minute:
+            expected += 2 * tower_dps(accursed, balance.towers.special_pierce, need.pierce_armor)
+        rows.append(Pressure(wave.key, minutes, kings, attack, towers, expected, need.required_dps))
+        seconds += wave.duration + balance.intermission_seconds
+        kills += wave.enemies
+    return tuple(rows)
 
 
 def trader_gold_per_minute(inputs: Inputs, assumptions: Assumptions, medium: str) -> float:

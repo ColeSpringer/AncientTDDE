@@ -1,6 +1,7 @@
 """Bind named scenario variables and validated content to the shared XS engine."""
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from enum import IntEnum
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
@@ -18,6 +19,7 @@ from ancienttdde.game.catalog import (
     Repair,
     Shop,
     SiegePowerUp,
+    TowerAttack,
 )
 from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
 from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Towers
@@ -26,6 +28,7 @@ from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import RAIDER_MEDIA, TRANSFERS
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns
 from ancienttdde.scenario.objects import display_name
+from ancienttdde.scenario.triggers import PIERCE
 
 
 class State(IntEnum):
@@ -52,6 +55,11 @@ LANE_CLASSES = (2, 3, 4, 11, 12, 14, 18, 19, 22, 30, 43, 49, 51, 52, 54, 59)
 ARMOR_LIMIT = 30000
 # Siege positions per lane in the siege tables.
 SIEGE_SLOTS = 3
+# The most attack or armor one technology-style effect adds: it shares a value with the class.
+CLASS_CHUNK = 255
+# Every this many seconds, the enemy count looks at every enemy type, not only the current
+# wave's.
+SWEEP_TICKS = 5
 
 
 GLOBAL_VARIABLES = (
@@ -85,15 +93,13 @@ GLOBAL_VARIABLES = (
     # Waves cleared, for the result.
     "cleared",
     # After the schedule: the stage, the endless growth level applied and one awaiting the
-    # native triggers, the pierce armor added and steps awaiting them, and seconds until sudden
-    # death next costs lives. wave_display asks the native triggers to count down to the next
-    # endless wave (1), to clear the countdown when a wave starts (2) or to count down the
-    # choice window (3).
+    # native triggers, the pierce armor added, and seconds until sudden death next costs lives.
+    # wave_display asks the native triggers to count down to the next endless wave (1), to
+    # clear the countdown when a wave starts (2) or to count down the choice window (3).
     "stage",
     "endless_level",
     "endless_request",
     "armor",
-    "armor_request",
     "drain",
     "wave_display",
     # The siege power-up: its holder, stage (warning, then active), seconds left in the stage,
@@ -104,8 +110,8 @@ GLOBAL_VARIABLES = (
     "siege_cooldown",
     "siege_display",
 )
-# A lane's purchase, King, attack and message fields are requests its native triggers
-# acknowledge; owned holds its once-only purchases as bits, kills the kill rewards already paid.
+# A lane's purchase, King and message fields are requests its native triggers acknowledge;
+# owned holds its once-only purchases as bits, kills the kill rewards already paid.
 LANE_VARIABLES = (
     "active",
     "lives",
@@ -118,7 +124,6 @@ LANE_VARIABLES = (
     "kings",
     "kills",
     "notice",
-    "attack",
     "message",
     # A new selection of a control, waiting for the XS to act on it, and the control the lane's
     # player holds selected, which the native triggers keep to notice the next new selection.
@@ -163,17 +168,76 @@ def camel(name: str) -> str:
     return "".join(word.title() for word in name.split("_"))
 
 
-def table(name: str, values: list[int]) -> str:
-    cases = "\n".join(f"    if (index == {i}) return ({value});" for i, value in enumerate(values))
-    return f"int {name}(int index = 0) {{\n{cases}\n    return (0);\n}}\n"
+@dataclass(frozen=True)
+class ArrayTable:
+    """An integer lookup table the XS keeps in an array: every index below the size reads its
+    value or the default, and any other index reads the default."""
+
+    name: str
+    size: int
+    default: int
+    values: Mapping[int, int]
+
+    @property
+    def array(self) -> str:
+        return f"{self.name}Table"
+
+    @property
+    def filler(self) -> str:
+        return f"ancientFill{self.name[0].upper()}{self.name[1:]}"
+
+    def fill(self) -> str:
+        """The function that creates and fills the array: one per table, so no function grows
+        past one table's values."""
+        create = f'xsArrayCreateInt({self.size}, {self.default}, "{self.name}")'
+        lines = [f"    {self.array} = {create};"]
+        lines += [
+            f"    xsArraySetInt({self.array}, {index}, {value});"
+            for index, value in sorted(self.values.items())
+            if value != self.default
+        ]
+        return f"void {self.filler}() {{\n" + "\n".join(lines) + "\n}\n\n"
+
+    def accessor(self) -> str:
+        return (
+            f"int {self.name}(int index = 0) {{\n"
+            "    ancientEnsureTables();\n"
+            f"    if ((index < 0) || (index >= {self.size})) return ({self.default});\n"
+            f"    return (xsArrayGetInt({self.array}, index));\n"
+            "}\n"
+        )
 
 
-def sparse(name: str, values: Mapping[int, int], fallback: int = 0) -> str:
+def table(name: str, values: list[int]) -> ArrayTable:
+    return ArrayTable(name, max(1, len(values)), 0, dict(enumerate(values)))
+
+
+def sparse(name: str, values: Mapping[int, int], fallback: int = 0) -> ArrayTable:
     """A table over scattered indexes; any index it does not list reads the fallback."""
-    cases = "\n".join(
-        f"    if (index == {i}) return ({v});" for i, v in sorted(values.items()) if v != fallback
+    return ArrayTable(name, max(values, default=0) + 1, fallback, values)
+
+
+def array_tables(tables: Sequence[ArrayTable]) -> str:
+    """Declare the tables' arrays, fill them all before the first lookup, and look them up.
+
+    The fill waits for the first lookup, so it runs whether or not DE keeps XS globals and
+    arrays when a saved game loads.
+    """
+    return (
+        "".join(f"int {t.array} = -1;\n" for t in tables)
+        + "bool ancientTablesReady = false;\n\n"
+        + "".join(t.fill() for t in tables)
+        + "void ancientTables() {\n"
+        + "".join(f"    {t.filler}();\n" for t in tables)
+        + "}\n\n"
+        + "void ancientEnsureTables() {\n"
+        + "    if (ancientTablesReady == false) {\n"
+        + "        ancientTablesReady = true;\n"
+        + "        ancientTables();\n"
+        + "    }\n"
+        + "}\n\n"
+        + "".join(t.accessor() for t in tables)
     )
-    return f"int {name}(int index = 0) {{\n{cases}\n    return ({fallback});\n}}\n"
 
 
 def sparse_strings(name: str, values: Mapping[int, str], fallback: str) -> str:
@@ -240,7 +304,7 @@ def grant_table(profiles: Profiles, shop: Shop) -> str:
     )
 
 
-def civilization_tables(profiles: Profiles, shop: Shop) -> str:
+def civilization_arrays(profiles: Profiles, shop: Shop) -> list[ArrayTable]:
     """Per-civilization profile values the XS applies; unlisted civilizations read the default."""
     default = profiles.default
     tables = {
@@ -262,10 +326,38 @@ def civilization_tables(profiles: Profiles, shop: Shop) -> str:
             profiles.native_index(default),
         ),
     }
+    return [sparse(name, values, fallback) for name, (values, fallback) in tables.items()]
+
+
+def attack_table(profiles: Profiles, families: Sequence[str]) -> str:
+    """Tower attack by family (0 upward, in family order) and civilization ID: a listed
+    civilization reads its own profile, any other the default."""
+    default = dict(profiles.default.attack)
+    lines = [
+        f"    if ((family == {index}) && (civ == {c.id})) return ({amount});"
+        for index, family in enumerate(families)
+        for c in profiles.civilizations
+        if (amount := dict(c.profile.attack).get(family, 0)) != default.get(family, 0)
+    ]
+    lines += [
+        f"    if (family == {index}) return ({default[family]});"
+        for index, family in enumerate(families)
+        if default.get(family, 0)
+    ]
     return (
-        "".join(sparse(name, values, fallback) for name, (values, fallback) in tables.items())
-        + raider_table(profiles)
+        "int civAttack(int family = 0, int civ = 0) {\n"
+        + "".join(f"{line}\n" for line in lines)
+        + "    return (0);\n}\n"
+    )
+
+
+def civilization_tables(profiles: Profiles, shop: Shop, families: Sequence[str]) -> str:
+    """Per-civilization raider caps, grants, tower attack and chat lines, read while a lane is
+    set up."""
+    return (
+        raider_table(profiles)
         + grant_table(profiles, shop)
+        + attack_table(profiles, families)
         + sparse_strings("civName", {c.id: c.name for c in profiles.civilizations}, "")
         + sparse_strings(
             "civText",
@@ -379,6 +471,10 @@ def render_prelude(
         cSiegeSlots=SIEGE_SLOTS,
         cTrebuchet=UnitInfo["TREBUCHET"].ID,
         cPackedTrebuchet=UnitInfo["TREBUCHET_PACKED"].ID,
+        cPierceClass=PIERCE,
+        cClassChunk=CLASS_CHUNK,
+        cSweepTicks=SWEEP_TICKS,
+        cFamilies=len(balance.towers.families),
     )
     stride = len(purchases) + 1
     starts: dict[int, int] = {}
@@ -404,6 +500,8 @@ def render_prelude(
         (p.pad_region[0], p.pad_region[1], p.pad_region[2], p.pad_region[3]) for p in purchases
     ]
     invested = [p.effect for p in investments if isinstance(p.effect, Investment)]
+    families = [name for name, _ in balance.towers.families]
+    members = [balance.towers.family_ids(name) for name in families]
     bosses = {w.object_id for w in balance.waves if w.boss}
     enemies = sorted({w.object_id for w in balance.waves})
     tables: dict[str, list[int]] = {
@@ -439,6 +537,10 @@ def render_prelude(
         "siegeY10": [0] * SIEGE_SLOTS
         + [center(tile)[1] for lane in lanes for tile in lane.sites.siege],
         "endlessTemplate": list(balance.endless.templates),
+        # The enemies endless waves bring, once each: they take every armor step.
+        "endlessUnit": list(
+            dict.fromkeys(balance.waves[t].object_id for t in balance.endless.templates)
+        ),
         # Indexed by (level * cEndlessTemplates + template) * cEndlessLevels + growth - 1.
         "endlessHitPoints": [
             balance.endless_hit_points(growth, position, level)
@@ -466,6 +568,8 @@ def render_prelude(
         # Whether each enemy type is a boss's, and the lives its leak costs, in enemyType order.
         "enemyBoss": [int(enemy in bosses) for enemy in enemies],
         "enemyLives": [balance.boss_leak_lives if enemy in bosses else 1 for enemy in enemies],
+        # Each scheduled wave's enemy type, as an index in enemyType.
+        "waveKind": [enemies.index(w.object_id) for w in balance.waves],
         "laneClass": list(LANE_CLASSES),
         "shopX1": [pad[0] for pad in pads],
         "shopY1": [pad[1] for pad in pads],
@@ -492,6 +596,20 @@ def render_prelude(
         "investPeriod": [e.period for e in invested],
         "investPays": [PAYOUTS.index(e.pays) for e in invested],
         "investAmount": [e.amount for e in invested],
+        "investFamily": [families.index(e.family) if e.family else 0 for e in invested],
+        # The tower definitions of each family, flattened: family f holds familyCount(f)
+        # members from familyStart(f).
+        "familyStart": [sum(len(m) for m in members[:f]) for f in range(len(members))],
+        "familyCount": [len(m) for m in members],
+        "familyUnit": [unit for m in members for unit in m],
+        # The tower attack a purchase adds, and to which family.
+        "shopAttack": [0]
+        + [p.effect.amount if isinstance(p.effect, TowerAttack) else 0 for p in purchases],
+        "shopAttackFamily": [0]
+        + [
+            families.index(p.effect.family) if isinstance(p.effect, TowerAttack) else 0
+            for p in purchases
+        ],
         "towerTech": [tech for _, tech in access],
     }
     texts: dict[str, list[str]] = {
@@ -506,14 +624,16 @@ def render_prelude(
         ],
     }
     constants["cEnemyTypes"] = len(tables["enemyType"])
+    constants["cEndlessUnits"] = len(tables["endlessUnit"])
     declaration = "extern const int" if extern else "const int"
+    arrays = [table(name, values) for name, values in tables.items()]
+    arrays += [sparse("spawnStart", starts), sparse("spawnCount", counts)]
+    arrays += civilization_arrays(profiles, shop)
     return (
         "\n".join(f"{declaration} {name} = {value};" for name, value in constants.items())
         + "\n"
-        + "\n".join(table(name, values) for name, values in tables.items())
-        + sparse("spawnStart", starts)
-        + sparse("spawnCount", counts)
-        + civilization_tables(profiles, shop)
+        + array_tables(arrays)
+        + civilization_tables(profiles, shop, families)
         + "\n".join(strings(name, values) for name, values in texts.items())
     )
 

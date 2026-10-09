@@ -19,9 +19,16 @@ The data files give the towers, enemies and technologies; these settings and con
 | tower hit point kings | 0.0005 |
 | raider slot kings | 0.5 |
 | population kings | 0.03 |
+| starting kings | 1.0 |
+| attack share | 0.6 |
+| investment return | 1.7 |
+| investment minutes | 40.0 |
+| towers at first wave | 8 |
+| towers at finale | 30 |
+| finale minute | 60.0 |
+| accursed from minute | 20.0 |
 | food per King | 3000 |
 | Kings per tile of tower range | 0.25 |
-| enemy speed (tiles per second) | 0.65 |
 | lane length (tiles) | 48 |
 | land trade route (tiles) | 196 |
 | water trade route (tiles) | 197 |
@@ -42,66 +49,129 @@ Damage per second against 2 pierce armor (the knight line), at each cumulative t
 
 ## Waves
 
-Normal hit points. An enemy crosses the lane in 74 seconds; the required damage per second kills the whole wave before its last enemy reaches the exit.
+Normal hit points. Each enemy crosses the lane at its own speed; the required damage per second kills the whole wave before its last enemy reaches the exit.
 
-| # | Wave | Enemies | HP | Pierce armor | Total HP | Spawn s | DPS needed |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Villagers | 30 | 60 | 0 | 1800 | 42 | 16 |
-| 2 | Militia | 30 | 70 | 1 | 2100 | 42 | 18 |
-| 3 | Spearmen | 30 | 90 | 0 | 2700 | 42 | 23 |
-| 4 | Archers | 30 | 115 | 0 | 3450 | 42 | 30 |
-| 5 | War Elephants | 18 | 230 | 2 | 4140 | 40 | 36 |
-| 6 | Men-at-Arms | 30 | 160 | 1 | 4800 | 42 | 41 |
-| 7 | Pikemen | 30 | 180 | 0 | 5400 | 42 | 47 |
-| 8 | Champions | 30 | 210 | 1 | 6300 | 42 | 54 |
-| 9 | Scout Cavalry | 30 | 230 | 2 | 6900 | 42 | 60 |
-| 10 | Mamelukes | 30 | 270 | 0 | 8100 | 42 | 70 |
-| 11 | Elite Berserks | 30 | 300 | 1 | 9000 | 42 | 78 |
-| 12 | Elite Eagle Warriors | 30 | 340 | 4 | 10200 | 42 | 88 |
-| 13 | Heavy Camel Riders | 30 | 390 | 0 | 11700 | 42 | 101 |
-| 14 | Knights | 30 | 440 | 2 | 13200 | 42 | 114 |
-| 15 | Saboteurs | 30 | 500 | 3 | 15000 | 42 | 129 |
-| 16 | Charles Martel | 30 | 570 | 0 | 17100 | 42 | 148 |
-| 17 | Guy Josselyne | 30 | 650 | 3 | 19500 | 42 | 168 |
-| 18 | Joan of Arc | 30 | 730 | 2 | 21900 | 42 | 189 |
-| 19 | William Wallace | 30 | 830 | 5 | 24900 | 42 | 215 |
-| 20 | William the Conqueror | 30 | 940 | 4 | 28200 | 42 | 243 |
-| 21 | Nobunaga | 30 | 1050 | 0 | 31500 | 42 | 272 |
-| 22 | La Hire | 30 | 1200 | 1 | 36000 | 42 | 311 |
-| 23 | Elite Plumed Archers | 30 | 1400 | 2 | 42000 | 42 | 363 |
-| 24 | The Black Prince | 30 | 1550 | 2 | 46500 | 42 | 401 |
-| 25 | Richard the Lionheart | 30 | 1800 | 3 | 54000 | 42 | 466 |
-| 26 | Hrolf the Ganger | 30 | 2000 | 4 | 60000 | 42 | 518 |
-| 27 | Elite Teutonic Knights | 30 | 2300 | 2 | 69000 | 42 | 596 |
-| 28 | Elite Genitours | 30 | 2600 | 1 | 78000 | 42 | 673 |
-| 29 | Aethelfrith | 30 | 2950 | 0 | 88500 | 42 | 764 |
-| 30 | Theodoric the Goth | 30 | 3350 | 4 | 100500 | 42 | 868 |
-| 31 | Heavy Cavalry Archers | 45 | 2550 | 0 | 114750 | 42 | 991 |
-| 32 | Elite Mangudai | 45 | 2900 | 0 | 130500 | 42 | 1126 |
-| 33 | Tamerlane | 45 | 3250 | 1 | 146250 | 42 | 1262 |
-| 34 | Genghis Khan | 45 | 3700 | 2 | 166500 | 42 | 1437 |
-| 35 | Subotai | 45 | 4200 | 2 | 189000 | 42 | 1631 |
-| 36 | Paladins | 45 | 4800 | 3 | 216000 | 42 | 1865 |
-| 37 | Elite War Elephants | 45 | 5400 | 3 | 243000 | 42 | 2098 |
-| 38 | Elite Cataphracts | 45 | 6200 | 1 | 279000 | 42 | 2408 |
-| 39 | Belisarius | 45 | 7000 | 1 | 315000 | 42 | 2719 |
-| 40 | Siege Rams | 45 | 5000 | 40 | 225000 | 42 | 1942 |
-| 41 | Elite Conquistadors | 75 | 6800 | 2 | 510000 | 72 | 3497 |
-| 42 | Attila the Hun | 75 | 7700 | 2 | 577500 | 72 | 3960 |
-| 43 | Master of the Templar | 75 | 8800 | 3 | 660000 | 72 | 4525 |
-| 44 | Lancelot | 75 | 9900 | 3 | 742500 | 72 | 5091 |
-| 45 | Henry V | 75 | 11300 | 4 | 847500 | 72 | 5811 |
-| 46 | Scythian Scouts | 75 | 12800 | 8 | 960000 | 72 | 6582 |
-| 47 | Charlemagne | 1 | 632000 | 0 | 632000 | 0 | 8558 |
-| 48 | Roland | 1 | 676000 | 2 | 676000 | 0 | 9154 |
-| 49 | Frederick Barbarossa | 1 | 723000 | 2 | 723000 | 0 | 9791 |
-| 50 | Saladin | 1 | 774000 | 0 | 774000 | 0 | 10481 |
-| 51 | El Cid Campeador | 1 | 828000 | 3 | 828000 | 0 | 11213 |
-| 52 | Jan Zizka | 1 | 886000 | 1 | 886000 | 0 | 11998 |
-| 53 | Vytautas the Great | 1 | 948000 | 5 | 948000 | 0 | 12838 |
-| 54 | Bayinnaung | 1 | 1015000 | 3 | 1015000 | 0 | 13745 |
-| 55 | King Arthur | 1 | 1086000 | 2 | 1086000 | 0 | 14706 |
-| 56 | Abraha Elephant | 1 | 1162000 | 3 | 1162000 | 0 | 15735 |
+| # | Wave | Enemies | HP | Pierce armor | Total HP | Spawn s | Speed | Crossing s | DPS needed |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Villagers | 30 | 45 | 0 | 1350 | 42 | 0.8 | 60 | 13 |
+| 2 | Militia | 30 | 95 | 1 | 2850 | 42 | 0.9 | 53 | 30 |
+| 3 | Spearmen | 30 | 130 | 0 | 3900 | 42 | 1 | 48 | 43 |
+| 4 | Archers | 30 | 200 | 0 | 6000 | 42 | 0.96 | 50 | 65 |
+| 5 | War Elephants | 18 | 520 | 2 | 9360 | 40 | 0.8 | 60 | 94 |
+| 6 | Men-at-Arms | 30 | 430 | 1 | 12900 | 42 | 0.96 | 50 | 140 |
+| 7 | Pikemen | 30 | 530 | 0 | 15900 | 42 | 1 | 48 | 177 |
+| 8 | Champions | 30 | 640 | 1 | 19200 | 42 | 0.96 | 50 | 209 |
+| 9 | Scout Cavalry | 30 | 730 | 2 | 21900 | 42 | 1.2 | 40 | 267 |
+| 10 | Mamelukes | 30 | 810 | 0 | 24300 | 42 | 1.4 | 34 | 319 |
+| 11 | Elite Berserks | 30 | 1200 | 1 | 36000 | 42 | 1.05 | 46 | 410 |
+| 12 | Elite Eagle Warriors | 30 | 1300 | 4 | 39000 | 42 | 1.3 | 37 | 494 |
+| 13 | Heavy Camel Riders | 30 | 1500 | 0 | 45000 | 42 | 1.45 | 33 | 599 |
+| 14 | Knights | 30 | 2000 | 2 | 60000 | 42 | 1.35 | 36 | 774 |
+| 15 | Saboteurs | 30 | 2300 | 3 | 69000 | 42 | 1.35 | 36 | 890 |
+| 16 | Charles Martel | 30 | 3200 | 0 | 96000 | 42 | 0.9 | 53 | 1007 |
+| 17 | Guy Josselyne | 30 | 2700 | 3 | 81000 | 42 | 1.45 | 33 | 1079 |
+| 18 | Joan of Arc | 30 | 3000 | 2 | 90000 | 42 | 1.45 | 33 | 1198 |
+| 19 | William Wallace | 30 | 4100 | 5 | 123000 | 42 | 1 | 48 | 1367 |
+| 20 | William the Conqueror | 30 | 3900 | 4 | 117000 | 42 | 1.32 | 36 | 1493 |
+| 21 | Nobunaga | 30 | 5600 | 0 | 168000 | 42 | 0.9 | 53 | 1762 |
+| 22 | La Hire | 30 | 6300 | 1 | 189000 | 42 | 0.9 | 53 | 1983 |
+| 23 | Elite Plumed Archers | 30 | 5900 | 2 | 177000 | 42 | 1.2 | 40 | 2159 |
+| 24 | The Black Prince | 30 | 6100 | 2 | 183000 | 42 | 1.3 | 37 | 2319 |
+| 25 | Richard the Lionheart | 30 | 6800 | 3 | 204000 | 42 | 1.3 | 37 | 2585 |
+| 26 | Hrolf the Ganger | 30 | 10000 | 4 | 300000 | 42 | 0.7 | 69 | 2713 |
+| 27 | Elite Teutonic Knights | 30 | 10000 | 2 | 300000 | 42 | 0.8 | 60 | 2941 |
+| 28 | Elite Genitours | 30 | 8300 | 1 | 249000 | 42 | 1.35 | 36 | 3211 |
+| 29 | Aethelfrith | 30 | 10000 | 0 | 300000 | 42 | 1.03 | 47 | 3386 |
+| 30 | Theodoric the Goth | 30 | 12000 | 4 | 360000 | 42 | 0.9 | 53 | 3776 |
+| 31 | Heavy Cavalry Archers | 45 | 7000 | 0 | 315000 | 42 | 1.4 | 34 | 4129 |
+| 32 | Elite Mangudai | 45 | 7500 | 0 | 337500 | 42 | 1.4 | 34 | 4424 |
+| 33 | Tamerlane | 45 | 7800 | 1 | 351000 | 42 | 1.41 | 34 | 4616 |
+| 34 | Genghis Khan | 45 | 8100 | 2 | 364500 | 42 | 1.45 | 33 | 4853 |
+| 35 | Subotai | 45 | 8000 | 2 | 360000 | 42 | 1.65 | 29 | 5064 |
+| 36 | Paladins | 45 | 9300 | 3 | 418500 | 42 | 1.35 | 36 | 5396 |
+| 37 | Elite War Elephants | 45 | 13000 | 3 | 585000 | 42 | 0.8 | 60 | 5735 |
+| 38 | Elite Cataphracts | 45 | 10000 | 1 | 450000 | 42 | 1.35 | 36 | 5802 |
+| 39 | Belisarius | 45 | 11000 | 1 | 495000 | 42 | 1.35 | 36 | 6383 |
+| 40 | Siege Rams | 45 | 14000 | 100 | 630000 | 42 | 0.6 | 80 | 5164 |
+| 41 | Elite Conquistadors | 75 | 9900 | 2 | 742500 | 72 | 1.3 | 37 | 6817 |
+| 42 | Attila the Hun | 75 | 11000 | 2 | 825000 | 72 | 1.2 | 40 | 7366 |
+| 43 | Master of the Templar | 75 | 11000 | 3 | 825000 | 72 | 1.32 | 36 | 7613 |
+| 44 | Lancelot | 75 | 12000 | 3 | 900000 | 72 | 1.3 | 37 | 8263 |
+| 45 | Henry V | 75 | 12000 | 4 | 900000 | 72 | 1.3 | 37 | 8263 |
+| 46 | Scythian Scouts | 75 | 12000 | 8 | 900000 | 72 | 1.5 | 32 | 8654 |
+| 47 | Charlemagne | 1 | 520000 | 0 | 520000 | 0 | 0.9 | 53 | 9750 |
+| 48 | Roland | 1 | 370000 | 2 | 370000 | 0 | 1.3 | 37 | 10021 |
+| 49 | Frederick Barbarossa | 1 | 680000 | 2 | 680000 | 0 | 0.75 | 64 | 10625 |
+| 50 | Saladin | 1 | 380000 | 0 | 380000 | 0 | 1.4 | 34 | 11083 |
+| 51 | El Cid Campeador | 1 | 420000 | 3 | 420000 | 0 | 1.32 | 36 | 11550 |
+| 52 | Jan Zizka | 1 | 420000 | 1 | 420000 | 0 | 1.4 | 34 | 12250 |
+| 53 | Vytautas the Great | 1 | 400000 | 5 | 400000 | 0 | 1.5 | 32 | 12500 |
+| 54 | Bayinnaung | 1 | 850000 | 3 | 850000 | 0 | 0.75 | 64 | 13281 |
+| 55 | King Arthur | 1 | 740000 | 2 | 740000 | 0 | 0.9 | 53 | 13875 |
+| 56 | Abraha Elephant | 1 | 980000 | 3 | 980000 | 0 | 0.7 | 69 | 14292 |
+
+## Pressure
+
+Each wave against the lane the assumptions expect at the minute it starts: the Kings it has, the tower attack 60 percent of them buy, its Watch Towers and, from minute 20, both Accursed Towers. Pressure is the damage per second the wave needs over what those towers deal; above 1 the wave leaks. The last columns are the pressure on Easy and Hard, with their own King price and hit points.
+
+| # | Wave | Minute | Kings | Attack | Towers | Expected DPS | DPS needed | Pressure | Easy | Hard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | Villagers | 4.9 | 2.2 | 6 | 8 | 42 | 13 | 0.31 | 0.22 | 0.39 |
+| 2 | Militia | 6.1 | 3.6 | 10 | 8 | 59 | 30 | 0.51 | 0.36 | 0.63 |
+| 3 | Spearmen | 7.4 | 5.1 | 15 | 9 | 88 | 43 | 0.49 | 0.35 | 0.60 |
+| 4 | Archers | 8.6 | 6.7 | 20 | 9 | 121 | 65 | 0.54 | 0.39 | 0.67 |
+| 5 | War Elephants | 9.9 | 9.5 | 31 | 10 | 169 | 94 | 0.55 | 0.40 | 0.67 |
+| 6 | Men-at-Arms | 11.1 | 11.2 | 37 | 10 | 216 | 140 | 0.65 | 0.47 | 0.79 |
+| 7 | Pikemen | 12.4 | 12.9 | 44 | 11 | 271 | 177 | 0.65 | 0.47 | 0.79 |
+| 8 | Champions | 13.6 | 14.7 | 52 | 11 | 322 | 209 | 0.65 | 0.47 | 0.79 |
+| 9 | Scout Cavalry | 14.9 | 17.8 | 65 | 12 | 411 | 267 | 0.65 | 0.48 | 0.78 |
+| 10 | Mamelukes | 16.1 | 19.8 | 74 | 12 | 492 | 319 | 0.65 | 0.48 | 0.78 |
+| 11 | Elite Berserks | 17.4 | 21.8 | 82 | 13 | 561 | 410 | 0.73 | 0.54 | 0.88 |
+| 12 | Elite Eagle Warriors | 18.6 | 25.2 | 98 | 13 | 668 | 494 | 0.74 | 0.54 | 0.90 |
+| 13 | Heavy Camel Riders | 19.9 | 27.3 | 109 | 14 | 795 | 599 | 0.75 | 0.55 | 0.91 |
+| 14 | Knights | 21.1 | 29.5 | 120 | 14 | 1047 | 774 | 0.74 | 0.55 | 0.88 |
+| 15 | Saboteurs | 22.4 | 33.1 | 138 | 15 | 1206 | 890 | 0.74 | 0.55 | 0.88 |
+| 16 | Charles Martel | 23.6 | 35.4 | 149 | 15 | 1355 | 1007 | 0.74 | 0.55 | 0.88 |
+| 17 | Guy Josselyne | 24.9 | 37.8 | 161 | 16 | 1463 | 1079 | 0.74 | 0.55 | 0.88 |
+| 18 | Joan of Arc | 26.1 | 40.2 | 173 | 16 | 1613 | 1198 | 0.74 | 0.55 | 0.88 |
+| 19 | William Wallace | 27.4 | 44.2 | 194 | 17 | 1802 | 1367 | 0.76 | 0.56 | 0.90 |
+| 20 | William the Conqueror | 28.6 | 46.7 | 208 | 17 | 1987 | 1493 | 0.75 | 0.56 | 0.90 |
+| 21 | Nobunaga | 29.9 | 49.4 | 223 | 18 | 2211 | 1762 | 0.80 | 0.59 | 0.95 |
+| 22 | La Hire | 31.1 | 53.6 | 247 | 18 | 2479 | 1983 | 0.80 | 0.59 | 0.95 |
+| 23 | Elite Plumed Archers | 32.4 | 56.3 | 263 | 19 | 2680 | 2159 | 0.81 | 0.60 | 0.96 |
+| 24 | The Black Prince | 33.6 | 59.2 | 279 | 19 | 2901 | 2319 | 0.80 | 0.59 | 0.95 |
+| 25 | Richard the Lionheart | 34.9 | 63.6 | 304 | 20 | 3214 | 2585 | 0.80 | 0.60 | 0.96 |
+| 26 | Hrolf the Ganger | 36.1 | 66.6 | 321 | 20 | 3450 | 2713 | 0.79 | 0.59 | 0.93 |
+| 27 | Elite Teutonic Knights | 37.4 | 69.6 | 338 | 21 | 3731 | 2941 | 0.79 | 0.59 | 0.94 |
+| 28 | Elite Genitours | 38.6 | 72.6 | 355 | 21 | 4014 | 3211 | 0.80 | 0.60 | 0.95 |
+| 29 | Aethelfrith | 39.9 | 77.4 | 380 | 22 | 4389 | 3386 | 0.77 | 0.58 | 0.91 |
+| 30 | Theodoric the Goth | 41.1 | 79.7 | 392 | 22 | 4567 | 3776 | 0.83 | 0.62 | 0.97 |
+| 31 | Heavy Cavalry Archers | 42.4 | 81.9 | 403 | 23 | 4842 | 4129 | 0.85 | 0.64 | 1.00 |
+| 32 | Elite Mangudai | 43.6 | 85.8 | 422 | 23 | 5176 | 4424 | 0.85 | 0.64 | 1.01 |
+| 33 | Tamerlane | 44.9 | 88.0 | 434 | 24 | 5403 | 4616 | 0.85 | 0.64 | 1.01 |
+| 34 | Genghis Khan | 46.1 | 91.8 | 453 | 24 | 5741 | 4853 | 0.85 | 0.64 | 0.99 |
+| 35 | Subotai | 47.4 | 94.0 | 464 | 25 | 5994 | 5064 | 0.84 | 0.63 | 0.99 |
+| 36 | Paladins | 48.6 | 97.9 | 484 | 25 | 6349 | 5396 | 0.85 | 0.64 | 1.00 |
+| 37 | Elite War Elephants | 49.9 | 100.1 | 495 | 26 | 6615 | 5735 | 0.87 | 0.65 | 1.02 |
+| 38 | Elite Cataphracts | 51.1 | 104.0 | 515 | 26 | 7028 | 5802 | 0.83 | 0.62 | 0.97 |
+| 39 | Belisarius | 52.4 | 106.1 | 526 | 27 | 7308 | 6383 | 0.87 | 0.66 | 1.03 |
+| 40 | Siege Rams | 53.6 | 108.3 | 537 | 27 | 6168 | 5164 | 0.84 | 0.62 | 1.00 |
+| 41 | Elite Conquistadors | 54.9 | 112.2 | 557 | 28 | 7990 | 6817 | 0.85 | 0.64 | 1.00 |
+| 42 | Attila the Hun | 56.6 | 116.3 | 578 | 29 | 8483 | 7366 | 0.87 | 0.65 | 1.02 |
+| 43 | Master of the Templar | 58.4 | 118.6 | 590 | 29 | 8848 | 7613 | 0.86 | 0.64 | 1.01 |
+| 44 | Lancelot | 60.1 | 122.7 | 611 | 30 | 9351 | 8263 | 0.88 | 0.64 | 1.04 |
+| 45 | Henry V | 61.9 | 126.8 | 645 | 30 | 9849 | 8263 | 0.84 | 0.61 | 1.01 |
+| 46 | Scythian Scouts | 63.6 | 130.9 | 682 | 30 | 10336 | 8654 | 0.84 | 0.61 | 1.03 |
+| 47 | Charlemagne | 65.4 | 133.2 | 703 | 30 | 10782 | 9750 | 0.90 | 0.65 | 1.11 |
+| 48 | Roland | 65.9 | 135.1 | 720 | 30 | 11007 | 10021 | 0.91 | 0.66 | 1.12 |
+| 49 | Frederick Barbarossa | 66.4 | 137.0 | 737 | 30 | 11263 | 10625 | 0.94 | 0.68 | 1.16 |
+| 50 | Saladin | 66.9 | 138.9 | 754 | 30 | 11551 | 11083 | 0.96 | 0.70 | 1.17 |
+| 51 | El Cid Campeador | 67.5 | 140.8 | 771 | 30 | 11760 | 11550 | 0.98 | 0.71 | 1.20 |
+| 52 | Jan Zizka | 68.0 | 142.7 | 789 | 30 | 12048 | 12250 | 1.02 | 0.74 | 1.24 |
+| 53 | Vytautas the Great | 68.5 | 144.6 | 806 | 30 | 12241 | 12500 | 1.02 | 0.74 | 1.24 |
+| 54 | Bayinnaung | 69.0 | 146.5 | 823 | 30 | 12529 | 13281 | 1.06 | 0.77 | 1.29 |
+| 55 | King Arthur | 69.5 | 148.4 | 840 | 30 | 12801 | 13875 | 1.08 | 0.79 | 1.32 |
+| 56 | Abraha Elephant | 70.0 | 150.3 | 857 | 30 | 13042 | 14292 | 1.10 | 0.80 | 1.33 |
 
 ## Shop
 
@@ -141,13 +211,13 @@ A King buys 1500 stone or 2000 wood, and 2000 gold makes one; the attack ladder 
 | 3 relics and 2 monks | 1 | - |
 | 20 relics | 5 | - |
 | +80 population | 3 | - |
-| Castle (+20 population) | 3 | - |
-| Third row of towers | 2 | - |
+| Castle (+20 population, castle research) | 1 | - |
+| Third row of towers | 3 | - |
 | Fourth row of towers | 3 | - |
 | Repair crew | 10 | - |
 | Land raider (light cavalry) | 3 | - |
 | Naval raider (fire galley) | 3 | - |
-| Siege power-up | 20 | plus 5 per rival |
+| Siege power-up | 15 | plus 3 per rival |
 
 ## Investments
 
@@ -187,7 +257,7 @@ Each profile's adjustments and their worth in Kings over a run (Solo), the conte
 | Civilization | Lacks | Profile | Solo | Native | Total | PvP |
 | --- | --- | --- | --- | --- | --- | --- |
 | Britons | Bombard Tower | +1 starting King, +300 stone, +3 tower attack, Fletching researched | 2.5 | 0.2 | 2.7 | 2.7 |
-| Franks | Bombard Tower, Keep | +1 starting King, +300 food, Castle (+20 population) from the start, +1 land raider with PvP on | 2.7 | 0.2 +0.1 | 2.9 | 3.5 |
+| Franks | Bombard Tower, Keep | +1 starting King, +300 food, Castle (+20 population, castle research) from the start, +1 land raider with PvP on | 2.7 | 0.2 +0.1 | 2.9 | 3.5 |
 | Goths | Bombard Tower, Guard Tower, Keep | +1 starting King, kill rewards pay 25 percent more stone and wood, +10 population | 3.0 | 0.3 | 3.3 | 3.3 |
 | Teutons | - | +1 starting King, +2 tower attack, +25 bombard tower attack, +400 tower hit points, Masonry researched | 2.8 | 1.0 +0.1 | 3.8 | 4.1 |
 | Japanese | Bombard Tower | +1 starting King, +300 stone, +4 tower attack, Arrowslits researched | 2.7 | 0.1 +0.2 | 2.8 | 3.0 |
@@ -222,7 +292,7 @@ Each profile's adjustments and their worth in Kings over a run (Solo), the conte
 | Cumans | Bombard Tower, Guard Tower, Keep | +300 wood, kill rewards pay 25 percent more stone and wood, 2 resource villagers from the start, +1 land raider with PvP on | 2.9 | 0.0 +0.1 | 2.9 | 3.5 |
 | Lithuanians | - | +300 food, 3 relics and 2 monks from the start, +1 land raider with PvP on | 3.3 | 0.0 +0.2 | 3.3 | 4.0 |
 | Burgundians | - | +300 food, 175 gold every 2 minutes from the start | 3.2 | 0.3 | 3.5 | 3.5 |
-| Sicilians | Bombard Tower, Guard Tower, Keep | +1 starting King, +300 stone, Third row of towers from the start | 3.2 | 0.3 | 3.5 | 3.5 |
+| Sicilians | Bombard Tower, Guard Tower, Keep | +300 stone, Third row of towers from the start | 3.2 | 0.3 | 3.5 | 3.5 |
 | Poles | - | Kings cost 5 percent less gold, kill rewards pay 25 percent more stone and wood, +1 land raider with PvP on | 2.5 | 0.6 | 3.1 | 3.6 |
 | Bohemians | - | kill rewards pay 15 percent more stone and wood, +25 bombard tower attack, Chemistry researched | 2.6 | 0.9 | 3.5 | 3.5 |
 | Dravidians | - | +400 wood, 3 trade cogs from the start | 3.4 | 0.2 | 3.6 | 3.6 |
@@ -256,9 +326,9 @@ A light cavalry raider kills a trade cart in 20 seconds and a fire galley a trad
 
 | Players | Siege price | Trebuchets |
 | --- | --- | --- |
-| 2 | 25 | 2 |
-| 3 | 30 | 4 |
-| 4 | 35 | 6 |
-| 5 | 40 | 8 |
-| 6 | 45 | 10 |
-| 7 | 50 | 12 |
+| 2 | 18 | 2 |
+| 3 | 21 | 4 |
+| 4 | 24 | 6 |
+| 5 | 27 | 8 |
+| 6 | 30 | 10 |
+| 7 | 33 | 12 |

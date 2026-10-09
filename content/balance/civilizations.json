@@ -38,7 +38,7 @@
     {"key": "CUMANS", "id": 34, "identity": "cavalry move faster", "profile": {"purchases": ["resource_villagers"], "kill_reward_percent": 125, "resources": {"wood": 300}, "raiders": {"land": 1}}, "native": {"pvp": 0.1}},
     {"key": "LITHUANIANS", "id": 35, "identity": "monastery research is faster", "profile": {"purchases": ["relics"], "resources": {"food": 300}, "raiders": {"land": 1}}, "native": {"pvp": 0.2}},
     {"key": "BURGUNDIANS", "id": 36, "identity": "economy research comes an age early and costs less, Vineyards turn farms into gold", "profile": {"purchases": ["gold_175"], "resources": {"food": 300}}, "native": {"solo": 0.3}},
-    {"key": "SICILIANS", "id": 37, "identity": "towers and castles build faster and farms yield more, while Donjons are ruled out", "profile": {"kings": 1, "purchases": ["third_row"], "resources": {"stone": 300}}, "native": {"solo": 0.3}},
+    {"key": "SICILIANS", "id": 37, "identity": "towers and castles build faster and farms yield more, while Donjons are ruled out", "profile": {"purchases": ["third_row"], "resources": {"stone": 300}}, "native": {"solo": 0.3}},
     {"key": "POLES", "id": 38, "identity": "stone miners also bring gold and Folwarks feed villagers", "profile": {"kill_reward_percent": 125, "king_gold_percent": 95, "raiders": {"land": 1}}, "native": {"solo": 0.6}},
     {"key": "BOHEMIANS", "id": 39, "identity": "mining upgrades are free and Chemistry arrives in the Castle Age", "profile": {"attack": {"bombard": 25}, "kill_reward_percent": 115, "technologies": ["CHEMISTRY"]}, "native": {"solo": 0.9}},
     {"key": "DRAVIDIANS", "id": 40, "identity": "each age brings wood", "profile": {"purchases": ["trade_cogs"], "resources": {"wood": 400}}, "native": {"solo": 0.2}},

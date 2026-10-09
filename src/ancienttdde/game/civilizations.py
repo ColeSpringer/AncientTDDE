@@ -38,12 +38,12 @@ NO_RESOURCES = Resources(0, 0, 0, 0)
 
 @dataclass(frozen=True)
 class NativeEffects:
-    """The adjustments a lane's native triggers apply once: everything the XS cannot."""
+    """The adjustments a lane's native triggers apply once: everything the XS does not. Tower
+    attack is the XS's, as a native attack change stops at 255."""
 
     resources: Resources = NO_RESOURCES
     population: int = 0
     technologies: tuple[str, ...] = ()
-    attack: tuple[tuple[str, int], ...] = ()
     tower_hit_points: int = 0
     tower_stone: int = 0
     relics: int = 0

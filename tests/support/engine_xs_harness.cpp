@@ -54,6 +54,19 @@ bool xsResearchTechnology(int tech, bool, bool, int player) {
     techStates[{tech, player}] = cTechStateDone;
     return true;
 }
+// Technology-style effects the XS applied, as DE's xsEffectAmount(effect, object or technology,
+// attribute or operation, value, player) receives them.
+struct Applied { int effect; int unit; int attribute; float amount; int player; };
+std::vector<Applied> applied;
+bool operator==(const Applied &a, const Applied &b) {
+    return a.effect == b.effect && a.unit == b.unit && a.attribute == b.attribute && a.amount == b.amount && a.player == b.player;
+}
+void xsEffectAmount(int effect, int unit, int attribute, float amount, int player) {
+    applied.push_back({effect, unit, attribute, amount, player});
+}
+constexpr int cAddAttribute = 4;
+constexpr int cArmor = 8;
+constexpr int cAttack = 9;
 float xsGetObjectAttribute(int player, int object, int attribute, int = -1) {
     if (object != 598 || attribute != cHitpoints) { std::cerr << "Unexpected object attribute\n"; std::exit(1); }
     return outpostHitpoints.at(player);
@@ -80,8 +93,11 @@ int classOf(int type) {
     std::cerr << "No class recorded for object " << type << '\n';
     std::exit(1);
 }
+// Queries of the enemy's units since the counter was last cleared.
+int enemyQueries = 0;
 // DE documents object and class queries only; there is no documented all-objects wildcard.
 int xsGetPlayerUnitIds(int player, int objectOrClass, int target = -1) {
+    if (player == 8) ++enemyQueries;
     if (objectOrClass < 0) {
         std::cerr << "Unit queries need a documented object or class ID\n";
         std::exit(1);
@@ -114,20 +130,26 @@ int xsGetGarrisonedInUnitId(int id) { return units.at(id).garrison; }
 int xsGetUnitType(int id) { return units.at(id).type; }
 vector xsGetUnitPosition(int id) { return units.at(id).pos; }
 vector xsVectorSet(float x, float y, float z) { return {x, y, z}; }
-std::array<int, 9> kingsCreated{};
+// Kings the XS created by owner: those a lane earns or buys, and the one a cleared lane keeps
+// on its spare siege islet.
+std::array<int, 9> kingsCreated{}, spareKings{};
+bool onSpareIslet(int owner, vector pos);
 std::array<std::map<int, int>, 9> created{};
 // Enemies the XS created, by the lane whose rows they appeared in.
 std::array<int, 9> spawns{};
 int laneOfRow(float y);
+// Creations that played DE's creation sound, by owner.
+std::array<int, 9> audible{};
 // A unit, building or object on the spot blocks a collision-checked creation, as in DE.
-int xsCreateUnit(int type, int owner, vector pos, bool, bool, bool checkCollision) {
+int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCollision) {
     if (checkCollision)
         for (auto &[id, u] : units)
             if (std::abs(u.pos[0] - pos[0]) < 0.5f && std::abs(u.pos[1] - pos[1]) < 0.5f) return -1;
     int id = sequence++;
     units.emplace(id, Unit{type, pos, 100, owner});
     ++created[owner][type];
-    if (type == 434) ++kingsCreated[owner];
+    if (sound) ++audible[owner];
+    if (type == 434) { if (onSpareIslet(owner, pos)) ++spareKings[owner]; else ++kingsCreated[owner]; }
     if (owner == 8) { int lane = laneOfRow(pos[1]); if (lane > 0) ++spawns[lane]; }
     return id;
 }
@@ -156,33 +178,43 @@ int laneOfRow(float y) {
     for (int p = 1; p <= 7; ++p) if (y >= laneLowY(p) && y < laneHighY(p) + 1) return p;
     return 0;
 }
-std::array<int, 9> grants{}, cleanups{}, attacks{}, acknowledged{};
+std::array<int, 9> grants{}, cleanups{}, acknowledged{};
 std::array<std::vector<int>, 9> bought{};
 // Message codes each lane's native message triggers delivered to its player.
 std::array<std::vector<int>, 9> sent{};
-std::array<int, 9> berryMills{};
 bool near(const Unit &u, int x10, int y10) {
     return std::abs(u.pos[0] - x10 / 10.0f) < 0.5f && std::abs(u.pos[1] - y10 / 10.0f) < 0.5f;
+}
+// The third siege islet, which no siege uses, holds a cleared lane's one King.
+bool onSpareIslet(int owner, vector pos) {
+    if (owner < 1 || owner > 7) return false;
+    int key = owner * cSiegeSlots + 2;
+    return near(Unit{434, pos}, siegeX10(key), siegeY10(key));
+}
+// A cleared lane owns nothing but that King.
+bool onlySpareKing(int player) {
+    std::vector<Unit> owned;
+    for (auto &[id, u] : units) if (u.owner == player) owned.push_back(u);
+    return owned.size() == 1 && owned[0].type == 434 && onSpareIslet(player, owned[0].pos);
 }
 void resetXsBuffers() {
     arrays.clear(); floatArrays.clear();
     ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientLeakCounts=-1;
-    ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPads=-1;
-    ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientLastNotice=-1;
-    ancientSpawnArray=-1; ancientVillagerArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
+    ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPad=-1;
+    ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientSamplePad=-1;
+    ancientLastNotice=-1; ancientSpawnArray=-1; ancientVillagerArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
+    ancientLaneRows=-1;
+    // The lookup tables live in the same arrays, so they are filled again on the next lookup.
+    ancientTablesReady=false;
 }
-// Endless growth levels and armor steps the native triggers applied, and countdowns shown.
+// Endless growth levels the native triggers applied, and countdowns shown.
 std::vector<int> endlessLevels;
-int armorSteps = 0, waveTimers = 0, timerClears = 0, choiceTimers = 0;
+int waveTimers = 0, timerClears = 0, choiceTimers = 0;
 // Native triggers acknowledge one request per lane each pass, as the generated ones do.
 void nativeEffects() {
     if (xsTriggerVariable(vEndlessRequest) > 0) {
         endlessLevels.push_back(xsTriggerVariable(vEndlessRequest));
         xsSetTriggerVariable(vEndlessRequest, 0);
-    }
-    if (xsTriggerVariable(vArmorRequest) > 0) {
-        ++armorSteps;
-        xsSetTriggerVariable(vArmorRequest, xsTriggerVariable(vArmorRequest) - 1);
     }
     // The configure triggers set a scheduled wave's enemies up before any batch may spawn.
     int configuring = xsTriggerVariable(vWave);
@@ -194,7 +226,7 @@ void nativeEffects() {
     for (int p=1; p<=7; ++p) {
         if (lane(p, fActive) && !lane(p, fInitialized)) { ++grants[p]; setLane(p, fInitialized, 1); }
         if (lane(p, fCleanup)) {
-            ancientCleanupLane(p, berryMills[p]);
+            ancientCleanupLane(p);
             ++cleanups[p]; setLane(p, fCleanup, 0);
         }
         if (lane(p, fActive) && lane(p, fPurchase)) {
@@ -216,7 +248,6 @@ void nativeEffects() {
                     if (u.owner == p && classOf(u.type) == 4 && near(u, transferX10(p * cTransferCount + t), transferY10(p * cTransferCount + t))) u.pos[1] += 2;
             }
         }
-        if (lane(p, fActive) && lane(p, fAttack) > 0) { ++attacks[p]; setLane(p, fAttack, lane(p, fAttack) - 1); }
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
         // The XS creates each batch; the lane's trigger sends it down the lane and clears the flag.
         if (lane(p, fActive) && lane(p, fSpawn)) { ++acknowledged[p]; setLane(p, fSpawn, 0); }
@@ -229,6 +260,8 @@ void clearEnemies() {
     }
 }
 void tick(bool clear=false) { if (clear) clearEnemies(); ancientTick(); nativeEffects(); }
+// Enemies of a type other than the current wave's are looked at once in cSweepTicks seconds.
+void sweep() { for (int n=0; n<cSweepTicks; ++n) tick(); }
 void start(std::initializer_list<int> humans) {
     occupied.fill(true);
     playerTypes.fill(cPlayerTypeComputer);
@@ -242,8 +275,9 @@ void restart(std::initializer_list<int> humans) {
     variables.fill(0); units.clear(); chat.clear(); researched.clear(); techStates.clear();
     for (int p=0; p<9; ++p) { sent[p].clear(); bought[p].clear(); attributes[p].clear(); created[p].clear(); }
     outpostHitpoints.fill(500);
-    kingsCreated.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); attacks.fill(0); acknowledged.fill(0);
-    endlessLevels.clear(); armorSteps = waveTimers = timerClears = choiceTimers = 0;
+    kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); acknowledged.fill(0); audible.fill(0);
+    applied.clear();
+    endlessLevels.clear(); waveTimers = timerClears = choiceTimers = 0;
     resetXsBuffers();
     start(humans);
 }
@@ -309,6 +343,40 @@ int unitsOf(int player, int type) {
     for (auto &[id, u] : units) if (u.owner == player && u.type == type) ++count;
     return count;
 }
+// The pierce attack steps the XS added to a player's object definition, in order. DE packs the
+// class with each step's amount (class * 256 + amount), so a step lies within 1..255.
+std::vector<int> attackSteps(int player, int unit) {
+    std::vector<int> steps;
+    for (auto &a : applied) {
+        if (a.player != player || a.unit != unit) continue;
+        int value = int(a.amount);
+        require(a.effect == cAddAttribute && a.attribute == cAttack && float(value) == a.amount
+                && value / 256 == 3 && value % 256 > 0, "Attack was not added as pierce steps");
+        steps.push_back(value % 256);
+    }
+    return steps;
+}
+// The towers every attack purchase but the Bombard Tower's raises.
+const std::vector<int> towerFamily = {79, 234, 235, 236};
+// Kings enough for the purchase stand on its pad until it is bought.
+void buy(int player, int purchase) {
+    auto before = bought[player].size();
+    kingsOn(player, purchase, shopPrice(purchase));
+    for (int n=0; n<=cStillSamples; ++n) tick();
+    require(bought[player].size()==before+1 && bought[player].back()==purchase, "The purchase was not made");
+}
+// The pierce armor the XS added to the enemy's definition of a unit, packed as attack is.
+int armorAdded(int unit) {
+    int total = 0;
+    for (auto &a : applied) {
+        if (a.player != 8 || a.unit != unit || a.attribute != cArmor) continue;
+        int value = int(a.amount);
+        require(a.effect == cAddAttribute && float(value) == a.amount && value / 256 == 3
+                && value % 256 > 0, "Armor was not added as pierce steps");
+        total += value % 256;
+    }
+    return total;
+}
 int own(std::initializer_list<int> purchases) {
     int owned = 0;
     for (int purchase : purchases) owned += shopMask(purchase);
@@ -316,13 +384,13 @@ int own(std::initializer_list<int> purchases) {
 }
 int main(int argc, char** argv) {
     require(argc == 2, "Need case"); string test=argv[1];
-    if(test=="berry_mills") {
-        // Each lane owns a mill plus one object from every other class it starts with.
+    if(test=="cleared_lanes") {
+        // Each lane owns its berry mill (and its upgraded form) and one object from every other
+        // class it starts with. A cleared lane keeps none of them, only one King on its spare
+        // siege islet, so DE does not defeat the slot; human lanes keep everything until they fall.
         std::array<std::vector<int>, 9> laneUnits{};
         for(int p=1;p<=7;++p) {
-            berryMills[p]=sequence;
-            units.emplace(sequence++, Unit{68, {84, float(laneY(p)), 0}, 100, p});
-            for(int type: {293, 79, 128, 17, 601, 434, 50, 286}) {
+            for(int type: {68, 131, 293, 79, 128, 17, 601, 434, 50, 286}) {
                 laneUnits[p].push_back(sequence);
                 units.emplace(sequence++, Unit{type, {85.5, float(laneY(p))-1.5f, 0}, 100, p});
             }
@@ -333,36 +401,27 @@ int main(int argc, char** argv) {
         units.emplace(keeper, Unit{434, {25.5, 2.5, 0}, 100, 8});
         start({2,7});
         for(int p=1;p<=7;++p) {
-            require(units.count(berryMills[p])==1, "A player's berry mill was removed at startup");
-            require(units.at(berryMills[p]).owner==p, "Berry mill ownership changed");
             bool human=p==2 || p==7;
             for(int id: laneUnits[p])
                 require(units.count(id)==human, "Startup cleanup did not distinguish human and AI units");
             require(units.count(laneLife(p))==human, "Startup cleanup kept an AI lane's life display");
+            require(human || (onlySpareKing(p) && spareKings[p]==1), "A cleared lane kept more than its spare King");
         }
-        units.at(berryMills[2]).type=131;
-        int extraMill=sequence++;
-        units.emplace(extraMill, Unit{68, {80, float(laneY(2)), 0}, 100, 2});
         resetXsBuffers();
         setLane(2, fLives, 0); tick();
-        require(units.count(berryMills[2])==1 && units.at(berryMills[2]).owner==2,
-                "Elimination removed or transferred the upgraded berry mill");
-        require(!units.count(extraMill), "Elimination left a second mill behind");
-        for(int id: laneUnits[2]) require(!units.count(id), "Elimination left other player units behind");
+        require(onlySpareKing(2) && spareKings[2]==1, "An eliminated lane kept more than its spare King");
         require(units.count(gaia)==1 && units.count(keeper)==1 && units.count(laneUnits[7][0])==1,
                 "Cleanup removed another owner's units");
         auto remaining=units.size();
-        ancientCleanupLane(2, berryMills[2]);
-        require(units.size()==remaining, "Repeating cleanup changed the remaining units");
-        units.erase(berryMills[1]);
-        ancientCleanupLane(1, berryMills[1]);
-        require(!units.count(berryMills[1]), "Cleanup recreated a missing mill");
+        ancientCleanupLane(2);
+        require(units.size()==remaining && onlySpareKing(2), "Repeating cleanup changed what remains");
     } else if(test=="slots") {
         start({2,7}); require(xsTriggerVariable(vParticipants)==2, "Nonconsecutive slots miscounted");
         advanceTo(sWave); for(int n=0;n<20;++n) tick(true);
         require(spawns[2]==spawns[7] && spawns[2]>0, "Active lanes received different schedules");
         for(int p:{1,3,4,5,6}) {
             require(!grants[p] && !kingsCreated[p] && !spawns[p], "AI filler was paid or spawned");
+            require(onlySpareKing(p), "AI filler kept more than its spare King");
             require(cleanups[p]==1, "AI filler was not cleared exactly once");
         }
     } else if(test=="ai_departures") {
@@ -396,6 +455,7 @@ int main(int argc, char** argv) {
         setLane(7,fLives,0); if(test=="simultaneous") setLane(1,fLives,0);
         tick(); require(phase()==sElimination, "Missing batch elimination state");
         tick(); require(phase()==sDefeat && xsTriggerVariable(vWinner)==8, "Empty field selected a human winner");
+        require(onlySpareKing(7) && (test=="defeat" || onlySpareKing(1)), "A fallen lane kept more than its spare King");
     } else if(test=="survivor" || test=="resign") {
         start({2,7});
         if(test=="resign") occupied[2]=false; else setLane(2,fLives,0);
@@ -405,6 +465,9 @@ int main(int argc, char** argv) {
         attributes[2][cAttributeGold]=9000;
         for(int n=0;n<30;++n) tick();
         require(kingsCreated[2]==paid && lane(2,fActive)==0, "Eliminated lane still receives Kings");
+        // A lane whose player left the game needs no King to keep its slot.
+        if(test=="resign") require(spareKings[2]==0 && unitsOf(2, cKing)==0, "A departed player was given a King");
+        else require(onlySpareKing(2), "A fallen lane kept more than its spare King");
     } else if(test=="sudden") {
         start({1,7});
         reachWave(cWaveCount);
@@ -434,13 +497,26 @@ int main(int argc, char** argv) {
         start({4});
         select(4, cControlEndless); tick();
         reachWave(cWaveCount);
-        require(endlessLevels==std::vector<int>{1} && armorSteps==1, "The first endless wave was not configured once");
+        require(endlessLevels==std::vector<int>{1}, "The first endless wave was not configured once");
+        for(int t=0;t<cEndlessTemplates;++t)
+            require(armorAdded(waveUnit(endlessTemplate(t)))==cArmorStep, "The first endless wave did not add one armor step");
         reachWave(cWaveCount + cEndlessTemplates);
-        require(endlessLevels==std::vector<int>({1, 2}) && armorSteps==cEndlessTemplates + 1,
-                "A new round of templates did not grow, or armor did not rise every wave");
+        require(endlessLevels==std::vector<int>({1, 2}), "A new round of templates did not grow");
+        for(int t=0;t<cEndlessTemplates;++t)
+            require(armorAdded(waveUnit(endlessTemplate(t)))==(cEndlessTemplates + 1) * cArmorStep, "Armor did not rise every wave");
         require(xsTriggerVariable(vArmor)==(cEndlessTemplates + 1) * cArmorStep, "Armor total was not kept");
         int hitpoints = endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates) * cEndlessLevels + 1);
         require(mentions(ancientText(hitpoints) + " HP each")>=1, "The grown hit points were not announced");
+    } else if(test=="endless_armor_past_255") {
+        // Endless armor keeps rising past the 255 a native effect stops at, on the enemy alone.
+        start({4});
+        select(4, cControlEndless); tick();
+        int steps = 255 / cArmorStep + 2;
+        reachWave(cWaveCount + steps - 1);
+        for(int t=0;t<cEndlessTemplates;++t)
+            require(armorAdded(waveUnit(endlessTemplate(t)))==steps * cArmorStep, "Endless armor stopped short");
+        require(steps * cArmorStep > 255, "The case does not pass 255");
+        for(auto &a : applied) require(a.player==8 || a.attribute!=cArmor, "Armor reached a lane's units");
     } else if(test=="endless_waits") {
         start({4});
         select(4, cControlEndless); tick();
@@ -448,7 +524,8 @@ int main(int argc, char** argv) {
         for(int n=0;n<10000 && phase()!=sPreparation;++n) tick(true);
         // Without the native triggers, the endless wave starts but waits for its configuration.
         for(int n=0;n<10000 && xsTriggerVariable(vWave)<cWaveCount;++n) { clearEnemies(); ancientTick(); }
-        require(xsTriggerVariable(vEndlessRequest)==1 && xsTriggerVariable(vArmorRequest)==1, "The endless wave did not ask for its configuration");
+        require(xsTriggerVariable(vEndlessRequest)==1, "The endless wave did not ask for its configuration");
+        require(armorAdded(waveUnit(endlessTemplate(0)))==cArmorStep, "The script did not add the endless wave's armor");
         int before = spawns[4];
         for(int n=0;n<5;++n) { clearEnemies(); ancientTick(); }
         require(spawns[4]==before && lane(4,fSpawn)==0, "An endless wave spawned before its configuration applied");
@@ -471,32 +548,32 @@ int main(int argc, char** argv) {
         reachWave(cWaveCount + 1);
         for(int n=0;n<20;++n) tick(true);
         auto saved=variables; auto savedUnits=units; auto savedAttributes=attributes; auto savedSpawns=spawns;
-        auto savedLevels=endlessLevels; int savedArmor=armorSteps;
+        auto savedLevels=endlessLevels; auto savedApplied=applied;
         for(int n=0;n<400;++n) tick(true);
-        auto expected=variables; auto expectedSpawns=spawns; auto expectedLevels=endlessLevels; int expectedArmor=armorSteps;
+        auto expected=variables; auto expectedSpawns=spawns; auto expectedLevels=endlessLevels; auto expectedApplied=applied;
         variables=saved; units=savedUnits; attributes=savedAttributes; spawns=savedSpawns;
-        endlessLevels=savedLevels; armorSteps=savedArmor;
+        endlessLevels=savedLevels; applied=savedApplied;
         resetXsBuffers();
         for(int n=0;n<400;++n) tick(true);
         require(variables==expected && spawns==expectedSpawns, "Reload changed endless progress or spawns");
-        require(endlessLevels==expectedLevels && armorSteps==expectedArmor, "Reload repeated or lost endless growth");
+        require(endlessLevels==expectedLevels && applied==expectedApplied && !applied.empty(), "Reload repeated or lost endless growth");
     } else if(test=="resume") {
         start({2,7});
         setLane(2, fOwned, own({cBuyGold1000, cBuyKingEveryMinute, cBuyAttack1Every5}));
         advanceTo(sWave); for(int n=0;n<27;++n) tick(true);
         kingsOn(7, cBuyTowerAttack10, 3);
         auto saved=variables; auto savedUnits=units; auto savedAttributes=attributes;
-        auto savedKings=kingsCreated; auto savedSpawns=spawns; auto savedBought=bought; auto savedAttacks=attacks;
+        auto savedKings=kingsCreated; auto savedSpawns=spawns; auto savedBought=bought; auto savedApplied=applied;
         for(int n=0;n<130;++n) tick(true);
         auto expected=variables; auto expectedAttributes=attributes; auto expectedKings=kingsCreated;
-        auto expectedSpawns=spawns; auto expectedBought=bought; auto expectedAttacks=attacks;
+        auto expectedSpawns=spawns; auto expectedBought=bought; auto expectedApplied=applied;
         variables=saved; units=savedUnits; attributes=savedAttributes;
-        kingsCreated=savedKings; spawns=savedSpawns; bought=savedBought; attacks=savedAttacks;
+        kingsCreated=savedKings; spawns=savedSpawns; bought=savedBought; applied=savedApplied;
         resetXsBuffers();
         for(int n=0;n<130;++n) tick(true);
         require(variables==expected && attributes==expectedAttributes, "Reload changed progress, timers or resources");
         require(kingsCreated==expectedKings && spawns==expectedSpawns, "Reload changed Kings or spawns");
-        require(bought==expectedBought && attacks==expectedAttacks, "Reload repeated or lost purchases");
+        require(bought==expectedBought && applied==expectedApplied && !applied.empty(), "Reload repeated or lost purchases");
         require(grants[2]==1 && grants[7]==1, "Reload repeated bonuses");
     } else if(test=="cap") {
         start({1,7}); advanceTo(sWave);
@@ -507,8 +584,8 @@ int main(int argc, char** argv) {
     } else if(test=="leaks") {
         start({2,7});
         for(int p:{2,7}) for(int i=0;i<4;++i) units.emplace(sequence++,Unit{waveUnit(0),{float(laneExitX(p)),float(laneY(p)),0}});
-        tick(); require(lane(2,fLives)==cLives-4 && lane(7,fLives)==cLives-4, "Leaks were not counted exactly once");
-        tick(); require(lane(2,fLives)==cLives-4, "Leak charged twice");
+        sweep(); require(lane(2,fLives)==cLives-4 && lane(7,fLives)==cLives-4, "Leaks were not counted exactly once");
+        sweep(); require(lane(2,fLives)==cLives-4, "Leak charged twice");
     } else if(test=="first_wave") {
         // Fast is DE's 2x lobby speed: once the run option is chosen, the first pair arrives
         // about two real minutes in.
@@ -558,6 +635,72 @@ int main(int argc, char** argv) {
         for(auto &[id, u] : units) if(u.owner==8) rows.push_back(u.pos[1]);
         std::sort(rows.begin(), rows.end());
         require(rows==std::vector<float>({laneY(2)-0.5f, laneY(2)+0.5f, laneY(2)+1.5f}), "A triple did not fill the three rows");
+    } else if(test=="spawn_silent") {
+        // Wave spawns make no sound.
+        start({2}); advanceTo(sWave); for(int n=0;n<5;++n) tick();
+        require(spawns[2]>0 && audible[8]==0, "A wave spawn played the creation sound");
+    } else if(test=="shop_cached_pad_moves") {
+        // A King standing on a pad counts in every sample once it has stood still long enough,
+        // and stops counting once it leaves, whether it walks off or drifts off a little at a time.
+        start({1});
+        int pad = cBuyTowerAttack10;
+        require(shopPrice(pad) > 1, "One King alone must not buy the pad");
+        auto king = kingsAt(1, shopX1(pad) + 0.5f, shopY1(pad) + 0.5f, 1, 0);
+        for(int n=0;n<cStillSamples+3;++n) {
+            ancientSampleKings(1);
+            require(xsArrayGetInt(ancientPadCounts, pad)==(n>=cStillSamples ? 1 : 0), "A still King was not counted once per sample");
+        }
+        walk(king, -1.0f, 0.0f);
+        ancientSampleKings(1);
+        require(xsArrayGetInt(ancientPadCounts, pad)==0, "A King that walked off the pad still counted");
+        walk(king, 1.0f, 0.0f);
+        for(int n=0;n<cStillSamples+3;++n) ancientSampleKings(1);
+        require(xsArrayGetInt(ancientPadCounts, pad)==1, "A King back on the pad did not count");
+        // Less than half a tile a sample keeps a King still, but it counts where it stands.
+        for(int n=0;n<4;++n) { walk(king, -0.3f, 0.0f); ancientSampleKings(1); }
+        require(units.at(king[0]).pos[0] < shopX1(pad) && xsArrayGetInt(ancientPadCounts, pad)==0,
+                "A King that drifted off the pad still counted");
+    } else if(test=="collect_sweep") {
+        // Each second counts the current wave's enemy type and one slice of the others, so
+        // every type is counted once in cSweepTicks seconds and no second queries them all;
+        // strays in cleared lanes go when their slice comes round.
+        start({2}); advanceTo(sWave); clearEnemies();
+        int live = waveKind(ancientTemplate(xsTriggerVariable(vWave)));
+        int other = live == 0 ? 1 : 0;
+        units.emplace(sequence++, Unit{enemyType(live), {20.5f, laneY(2) + 0.5f, 0}});
+        int stray = sequence++;
+        units.emplace(stray, Unit{enemyType(other), {21.5f, laneY(2) + 0.5f, 0}});
+        int idle = sequence++;
+        units.emplace(idle, Unit{enemyType(other), {21.5f, laneY(4) + 0.5f, 0}});
+        ancientCollect(live, (other + 1) % cSweepTicks);
+        require(lane(2, fCount)==1 && units.count(idle)==1, "A collection looked past its slice");
+        ancientCollect(live, other % cSweepTicks);
+        require(lane(2, fCount)==2 && units.count(stray)==1 && units.count(idle)==0, "The sweep missed a stray");
+        // Without a slice, every type is looked at.
+        units.emplace(idle, Unit{enemyType(other), {21.5f, laneY(4) + 0.5f, 0}});
+        ancientCollect();
+        require(lane(2, fCount)==2 && units.count(idle)==0, "A collection without arguments missed enemies");
+        int most=0;
+        for(int n=0;n<cSweepTicks;++n) { enemyQueries=0; tick(); most=std::max(most, enemyQueries); }
+        require(most <= (cEnemyTypes + cSweepTicks - 1) / cSweepTicks + 1, "A second queried every enemy type at once");
+        auto current = [&]() {
+            int n=0;
+            for(auto &[id, u] : units) if(u.owner==8 && u.type==enemyType(live) && laneOfRow(u.pos[1])==2) ++n;
+            return n;
+        };
+        int swept=0;
+        for(int n=0;n<2*cSweepTicks;++n) {
+            int before=current();
+            tick();
+            if(lane(2, fCount)==before+1) ++swept;
+            else require(lane(2, fCount)==before, "A second miscounted the current enemies");
+        }
+        require(swept==2, "The game clock did not sweep every cSweepTicks seconds");
+        // After a reload the current wave's enemies still count from the first second.
+        resetXsBuffers();
+        int before=current();
+        tick();
+        require(lane(2, fCount)==before || lane(2, fCount)==before+1, "A reload lost the current enemies");
     } else if(test=="boss_hitpoints") {
         // A boss comes alone at the attribute's limit and draws the rest from its lane's
         // reservoir as it is hit, so it falls only once the whole amount is spent.
@@ -591,7 +734,7 @@ int main(int argc, char** argv) {
         start({2,7});
         units.emplace(sequence++, Unit{waveUnit(cWaveCount-1), {float(laneExitX(2)), float(laneY(2)), 0}});
         units.emplace(sequence++, Unit{waveUnit(0), {float(laneExitX(7)), float(laneY(7)), 0}});
-        tick();
+        sweep();
         require(lane(2,fLives)==cLives-cBossLeakLives && lane(7,fLives)==cLives-1, "A boss leak did not cost its lives");
         require(mentions("P2 lost " + ancientText(cBossLeakLives) + " lives")==1, "The boss leak was not reported");
     } else if(test=="pvp_waits_for_first_wave") {
@@ -608,7 +751,7 @@ int main(int argc, char** argv) {
         // A DE trial left a militia sent to exit tile (56, 15) standing at (55.97, 15.0).
         start({2,7});
         for(int p:{2,7}) units.emplace(sequence++,Unit{waveUnit(0),{float(laneExitX(p))-0.03f,float(laneY(p)),0}});
-        tick(); require(lane(2,fLives)==cLives-1 && lane(7,fLives)==cLives-1,
+        sweep(); require(lane(2,fLives)==cLives-1 && lane(7,fLives)==cLives-1,
                         "An enemy that stopped at the exit was not counted as a leak");
     } else if(test=="shop_exact") {
         start({1});
@@ -727,7 +870,26 @@ int main(int argc, char** argv) {
         advanceTo(sPreparation);
         advanceEconomy(30-xsTriggerVariable(vEconomy));
         tick(true);
-        require(attacks[1]==6, "Periodic tower attack did not arrive every five seconds");
+        for (int unit : towerFamily)
+            require(attackSteps(1, unit)==std::vector<int>(6, 1), "Periodic tower attack did not arrive every five seconds");
+        require(applied.size()==6*towerFamily.size(), "Periodic tower attack reached other definitions");
+    } else if(test=="attack_chunks") {
+        // A purchase adds its whole amount to every tower however much was bought before, past
+        // the 255 a native effect stops at.
+        start({1});
+        for (int purchase : {cBuyTowerAttack170, cBuyTowerAttack50, cBuyTowerAttack100}) buy(1, purchase);
+        for (int unit : towerFamily)
+            require(attackSteps(1, unit)==std::vector<int>({170, 50, 100}), "A purchase's attack did not arrive whole");
+        require(applied.size()==3*towerFamily.size(), "Attack reached another definition");
+        buy(1, cBuyBombardAttack400);
+        require(attackSteps(1, 236)==std::vector<int>({170, 50, 100, 255, 145}) && attackSteps(1, 79).size()==3,
+                "Bombard Tower attack did not reach the Bombard Tower alone");
+    } else if(test=="attack_750") {
+        start({3});
+        buy(3, cBuyTowerAttack750);
+        for (int unit : towerFamily)
+            require(attackSteps(3, unit)==std::vector<int>({255, 255, 240}), "+750 was not added in steps of at most 255");
+        for (auto &a : applied) require(a.player==3, "Another lane's towers gained attack");
     } else if(test=="repair") {
         start({1});
         setLane(1, fOwned, own({cBuyRepair}));
@@ -743,7 +905,7 @@ int main(int argc, char** argv) {
         start({2});
         for(int i=0;i<3;++i) units.emplace(sequence++,Unit{waveUnit(0),{float(laneExitX(2)),float(laneY(2)),0}});
         outpostHitpoints[2]=600;
-        tick();
+        sweep();
         require(units.at(laneLife(2)).hp == 600.0f * (cLives-3) / cLives, "Life display ignored the Outpost's maximum");
         require(mentions("P2 lost 3 lives")==1, "The leak was not reported");
     } else if(test=="tower_access") {
@@ -1154,15 +1316,28 @@ int main(int argc, char** argv) {
         bool upgraded=false;
         for(auto &r : researched) if(r.first==cGuardTowerTech && r.second==2) upgraded=true;
         require(upgraded, "The granted age did not bring its tower upgrade");
+        require(attackSteps(2, 236)==std::vector<int>({255, 145}) && attackSteps(2, 79).empty(),
+                "The granted Bombard Tower attack was not added once");
         kingsOn(2, cBuyCastleAge, 1);
         for(int n=0;n<4;++n) tick();
         require(bought[2].empty() && kingsOnPad(2, cBuyCastleAge)==1 && told(2, cMessageOwned)==1,
                 "A granted purchase was sold again");
+    } else if(test=="profile_attack") {
+        // A profile's own tower attack arrives through the script after its granted purchases,
+        // once, so the two together pass 255.
+        civilizations[3]=102;
+        start({3}); tick();
+        require(attackSteps(3, 79)==std::vector<int>({3}) && attackSteps(3, 234)==std::vector<int>({3}),
+                "The profile's tower attack did not reach every tower once");
+        require(attackSteps(3, 236)==std::vector<int>({255, 145, 3, 5}),
+                "The Bombard Tower did not take the grant and both family bonuses");
+        for(int n=0;n<5;++n) tick();
+        require(attackSteps(3, 79).size()==1, "The profile's tower attack was added again");
     } else if(test=="profile_text") {
         civilizations[5]=100; civilizations[6]=101;
         start({5,6});
         advanceTo(sPreparation);
-        require(mentions("P5 Testone: +2 starting Kings, Kings cost 20 percent less gold, kill rewards pay 50 percent more stone and wood, Castle Age and Guard Tower from the start, Castle (+20 population) from the start, Bombard Tower attack +400 from the start, +1 land raider with PvP on; a King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100) + " gold.")==1,
+        require(mentions("P5 Testone: +2 starting Kings, Kings cost 20 percent less gold, kill rewards pay 50 percent more stone and wood, Castle Age and Guard Tower from the start, Castle (+20 population, castle research) from the start, Bombard Tower attack +400 from the start, +1 land raider with PvP on; a King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100) + " gold.")==1,
                 "The civilization line was not announced with the lane's King price");
         require(mentions("P6 Testtwo: no adjustments.")==1, "A neutral profile was not announced");
         require(lane(6, fProfile)==-1, "A neutral profile did not record that it has no native effect set");
@@ -1186,6 +1361,7 @@ int main(int argc, char** argv) {
         tick();
         require(mentions("P2: a starting purchase is not for this civilization and stays on sale.")==1,
                 "The grant the civilization cannot use was not reported");
+        require(applied.empty(), "Attack for towers the civilization lacks was added");
         require(unitsOf(2, spawnUnit(spawnStart(2 * cSpawnStride + cBuyCastle)))==1 && ancientOwns(2, shopMask(cBuyCastle)),
                 "The other grants did not go through");
     } else if(test=="siege_price") {

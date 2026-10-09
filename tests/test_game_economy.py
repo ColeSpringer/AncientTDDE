@@ -92,39 +92,19 @@ def test_attack_changes_target_only_tower_definitions(game_build: GameBuild) -> 
                 assert attributes["armour_attack_class"] == PIERCE
 
 
-@pytest.mark.parametrize(
-    ("key", "family", "amount"),
-    [("tower_attack_50", TOWERS, 50), ("bombard_attack_400", BOMBARD, 400)],
-)
-def test_tower_attack_purchases_raise_their_family(
-    game_build: GameBuild, key: str, family: tuple[int, ...], amount: int
-) -> None:
-    triggers = triggers_by_name(snapshot(game_build))
-    for player in PLAYERS:
-        changes = effects(triggers[f"lane.p{player}.buy.{key}"], "modify_attribute")
-        assert sorted(c["object_list_unit_id"] for c in changes) == sorted(family)
-        assert all(c["source_player"] == player and c["operation"] == ADD for c in changes)
-        assert all(c["armour_attack_quantity"] == amount for c in changes)
-
-
-@pytest.mark.parametrize("player", PLAYERS)
-def test_periodic_attack_arrives_one_point_at_a_time(game_build: GameBuild, player: int) -> None:
+def test_bought_and_periodic_tower_attack_is_left_to_the_xs(game_build: GameBuild) -> None:
+    """A native effect cannot raise an attack class past 255, so no trigger adds bought or
+    periodic tower attack: the XS adds it (see the attack cases in test_game_script.py)."""
     data = snapshot(game_build)
-    trigger = triggers_by_name(data)[f"lane.p{player}.attack"]
-    attack = variables_by_name(data)[f"lane.p{player}.attack"]
-    assert trigger["looping"]
-    assert any(
-        c["type"] == "variable_value"
-        and c["attributes"]["variable"] == attack
-        and c["attributes"]["quantity"] == 1
-        and c["attributes"]["comparison"] == 4
-        for c in trigger["conditions"]
-    )
-    changes = effects(trigger, "modify_attribute")
-    assert sorted(c["object_list_unit_id"] for c in changes) == sorted(TOWERS)
-    assert all(c["armour_attack_quantity"] == 1 for c in changes)
-    [spent] = effects(trigger, "change_variable")
-    assert (spent["variable"], spent["quantity"], spent["operation"]) == (attack, 1, SUBTRACT)
+    triggers = triggers_by_name(data)
+    variables = variables_by_name(data)
+    bought = [p["key"] for p in catalog() if p["effect"]["kind"] == "tower_attack"]
+    assert {"tower_attack_750", "bombard_attack_400"} <= set(bought)
+    for player in PLAYERS:
+        assert f"lane.p{player}.attack" not in triggers
+        assert f"lane.p{player}.attack" not in variables
+        for key in bought:
+            assert not effects(triggers[f"lane.p{player}.buy.{key}"], "modify_attribute"), key
 
 
 @pytest.mark.parametrize("player", PLAYERS)
@@ -484,16 +464,57 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
     assert names[21492] == "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
 
 
-def test_pad_exhibits_stand_where_the_catalog_puts_them_with_their_captions(
-    game_build: GameBuild,
+@pytest.mark.parametrize("player", PLAYERS)
+def test_transfer_flags_name_their_destination_and_their_relics_point_at_them(
+    game_build: GameBuild, player: int
 ) -> None:
-    """A placed exhibit with a display_at is moved there and a King is created there
-    otherwise; each carries its purchases' tags as the caption DE draws above it."""
-    from ancienttdde.game.catalog import display_captions, load_shop
-    from ancienttdde.game.config import load_balance
+    """The relic beside a transfer pad stands in a sealed pocket; the flag on the pad's one
+    tile is where a villager goes. Compass words would mislead in DE's isometric view."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.config import load_lanes
+    from ancienttdde.game.labels import TRANSFER_AREAS
+    from ancienttdde.scenario.objects import marker_flags
 
     data = snapshot(game_build)
     units = {u["reference_id"]: u for u in data["units"]}
+    names = {
+        attr_list(rename, "selected_object_ids")[0]: attr_text(rename, "message")
+        for rename in effects(triggers_by_name(data)["game.labels"], "change_object_name")
+    }
+    lane = load_lanes(object_value(anchors(game_build), "anchors"))[player - 1]
+    for key, transfer in lane.sites.transfers.items():
+        destination = TRANSFER_AREAS[key][0]
+        x, y = transfer.pad[0], transfer.pad[1]
+        [flag] = [
+            u
+            for u in units.values()
+            if u["unit_const"] in marker_flags()
+            and (math.floor(u["x"]), math.floor(u["y"])) == (x, y)
+        ]
+        assert flag.get("caption_string") == f"Transfer pad: to the {destination}", key
+        [relic] = [
+            ref
+            for ref, u in units.items()
+            if u["unit_const"] == RELIC and math.dist((u["x"], u["y"]), (x + 0.5, y + 0.5)) <= 2.5
+        ]
+        assert names[relic] == (
+            "Transfer pad: the flagged tile at the walkway's dead end, two tiles from this "
+            f"relic; a villager standing on it moves to the {destination}"
+        ), key
+
+
+def test_pad_exhibits_stay_where_the_map_puts_them_with_their_captions(
+    game_build: GameBuild,
+) -> None:
+    """The original's exhibits stay on their map spots and a King is created beside each new
+    pad; each carries its purchases' tags as the caption DE draws above it."""
+    from ancienttdde.game.catalog import display_captions, load_shop
+    from ancienttdde.game.config import load_balance
+
+    output, _ = game_build
+    data = snapshot(game_build)
+    units = {u["reference_id"]: u for u in data["units"]}
+    spots = {u["reference_id"]: (u["x"], u["y"]) for u in cached_json(output / "map.json")["units"]}
     balance = load_balance(ROOT / "content/balance/game.json")
     shop = load_shop(
         ROOT / "content/balance/shop.json",
@@ -505,8 +526,7 @@ def test_pad_exhibits_stand_where_the_catalog_puts_them_with_their_captions(
         if purchase.display is not None:
             unit = units[purchase.display]
             assert unit.get("caption_string") == tags[purchase.display], purchase.key
-            if purchase.display_at is not None:
-                assert (unit["x"], unit["y"]) == purchase.display_at, purchase.key
+            assert (unit["x"], unit["y"]) == spots[purchase.display], purchase.key
         else:
             [king] = [
                 u

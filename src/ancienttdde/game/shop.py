@@ -91,8 +91,9 @@ def apply(
     player = lane.player
     sites = lane.sites
     match purchase.effect:
-        case TowerAttack(family=family, amount=amount):
-            game.attack_bonus(trigger, player, balance.towers.family_ids(family), amount)
+        case TowerAttack():
+            # The XS adds the attack: a native effect cannot raise an attack class past 255.
+            pass
         case ResourceGrant(resource=resource, amount=amount):
             grant_resource(trigger, player, resource, amount)
         case AgeUp(age=age):
@@ -210,22 +211,15 @@ def remove_shop_signs(game: Game, shop: Shop) -> None:
 
 
 def place_displays(game: Game, shop: Shop) -> None:
-    """Stand each exhibit where the catalog puts it: a placed object is moved there, and a
-    Gaia King is placed beside a pad whose original label was an object only the mod named."""
-    placed = {unit.reference_id: unit for unit in game.scenario.unit_manager.units[0]}
+    """Place a Gaia King beside each pad whose original label was an object only the mod named."""
     for purchase in shop.purchases:
-        if purchase.display_at is None:
-            continue
-        x, y = purchase.display_at
-        if purchase.display is not None:
-            exhibit = placed[game.placement(purchase.display)]
-            exhibit.x, exhibit.y = x, y
-            continue
-        king = game.scenario.unit_manager.add_unit(
-            player=0, unit_const=game.stock("king"), x=x, y=y, caption_string=purchase.tag
-        )
-        game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
-    game.forget_gaia()
+        if purchase.display_at is not None:
+            x, y = purchase.display_at
+            king = game.scenario.unit_manager.add_unit(
+                player=0, unit_const=game.stock("king"), x=x, y=y, caption_string=purchase.tag
+            )
+            game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
+    game.forget_gaia("king")
 
 
 def caption_displays(game: Game, shop: Shop) -> None:

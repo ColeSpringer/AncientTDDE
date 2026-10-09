@@ -28,6 +28,20 @@ class PlacementOverride(TypedDict):
     caption: NotRequired[str]
 
 
+class PlacementAddition(TypedDict):
+    """An object the migration places that the original map lacks."""
+
+    key: str
+    object_key: str
+    player_id: int
+    x: float
+    y: float
+
+
+class PlacementRemoval(TypedDict):
+    reference_id: int
+
+
 class TerrainPatch(TypedDict):
     key: str
     region: list[int]
@@ -55,6 +69,8 @@ class FoundationConfig(TypedDict):
     objects: list[ObjectMapping]
     anchors: dict[str, MapAnchor]
     placement_overrides: list[PlacementOverride]
+    placement_additions: NotRequired[list[PlacementAddition]]
+    placement_removals: NotRequired[list[PlacementRemoval]]
     terrain_patches: list[TerrainPatch]
     routes: list[Route]
     isolation: list[Isolation]
@@ -64,6 +80,8 @@ class FoundationConfig(TypedDict):
 
 class MigrationSummary(TypedDict):
     placements: dict[str, int]
+    placement_additions: int
+    placement_removals: int
     terrain_patch_tiles: int
 
 
