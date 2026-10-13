@@ -317,6 +317,31 @@ def test_displays_must_stand_free_beside_their_pads(
         check_displays(load(raw, tmp_path), data, config)
 
 
+def test_pvp_pads_are_gated_across_the_row_nearest_their_entrance() -> None:
+    """The gate follows the rows the pad flags were laid out in, whatever stands beside the
+    pad; only raider and siege pads get one, and nothing may stand where it goes."""
+    from conftest import new_scenario
+
+    from ancienttdde.game.shop import place_gates
+    from ancienttdde.game.triggers import Game
+
+    # Each pad's rows, the farthest from its entrance first.
+    rows = {
+        "naval_raider": [[(5, 1), (6, 1)], [(5, 2), (6, 2)]],
+        "land_raider": [[(8, 1)], [(8, 2)]],
+        "siege": [[(10, 1)], [(10, 2)], [(10, 3)]],
+        "castle": [[(12, 1)], [(12, 2)]],
+    }
+    game = Game(new_scenario())
+    place_gates(game, shop(), rows)
+    hay = [u for u in game.scenario.unit_manager.units[0] if u.unit_const == HAY_STACK]
+    assert sorted((int(u.x), int(u.y)) for u in hay) == [(5, 2), (6, 2), (8, 2), (10, 3)]
+    taken = Game(new_scenario())
+    taken.scenario.unit_manager.add_unit(player=0, unit_const=KING, x=8.5, y=2.5)
+    with pytest.raises(ValueError, match=r"land_raider pad's gate tile \(8, 2\) is taken"):
+        place_gates(taken, shop(), rows)
+
+
 def test_periodic_attack_purchases_may_raise_different_families(tmp_path: Path) -> None:
     """The XS adds each investment's attack to its own family."""
     from ancienttdde.game.catalog import Investment

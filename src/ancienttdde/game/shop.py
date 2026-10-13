@@ -1,5 +1,7 @@
 """Native acknowledgements that apply what the XS shop has paid for, and the shop's tidying."""
 
+from collections.abc import Mapping
+
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
@@ -220,6 +222,24 @@ def place_displays(game: Game, shop: Shop) -> None:
             )
             game.names.register("object", f"shop.{purchase.key}.display", king.reference_id)
     game.forget_gaia("king")
+
+
+def place_gates(game: Game, shop: Shop, rows: Mapping[str, list[list[Tile]]]) -> None:
+    """Gaia Hay Stacks seal the raider and siege pads until PvP is switched on, across each
+    pad's open row nearest the entrance its flags were laid out from (the farthest row comes
+    first); nothing may stand where a gate goes."""
+    standing = {(int(u.x), int(u.y)) for u in game.scenario.unit_manager.get_all_units()}
+    for purchase in shop.purchases:
+        if not isinstance(purchase.effect, Raider | SiegePowerUp):
+            continue
+        for x, y in rows[purchase.key][-1]:
+            if (x, y) in standing:
+                raise ValueError(f"The {purchase.key} pad's gate tile {(x, y)} is taken")
+            hay = game.scenario.unit_manager.add_unit(
+                player=0, unit_const=game.stock("hay-stack"), x=x + 0.5, y=y + 0.5
+            )
+            game.names.register("object", f"shop.{purchase.key}.gate.{x}.{y}", hay.reference_id)
+    game.forget_gaia("hay-stack")
 
 
 def caption_displays(game: Game, shop: Shop) -> None:

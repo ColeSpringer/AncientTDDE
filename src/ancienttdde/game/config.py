@@ -12,7 +12,14 @@ from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.common.data import integer, object_value, read_object, rows, text_field
 from ancienttdde.game.restricted import POINTLESS, TECHNOLOGIES
-from ancienttdde.game.sites import LaneSites, RaiderMedium, Tile, TradeMedium, load_sites
+from ancienttdde.game.sites import (
+    SPARE_ISLET,
+    LaneSites,
+    RaiderMedium,
+    Tile,
+    TradeMedium,
+    load_sites,
+)
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import technology
 
@@ -462,8 +469,8 @@ def load_raiders(raw: dict[str, object]) -> Raiders:
 def load_siege(raw: dict[str, object]) -> Siege:
     shared = integer(raw, "shared_cooldown", 0, 600)
     return Siege(
-        # Each rival has three siege positions; the third stays in reserve.
-        trebuchets_per_rival=integer(raw, "trebuchets_per_rival", 1, 3),
+        # The last of each rival's siege islets stays in reserve for a cleared lane's King.
+        trebuchets_per_rival=integer(raw, "trebuchets_per_rival", 1, SPARE_ISLET),
         warning_seconds=integer(raw, "warning_seconds", 1, 60),
         active_seconds=integer(raw, "active_seconds", 10, 300),
         shared_cooldown=shared,

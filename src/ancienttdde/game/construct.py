@@ -22,7 +22,7 @@ from ancienttdde.game.config import Balance, EngineLane, Interaction, load_balan
 from ancienttdde.game.controls import CONTROLS
 from ancienttdde.game.economy import endless_deposits
 from ancienttdde.game.instructions import instructions
-from ancienttdde.game.interaction import pvp_diplomacy, siege_countdowns
+from ancienttdde.game.interaction import open_pvp_pads, pvp_diplomacy, siege_countdowns
 from ancienttdde.game.labels import caption_transfers, name_objects
 from ancienttdde.game.lanes import lane_actions
 from ancienttdde.game.objectives import run_objectives
@@ -34,9 +34,14 @@ from ancienttdde.game.selection import (
     place_controls,
     retire_controls,
 )
-from ancienttdde.game.shop import caption_displays, place_displays, remove_shop_signs
+from ancienttdde.game.shop import (
+    caption_displays,
+    place_displays,
+    place_gates,
+    remove_shop_signs,
+)
 from ancienttdde.game.sites import Tile, numbers
-from ancienttdde.game.spawns import creation_tiles
+from ancienttdde.game.spawns import creation_tiles, marked_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
@@ -52,6 +57,7 @@ from ancienttdde.map.build import read_content
 from ancienttdde.map.construct import construct_scenario
 from ancienttdde.map.geometry import blocking_sizes, cells, footprint
 from ancienttdde.map.models import MapAnchor
+from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import marker_flags
 from ancienttdde.scenario.settings import (
     disable_automatic_victory,
@@ -66,14 +72,15 @@ from ancienttdde.scenario.xs import check_xs, xs_checker
 def clear_sites(
     game: Game, lanes: tuple[EngineLane, ...], shop: Shop, interaction: Interaction
 ) -> None:
-    """Take the map's marker flags off the tiles the XS creates units on.
-
-    Creation checks collisions, and DE gives even a flag an obstruction. Anything else on
-    those tiles is a content error.
+    """Take the map's marker flags off the tiles the XS creates units on with a collision
+    check, the King stall and siege islets among them; the transfer arrivals and bought
+    villagers' spots keep the original's flags. Anything else on those tiles is a content
+    error.
     """
     flags = marker_flags()
     for lane in lanes:
         tiles = creation_tiles(lane, shop, interaction)
+        marked = marked_tiles(lane)
         for placed in game.scenario.unit_manager.units:
             for unit in list(placed):
                 tile = (int(unit.x), int(unit.y))
@@ -81,13 +88,71 @@ def clear_sites(
                     continue
                 if unit.unit_const not in flags:
                     raise ValueError(f"Object {unit.unit_const} blocks a creation tile {tile}")
+                if tile in marked:
+                    continue
                 placed.remove(unit)
                 game.placements.discard(unit.reference_id)
 
 
-def reading_order(tile: Tile) -> tuple[int, int]:
-    x, y = tile
-    return y, x
+def pad_rows(key: str, region: Rect, open_tiles: set[Tile], taken: set[Tile]) -> list[list[Tile]]:
+    """A pad's open tiles in rows across it, the row farthest from its entrance first, each
+    in ascending order. The entrance is the side with the most free tiles just outside the
+    pad beside an open one."""
+    x1, y1, x2, y2 = region
+    outside = {
+        "west": [(x1 - 1, y) for x, y in open_tiles if x == x1],
+        "east": [(x2 + 1, y) for x, y in open_tiles if x == x2],
+        "north": [(x, y1 - 1) for x, y in open_tiles if y == y1],
+        "south": [(x, y2 + 1) for x, y in open_tiles if y == y2],
+    }
+    free = {side: sum(tile not in taken for tile in tiles) for side, tiles in outside.items()}
+    entrances = [side for side, count in free.items() if count == max(free.values())]
+    if len(entrances) != 1:
+        raise ValueError(f"{key} pad has no single entrance")
+    [side] = entrances
+    across = side in ("west", "east")
+    rows: dict[int, list[Tile]] = {}
+    for tile in open_tiles:
+        rows.setdefault(tile[0] if across else tile[1], []).append(tile)
+    return [sorted(rows[r]) for r in sorted(rows, reverse=side in ("west", "north"))]
+
+
+def far_end(rows: list[list[Tile]], kings: int) -> set[Tile]:
+    """Whole rows from the far end, then the first tiles of the next; a lone flag takes its
+    row's middle tile, the first of two."""
+    wanted: list[Tile] = []
+    for row in rows:
+        left = kings - len(wanted)
+        if left <= 0:
+            break
+        if left >= len(row):
+            wanted += row
+        elif left == 1:
+            wanted.append(row[(len(row) - 1) // 2])
+        else:
+            wanted += row[:left]
+    return set(wanted)
+
+
+def fills_far_end(rows: list[list[Tile]], flagged: set[Tile]) -> bool:
+    """Whether the flags stand on open tiles and fill every row beyond the nearest flagged
+    one."""
+    depth = {tile: index for index, row in enumerate(rows) for tile in row}
+    if not flagged or not flagged <= depth.keys():
+        return False
+    nearest = max(depth[tile] for tile in flagged)
+    return all(set(row) <= flagged for row in rows[:nearest])
+
+
+def entrance_obstacles(game: Game, blocked: set[Tile]) -> set[Tile]:
+    """Tiles a King cannot step in from: those placed objects block or stand on, but for
+    marker flags, which have no collision."""
+    flags = marker_flags()
+    return blocked | {
+        (int(unit.x), int(unit.y))
+        for unit in game.scenario.unit_manager.get_all_units()
+        if unit.unit_const not in flags
+    }
 
 
 def reconcile_pad_flags(
@@ -96,10 +161,11 @@ def reconcile_pad_flags(
     shop: Shop,
     interaction: Interaction,
     sizes: Mapping[int, int],
-) -> None:
+) -> dict[str, list[list[Tile]]]:
     """Give each pad one Gaia flag per King of its price, the siege's base price: the map's
-    flags were placed for the original's prices. A tile keeps one flag; extra tiles lose
-    theirs from the last in reading order, and missing flags go on the first open tiles."""
+    flags were placed for the original's prices. As in the original, the flags fill whole
+    rows from the end farthest from the pad's entrance; a pad whose flags already do keeps
+    them. A tile keeps one flag. Returns each pad's rows, the farthest first."""
     flags = marker_flags()
     placed = game.scenario.unit_manager.units
     # Every marker flag's reference ID, by tile.
@@ -115,21 +181,24 @@ def reconcile_pad_flags(
         for unit in owned
         for cell in footprint({"x": unit.x, "y": unit.y}, sizes.get(unit.unit_const, 0))
     }
+    taken = entrance_obstacles(game, blocked)
     doomed: set[int] = set()
+    layouts: dict[str, list[list[Tile]]] = {}
     for purchase in shop.purchases:
         region = cells(purchase.pad_region)
-        flagged = sorted((tile for tile in region if tile in marked), key=reading_order)
+        rows = pad_rows(purchase.key, purchase.pad_region, region - blocked - reserved, taken)
+        layouts[purchase.key] = rows
+        flagged = {tile for tile in region if tile in marked}
         for tile in flagged:
             doomed.update(marked[tile][1:])
-        for tile in flagged[purchase.kings :]:
+        wanted = flagged
+        if len(flagged) != purchase.kings or not fills_far_end(rows, flagged):
+            wanted = far_end(rows, purchase.kings)
+            if len(wanted) < purchase.kings:
+                raise ValueError(f"The {purchase.key} pad has no room for {purchase.kings} flags")
+        for tile in flagged - wanted:
             doomed.add(marked[tile][0])
-        missing = purchase.kings - len(flagged)
-        if missing <= 0:
-            continue
-        open_tiles = sorted(region - set(flagged) - reserved - blocked, key=reading_order)
-        if len(open_tiles) < missing:
-            raise ValueError(f"The {purchase.key} pad has no room for {purchase.kings} flags")
-        for x, y in open_tiles[:missing]:
+        for x, y in sorted(wanted - flagged):
             flag = game.scenario.unit_manager.add_unit(
                 player=0, unit_const=OtherInfo["FLAG_B"].ID, x=x + 0.5, y=y + 0.5
             )
@@ -138,6 +207,7 @@ def reconcile_pad_flags(
         for unit in [u for u in owned if u.reference_id in doomed]:
             owned.remove(unit)
             game.placements.discard(unit.reference_id)
+    return layouts
 
 
 def remove_selectors(game: Game, lanes: tuple[EngineLane, ...]) -> None:
@@ -161,10 +231,12 @@ def settings(
 ) -> None:
     scenario = game.scenario
     clear_sites(game, lanes, shop, balance.interaction)
-    reconcile_pad_flags(game, lanes, shop, balance.interaction, sizes)
+    # Before the pad flags, whose layout reads each pad's open entrance.
     remove_shop_signs(game, shop)
     remove_selectors(game, lanes)
+    rows = reconcile_pad_flags(game, lanes, shop, balance.interaction, sizes)
     place_displays(game, shop)
+    place_gates(game, shop, rows)
     caption_displays(game, shop)
     caption_transfers(game, lanes)
     place_controls(game, anchors, balance)
@@ -259,6 +331,7 @@ def add_logic(
     endless_growth(game, balance)
     wave_warnings(game, balance)
     pvp_diplomacy(game)
+    open_pvp_pads(game, shop)
     siege_countdowns(game, balance)
     retire_controls(game)
     restrict_competitive(game)

@@ -20,6 +20,7 @@ from conftest import (
     triggers_by_name,
     variables_by_name,
 )
+from conftest import tiles as map_tiles
 
 from ancienttdde.game.config import Balance
 from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerRecord
@@ -147,10 +148,15 @@ def test_no_native_trigger_adds_endless_armor(game_build: GameBuild) -> None:
 def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild) -> None:
     data = snapshot(game_build)
     variables = variables_by_name(data)
-    status = triggers_by_name(data)["game.status"]["short_description"]
-    assert status == (
-        f"Wave <Variable {variables['game.display_wave']}>: "
-        f"<Variable {variables['game.countdown']}> s"
+    triggers = triggers_by_name(data)
+    wave = f"<Variable {variables['game.display_wave']}>"
+    countdown = f"<Variable {variables['game.countdown']}>"
+    assert triggers["game.status.next"]["short_description"] == (
+        f"Wave {wave} arrives in {countdown} s"
+    )
+    # Reads right at 0 too, through each wave's tail and after the finale.
+    assert triggers["game.status.spawning"]["short_description"] == (
+        f"Wave {wave}: {countdown} s of spawning left"
     )
 
 
@@ -214,11 +220,11 @@ def test_only_display_objectives_are_ever_activated(game_build: GameBuild) -> No
         for activation in effects(trigger, "activate_trigger"):
             target = by_id[activation["trigger_id"]]
             assert target["display_as_objective"] and not target["effects"]
-        # Only a cleared lane's cleanup and the hiding of finished objectives end triggers.
+        # Only a cleared lane's cleanup, the hiding of finished objectives and the wave
+        # triggers switching the status line end triggers.
         if effects(trigger, "deactivate_trigger"):
-            assert trigger["name"].startswith("game.hide.") or trigger["name"].endswith(
-                ".cleanup"
-            ), trigger["name"]
+            name = trigger["name"]
+            assert name.startswith(("game.hide.", "game.wave.")) or name.endswith(".cleanup"), name
 
 
 def control_units(build: GameBuild) -> dict[str, MapUnit]:
@@ -357,6 +363,9 @@ def test_option_lines_never_complete_and_are_deactivated_once_locked(
         assert not hider["looping"]
         assert requested(hider, variables["game.locked"]) == 1
         assert [e["trigger_id"] for e in effects(hider, "deactivate_trigger")] == [line["id"]]
+    assert triggers["game.objective.options"]["short_description"] == (
+        "Run options below the shop, left to right: Standard, Endless, Practice, PvP on"
+    )
     [_, mode] = conditions(triggers["game.hide.practice_controls"], "variable_value")
     assert mode["variable"] == variables["game.mode"]
     assert (attr_int(mode, "quantity"), attr_int(mode, "inverted")) == (MODES.index("practice"), 1)
@@ -394,6 +403,95 @@ def test_pvp_makes_every_defense_slot_an_enemy_at_the_first_wave(game_build: Gam
     }
     assert pairs == {(p, q) for p in PLAYERS for q in PLAYERS if p != q}
     assert len(effects(trigger, "change_diplomacy")) == len(pairs)
+
+
+# Each PvP pad's column nearest its entrance, opposite its King.
+GATES = {
+    "naval_raider": {(167, y) for y in range(20, 23)},
+    "siege": {(166, y) for y in range(24, 34)},
+    "land_raider": {(168, y) for y in range(36, 39)},
+}
+HAY_STACK = 857
+
+
+def test_pvp_pads_stay_sealed_with_hay_until_pvp_is_switched_on(game_build: GameBuild) -> None:
+    output, _ = game_build
+    data = snapshot(game_build)
+    variables = variables_by_name(data)
+    gates = {spot for spots in GATES.values() for spot in spots}
+    hay: dict[tuple[int, int], MapUnit] = {}
+    for u in data["units"]:
+        spot = (math.floor(u["x"]), math.floor(u["y"]))
+        if spot in gates:
+            assert (u["unit_const"], u["player_id"]) == (HAY_STACK, 0), spot
+            assert spot not in hay, spot
+            hay[spot] = u
+    assert hay.keys() == gates
+    # The build adds the gates; the map has none.
+    original = {u["reference_id"] for u in cached_json(output / "map.json")["units"]}
+    assert not original & {u["reference_id"] for u in hay.values()}
+    opened = triggers_by_name(data)["game.pvp.open"]
+    assert not opened["looping"] and opened["enabled"]
+    assert [
+        (attr_int(c, "variable"), attr_int(c, "quantity"))
+        for c in conditions(opened, "variable_value")
+    ] == [(variables["game.pvp"], 1)]
+    [removal] = effects(opened, "remove_object")
+    assert removal["source_player"] == 0
+    assert sorted(attr_list(removal, "selected_object_ids")) == sorted(
+        hay[tile]["reference_id"] for tile in gates
+    )
+    assert len(opened["effects"]) == 1
+
+
+def test_opening_the_pvp_pads_needs_their_gates() -> None:
+    """A Remove Object effect that selects nothing would clear every Gaia object, so the build
+    refuses to open pads it never gated."""
+    from conftest import new_scenario
+
+    from ancienttdde.game.catalog import load_shop
+    from ancienttdde.game.interaction import open_pvp_pads
+    from ancienttdde.game.triggers import Game
+
+    spots = json.loads((ROOT / "content/maps/foundation.json").read_text())["anchors"]
+    families = [name for name, _ in balance().towers.families]
+    shop = load_shop(ROOT / "content/balance/shop.json", spots, families)
+    with pytest.raises(ValueError, match="No PvP pad gates to open"):
+        open_pvp_pads(Game(new_scenario()), shop)
+
+
+def test_the_gates_cut_only_the_pvp_pads_off_from_the_kings(game_build: GameBuild) -> None:
+    """Every lane's Kings reach every pad from their rally point, except the PvP pads while
+    their gates stand."""
+    from ancienttdde.game.catalog import load_shop
+    from ancienttdde.map.geometry import cells, flood, footprint
+
+    data = snapshot(game_build)
+    config = json.loads((ROOT / "content/maps/foundation.json").read_text())
+    sizes = {row["stock_id"]: row.get("blocking_size", 0) for row in config["objects"]}
+    width = data["map"]["width"]
+    land = {
+        (i % width, i // width)
+        for i, t in enumerate(map_tiles(data))
+        if t[0] in config["land_terrain"]
+    }
+    [removal] = effects(triggers_by_name(data)["game.pvp.open"], "remove_object")
+    gates = set(attr_list(removal, "selected_object_ids"))
+    spots = anchors(game_build)
+    rallies = {tile(spots[f"lane.p{p}.kings"]["points"][1]) for p in PLAYERS}
+
+    def reached(units: list[MapUnit]) -> set[tuple[int, int]]:
+        blocked = {c for u in units for c in footprint(u, sizes.get(u["unit_const"], 0))}
+        return flood(rallies, land - blocked)
+
+    gated = reached(data["units"])
+    opened = reached([u for u in data["units"] if u["reference_id"] not in gates])
+    families = [name for name, _ in balance().towers.families]
+    shop = load_shop(ROOT / "content/balance/shop.json", spots, families)
+    for purchase in shop.purchases:
+        pad = cells(purchase.pad_region)
+        assert bool(pad & gated) == (purchase.key not in GATES), purchase.key
+        assert pad & opened, purchase.key
 
 
 @pytest.mark.parametrize("player", PLAYERS)

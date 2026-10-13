@@ -3,7 +3,7 @@
   "lives": 30,
   "boss_leak_lives": 5,
   "choice_seconds": 60,
-  "preparation_seconds": 233,
+  "preparation_seconds": 293,
   "intermission_seconds": 30,
   "max_enemies_per_lane": 80,
   "sudden_death_interval": 30,

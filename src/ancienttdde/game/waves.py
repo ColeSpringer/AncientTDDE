@@ -2,6 +2,7 @@
 
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
+from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
@@ -143,9 +144,16 @@ def endless_growth(game: Game, balance: Balance) -> None:
             game.set_value(grow, "game.endless_request", 0)
 
 
+def show_status(game: Game, trigger: TriggerHandle, shown: str, hidden: str) -> None:
+    """Switch the status line: the wait for the next wave, or the wave that is spawning."""
+    effect(trigger, "activate_trigger", trigger_id=game.names.resolve("trigger", shown))
+    effect(trigger, "deactivate_trigger", trigger_id=game.names.resolve("trigger", hidden))
+
+
 def wave_warnings(game: Game, balance: Balance) -> None:
     """Count down the choice window, then to each wave once its preparation or intermission
-    begins; the engine asks for the countdown before each wave after the schedule."""
+    begins; the engine asks for the countdown before each wave after the schedule. The status
+    line follows: the wait while it counts down, the wave once it starts."""
     # The engine asks for this countdown as it counts the window's first second off.
     choice = game.trigger("game.choice.warning", looping=True)
     game.value(choice, "game.wave_display", 3)
@@ -170,10 +178,12 @@ def wave_warnings(game: Game, balance: Balance) -> None:
         reset_timer=1,
         timer=0,
     )
+    show_status(game, endless, "game.status.next", "game.status.spawning")
     game.set_value(endless, "game.wave_display", 0)
     clear = game.trigger("game.wave.timer.clear", looping=True)
     game.value(clear, "game.wave_display", 2)
     effect(clear, "clear_timer", timer=0)
+    show_status(game, clear, "game.status.spawning", "game.status.next")
     game.set_value(clear, "game.wave_display", 0)
     for number, wave in enumerate(balance.waves, 1):
         trigger = game.trigger(f"game.wave.{number}.warning", looping=False)
@@ -189,19 +199,30 @@ def wave_warnings(game: Game, balance: Balance) -> None:
             reset_timer=1,
             timer=0,
         )
+        show_status(game, trigger, "game.status.next", "game.status.spawning")
 
 
 def game_status(game: Game, balance: Balance) -> None:
+    """Two lines share the wave number and countdown: the wait for the next wave, shown from
+    the start, and the wave that is spawning; the wave triggers switch between them."""
     wave = game.names.resolve("variable", "game.display_wave")
     countdown = game.names.resolve("variable", "game.countdown")
+    goal = (
+        f"Survive {len(balance.waves)} scheduled waves; Endless runs and sudden death "
+        "continue past them."
+    )
     objective(
         game,
-        "game.status",
-        f"Wave <Variable {wave}>: <Variable {countdown}> s",
-        f"Survive {len(balance.waves)} scheduled waves; Endless runs and sudden death "
-        "continue past them. Before a wave, the seconds until it starts; during a wave, "
-        "the seconds its enemies keep spawning.",
+        "game.status.next",
+        f"Wave <Variable {wave}> arrives in <Variable {countdown}> s",
+        f"{goal} The seconds until the next wave starts.",
         shown=True,
+    )
+    objective(
+        game,
+        "game.status.spawning",
+        f"Wave <Variable {wave}>: <Variable {countdown}> s of spawning left",
+        f"{goal} The seconds the wave's enemies keep spawning.",
     )
 
 
@@ -244,11 +265,20 @@ def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane, bands: tuple[Ba
 
 def lane_spawned(game: Game, lane: EngineLane) -> None:
     """The XS creates each batch of enemies; this acknowledges it by sending the new batch
-    off."""
+    off. The batch first takes the No Attack stance, which it keeps: a unit a tower hits
+    would otherwise stop to answer it, which the alliance forbids."""
     prefix = f"lane.p{lane.player}"
     spawned = game.trigger(f"{prefix}.spawned", looping=True)
     game.value(spawned, f"{prefix}.active", 1)
     game.value(spawned, f"{prefix}.spawn", 1)
+    _, y1, _, y2 = lane.path
+    effect(
+        spawned,
+        "change_object_stance",
+        source_player=8,
+        attack_stance=AttackStance.NO_ATTACK_STANCE,
+        **area((lane.spawn_x, y1, lane.spawn_x + 1, y2)),
+    )
     send_down_the_lane(spawned, lane, spawn_rows(lane))
     game.set_value(spawned, f"{prefix}.spawn", 0)
 

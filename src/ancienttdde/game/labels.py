@@ -69,11 +69,11 @@ def caption_transfers(game: Game, lanes: Iterable[EngineLane]) -> None:
 
 
 def arrival_text(origin: str, arrival: Tile, bought: tuple[Tile, ...]) -> str:
-    text = f"Villagers arrive here from the {origin}"
+    text = f"Arrivals from the {origin}"
     if arrival in bought:
-        return text + " and when bought"
+        return text + ", and bought villagers"
     if any(math.dist(arrival, tile) <= BOUGHT_REACH for tile in bought):
-        return text + "; bought villagers appear beside it"
+        return text + "; bought villagers nearby"
     return text
 
 
@@ -93,12 +93,9 @@ def name_objects(game: Game, lanes: Iterable[EngineLane], shop: Shop, balance: B
         game.rename(trigger, game.placement(lane.life_reference), lives, owners=owners)
         for key, transfer in lane.sites.transfers.items():
             destination, origin = TRANSFER_AREAS[key]
-            # The relic stands in a sealed pocket two tiles from the pad's flagged tile. DE's
-            # isometric view makes compass words ambiguous, so the text names the flag.
-            pad = (
-                "Transfer pad: the flagged tile at the walkway's dead end, two tiles from this "
-                f"relic; a villager standing on it moves to the {destination}"
-            )
+            # The relic stands in a sealed pocket two tiles from the pad's flagged tile, so
+            # the short text names the flag rather than the relic's own tile.
+            pad = f"Villager on the flag: moves to the {destination}"
             game.rename(trigger, relic_label(game, transfer.pad), pad, owners=owners)
             area = ARRIVAL_AREAS.get(key)
             bought = lane.sites.villagers[area].tiles if area else ()

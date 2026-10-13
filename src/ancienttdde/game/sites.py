@@ -17,6 +17,10 @@ type RaiderMedium = Literal["land", "naval"]
 RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
 type TradeMedium = Literal["land", "water"]
 TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
+# The islets beside each lane's towers: a rival's trebuchets take the first ones, and a cleared
+# lane's King keeps the last.
+SIEGE_ISLETS = 3
+SPARE_ISLET = SIEGE_ISLETS - 1
 
 
 @dataclass(frozen=True)
@@ -152,5 +156,7 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
             for row in ("third", "fourth")
         },
         raiders={medium: spawn(anchors, f"{prefix}.raiders.{medium}") for medium in RAIDER_MEDIA},
-        siege=tuple(point_tile(anchors, f"siege.p{player}.{index}") for index in (1, 2, 3)),
+        siege=tuple(
+            point_tile(anchors, f"siege.p{player}.{index}") for index in range(1, SIEGE_ISLETS + 1)
+        ),
     )

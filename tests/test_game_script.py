@@ -179,12 +179,10 @@ def test_prelude_passes_the_whole_relic_column() -> None:
     assert filled(text, "laneRelicX2")[1] == x2
 
 
-def test_prelude_counts_transfers_and_still_samples() -> None:
+def test_prelude_counts_still_samples() -> None:
     from ancienttdde.game.script import STILL_SAMPLES
-    from ancienttdde.game.sites import TRANSFERS
 
     text = prelude()
-    assert f"const int cTransferCount = {len(TRANSFERS)};" in text
     assert f"const int cStillSamples = {STILL_SAMPLES};" in text and STILL_SAMPLES >= 2
 
 
@@ -321,6 +319,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "leaks",
         "exit_arrival",
         "first_wave",
+        "first_wave_marks",
         "shop_exact",
         "shop_repeat",
         "shop_walking",
@@ -345,7 +344,8 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "shop_single_file",
         "shop_settle",
         "spawn_blocked",
-        "transfer",
+        "spawn_unchecked",
+        "spawn_built_over",
         "king_stall_shared",
         "shop_civ_lacks",
         "age_upgrades",
@@ -355,7 +355,6 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "shop_pause",
         "shop_requires_together",
         "notice_change",
-        "transfer_type",
         "options_default",
         "options_competitive",
         "pvp_opt_in",
@@ -366,6 +365,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "options_chooser_only",
         "options_solo_only",
         "options_pvp_solo",
+        "options_pvp_only_its_own",
         "options_chooser_leaves",
         "options_locked",
         "practice_controls",

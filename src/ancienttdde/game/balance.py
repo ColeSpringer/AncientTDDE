@@ -79,8 +79,9 @@ class Assumptions:
     population_kings: float = 0.03
     # The lane the waves are tuned against: the Kings it starts with, the share of its Kings it
     # puts into the tower attack ladder, what investments return on what it earns once they
-    # have had this many minutes, the Watch Towers it stands at the first wave and at the
-    # finale's minute, and when it has both Accursed Towers.
+    # have had this many minutes, the Watch Towers it stands at the first wave (it builds its
+    # opening eight itself from its starting stone) and at the finale's minute, and when it
+    # has both Accursed Towers.
     starting_kings: float = 1.0
     attack_share: float = 0.6
     investment_return: float = 1.7

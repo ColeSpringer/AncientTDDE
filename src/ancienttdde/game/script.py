@@ -25,7 +25,7 @@ from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
 from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Towers
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
-from ancienttdde.game.sites import RAIDER_MEDIA, TRANSFERS
+from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS, SPARE_ISLET
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns
 from ancienttdde.scenario.objects import display_name
 from ancienttdde.scenario.triggers import PIERCE
@@ -53,8 +53,6 @@ STAGES = ("scheduled", "endless", "sudden")
 LANE_CLASSES = (2, 3, 4, 11, 12, 14, 18, 19, 22, 30, 43, 49, 51, 52, 54, 59)
 # The pierce armor endless waves may add stays within the engine's 16-bit armor values.
 ARMOR_LIMIT = 30000
-# Siege positions per lane in the siege tables.
-SIEGE_SLOTS = 3
 # The most attack or armor one technology-style effect adds: it shares a value with the class.
 CLASS_CHUNK = 255
 # Every this many seconds, the enemy count looks at every enemy type, not only the current
@@ -441,7 +439,6 @@ def render_prelude(
         cNoticeSeconds=NOTICE_SECONDS,
         cKingSlots=KING_SLOTS,
         cStillSamples=STILL_SAMPLES,
-        cTransferCount=len(TRANSFERS),
         cLifeObject=BuildingInfo["OUTPOST"].ID,
         cShopCount=len(purchases),
         cInvestCount=len(investments),
@@ -468,7 +465,8 @@ def render_prelude(
         cSiegeActive=interaction.siege.active_seconds,
         cSiegeSharedCooldown=interaction.siege.shared_cooldown,
         cSiegeBuyerCooldown=interaction.siege.buyer_cooldown,
-        cSiegeSlots=SIEGE_SLOTS,
+        cSiegeSlots=SIEGE_ISLETS,
+        cSpareSiegeSlot=SPARE_ISLET,
         cTrebuchet=UnitInfo["TREBUCHET"].ID,
         cPackedTrebuchet=UnitInfo["TREBUCHET_PACKED"].ID,
         cPierceClass=PIERCE,
@@ -491,11 +489,6 @@ def render_prelude(
         cSpawnSlots=max(counts.values(), default=1),
         cGrantSlots=grant_slots(profiles, shop),
     )
-    transfers = [(0, 0, 0, 0, 0, 0)] * len(TRANSFERS) + [
-        (*lane.sites.transfers[name].pad, *center(lane.sites.transfers[name].arrival))
-        for lane in lanes
-        for name in TRANSFERS
-    ]
     pads = [(0, 0, 0, 0)] + [
         (p.pad_region[0], p.pad_region[1], p.pad_region[2], p.pad_region[3]) for p in purchases
     ]
@@ -532,9 +525,9 @@ def render_prelude(
         "raiderLine": [0] * line_size
         + [unit for line in lines for unit in line + (0,) * (line_size - len(line))],
         # Indexed by lane * cSiegeSlots + position, in tenths of a tile at the islet centers.
-        "siegeX10": [0] * SIEGE_SLOTS
+        "siegeX10": [0] * SIEGE_ISLETS
         + [center(tile)[0] for lane in lanes for tile in lane.sites.siege],
-        "siegeY10": [0] * SIEGE_SLOTS
+        "siegeY10": [0] * SIEGE_ISLETS
         + [center(tile)[1] for lane in lanes for tile in lane.sites.siege],
         "endlessTemplate": list(balance.endless.templates),
         # The enemies endless waves bring, once each: they take every armor step.
@@ -586,12 +579,6 @@ def render_prelude(
         "spawnShared": [int(e.shared) for e in entries],
         "spawnX10": [e.x10 for e in entries],
         "spawnY10": [e.y10 for e in entries],
-        "transferX1": [t[0] for t in transfers],
-        "transferY1": [t[1] for t in transfers],
-        "transferX2": [t[2] for t in transfers],
-        "transferY2": [t[3] for t in transfers],
-        "transferX10": [t[4] for t in transfers],
-        "transferY10": [t[5] for t in transfers],
         "investMask": [p.mask for p in investments],
         "investPeriod": [e.period for e in invested],
         "investPays": [PAYOUTS.index(e.pays) for e in invested],

@@ -22,7 +22,6 @@ CONTROLS = (
     Control("endless", "run"),
     Control("practice", "run"),
     Control("pvp_on", "run"),
-    Control("pvp_off", "run"),
     Control("next_wave", "practice"),
     Control("kings", "practice"),
     Control("resources", "practice"),
@@ -53,7 +52,6 @@ def control_texts(balance: Balance) -> dict[str, tuple[str, str]]:
             "Run option: Practice (solo) - practice controls, assisted result",
         ),
         "pvp_on": ("PvP on", "Run option: PvP on (competitive) - raiders and siege for sale"),
-        "pvp_off": ("PvP off", "Run option: PvP off (competitive) - no raiders or siege"),
         "next_wave": ("Next wave", "Practice: start the next wave now"),
         "kings": (f"+{practice.kings} Kings", f"Practice: {practice.kings} more Kings"),
         "resources": (

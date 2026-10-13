@@ -135,7 +135,9 @@ def interaction(balance: Balance, profiles: Profiles) -> str:
 
 
 def civilization_lines(profiles: Profiles) -> str:
-    lines = [f"- {c.name}: {profiles.text(c)}." for c in profiles.civilizations]
+    """One line per civilization, sorted by name; the default last."""
+    listed = sorted(profiles.civilizations, key=lambda c: c.name)
+    lines = [f"- {c.name}: {profiles.text(c)}." for c in listed]
     lines.append(f"- {DEFAULT_NAME}: {profiles.text(None)}.")
     return "\n".join(lines)
 
@@ -187,14 +189,14 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         f"beside the options: start the next wave now, {balance.practice.kings} more Kings, "
         f"{balance.practice.resources} more of each resource and all lives back. A Practice "
         "run is shown as assisted. Competitive games choose PvP on, which puts raiders and the "
-        "siege power-up on sale from the first wave, or PvP off. Each selection of a practice "
-        "control acts once. Once the options are fixed the run options leave the row, as do "
-        "the practice controls unless the run is Practice.\n\n"
+        "siege power-up on sale from the first wave and opens their pads; without it PvP stays "
+        "off. Each selection of a practice control acts once. Once the options are fixed the "
+        "run options leave the row, as do the practice controls unless the run is Practice.\n\n"
         "## Economy\n\n"
         f"Each human lane starts with {start.food} food, {start.wood} wood, {start.stone} "
-        f"stone and {start.gold} gold, {balance.lives} lives, three Kings in the shop, two "
-        "Watch Towers, villagers in its build and resource areas, eight trade carts and four "
-        "trade cogs that start trading, and "
+        f"stone and {start.gold} gold, {balance.lives} lives, three Kings in the shop, "
+        "villagers in its build and resource areas, eight trade carts and four trade cogs that "
+        "start trading, and "
         f"{count(economy.starting_relics, 'relic', 'relics')} in its monasteries. "
         f"{opening_stock(shop)}{starting_research(balance)}Population comes only "
         "from the shop's +80 population and castle, and from the civilization profiles that "
@@ -212,8 +214,8 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "that never run out. The trees beside your lumber camps never run out either. "
         "Messages about your Kings, rewards and refused purchases are shown only to you.\n\n"
         "Villagers cannot walk between the build and resource areas, or across the enemy "
-        "path. Stand one on the small flag at the dead end of each walkway (the transfer "
-        "pad); the relic beside it names where the villager goes.\n\n"
+        "path. Stand a villager on the flag at the end of a walkway (its relic names where it "
+        "goes); flags also mark where villagers arrive.\n\n"
         "## Shop\n\n"
         f"Walk Kings onto a shop pad and let them stand for about {STILL_SAMPLES + 1} seconds; "
         "Kings walking across or pausing briefly on a pad buy nothing. A purchase takes "

@@ -1,9 +1,11 @@
-"""Native triggers for competition: PvP diplomacy, siege countdowns and protected Kings."""
+"""Native triggers for competition: PvP diplomacy and pads, siege countdowns and protected
+Kings."""
 
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
+from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import condition, effect
@@ -24,6 +26,22 @@ def pvp_diplomacy(game: Game) -> None:
                     target_player=target,
                     diplomacy=DiplomacyState.ENEMY,
                 )
+
+
+def open_pvp_pads(game: Game, shop: Shop) -> None:
+    """Selecting PvP on removes the Hay Stacks that seal the raider and siege pads; only that
+    selection, which fixes the options, switches PvP on."""
+    gates = [
+        identifier
+        for purchase in shop.purchases
+        for identifier in game.names.registered("object", f"shop.{purchase.key}.gate.")
+    ]
+    # Selecting nothing would remove every Gaia object.
+    if not gates:
+        raise ValueError("No PvP pad gates to open")
+    trigger = game.trigger("game.pvp.open", looping=False)
+    game.value(trigger, "game.pvp", 1)
+    effect(trigger, "remove_object", source_player=0, selected_object_ids=gates)
 
 
 def siege_countdowns(game: Game, balance: Balance) -> None:

@@ -3,6 +3,7 @@
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
@@ -27,6 +28,7 @@ from ancienttdde.map.geometry import Position
 from ancienttdde.scenario.xs import xs_checker
 
 MOVE = 1
+NO_ATTACK_STANCE = 3
 
 
 def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: GameBuild) -> None:
@@ -76,7 +78,8 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
         )
     # Logic triggers stay enabled and are gated by variables; only display-only objectives
     # are revealed by activation. A cleared lane's cleanup deactivates that lane's other
-    # triggers, and the game.hide triggers deactivate display-only objectives.
+    # triggers, the game.hide triggers deactivate display-only objectives, and the wave
+    # triggers switch the status line between the wait and the wave.
     objectives = {
         t["id"] for t in snapshot["triggers"] if t["display_as_objective"] and not t["effects"]
     }
@@ -89,6 +92,9 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
                 target = by_id[change["attributes"]["trigger_id"]]
                 if trigger["name"].startswith("game.hide."):
                     assert target["id"] in objectives
+                    continue
+                if trigger["name"].startswith("game.wave."):
+                    assert target["name"] in ("game.status.next", "game.status.spawning")
                     continue
                 lane = re.fullmatch(r"(lane\.p[1-7])\.cleanup", trigger["name"])
                 assert lane is not None, trigger["name"]
@@ -145,6 +151,132 @@ def test_every_pad_shows_one_flag_per_king_of_its_price(game_build: GameBuild) -
         tiles = {(int(u["x"]), int(u["y"])) for u in marked}
         assert len(marked) == len(tiles) == purchase.kings, purchase.key
         assert all(u["player_id"] == 0 for u in marked), purchase.key
+
+
+def column(x: int, rows: range) -> set[tuple[int, int]]:
+    return {(x, y) for y in rows}
+
+
+# The side each pad is entered from, read off the map; every other pad opens to the north.
+ENTERED_FROM_WEST = {
+    "tower_attack_255",
+    "tower_attack_750",
+    "bombard_attack_400",
+    "wood_2000",
+    "king_every_150",
+    "king_every_minute",
+    "gold_1000",
+    "gold_450",
+    "gold_175",
+    "land_raider",
+    "naval_raider",
+    "siege",
+}
+ENTERED_FROM_EAST = {
+    "tower_attack_4",
+    "tower_attack_10",
+    "tower_attack_25",
+    "tower_attack_50",
+    "tower_attack_100",
+    "tower_attack_170",
+    "stone_1500",
+    "stone_800",
+    "stone_375",
+    "attack_1_every_30",
+    "attack_3_every_30",
+    "relic_enclosure",
+}
+# Pads whose flags differ from the map's: priced differently from the original, or new.
+FAR_END_FLAGS = {
+    "third_row": column(162, range(47, 50)),
+    "fourth_row": column(164, range(47, 50)),
+    "naval_raider": column(169, range(20, 23)),
+    "siege": column(169, range(24, 34)) | column(168, range(24, 29)),
+    "land_raider": column(169, range(36, 39)),
+    "castle": {(150, 49)},
+    "king_every_150": column(130, range(18, 23)) | column(129, range(18, 21)),
+    "king_every_minute": column(130, range(24, 30))
+    | column(129, range(24, 30))
+    | column(128, range(24, 30))
+    | column(127, range(24, 26)),
+    "gold_1000": column(130, range(31, 33)) | column(129, range(31, 33)),
+    "gold_450": column(130, range(34, 36)),
+    "stone_800": column(138, range(30, 33)) | column(139, range(30, 32)),
+    "stone_375": column(138, range(34, 36)),
+    "attack_1_every_30": column(138, range(25, 29)),
+}
+
+
+def test_pad_flags_fill_from_the_end_farthest_from_the_entrance(game_build: GameBuild) -> None:
+    """Like the original's, a pad's flags fill whole rows from its far end towards the
+    entrance; a pad whose map flags already do keeps them."""
+    from ancienttdde.game.catalog import load_shop
+    from ancienttdde.game.config import load_balance
+    from ancienttdde.map.geometry import cells, footprint
+    from ancienttdde.scenario.objects import marker_flags
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    data = json.loads((output / "map.json").read_text())
+    config = json.loads((ROOT / "content/maps/foundation.json").read_text())
+    sizes = {row["stock_id"]: row.get("blocking_size", 0) for row in config["objects"]}
+    balance = load_balance(ROOT / "content/balance/game.json")
+    families = [name for name, _ in balance.towers.families]
+    catalog = load_shop(ROOT / "content/balance/shop.json", data["anchors"], families)
+
+    def flagged(units: list[dict[str, Any]]) -> set[tuple[int, int]]:
+        return {(int(u["x"]), int(u["y"])) for u in units if u["unit_const"] in marker_flags()}
+
+    built, original = flagged(snapshot["units"]), flagged(data["units"])
+    blocked = {
+        cell for u in snapshot["units"] for cell in footprint(u, sizes.get(u["unit_const"], 0))
+    }
+    for purchase in catalog.purchases:
+        region = cells(purchase.pad_region)
+        expected = FAR_END_FLAGS.get(purchase.key, original & region)
+        assert built & region == expected, purchase.key
+        # Rows of standable tiles, the farthest from the entrance first.
+        open_tiles = region - blocked
+        if purchase.key in ENTERED_FROM_WEST:
+            depth = {tile: -tile[0] for tile in open_tiles}
+        elif purchase.key in ENTERED_FROM_EAST:
+            depth = {tile: tile[0] for tile in open_tiles}
+        else:
+            depth = {tile: -tile[1] for tile in open_tiles}
+        shallowest = max(depth[tile] for tile in expected)
+        assert all(tile in expected for tile in open_tiles if depth[tile] < shallowest), (
+            purchase.key
+        )
+
+
+def test_a_pad_needs_one_entrance_and_its_flags_fill_whole_rows_from_the_far_end() -> None:
+    from ancienttdde.game.construct import far_end, pad_rows
+
+    region = (10, 10, 12, 11)
+    open_tiles = {(x, y) for x in range(10, 13) for y in range(10, 12)}
+    # Only the west side is free, so the rows run from x = 12 back to x = 10.
+    walls = {(x, y) for x in range(9, 14) for y in (9, 12)} | {(13, 10), (13, 11)}
+    rows = pad_rows("test", region, open_tiles, walls)
+    assert rows == [[(12, 10), (12, 11)], [(11, 10), (11, 11)], [(10, 10), (10, 11)]]
+    assert far_end(rows, 3) == {(12, 10), (12, 11), (11, 10)}
+    # A lone flag takes its row's middle tile, the first of two.
+    assert far_end(rows, 1) == {(12, 10)}
+    assert far_end([[(1, 5), (2, 5), (3, 5)]], 1) == {(2, 5)}
+    # Open on every side: the north and south edges tie.
+    with pytest.raises(ValueError, match="test pad has no single entrance"):
+        pad_rows("test", region, open_tiles, set())
+
+
+def test_only_what_stands_in_the_way_closes_a_pads_side() -> None:
+    """Marker flags have no collision, so they close no pad's side; a unit standing there or
+    a blocking footprint does."""
+    from ancienttdde.game.construct import entrance_obstacles
+    from ancienttdde.game.triggers import Game
+
+    scenario = new_scenario()
+    for unit_const, x in ((601, 1.5), (KING, 3.5)):
+        scenario.unit_manager.add_unit(player=0, unit_const=unit_const, x=x, y=1.5)
+    assert entrance_obstacles(Game(scenario), {(9, 9)}) == {(3, 1), (9, 9)}
 
 
 def test_ai_fillers_use_embedded_passive_ai(game_build: GameBuild) -> None:
@@ -218,11 +350,36 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBui
             assert set(orders[0]["selected_object_ids"]) == traders
 
 
+def test_lanes_start_without_towers(game_build: GameBuild) -> None:
+    """The original's lanes own no tower at the start; each builds its own."""
+    from ancienttdde.game.config import load_balance
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    towers = load_balance(ROOT / "content/balance/game.json").towers
+    families = {unit for name, _ in towers.families for unit in towers.family_ids(name)}
+    assert 79 in families
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    for player in range(1, 8):
+        created = [
+            e["attributes"]["object_list_unit_id"]
+            for e in triggers[f"lane.p{player}.initialize"]["effects"]
+            if e["type"] == "create_object"
+        ]
+        assert not set(created) & families, player
+    placed = [u for u in snapshot["units"] if 1 <= u["player_id"] <= 7]
+    assert not [u for u in placed if u["unit_const"] in families]
+
+
 def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
     game_build: GameBuild,
 ) -> None:
     """The original's one-way alliance: the enemy's units attack nothing while every lane's
-    towers fire at them, and they walk at their stock speed."""
+    towers fire at them, and they walk at their stock speed. Each new batch takes the No Attack
+    stance in the spawn column, so a unit a tower hits does not turn to answer it."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.config import load_lanes
+
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     players = snapshot["players"]
@@ -230,9 +387,30 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
     assert players[8]["diplomacy"][:7] == [DiplomacyState.ALLY] * 7
     for player in range(1, 8):
         assert players[player]["diplomacy"][7] == DiplomacyState.ENEMY
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    stances: dict[str, list[dict[str, object]]] = {}
+    for lane in load_lanes(object_value(anchors, "anchors")):
+        _, y1, _, y2 = lane.path
+        spawned = next(
+            t for t in snapshot["triggers"] if t["name"] == f"lane.p{lane.player}.spawned"
+        )
+        kinds = [e["type"] for e in spawned["effects"]]
+        assert kinds.count("change_object_stance") == 1
+        assert kinds.index("change_object_stance") < kinds.index("task_object")
+        [stance] = [
+            e["attributes"] for e in spawned["effects"] if e["type"] == "change_object_stance"
+        ]
+        assert (stance["source_player"], stance["attack_stance"]) == (8, NO_ATTACK_STANCE)
+        assert (stance["area_x1"], stance["area_y1"], stance["area_x2"], stance["area_y2"]) == (
+            lane.spawn_x,
+            y1,
+            lane.spawn_x + 1,
+            y2,
+        )
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
-            assert change["type"] != "change_object_stance"
+            if change["type"] == "change_object_stance":
+                stances.setdefault(trigger["name"], []).append(change["attributes"])
             attributes = change["attributes"]
             # The protected keeper King is the one enemy unit held in place.
             if (
@@ -241,6 +419,7 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
                 and attributes["object_list_unit_id"] != KING
             ):
                 assert attributes["object_attributes"] != ObjectAttribute.MOVEMENT_SPEED
+    assert sorted(stances) == sorted(f"lane.p{player}.spawned" for player in range(1, 8))
 
 
 def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: GameBuild) -> None:
@@ -571,6 +750,48 @@ def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: Gam
         ]
         assert len(gatherers) == 2
         assert all(position in reachable for position in gatherers)
+
+
+def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
+    """Selecting the King the XS leaves on a cleared lane's spare siege islet says why it is
+    there. Its trigger waits outside the lane's own, which the cleanup ends as it creates it."""
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    for player in range(1, 8):
+        x, y = (int(v) for v in anchors[f"siege.p{player}.3"]["point"])
+        keeper = triggers[f"game.keeper.p{player}"]
+        assert not keeper["looping"] and keeper["enabled"]
+        [standing] = keeper["conditions"]
+        attributes = standing["attributes"]
+        assert standing["type"] == "objects_in_area"
+        assert (attributes["source_player"], attributes["object_list"]) == (player, KING)
+        assert attributes["quantity"] == 1
+        assert (
+            attributes["area_x1"],
+            attributes["area_y1"],
+            attributes["area_x2"],
+            attributes["area_y2"],
+        ) == (x, y, x, y)
+        [rename] = keeper["effects"]
+        named = rename["attributes"]
+        assert rename["type"] == "change_object_name"
+        assert (named["source_player"], named["object_list_unit_id"]) == (player, KING)
+        assert (named["area_x1"], named["area_y1"], named["area_x2"], named["area_y2"]) == (
+            x,
+            y,
+            x,
+            y,
+        )
+        assert named["message"] == f"Slot keeper: P{player}'s cleared lane stays in the game"
+        cleanup = triggers[f"lane.p{player}.cleanup"]
+        ended = [
+            e["attributes"]["trigger_id"]
+            for e in cleanup["effects"]
+            if e["type"] == "deactivate_trigger"
+        ]
+        assert ended and keeper["id"] not in ended
 
 
 def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(

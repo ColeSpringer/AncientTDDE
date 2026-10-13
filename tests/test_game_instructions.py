@@ -72,9 +72,21 @@ def test_instructions_state_the_starting_grant_and_research() -> None:
     text = instructions(balance(), shop(), profiles())
     assert "Starting Resources" not in text and "lobby's resources" not in text
     assert "starts with 750 food, 1500 wood, 1500 stone and 400 gold" in text
+    # Lanes start without towers, as in the original.
+    assert "three Kings in the shop, villagers in its build and resource areas" in text
     assert "Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason" in text
     assert "The shop sells 2000 wood for 1 King and 1500 stone for 1 King." in text
     assert "right pad" not in text
+
+
+def test_instructions_explain_the_transfer_flags() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop(), profiles())
+    assert (
+        "Stand a villager on the flag at the end of a walkway (its relic names where it goes); "
+        "flags also mark where villagers arrive." in text
+    )
 
 
 def test_instructions_cope_with_no_starting_research(tmp_path: Path) -> None:
@@ -105,7 +117,7 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
     assert "Standard and PvP off are the defaults when the time runs out" in text
     assert (
         "Competitive games choose PvP on, which puts raiders and the siege power-up on sale "
-        "from the first wave, or PvP off" in text
+        "from the first wave and opens their pads; without it PvP stays off." in text
     )
     assert (
         "Easiest plays Easy; Standard and Moderate play Normal; Hard, Hardest and Extreme "
@@ -200,6 +212,18 @@ def test_instructions_list_every_civilization_profile() -> None:
     assert f"- Any other civilization: {listed.text(None)}." in section
     assert "adjustments: +3 starting Kings" in listed.text(None)
     assert section.count("\n- ") == len(listed.civilizations) + 1
+
+
+def test_civilizations_are_listed_alphabetically_with_the_default_last() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop(), profiles())
+    section = text.split("## Civilizations")[1].split("## ")[0]
+    names = [line[2:].split(":")[0] for line in section.splitlines() if line.startswith("- ")]
+    *civilizations, default = names
+    assert civilizations == sorted(civilizations)
+    assert civilizations[:3] == ["Achaemenids", "Armenians", "Athenians"]
+    assert default == "Any other civilization"
 
 
 def test_the_kill_king_message_counts_wave_kills() -> None:

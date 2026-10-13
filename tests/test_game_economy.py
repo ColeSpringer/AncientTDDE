@@ -17,7 +17,7 @@ from conftest import (
     variables_by_name,
 )
 
-from ancienttdde.scenario.snapshot import ScenarioSnapshot, TriggerRecord
+from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerRecord
 
 PLAYERS = range(1, 8)
 KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
@@ -197,6 +197,45 @@ def test_new_kings_walk_from_the_stall_into_the_shop(game_build: GameBuild, play
     [walk] = effects(trigger, "task_object")
     assert located(walk) == rally and walk["object_list_unit_id"] == KING
     assert not effects(trigger, "create_object") and not effects(trigger, "change_variable")
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_villagers_on_a_transfer_pad_are_teleported_to_its_arrival(
+    game_build: GameBuild, player: int
+) -> None:
+    """Every villager standing on the pad moves to the arrival as it is, with its type and
+    what it carries; nothing is removed or created, so the arrival flag stays. Each is first
+    sent on to the arrival's walk tile, so none keeps walking back towards the pad."""
+    data = snapshot(game_build)
+    triggers = triggers_by_name(data)
+    active = variables_by_name(data)[f"lane.p{player}.active"]
+    for name in ("build", "economy", "north", "south"):
+        site = anchors(game_build)[f"lane.p{player}.transfer.{name}"]
+        pad = tuple(site["region"])
+        arrival, walk = (tile(p) for p in site["points"])
+        trigger = triggers[f"lane.p{player}.transfer.{name}.move"]
+        assert trigger["looping"] and requested(trigger, active) == 1
+
+        def region(attributes: dict[str, Any]) -> tuple[int, int, int, int]:
+            return (
+                attributes["area_x1"],
+                attributes["area_y1"],
+                attributes["area_x2"],
+                attributes["area_y2"],
+            )
+
+        [standing] = [
+            c["attributes"] for c in trigger["conditions"] if c["type"] == "objects_in_area"
+        ]
+        assert (standing["object_group"], standing["source_player"]) == (4, player)
+        assert standing["quantity"] == 1 and region(standing) == pad
+        assert [e["type"] for e in trigger["effects"]] == ["task_object", "teleport_object"]
+        [sent] = effects(trigger, "task_object")
+        assert (sent["object_group"], sent["source_player"], sent["action_type"]) == (4, player, 1)
+        assert region(sent) == pad and located(sent) == walk
+        [moved] = effects(trigger, "teleport_object")
+        assert (moved["object_group"], moved["source_player"]) == (4, player)
+        assert region(moved) == pad and located(moved) == arrival
 
 
 @pytest.mark.parametrize("player", PLAYERS)
@@ -448,19 +487,35 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
 
     for lane in load_lanes(object_value(sites, "anchors")):
         assert names[lane.life_reference].startswith(f"P{lane.player} lives")
-        for key, transfer in lane.sites.transfers.items():
-            pad = names[label_near(transfer.pad[0], transfer.pad[1])]
-            arrival = names[label_near(*transfer.arrival)]
-            assert pad.startswith("Transfer pad:") and "moves to the" in pad, key
-            assert "arrive here from the" in arrival, key
-            if key == "build":
-                # Bought building villagers appear on the arrival tile itself.
-                assert arrival.endswith("and when bought"), arrival
-            elif key == "economy":
-                # Bought resource villagers appear two tiles from the arrival.
-                assert arrival.endswith("bought villagers appear beside it"), arrival
-            else:
-                assert "bought" not in arrival
+        labels = {
+            key: (
+                names[label_near(transfer.pad[0], transfer.pad[1])],
+                names[label_near(*transfer.arrival)],
+            )
+            for key, transfer in lane.sites.transfers.items()
+        }
+        # Bought building villagers appear on the build arrival itself, bought resource
+        # villagers two tiles from the economy arrival.
+        assert labels == {
+            "build": (
+                "Villager on the flag: moves to the build area",
+                "Arrivals from the resource area, and bought villagers",
+            ),
+            "economy": (
+                "Villager on the flag: moves to the resource area",
+                "Arrivals from the build area; bought villagers nearby",
+            ),
+            "north": (
+                "Villager on the flag: moves to the north build rows",
+                "Arrivals from the south build rows",
+            ),
+            "south": (
+                "Villager on the flag: moves to the south build rows",
+                "Arrivals from the north build rows",
+            ),
+        }
+        # Short enough to read at a glance when the relic is selected.
+        assert max(len(text) for pair in labels.values() for text in pair) <= 55
     assert names[21492] == "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
 
 
@@ -497,10 +552,7 @@ def test_transfer_flags_name_their_destination_and_their_relics_point_at_them(
             for ref, u in units.items()
             if u["unit_const"] == RELIC and math.dist((u["x"], u["y"]), (x + 0.5, y + 0.5)) <= 2.5
         ]
-        assert names[relic] == (
-            "Transfer pad: the flagged tile at the walkway's dead end, two tiles from this "
-            f"relic; a villager standing on it moves to the {destination}"
-        ), key
+        assert names[relic] == f"Villager on the flag: moves to the {destination}", key
 
 
 def test_pad_exhibits_stay_where_the_map_puts_them_with_their_captions(
@@ -538,14 +590,19 @@ def test_pad_exhibits_stay_where_the_map_puts_them_with_their_captions(
 
 
 @pytest.mark.parametrize("player", PLAYERS)
-def test_creation_tiles_hold_no_placed_objects(game_build: GameBuild, player: int) -> None:
-    """XS creates Kings, bought units and transferred villagers with collision checks, so even
-    the map's marker flags must be gone from those tiles."""
+def test_creation_tiles_hold_only_the_originals_arrival_flags(
+    game_build: GameBuild, player: int
+) -> None:
+    """XS creates Kings, bought units and trebuchets on these tiles. The original's flags stay
+    on the transfer arrivals and the bought villagers' spots: villagers are teleported there,
+    or created without a collision check. Every other creation tile holds nothing."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance, load_lanes
     from ancienttdde.game.spawns import creation_tiles
+    from ancienttdde.scenario.objects import marker_flags
 
+    output, _ = game_build
     sites = anchors(game_build)
     families = [
         name for name, _ in load_balance(ROOT / "content/balance/game.json").towers.families
@@ -558,17 +615,28 @@ def test_creation_tiles_hold_no_placed_objects(game_build: GameBuild, player: in
     # Trebuchets arrive on this lane's islets for whoever holds the siege.
     assert set(lane.sites.siege[: balance.interaction.siege.trebuchets_per_rival]) <= tiles
     assert {spawn.tiles[0] for spawn in lane.sites.raiders.values()} <= tiles
-    standing = [
-        (u["unit_const"], math.floor(u["x"]), math.floor(u["y"]))
-        for u in snapshot(game_build)["units"]
-        if (math.floor(u["x"]), math.floor(u["y"])) in tiles
-    ]
-    assert standing == []
+    marked = {transfer.arrival for transfer in lane.sites.transfers.values()}
+    marked |= {spot for spawn in lane.sites.villagers.values() for spot in spawn.tiles}
+    assert marked <= tiles
+    standing: dict[tuple[int, int], list[MapUnit]] = {}
+    for u in snapshot(game_build)["units"]:
+        spot = (math.floor(u["x"]), math.floor(u["y"]))
+        if spot in tiles:
+            standing.setdefault(spot, []).append(u)
+    assert set(standing) == marked
+    placed = {u["reference_id"]: u for u in cached_json(output / "map.json")["units"]}
+    for spot, units in standing.items():
+        [flag] = units
+        assert flag["unit_const"] in marker_flags(), spot
+        # The original's own flag, never one the build made.
+        original = placed[flag["reference_id"]]
+        assert original["unit_const"] == flag["unit_const"], spot
+        assert (math.floor(original["x"]), math.floor(original["y"])) == spot
     # The transfer pads keep their flags: players stand villagers on them.
     flags = {
         (math.floor(u["x"]), math.floor(u["y"]))
         for u in snapshot(game_build)["units"]
-        if u["unit_const"] in (601, 602, 603)
+        if u["unit_const"] in marker_flags()
     }
     for transfer in lane.sites.transfers.values():
         assert (transfer.pad[0], transfer.pad[1]) in flags
@@ -591,21 +659,46 @@ def test_objectives_show_the_wave_countdown_and_every_lane(game_build: GameBuild
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
-    status = triggers["game.status"]
-    assert status["display_as_objective"]
-    assert f"<Variable {variables['game.display_wave']}>" in status["short_description"]
-    assert f"<Variable {variables['game.countdown']}>" in status["short_description"]
+    waiting, spawning = triggers["game.status.next"], triggers["game.status.spawning"]
+    for status in (waiting, spawning):
+        assert status["display_as_objective"]
+        assert f"<Variable {variables['game.display_wave']}>" in status["short_description"]
+        assert f"<Variable {variables['game.countdown']}>" in status["short_description"]
     for player in PLAYERS:
         lane = triggers[f"lane.p{player}.status"]
         assert lane["display_as_objective"]
         lives = variables[f"lane.p{player}.lives"]
         assert f"<Variable {lives}>/{balance()['lives']}" in lane["short_description"]
-    # Shown from the start and never fired: they only display their variables.
-    for shown in [status] + [triggers[f"lane.p{p}.status"] for p in PLAYERS]:
-        assert shown["enabled"] and shown["display_on_screen"] and not shown["effects"]
+    # Never fired: they only display their variables. The countdown to the next wave and the
+    # lives show from the start; the wave's spawning line waits for its first wave.
+    for shown in [waiting, spawning] + [triggers[f"lane.p{p}.status"] for p in PLAYERS]:
+        assert shown["display_on_screen"] and not shown["effects"]
+        assert shown["enabled"] == (shown is not spawning)
         assert [(c["type"], c["attributes"]["quantity"]) for c in shown["conditions"]] == [
             ("variable_value", -1)
         ]
+
+
+def test_the_status_line_switches_between_the_wait_and_the_wave(game_build: GameBuild) -> None:
+    """Before a wave the status counts down to it; while a wave spawns, it counts down the
+    spawning. The triggers that start each wait and each wave switch the lines."""
+    data = snapshot(game_build)
+    triggers = triggers_by_name(data)
+    waiting = triggers["game.status.next"]["id"]
+    spawning = triggers["game.status.spawning"]["id"]
+
+    def switched(name: str) -> tuple[list[int], list[int]]:
+        trigger = triggers[name]
+        return (
+            [attr_int(e, "trigger_id") for e in effects(trigger, "activate_trigger")],
+            [attr_int(e, "trigger_id") for e in effects(trigger, "deactivate_trigger")],
+        )
+
+    assert switched("game.wave.timer.clear") == ([spawning], [waiting])
+    waits = ["game.wave.endless.warning"]
+    waits += [f"game.wave.{number}.warning" for number in range(1, len(balance()["waves"]) + 1)]
+    for name in waits:
+        assert switched(name) == ([waiting], [spawning]), name
 
 
 @pytest.mark.parametrize("player", PLAYERS)

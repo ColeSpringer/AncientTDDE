@@ -41,6 +41,7 @@ type EffectName = Literal[
     "enable_disable_technology",
     "clear_timer",
     "change_view",
+    "teleport_object",
 ]
 type ConditionName = Literal[
     "timer",

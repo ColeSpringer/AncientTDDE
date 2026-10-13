@@ -77,6 +77,33 @@ def open_ground(medium: str = "land") -> frozenset[Cell]:
     return terrain(medium) - blocked()
 
 
+# The land terrains camps, mills and towers can be built on (DE's terrain restriction 4, read
+# from the DAT); the map's ice and ice beach are walkable only.
+BUILDABLE_TERRAIN = {0, 5, 10, 24}
+
+
+@cache
+def buildable() -> frozenset[Cell]:
+    data, _ = content()
+    width = data["map"]["width"]
+    tiles = {
+        (i % width, i // width)
+        for i, t in enumerate(data["map"]["tiles"])
+        if t[0] in BUILDABLE_TERRAIN
+    }
+    return frozenset(tiles - blocked())
+
+
+def fits_a_camp_over(spot: Cell) -> bool:
+    """Whether a 2x2 building, a camp or mill, could stand over the tile."""
+    x, y = spot
+    return any(
+        {(x - dx + i, y - dy + j) for i in (0, 1) for j in (0, 1)} <= buildable()
+        for dx in (0, 1)
+        for dy in (0, 1)
+    )
+
+
 def reachable(start: Iterable[Cell], medium: str = "land") -> set[Cell]:
     return flood(set(start), set(open_ground(medium)))
 
@@ -341,7 +368,7 @@ def test_every_lane_raids_the_same_trade_areas() -> None:
 def test_run_controls_stand_free_in_the_row_below_the_shop() -> None:
     run = [tile(p) for p in points("controls.run")]
     practice = [tile(p) for p in points("controls.practice")]
-    assert len(run) == 5 and len(practice) == 4
+    assert len(run) == 4 and len(practice) == 4
     spots = run + practice
     assert len(set(spots)) == len(spots)
     assert all(spot in open_ground() for spot in spots)
@@ -363,9 +390,12 @@ def test_the_enemy_keeper_stands_alone_off_the_siege_islets() -> None:
 
 
 @pytest.mark.parametrize("player", PLAYERS)
-def test_only_arrivals_every_lane_reaches_ignore_units_standing_there(player: int) -> None:
+def test_only_arrivals_every_lane_reaches_or_flags_mark_ignore_units_standing_there(
+    player: int,
+) -> None:
     """Units standing on a lane's own arrival spots are its own and can move away; trade area
-    spots and the King stall are open to every lane, so nothing standing there holds them."""
+    spots and the King stall are open to every lane, and the original's flags mark the bought
+    villagers' spots, so nothing standing there holds them."""
     from typing import cast
 
     from ancienttdde.game.catalog import load_shop
@@ -381,13 +411,43 @@ def test_only_arrivals_every_lane_reaches_ignore_units_standing_there(player: in
     trade = set[Cell]().union(
         *(reachable([tile(points(f"lane.p1.raiders.{m}")[0])], MEDIA[m]) for m in RAIDER_MEDIA)
     )
+    villagers = {spot for spawn in lane.sites.villagers.values() for spot in spawn.tiles}
+    _, config = content()
+    sizes = {r["stock_id"]: r.get("blocking_size", 0) for r in config["objects"]}
+    buildings = [
+        (u["x"], u["y"])
+        for u in data["units"]
+        if u["player_id"] == player and sizes.get(u["unit_const"], 0) > 0
+    ]
     for purchase in shop.purchases:
         for spawned in purchase_spawns(lane, purchase, balance.interaction.raiders):
             spot = (spawned.x10 // 10, spawned.y10 // 10)
-            assert spawned.shared == (spot in trade), purchase.key
+            assert spawned.shared == (spot in trade or spot in villagers), purchase.key
+            # The XS still refuses an unchecked spot that one of the lane's buildings covers.
+            x, y = spawned.x10 / 10, spawned.y10 / 10
+            assert all(max(abs(bx - x), abs(by - y)) >= 1 for bx, by in buildings), purchase.key
     rival = 2 if player == 1 else 1
     stall = tile(points(f"lane.p{player}.kings")[0])
     assert stall in reachable([tile(points(f"lane.p{rival}.kings")[1])])
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_no_building_can_stand_on_a_transfer_arrival(player: int) -> None:
+    """Teleport Object puts villagers on an arrival whatever stands there. Ice cannot be built
+    on, no camp or mill fits over the resource area's arrival, and the XS removes the towers
+    built in the resource area."""
+    from typing import cast
+
+    from ancienttdde.game.config import load_lanes
+    from ancienttdde.game.sites import within
+
+    data, _ = content()
+    lane = load_lanes(cast(dict[str, object], data.get("anchors", {})))[player - 1]
+    for name, transfer in lane.sites.transfers.items():
+        arrival = transfer.arrival
+        if arrival in buildable():
+            assert not fits_a_camp_over(arrival), name
+            assert within(lane.economy, arrival[0], arrival[1]), name
 
 
 @pytest.mark.parametrize("player", PLAYERS)

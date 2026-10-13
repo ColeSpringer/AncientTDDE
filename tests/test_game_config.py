@@ -198,7 +198,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("interaction", "raiders", "naval", "unit"), "GALLEY", "GALLEY"),
         (("interaction", "raiders", "land", "line"), ["HUSSAR"], "LIGHT_CAVALRY"),
         (("interaction", "raiders", "land", "cap"), 0, "cap"),
-        (("interaction", "siege", "trebuchets_per_rival"), 4, "trebuchets_per_rival"),
+        (("interaction", "siege", "trebuchets_per_rival"), 3, "trebuchets_per_rival"),
         (("interaction", "siege", "warning_seconds"), 0, "warning_seconds"),
         (("interaction", "siege", "buyer_cooldown"), 30, "buyer_cooldown"),
         (("practice", "kings"), 0, "kings"),

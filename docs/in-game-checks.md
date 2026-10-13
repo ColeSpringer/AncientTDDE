@@ -35,11 +35,16 @@ the row of Outposts below the shop.
   without orders; the build-area villagers wait.
 - A player-owned mill beside the berries in every human lane. Computer-filled and
   eliminated lanes are cleared completely, mills included; each keeps one King on its spare
-  siege islet so DE does not defeat the slot.
+  siege islet so DE does not defeat the slot, and selecting that King shows "Slot keeper:
+  P<n>'s cleared lane stays in the game".
 - Visible Hay Stack boundaries, blocked expansion rows and reserved tower pads.
 - New towers and age upgrades; bonuses persist without duplication.
 - Multiple enemies crossing exits together, and simultaneous final losses.
 - Each wave ends once its enemies are killed or reach the exit flags.
+- Before the first wave the chat says "First wave in 240", 180, 120, 60, 30 and 10 game
+  seconds, the objectives read "Wave 1 arrives in N s" (between waves "Wave N arrives in",
+  during a wave "Wave N: N s of spawning left"), and the top timer counts down; record
+  which of the three shows on your HUD.
 - Enemies appear in pairs side by side, one row above and one below the lane's center
   (threes fill the three rows), and walk in files to the exit.
 - Each of the ten bosses shows at most 32,767 hit points and is refilled from the total the
@@ -47,9 +52,10 @@ the row of Outposts below the shop.
   player is told at three quarters, half and a quarter; a boss reaching the exit costs 5
   lives.
 - Enemies never attack towers, villagers or Kings (the enemy is allied to every lane; lanes
-  are its enemies), and towers still fire at them; cavalry walks at its stock speed, pausing
-  at most briefly every 10 seconds when the lane's enemies are ordered on again, and no sound
-  plays when enemies appear.
+  are its enemies), and towers still fire at them; enemies take the No Attack stance as they
+  appear and walk past firing towers at their stock speed without turning, pausing or
+  bunching (archers especially). The only pause is a brief one every 10 seconds when the
+  lane's enemies are ordered on again; record any other. No sound plays when enemies appear.
 - No stutter in the first second (the script fills its lookup tables then), in the choice
   window or in preparation, and late waves with 60 or more enemies alive and 30 or more idle
   Kings stay smooth.
@@ -71,24 +77,28 @@ the row of Outposts below the shop.
   explained to that player alone, including Bombard Tower attack for civilizations
   without Bombard Towers, and a different refusal is explained at once.
 - Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 4, each raider
-  3, siege 15, each tower-row half 3). A Hay Stack divider splits the tower-row pad: the left
-  half opens the 3rd row, the right half the 4th.
-- New Kings, bought units and transferred villagers appear on their spots, where the build
-  removed the map's marker flags; a transferred villager keeps its type. A unit on an
-  arrival spot in the lane's own areas delays a purchase or a transfer without losing
-  anything, and the arrival clears once the unit moves. Kings, traders and raiders appear
-  even with another lane's unit on their spot.
+  3, siege 15, each tower-row half 3), in whole rows from the end farthest from the pad's
+  entrance. A Hay Stack divider splits the tower-row pad: the left half opens the 3rd row,
+  the right half the 4th.
+- New Kings and bought units appear on their spots. The original's flags stay on the
+  transfer arrivals and the bought villagers' spots (south rows included), and bought
+  villagers appear on their flags; a camp or mill built over a resource-area spot refuses
+  the purchase and keeps the Kings until it goes. A unit on another bought unit's spot in
+  the lane's own areas delays that purchase without losing anything. Kings, traders and
+  raiders appear even with another lane's unit on their spot.
 - Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
   leak and elimination messages reach everyone.
 - Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
-  the shop shows its purchase, destination, lives or credit text from the start; the shop
-  has no signs (DE cannot rename them) and the row-end signs are plain markers.
+  the shop shows its purchase, destination, lives or credit text from the start (a relic's
+  text fits without scrolling); the shop has no signs (DE cannot rename them) and the
+  row-end signs are plain markers.
 - The dock offers no Fishing Lines, Gillnets or Galleon, the blacksmith no infantry or
   archer armor, and a bought castle no unique technology that touches only units no lane
   has; Celts see none of them.
-- Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, and with Ballistics,
-  Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason researched: towers
-  hit moving targets and shoot adjacent enemies; a King buys 2000 wood or 1500 stone.
+- Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, no towers, and with
+  Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason
+  researched: towers hit moving targets and shoot adjacent enemies; a King buys 2000 wood or
+  1500 stone.
 - 2,000 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
   every 25 wave kills pay 125 stone and 25 wood (kills count with the enemy allied to the
   lanes). Raiders killing rival traders and raiders earn nothing.
@@ -116,9 +126,11 @@ the row of Outposts below the shop.
   units stand on the shop's spots (villagers walk clear, traders trade, a castle stands on
   its site, relics wait for the monks), Castle Age arrives with Guard Towers, an investment
   pays from the first period, and the pad refuses the Kings as already owned.
-- Transfer pads: the flag at each walkway's dead end shows its caption (if DE draws none,
-  the relic two tiles away names the flag), and a villager sent onto that tile reappears at
-  the arrival, one at a time.
+- Transfer pads: every villager standing on the flag at a walkway's end is teleported to
+  the flagged arrival in the other area, keeping its type and what it carries, and walks
+  clear; send several at once and check none heads back towards the pad. Record any
+  misbehaviour of Teleport Object (the fallback is the original's remove and create, one
+  villager at a time).
 - Reaching the end of each resource row pays its bonus once and adds endless deposits;
   starting mines and bushes keep their normal amounts.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
@@ -132,15 +144,16 @@ the row of Outposts below the shop.
 
 ## Modes and competition
 
-- The chooser's view opens on the run options, with "Run options close in" counting down
-  60 game seconds and two on-screen lines naming the options and practice controls left to
-  right. DE draws each Outpost's one-word caption and each pad exhibit's short tag above it
-  (never a Sign's); every exhibit stands where the original placed it. Selecting an Outpost
-  shows its full option, and an exhibit its full purchase.
+- The chooser's view opens on the four run options (Standard, Endless, Practice, PvP on),
+  with "Run options close in" counting down 60 game seconds and two on-screen lines naming
+  the options and practice controls left to right. DE draws each Outpost's one-word caption
+  and each pad exhibit's short tag above it (never a Sign's); every exhibit stands where the
+  original placed it. Selecting an Outpost shows its full option, and an exhibit its full
+  purchase.
 - The first human lane's first selection fixes the options and begins preparation at once,
   even when it is the default (Standard in a competitive game keeps PvP off); a later
   selection, or one by another lane, changes nothing
-  and is explained to that player. Without a selection, Standard or PvP off stands when
+  and is explained to that player. Without a selection, Standard with PvP off stands when
   the countdown ends. The run options then disappear, and the practice controls too unless
   the run is Practice; their two lines leave the objectives box (not struck through) while
   the wave and lives lines stay.
@@ -154,11 +167,13 @@ the row of Outposts below the shop.
   rising past +255), counts down each wave, and ends with a result when the lane falls.
 - Sudden death keeps the waves coming for every survivor, announced as sudden death waves,
   and costs lives every 30 seconds.
-- Competitive games start with PvP off and say so; PvP on makes the defense lanes enemies at
-  the first wave; PvP off keeps them neutral and raider and siege purchases keep their Kings.
+- Competitive games start with PvP off and say so; PvP on, the only PvP option, makes the
+  defense lanes enemies at the first wave; without it they stay neutral and raider and siege
+  purchases keep their Kings.
 - The raider and siege pads are road blocks with Hay Stack borders on the shop's east side,
   the land raider's in the old 4th-row block; each one's King stands centred in its
-  beach-side Hay Stack line.
+  beach-side Hay Stack line. A line of Hay Stacks across each pad's entrance keeps Kings out
+  (solo runs never open them) until PvP on is selected, which removes them at once.
 - Raiders arrive below their market or dock, walk clear, fight rival traders and raiders,
   and cannot leave their trade area; the third raider of a kind is refused (a fourth for
   the listed civilizations) and upgraded fire ships still count.

@@ -96,10 +96,40 @@ def lane_kings(game: Game, lane: EngineLane) -> None:
 
 
 def lane_transfers(game: Game, lane: EngineLane) -> None:
-    """Villagers the XS moves across a transfer pad walk clear of the arrival tile."""
+    """Villagers standing on a transfer pad are teleported to its arrival, as they are:
+    nothing is removed or created, so the flag marking the arrival is never in the way. They
+    are sent on to the arrival's walk tile first, so none keeps heading back for the pad,
+    and any left on the arrival tile is sent clear of it."""
     player = lane.player
     prefix = f"lane.p{player}"
     for name, transfer in lane.sites.transfers.items():
+        move = game.trigger(f"{prefix}.transfer.{name}.move", looping=True)
+        game.value(move, f"{prefix}.active", 1)
+        condition(
+            move,
+            "objects_in_area",
+            source_player=player,
+            object_group=CIVILIAN,
+            quantity=1,
+            **area(transfer.pad),
+        )
+        effect(
+            move,
+            "task_object",
+            source_player=player,
+            object_group=CIVILIAN,
+            action_type=ActionType.MOVE,
+            **area(transfer.pad),
+            **at(transfer.walk),
+        )
+        effect(
+            move,
+            "teleport_object",
+            source_player=player,
+            object_group=CIVILIAN,
+            **area(transfer.pad),
+            **at(transfer.arrival),
+        )
         trigger = game.trigger(f"{prefix}.transfer.{name}", looping=True)
         game.value(trigger, f"{prefix}.active", 1)
         condition(

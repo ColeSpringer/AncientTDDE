@@ -16,7 +16,8 @@ class Spawned:
     gaia: bool
     x10: int
     y10: int
-    # The spot is in a trade area every lane's raiders reach, so no unit there may block it.
+    # Creation is not checked: the spot lies in a trade area every lane's raiders reach, or
+    # holds the original's marker flag.
     shared: bool = False
 
 
@@ -40,7 +41,8 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
                 Spawned(unit, False, *center(t), True) for t in sites.raiders[medium].tiles
             )
         case Villagers(area=where):
-            return placed("villager", sites.villagers[where].tiles)
+            # The original created bought villagers natively on these flagged tiles.
+            return placed("villager", sites.villagers[where].tiles, shared=True)
         case Traders(medium=medium):
             if medium == "land":
                 return placed("cart", sites.carts, shared=True)
@@ -56,14 +58,24 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
 
 
 def creation_tiles(lane: EngineLane, shop: Shop, interaction: Interaction) -> set[Tile]:
-    """Every tile the XS creates a unit of the lane's on: the King stall, the transfer
-    arrivals, the spots of bought units and the islets where a rival's trebuchets arrive.
-    Nothing may be placed there: a checked spot would stay blocked, and a shared one would put
-    the unit inside it. Enemies appear on the lane's spawn column without collision checks."""
+    """Every tile a unit of the lane's appears on: the King stall, the transfer arrivals
+    villagers are teleported to, the spots of bought units and the islets where a rival's
+    trebuchets arrive. Only the marked tiles may hold anything, their marker flags: a checked
+    spot would stay blocked, and a teleport or an unchecked spot would put the unit inside
+    whatever stands there. Enemies appear on the lane's spawn column without collision
+    checks."""
     tiles = {lane.sites.king_spawn}
     tiles.update(transfer.arrival for transfer in lane.sites.transfers.values())
     tiles.update(lane.sites.siege[: interaction.siege.trebuchets_per_rival])
     for purchase in shop.purchases:
         for spawned in purchase_spawns(lane, purchase, interaction.raiders):
             tiles.add((spawned.x10 // 10, spawned.y10 // 10))
+    return tiles
+
+
+def marked_tiles(lane: EngineLane) -> set[Tile]:
+    """The transfer arrivals and bought villagers' spots, which keep the original's marker
+    flags: villagers are teleported there, or created without a collision check."""
+    tiles = {transfer.arrival for transfer in lane.sites.transfers.values()}
+    tiles.update(spot for spawn in lane.sites.villagers.values() for spot in spawn.tiles)
     return tiles

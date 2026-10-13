@@ -2,7 +2,7 @@
 // the shop's previous King sample, which a reload simply starts again.
 int ancientUnitArray = -1;
 int ancientRelicArray = -1;
-int ancientVillagerArray = -1;
+int ancientBuildingArray = -1;
 int ancientPadCounts = -1;
 int ancientLeakCounts = -1;
 int ancientLaneRows = -1;
@@ -119,10 +119,10 @@ void ancientCleanupLane(int player = 1) {
         }
     }
     // One unit keeps the slot in the game: the engine defeats a player who owns nothing. It
-    // stands on the lane's third siege islet, which no siege uses. A player who has left the
+    // stands on the lane's spare siege islet, which no siege uses. A player who has left the
     // game needs none.
     if (xsGetPlayerInGame(player) == false) return;
-    int spare = player * cSiegeSlots + 2;
+    int spare = player * cSiegeSlots + cSpareSiegeSlot;
     vector keep = xsVectorSet(0.1 * siegeX10(spare), 0.1 * siegeY10(spare), 0.0);
     if (xsCreateUnit(cKing, player, keep, false, false, false) < 0) {
         xsChatData(ancientPlayer(player) + "'s cleared lane could not keep its slot, so DE may report it defeated.");
@@ -187,8 +187,23 @@ void ancientAddAttack(int player = 1, int family = 0, int amount = 0) {
     }
 }
 
+// Whether one of the lane's buildings stands over a spot. Villagers build only camps and
+// mills where a spot is not checked, and their 2x2 square covers the tiles within a tile of
+// its centre.
+bool ancientBuiltOver(int player = 1, float x = 0.0, float y = 0.0) {
+    ancientBuildingArray = xsGetPlayerUnitIds(player, cArcherClass + 3, ancientBuildingArray);
+    for (building = 0; < xsArrayGetSize(ancientBuildingArray)) {
+        vector position = xsGetUnitPosition(xsArrayGetInt(ancientBuildingArray, building));
+        float dx = xsVectorGetX(position) - x;
+        float dy = xsVectorGetY(position) - y;
+        if ((dx > -1.0) && (dx < 1.0) && (dy > -1.0) && (dy < 1.0)) return (true);
+    }
+    return (false);
+}
+
 // Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
-// shared trade areas are not checked, so no rival unit can hold a purchase back.
+// shared trade areas and the bought villagers' flagged spots are not checked, so no rival unit
+// or marker flag can hold a purchase back; a building of the lane's own over one still does.
 bool ancientSpawn(int player = 1, int purchase = 0) {
     int key = player * cSpawnStride + purchase;
     int first = spawnStart(key);
@@ -200,7 +215,9 @@ bool ancientSpawn(int player = 1, int purchase = 0) {
             int owner = player;
             if (spawnGaia(first + entry) == 1) owner = 0;
             vector spot = xsVectorSet(0.1 * spawnX10(first + entry), 0.1 * spawnY10(first + entry), 0.0);
-            int unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, spawnShared(first + entry) == 0);
+            bool checked = (spawnShared(first + entry) == 0);
+            int unit = -1;
+            if (checked || (ancientBuiltOver(player, xsVectorGetX(spot), xsVectorGetY(spot)) == false)) unit = xsCreateUnit(spawnUnit(first + entry), owner, spot, false, true, checked);
             if (unit >= 0) {
                 xsArraySetInt(ancientSpawnArray, made, unit);
                 made = made + 1;
@@ -400,17 +417,15 @@ void ancientChoose(int player = 1, int code = 0) {
         xsSetTriggerVariable(vMode, mode);
         if (solo) xsChatData(ancientPlayer(player) + " chose " + modeName(mode) + ": " + modeText(mode) + ".");
         else xsChatData(ancientPlayer(player) + " chose Standard with PvP off: no raiders or siege in this game.");
-    } else {
+    } else if (code == cControlPvpOn) {
         if (solo) {
             ancientMessage(player, cMessageNeedsRivals);
             return;
         }
-        int pvp = 0;
-        if (code == cControlPvpOn) pvp = 1;
-        xsSetTriggerVariable(vPvp, pvp);
-        if (pvp == 1) xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
-        else xsChatData(ancientPlayer(player) + " chose PvP off: no raiders or siege in this game.");
-    }
+        // Standard leaves PvP off; only this option switches it on.
+        xsSetTriggerVariable(vPvp, 1);
+        xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
+    } else return;
     // One selection decides: the options are fixed and preparation begins.
     ancientLock(true);
     if (xsTriggerVariable(vPhase) == sSetup) ancientBeginPreparation();
@@ -1036,30 +1051,6 @@ void ancientKings(int player = 1) {
     if (xsCreateUnit(cKing, player, stall, false, true, false) >= 0) laneSet(player, fKings, laneValue(player, fKings) - 1);
 }
 
-// A villager on a transfer pad reappears, unchanged, in the area the pad leads to once there is room.
-void ancientTransfers(int player = 1) {
-    ancientVillagerArray = xsGetPlayerUnitIds(player, cVillagerClass, ancientVillagerArray);
-    for (index = 0; < xsArrayGetSize(ancientVillagerArray)) {
-        int villager = xsArrayGetInt(ancientVillagerArray, index);
-        if ((xsGetUnitHitpoints(villager) > 0) && (xsGetGarrisonedInUnitId(villager) < 0)) {
-            vector position = xsGetUnitPosition(villager);
-            float x = xsVectorGetX(position);
-            float y = xsVectorGetY(position);
-            int moved = 0;
-            for (transfer = 0; < cTransferCount) {
-                int slot = player * cTransferCount + transfer;
-                if ((moved == 0) && (x >= transferX1(slot)) && (x < transferX2(slot) + 1) && (y >= transferY1(slot)) && (y < transferY2(slot) + 1)) {
-                    vector arrival = xsVectorSet(0.1 * transferX10(slot), 0.1 * transferY10(slot), 0.0);
-                    if (xsCreateUnit(xsGetUnitType(villager), player, arrival, false, true, true) >= 0) {
-                        xsRemoveUnit(villager);
-                        moved = 1;
-                    }
-                }
-            }
-        }
-    }
-}
-
 // Age purchases bring their tower upgrade only to civilizations that have it.
 // Towers belong in the build rows. One in the resource area could reach the trade channel
 // beside it, so it is removed.
@@ -1176,7 +1167,6 @@ void ancientEconomy(int state = 0) {
             ancientControl(player);
             ancientShop(player);
             ancientUpgrades(player);
-            ancientTransfers(player);
             ancientEconomyTowers(player);
             ancientConvert(player);
             ancientKillRewards(player);
@@ -1254,7 +1244,11 @@ void ancientTick() {
             // The on-screen countdown starts with the window's first counted second.
             if (remaining == cChoice - 1) xsSetTriggerVariable(vWaveDisplay, 3);
             xsSetTriggerVariable(vCountdown, remaining + cPreparation);
-        } else xsSetTriggerVariable(vCountdown, remaining);
+        } else {
+            xsSetTriggerVariable(vCountdown, remaining);
+            // The chat counts down to the first wave as well as the timer and objectives.
+            if ((xsTriggerVariable(vWave) == -1) && (remaining > 0) && ((remaining % 60 == 0) || (remaining == 30) || (remaining == 10))) xsChatData("First wave in %d game seconds.", remaining);
+        }
         xsSetTriggerVariable(vDisplayWave, xsTriggerVariable(vWave) + 2);
         if (remaining <= 0) {
             if (state == sSetup) {

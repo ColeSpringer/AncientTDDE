@@ -28,7 +28,6 @@ constexpr int cAttributeKillsByPlayer1 = 326;
 constexpr int cTechStateDisabled = -1;
 constexpr int cTechStateDone = 3;
 constexpr int cHitpoints = 0;
-constexpr int cVillagerClass = 904;
 constexpr int cTowerClass = 952;
 std::array<int, 9> playerTypes{};
 std::array<std::map<int, float>, 9> attributes{};
@@ -127,7 +126,6 @@ bool xsSetUnitHitpoints(int id, float hp) {
     return true;
 }
 int xsGetGarrisonedInUnitId(int id) { return units.at(id).garrison; }
-int xsGetUnitType(int id) { return units.at(id).type; }
 vector xsGetUnitPosition(int id) { return units.at(id).pos; }
 vector xsVectorSet(float x, float y, float z) { return {x, y, z}; }
 // Kings the XS created by owner: those a lane earns or buys, and the one a cleared lane keeps
@@ -156,7 +154,12 @@ int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCo
 float xsVectorGetX(vector pos) { return pos[0]; }
 float xsVectorGetY(vector pos) { return pos[1]; }
 bool xsRemoveUnit(int id) { return units.erase(id) == 1; }
-void xsChatData(string message, int = -1) { chat.push_back(message); }
+// DE writes the value in place of %d.
+void xsChatData(string message, int value = -1) {
+    auto at = message.find("%d");
+    if (at != string::npos) message.replace(at, 2, std::to_string(value));
+    chat.push_back(message);
+}
 // The lobby's difficulty setting, as xsGetDifficulty reports it: Moderate unless a case says otherwise.
 int lobbyDifficulty = 2;
 int xsGetDifficulty() { return lobbyDifficulty; }
@@ -185,10 +188,10 @@ std::array<std::vector<int>, 9> sent{};
 bool near(const Unit &u, int x10, int y10) {
     return std::abs(u.pos[0] - x10 / 10.0f) < 0.5f && std::abs(u.pos[1] - y10 / 10.0f) < 0.5f;
 }
-// The third siege islet, which no siege uses, holds a cleared lane's one King.
+// The spare siege islet, which no siege uses, holds a cleared lane's one King.
 bool onSpareIslet(int owner, vector pos) {
     if (owner < 1 || owner > 7) return false;
-    int key = owner * cSiegeSlots + 2;
+    int key = owner * cSiegeSlots + cSpareSiegeSlot;
     return near(Unit{434, pos}, siegeX10(key), siegeY10(key));
 }
 // A cleared lane owns nothing but that King.
@@ -199,10 +202,10 @@ bool onlySpareKing(int player) {
 }
 void resetXsBuffers() {
     arrays.clear(); floatArrays.clear();
-    ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientLeakCounts=-1;
+    ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientBuildingArray=-1; ancientLeakCounts=-1;
     ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPad=-1;
     ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientSamplePad=-1;
-    ancientLastNotice=-1; ancientSpawnArray=-1; ancientVillagerArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
+    ancientLastNotice=-1; ancientSpawnArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
     ancientLaneRows=-1;
     // The lookup tables live in the same arrays, so they are filled again on the next lookup.
     ancientTablesReady=false;
@@ -240,12 +243,10 @@ void nativeEffects() {
                         u.pos[1] += 3;
             setLane(p, fPurchase, 0);
         }
-        // New Kings walk from the stall into the shop; transferred villagers clear the arrival.
+        // New Kings walk from the stall into the shop.
         if (lane(p, fActive)) {
             for (auto &[id, u] : units) {
                 if (u.owner == p && u.type == cKing && near(u, laneStallX10(p), laneStallY10(p))) u.pos[1] = 8.5f;
-                for (int t = 0; t < cTransferCount; ++t)
-                    if (u.owner == p && classOf(u.type) == 4 && near(u, transferX10(p * cTransferCount + t), transferY10(p * cTransferCount + t))) u.pos[1] += 2;
             }
         }
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
@@ -587,11 +588,31 @@ int main(int argc, char** argv) {
         sweep(); require(lane(2,fLives)==cLives-4 && lane(7,fLives)==cLives-4, "Leaks were not counted exactly once");
         sweep(); require(lane(2,fLives)==cLives-4, "Leak charged twice");
     } else if(test=="first_wave") {
-        // Fast is DE's 2x lobby speed: once the run option is chosen, the first pair arrives
-        // about two real minutes in.
+        // Once the run option is chosen, the first pair arrives after the preparation, about
+        // five game minutes in.
         start({7}); select(7, cControlStandard); int seconds=1;
         while(spawns[7]==0 && seconds<1000) { tick(true); ++seconds; }
-        require(seconds>=230 && seconds<=250, "First enemies did not arrive about 240 game seconds in");
+        require(seconds>=cPreparation-3 && seconds<=cPreparation+17, "First enemies did not arrive after the preparation");
+    } else if(test=="first_wave_marks") {
+        // The chat counts down to the first wave at whole minutes, then at 30 and 10 seconds,
+        // in preparation only: not in the choice window, and not before later waves.
+        auto marks = [&]() {
+            return std::count_if(chat.begin(), chat.end(), [](const string &m) { return m.rfind("First wave in ", 0) == 0; });
+        };
+        start({7});
+        reachWave(0);
+        // Every mark a preparation of up to ten minutes can reach, kept to this one's length.
+        int expected = 0;
+        for(int s : {600, 540, 480, 420, 360, 300, 240, 180, 120, 60, 30, 10}) {
+            if(s >= cPreparation) continue;
+            ++expected;
+            require(mentions("First wave in " + std::to_string(s) + " game seconds.")==1, "A mark of the first wave's countdown was missed");
+        }
+        require(expected > 0 && marks()==expected
+                && mentions("Prepare your towers. First wave in " + std::to_string(cPreparation) + " game seconds.")==1,
+                "The first wave was counted down at other times");
+        reachWave(1);
+        require(marks()==expected, "A later wave was counted down as the first");
     } else if(test=="choice_timeout") {
         // Without a selection the window runs out, Standard stands and preparation begins.
         start({7}); require(phase()==sSetup && choiceTimers==0, "The countdown ran before the window's first second");
@@ -940,30 +961,58 @@ int main(int argc, char** argv) {
         tick(); tick();
         require(bought[1]==std::vector<int>{cBuyTowerAttack4}, "A King that stopped on the pad did not buy");
     } else if(test=="spawn_blocked") {
+        // Monks appear only on free spots: a unit on one holds the whole purchase back.
         start({1});
-        int key = cSpawnStride + cBuyBuildingVillagers;
+        int key = cSpawnStride + cBuyRelics;
+        int price = shopPrice(cBuyRelics);
+        int relics = 0, monks = 0, monk = -1;
+        for(int e = spawnStart(key); e < spawnStart(key) + spawnCount(key); ++e) {
+            if(spawnUnit(e) == cRelic) ++relics;
+            else { ++monks; if(monk < 0) monk = e; }
+        }
+        require(relics > 0 && monk > spawnStart(key), "The relics purchase lost its relics or monks");
         int blocker = sequence++;
-        units.emplace(blocker, Unit{79, {spawnX10(spawnStart(key)) / 10.0f, spawnY10(spawnStart(key)) / 10.0f, 0}, 100, 1});
-        kingsOn(1, cBuyBuildingVillagers, 1);
+        units.emplace(blocker, Unit{79, {spawnX10(monk) / 10.0f, spawnY10(monk) / 10.0f, 0}, 100, 1});
+        kingsOn(1, cBuyRelics, price);
         for(int n=0;n<4;++n) tick();
-        require(bought[1].empty() && kingsOnPad(1, cBuyBuildingVillagers)==1, "A blocked spawn took the Kings");
-        require(created[1][83]==0, "A blocked purchase left units behind");
+        require(bought[1].empty() && kingsOnPad(1, cBuyRelics)==price, "A blocked spawn took the Kings");
+        require(unitsOf(0, cRelic)==0 && unitsOf(1, 125)==0, "A blocked purchase left units behind");
         require(told(1, cMessageNoRoom)==1, "The blocked spawn was not explained");
         units.erase(blocker);
         tick(); tick();
-        require(bought[1]==std::vector<int>{cBuyBuildingVillagers} && created[1][83]==spawnCount(key), "Cleared spawn did not deliver");
-    } else if(test=="transfer") {
-        start({2});
-        int slot = 2 * cTransferCount;
-        int villager = sequence++;
-        units.emplace(villager, Unit{293, {transferX1(slot) + 0.5f, transferY1(slot) + 0.5f, 0}, 25, 2});
-        int blocker = sequence++;
-        units.emplace(blocker, Unit{79, {transferX10(slot) / 10.0f, transferY10(slot) / 10.0f, 0}, 100, 2});
+        require(bought[1]==std::vector<int>{cBuyRelics} && unitsOf(0, cRelic)==relics && unitsOf(1, 125)==monks,
+                "Cleared spawn did not deliver");
+    } else if(test=="spawn_built_over") {
+        // A camp or mill of the lane's over a bought villager's spot holds the purchase back,
+        // as checked creation would; one beside it does not.
+        start({1});
+        int key = cSpawnStride + cBuyResourceVillagers;
+        int price = shopPrice(cBuyResourceVillagers);
+        float x = spawnX10(spawnStart(key)) / 10.0f, y = spawnY10(spawnStart(key)) / 10.0f;
+        // A 2x2 building covers the spot when its centre is half a tile off it diagonally.
+        int mill = sequence++;
+        units.emplace(mill, Unit{68, {x + 0.5f, y + 0.5f, 0}, 100, 1});
+        kingsOn(1, cBuyResourceVillagers, price);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && kingsOnPad(1, cBuyResourceVillagers)==price && created[1][83]==0,
+                "A building over the spot took the Kings");
+        require(told(1, cMessageNoRoom)==1, "The covered spot was not explained");
+        units[mill].pos = {x + 1.5f, y + 0.5f, 0};
         tick(); tick();
-        require(units.count(villager)==1 && created[2][293]==0, "A blocked transfer lost or duplicated the villager");
-        units.erase(blocker);
-        tick();
-        require(units.count(villager)==0 && created[2][293]==1, "The villager was not moved to the other area");
+        require(bought[1]==std::vector<int>{cBuyResourceVillagers} && created[1][83]==spawnCount(key),
+                "A building beside the spot held the purchase back");
+    } else if(test=="spawn_unchecked") {
+        // Bought villagers appear on their spots whatever stands there, as the original's flags do.
+        start({1});
+        int key = cSpawnStride + cBuyBuildingVillagers;
+        int price = shopPrice(cBuyBuildingVillagers);
+        for(int e = spawnStart(key); e < spawnStart(key) + spawnCount(key); ++e)
+            units.emplace(sequence++, Unit{601, {spawnX10(e) / 10.0f, spawnY10(e) / 10.0f, 0}, 100, 1});
+        kingsOn(1, cBuyBuildingVillagers, price);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1]==std::vector<int>{cBuyBuildingVillagers} && created[1][83]==spawnCount(key),
+                "A flag on a bought villager's spot held the purchase back");
+        require(kingsOnPad(1, cBuyBuildingVillagers)==0 && told(1, cMessageNoRoom)==0, "The Kings were not taken");
     } else if(test=="king_stall_shared") {
         // Every King walks the shop, so a King standing on another lane's stall cannot hold
         // back that lane's new Kings.
@@ -1049,12 +1098,6 @@ int main(int argc, char** argv) {
         for(int n=0;n<4;++n) tick();
         require(told(1, cMessageRequires)==1, "A different refusal was hidden behind the pause");
         require(toldAnything(1)==2, "Refusals were repeated within the pause");
-    } else if(test=="transfer_type") {
-        start({2});
-        int slot = 2 * cTransferCount;
-        units.emplace(sequence++, Unit{293, {transferX1(slot) + 0.5f, transferY1(slot) + 0.5f, 0}, 25, 2});
-        tick();
-        require(created[2][293]==1 && created[2][83]==0, "The transferred villager changed type");
     } else if(test=="options_default") {
         lobbyDifficulty=4;
         start({3});
@@ -1115,12 +1158,12 @@ int main(int argc, char** argv) {
         select(2, cControlPvpOn); tick();
         require(xsTriggerVariable(vPvp)==1 && mentions("P2 switched PvP on")==1, "The chooser could not switch PvP on");
         select(2, 0); tick();
-        select(2, cControlPvpOff); tick();
+        select(2, cControlStandard); tick();
         require(xsTriggerVariable(vPvp)==1 && told(2, cMessageOptionsFixed)==1, "PvP switched back off after the choice");
         restart({3,6});
-        select(3, cControlPvpOff); tick();
-        require(xsTriggerVariable(vPvp)==0 && phase()==sPreparation && mentions("P3 chose PvP off")==1,
-                "Choosing PvP off did not fix the options and begin preparation");
+        select(3, cControlStandard); tick();
+        require(xsTriggerVariable(vPvp)==0 && phase()==sPreparation && mentions("P3 chose Standard with PvP off")==1,
+                "Choosing Standard did not keep PvP off, fix the options and begin preparation");
         require(mentions("PvP is off: no raiders or siege in this game.")==0 && mentions("are for sale.")==0,
                 "The lock repeated or contradicted the choice");
     } else if(test=="options_solo_only") {
@@ -1132,6 +1175,14 @@ int main(int argc, char** argv) {
         require(phase()==sPreparation && xsTriggerVariable(vLocked)==1 && xsTriggerVariable(vPvp)==0,
                 "Standard did not fix the options of a competitive game");
         require(mentions("P2 chose Standard with PvP off")==1, "The Standard choice was not announced");
+    } else if(test=="options_pvp_only_its_own") {
+        // Only the PvP on control switches PvP on; a code past it changes nothing.
+        start({2,5});
+        ancientChoose(2, cControlPvpOn + 1);
+        require(xsTriggerVariable(vPvp)==0 && xsTriggerVariable(vLocked)==0 && phase()==sSetup,
+                "A code other than PvP on switched PvP on or fixed the options");
+        ancientChoose(2, cControlPvpOn);
+        require(xsTriggerVariable(vPvp)==1 && xsTriggerVariable(vLocked)==1, "PvP on did not switch PvP on");
     } else if(test=="options_pvp_solo") {
         start({1});
         select(1, cControlPvpOn); tick();

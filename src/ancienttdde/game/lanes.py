@@ -23,9 +23,10 @@ from ancienttdde.game.profiles import lane_profiles
 from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reach
 from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
+from ancienttdde.game.sites import SPARE_ISLET
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import lane_route, lane_spawned
-from ancienttdde.scenario.triggers import STORAGE, area, effect
+from ancienttdde.scenario.triggers import STORAGE, area, condition, effect
 
 
 def lane_actions(
@@ -50,6 +51,7 @@ def lane_actions(
     protect_kings(game, player)
     restrict_ages(game, player)
     restrict_reach(game, player)
+    lane_keeper(game, lane)
     # Last, so it can end every other trigger of the lane.
     lane_cleanup(game, lane)
 
@@ -93,15 +95,6 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
     )
     # Only the special towers bought for this lane use this definition.
     game.attack_bonus(init, player, (balance.towers.special_id,), balance.towers.special_pierce)
-    for x in (26, 40):
-        effect(
-            init,
-            "create_object",
-            source_player=player,
-            object_list_unit_id=game.stock("watch-tower"),
-            location_x=x,
-            location_y=lane.center_y - 3,
-        )
     protected = [
         u.reference_id
         for u in game.scenario.unit_manager.units[player]
@@ -150,6 +143,30 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
     for identifier in game.names.registered("trigger", f"{prefix}."):
         if identifier != cleanup.trigger_id:
             effect(cleanup, "deactivate_trigger", trigger_id=identifier)
+
+
+def lane_keeper(game: Game, lane: EngineLane) -> None:
+    """Name the King a cleared lane keeps, so selecting it explains itself. The trigger is not
+    one of the lane's own, which the cleanup ends as the King appears."""
+    player = lane.player
+    tile = lane.sites.siege[SPARE_ISLET]
+    keeper = game.trigger(f"game.keeper.p{player}", looping=False)
+    condition(
+        keeper,
+        "objects_in_area",
+        source_player=player,
+        object_list=game.stock("king"),
+        quantity=1,
+        **area((*tile, *tile)),
+    )
+    effect(
+        keeper,
+        "change_object_name",
+        source_player=player,
+        object_list_unit_id=game.stock("king"),
+        message=f"Slot keeper: P{player}'s cleared lane stays in the game",
+        **area((*tile, *tile)),
+    )
 
 
 def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:
