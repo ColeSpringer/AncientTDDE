@@ -1145,7 +1145,6 @@ void ancientKings(int player = 1) {
     if (xsCreateUnit(cKing, player, stall, false, true, false) >= 0) laneSet(player, fKings, laneValue(player, fKings) - 1);
 }
 
-// Age purchases bring their tower upgrade only to civilizations that have it.
 // Towers belong in the build rows. One in the resource area could reach the trade channel
 // beside it, so it is removed.
 void ancientEconomyTowers(int player = 1) {
@@ -1164,6 +1163,7 @@ void ancientEconomyTowers(int player = 1) {
     if (removed) ancientMessage(player, cMessageEconomyTower);
 }
 
+// Age purchases bring their tower upgrade only to civilizations that have it.
 void ancientUpgrades(int player = 1) {
     for (upgrade = 1; <= cShopCount) {
         int tech = shopUpgrade(upgrade);
@@ -1172,6 +1172,25 @@ void ancientUpgrades(int player = 1) {
             if ((state != cTechStateDisabled) && (state != cTechStateDone)) xsResearchTechnology(tech, true, false, player);
         }
     }
+}
+
+// The Bombard Tower research is free. Once a lane is set up, its food, wood and time are
+// zeroed, so DE researches it by itself the moment it is offered, as it does the Turks'
+// Chemistry: that takes Imperial Age, the lane's own Chemistry and a civilization whose tree
+// has it.
+void ancientFreeBombardTower(int player = 1) {
+    if (cBombardTowerResearch == 0) return;
+    xsEffectAmount(cModifyTech, cBombardTowerResearch, cAttrSetFoodCost, 0.0, player);
+    xsEffectAmount(cModifyTech, cBombardTowerResearch, cAttrSetWoodCost, 0.0, player);
+    xsEffectAmount(cModifyTech, cBombardTowerResearch, cAttrSetTime, 0.0, player);
+}
+
+// Should the game not act on its own, the lane completes the research within a second of it
+// being offered, queued or under way, so nothing is paid or waited for.
+void ancientBombardTower(int player = 1) {
+    if (cBombardTowerResearch == 0) return;
+    int state = xsGetTechState(cBombardTowerResearch, player);
+    if ((state == cTechStateReady) || (state == cTechStateQueued) || (state == cTechStateResearching)) xsResearchTechnology(cBombardTowerResearch, true, false, player);
 }
 
 void ancientConvert(int player = 1) {
@@ -1261,6 +1280,7 @@ void ancientEconomy(int state = 0) {
             ancientControl(player);
             ancientShop(player);
             ancientUpgrades(player);
+            ancientBombardTower(player);
             ancientEconomyTowers(player);
             ancientConvert(player);
             ancientKillRewards(player);
@@ -1320,6 +1340,7 @@ void ancientTick() {
             int civilization = xsGetPlayerCivilization(player);
             ancientGrant(player, civilization);
             ancientCivAttack(player, civilization);
+            ancientFreeBombardTower(player);
             int native = civNative(civilization);
             if (native > 0) laneSet(player, fProfile, native);
             else laneSet(player, fProfile, -1);

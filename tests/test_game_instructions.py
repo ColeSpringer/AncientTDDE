@@ -204,6 +204,17 @@ def test_instructions_explain_what_keeps_lanes_apart() -> None:
     assert "the run options leave the row" in text
 
 
+def test_instructions_explain_the_free_bombard_tower() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop(), profiles())
+    assert (
+        "once a lane has both Imperial Age and Chemistry, the Bombard Tower research "
+        "completes on its own at no cost. Each applies only to civilizations that have the "
+        "tower" in text
+    )
+
+
 def test_instructions_list_every_civilization_profile() -> None:
     from ancienttdde.game.instructions import instructions
 

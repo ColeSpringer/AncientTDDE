@@ -135,6 +135,20 @@ def test_prelude_lists_tower_access_from_the_tower_families() -> None:
     assert 'if (index == 2) return ("Bombard Tower");' in text.split("string towerName")[1]
 
 
+def test_prelude_names_the_bombard_tower_research() -> None:
+    from AoE2ScenarioParser.datasets.techs import TechInfo
+
+    from ancienttdde.game.config import Towers
+    from ancienttdde.game.script import bombard_research
+
+    balance, _, _, _ = content()
+    assert bombard_research(balance.towers) == TechInfo["BOMBARD_TOWER"].ID
+    donjons = Towers((("donjons", ("WATCH_TOWER", "DONJON")),), "DONJON", 0, 0, 1)
+    assert bombard_research(donjons) == 0
+    text = prelude()
+    assert f"const int cBombardTowerResearch = {TechInfo['BOMBARD_TOWER'].ID};" in text
+
+
 def test_prelude_tables_are_arrays_filled_once() -> None:
     text = prelude()
     # Integer tables are arrays; only the setup and message tables stay if-chains.
@@ -378,6 +392,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "king_stall_shared",
         "shop_civ_lacks",
         "age_upgrades",
+        "bombard_on_chemistry",
         "status_display",
         "pending_elimination",
         "tower_access_none",

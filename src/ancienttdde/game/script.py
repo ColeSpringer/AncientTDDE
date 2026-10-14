@@ -160,6 +160,12 @@ def tower_access(towers: Towers) -> tuple[tuple[str, int], ...]:
     return tuple(access)
 
 
+def bombard_research(towers: Towers) -> int:
+    """The Bombard Tower research the runtime makes free, or 0 when no family holds the tower."""
+    members = {member for _, members in towers.families for member in members}
+    return TechInfo[TOWER_TECHS["BOMBARD_TOWER"]].ID if "BOMBARD_TOWER" in members else 0
+
+
 def variable_names() -> tuple[str, ...]:
     return tuple(f"game.{name}" for name in GLOBAL_VARIABLES) + tuple(
         f"lane.p{p}.{name}" for p in range(1, 8) for name in LANE_VARIABLES
@@ -466,6 +472,7 @@ def render_prelude(
         cRepairInterval=repairs.interval,
         cRepairStone=repairs.stone,
         cTowerKinds=len(access),
+        cBombardTowerResearch=bombard_research(balance.towers),
         cRunOptions=len(controls("run")),
         cCompetitiveLevel=difficulty.competitive,
         cPracticeKings=balance.practice.kings,

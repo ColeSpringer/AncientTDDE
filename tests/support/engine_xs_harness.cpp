@@ -27,7 +27,11 @@ constexpr int cAttributeKills = 20;
 // Kept by the enemy (player 8): how many of its units each player has killed.
 constexpr int cAttributeKillsByPlayer1 = 326;
 constexpr int cTechStateDisabled = -1;
+constexpr int cTechStateNotReady = 0;
+constexpr int cTechStateReady = 1;
+constexpr int cTechStateResearching = 2;
 constexpr int cTechStateDone = 3;
+constexpr int cTechStateQueued = 4;
 constexpr int cHitpoints = 0;
 constexpr int cTowerClass = 952;
 std::array<int, 9> playerTypes{};
@@ -47,7 +51,7 @@ float xsPlayerAttribute(int player, int attribute) { return attributes.at(player
 void xsSetPlayerAttribute(int player, int attribute, float value) { attributes.at(player)[attribute] = value; }
 int xsGetTechState(int tech, int player) {
     auto found = techStates.find({tech, player});
-    return found == techStates.end() ? 1 : found->second;
+    return found == techStates.end() ? cTechStateNotReady : found->second;
 }
 bool xsResearchTechnology(int tech, bool, bool, int player) {
     researched.push_back({tech, player});
@@ -55,18 +59,25 @@ bool xsResearchTechnology(int tech, bool, bool, int player) {
     return true;
 }
 // Technology-style effects the XS applied, as DE's xsEffectAmount(effect, object or technology,
-// attribute or operation, value, player) receives them.
+// attribute or operation, value, player) receives them: object definition changes in applied,
+// technology changes in techChanges.
 struct Applied { int effect; int unit; int attribute; float amount; int player; };
 std::vector<Applied> applied;
+std::vector<Applied> techChanges;
 bool operator==(const Applied &a, const Applied &b) {
     return a.effect == b.effect && a.unit == b.unit && a.attribute == b.attribute && a.amount == b.amount && a.player == b.player;
 }
 constexpr int cSetAttribute = 0;
 constexpr int cAddAttribute = 4;
+constexpr int cModifyTech = 8;
+constexpr int cAttrSetTime = -1;
+constexpr int cAttrSetFoodCost = 0;
+constexpr int cAttrSetWoodCost = 1;
 // Each player's definition of a unit type's hit points once an effect changed them; units
 // created afterwards take them, as in DE.
 std::array<std::map<int, float>, 9> typeHitpoints{};
 void xsEffectAmount(int effect, int unit, int attribute, float amount, int player) {
+    if (effect == cModifyTech) { techChanges.push_back({effect, unit, attribute, amount, player}); return; }
     applied.push_back({effect, unit, attribute, amount, player});
     if (attribute != cHitpoints) return;
     if (effect == cSetAttribute) typeHitpoints.at(player)[unit] = amount;
@@ -295,7 +306,7 @@ void restart(std::initializer_list<int> humans) {
     for (int p=0; p<9; ++p) { sent[p].clear(); bought[p].clear(); attributes[p].clear(); created[p].clear(); }
     outpostHitpoints.fill(500);
     kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); acknowledged.fill(0); audible.fill(0);
-    applied.clear();
+    applied.clear(); techChanges.clear();
     for (auto &hp : typeHitpoints) hp.clear();
     refusedOwner = -1;
     waveTimers = timerClears = choiceTimers = 0;
@@ -1137,6 +1148,32 @@ int main(int argc, char** argv) {
         auto count=[&](int tech, int player){ return std::count(researched.begin(), researched.end(), std::make_pair(tech, player)); };
         require(count(cGuardTowerTech, 1)==1, "Castle Age did not bring Guard Towers exactly once");
         require(count(cGuardTowerTech, 6)==0, "A civilization without Guard Towers received them");
+    } else if(test=="bombard_on_chemistry") {
+        // The Bombard Tower research is free. Each lane's setup zeroes its food, wood and time
+        // once, so DE researches it by itself when it is offered, and each second the lane
+        // completes it once offered, queued or under way: that takes Imperial Age, the lane's
+        // own Chemistry and a civilization whose tree has it. A lane short of any reads
+        // not-ready and waits.
+        start({1,2,3,5,6});
+        tick(); tick();
+        auto freed=[&](int player, int attribute){ int n=0; for(auto &a : techChanges) if(a.unit==cBombardTowerTech && a.attribute==attribute && a.amount==0 && a.player==player) ++n; return n; };
+        for(int p : {1,5,6}) require(freed(p, cAttrSetFoodCost)==1 && freed(p, cAttrSetWoodCost)==1 && freed(p, cAttrSetTime)==1,
+                                    "The Bombard Tower research was not made free at setup");
+        auto count=[&](int player){ return std::count(researched.begin(), researched.end(), std::make_pair(cBombardTowerTech, player)); };
+        require(count(1)==0 && count(5)==0, "A lane short of Imperial Age or Chemistry received the Bombard Tower");
+        techStates[{cBombardTowerTech, 1}]=cTechStateReady;
+        techStates[{cBombardTowerTech, 2}]=cTechStateQueued;
+        techStates[{cBombardTowerTech, 3}]=cTechStateResearching;
+        techStates[{cBombardTowerTech, 6}]=cTechStateDisabled;
+        tick();
+        require(count(1)==1 && count(2)==1 && count(3)==1, "An offered, queued or started Bombard Tower research was not completed");
+        require(count(5)==0 && count(6)==0, "A lane short of Chemistry or without Bombard Towers received them");
+        for(int n=0;n<3;++n) tick();
+        require(count(1)==1 && count(2)==1 && count(3)==1 && freed(1, cAttrSetFoodCost)==1,
+                "The Bombard Tower research was repeated or made free again");
+        techStates[{cBombardTowerTech, 5}]=cTechStateReady;
+        tick();
+        require(count(5)==1, "The Bombard Tower did not follow once Chemistry was done");
     } else if(test=="status_display") {
         start({1});
         require(xsTriggerVariable(vDisplayWave)==1, "The first wave is not announced before it starts");

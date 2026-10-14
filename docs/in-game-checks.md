@@ -124,6 +124,11 @@ run's level; run options are selected in game, in the row of Outposts below the 
   the reserved pads with 240 pierce attack.
 - Castle Age and Imperial Age add Guard Tower and Keep only for civilizations that have
   them, and the preparation message lists each lane's unavailable towers correctly.
+- The University lists the Bombard Tower research at no cost and no time once the lane is
+  set up, and finishing Chemistry in the Imperial Age completes it by itself (the XS also
+  completes it within a second, a queued one included), only for civilizations that have
+  it; no lane can build Bombard Towers before Chemistry, and Chinese and Bohemians, who
+  start with Chemistry, get them with Imperial Age.
 - Preparation also announces each lane's civilization line, with the lane's own King price
   when its profile changes it; a civilization the content does not list (one newer than the
   build) plays the default profile and is announced as such.
