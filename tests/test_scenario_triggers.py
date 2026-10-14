@@ -84,6 +84,14 @@ def test_shared_operations_write_their_native_conditions_and_effects(
     assert [e["type"] for e in tick["effects"]] == ["change_variable"]
 
 
+def test_a_condition_never_takes_quantity_minus_one(builder: Builder) -> None:
+    """DE parks a trigger whose Variable Value condition has quantity -1 and never fires it."""
+    builder.variable("wave")
+    trigger = builder.trigger("warning", looping=False)
+    with pytest.raises(ValueError, match="quantity -1"):
+        builder.value(trigger, "wave", -1)
+
+
 def test_every_trigger_states_whether_it_repeats() -> None:
     looping = inspect.signature(Builder.trigger).parameters["looping"]
     assert looping.default is inspect.Parameter.empty

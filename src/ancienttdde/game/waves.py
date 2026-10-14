@@ -3,6 +3,7 @@
 from AoE2ScenarioParser.datasets.other import OtherInfo
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
@@ -188,7 +189,12 @@ def wave_warnings(game: Game, balance: Balance) -> None:
     for number, wave in enumerate(balance.waves, 1):
         trigger = game.trigger(f"game.wave.{number}.warning", looping=False)
         game.value(trigger, "game.phase", State.PREPARATION)
-        game.value(trigger, "game.wave", number - 2)
+        # DE never fires a Variable Value condition whose quantity is -1, so before the first
+        # wave, the wave is awaited as any value below 0.
+        if number == 1:
+            game.value(trigger, "game.wave", 0, Comparison.LESS)
+        else:
+            game.value(trigger, "game.wave", number - 2)
         seconds = balance.preparation_seconds if number == 1 else balance.intermission_seconds
         effect(
             trigger,

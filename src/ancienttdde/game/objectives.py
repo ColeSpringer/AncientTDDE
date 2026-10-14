@@ -5,7 +5,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from ancienttdde.game.controls import MODES
 from ancienttdde.game.script import STAGES, State
 from ancienttdde.game.triggers import Game
-from ancienttdde.scenario.triggers import TriggerHandle, effect
+from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
 
 def listed(game: Game, key: str, text: str, description: str, *, shown: bool) -> TriggerHandle:
@@ -27,8 +27,15 @@ def listed(game: Game, key: str, text: str, description: str, *, shown: bool) ->
 def objective(game: Game, key: str, text: str, description: str, *, shown: bool = False) -> int:
     """An objective that shows its text, with live variables, from the start or once revealed."""
     trigger = listed(game, key, text, description, shown=shown)
-    # Never fires: it only displays its text.
-    game.value(trigger, "game.phase", -1)
+    # Never fires: DE parks a trigger whose Variable Value condition has quantity -1, so the
+    # objective only displays its text.
+    condition(
+        trigger,
+        "variable_value",
+        variable=game.names.resolve("variable", "game.phase"),
+        quantity=-1,
+        comparison=Comparison.EQUAL,
+    )
     return trigger.trigger_id
 
 

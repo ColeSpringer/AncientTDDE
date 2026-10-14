@@ -7,6 +7,7 @@ from typing import Any
 import pytest
 from conftest import (
     ROOT,
+    Attributes,
     GameBuild,
     attr_int,
     attr_list,
@@ -24,6 +25,7 @@ KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
 HAY_STACK, SIGN, ACCURSED = 857, 819, 684
 TOWERS, BOMBARD = (79, 234, 235, 236), (236,)
 ATTACK, PIERCE, SET, ADD, SUBTRACT = 9, 3, 1, 2, 3
+EQUAL, LESS = 0, 1
 
 
 def snapshot(build: GameBuild) -> ScenarioSnapshot:
@@ -52,12 +54,24 @@ def located(effect: dict[str, Any]) -> tuple[int, int]:
     return attr_int(effect, "location_x"), attr_int(effect, "location_y")
 
 
+def conditions_on(trigger: TriggerRecord, variable: int) -> list[Attributes]:
+    """The attributes of a trigger's Variable Value conditions on one variable."""
+    return [
+        c["attributes"]
+        for c in trigger["conditions"]
+        if c["type"] == "variable_value" and c["attributes"]["variable"] == variable
+    ]
+
+
 def requested(trigger: TriggerRecord, variable: int) -> int | None:
-    for c in trigger["conditions"]:
-        attributes = c["attributes"]
-        if c["type"] == "variable_value" and attributes["variable"] == variable:
-            return attr_int(attributes, "quantity")
-    return None
+    found = conditions_on(trigger, variable)
+    return attr_int(found[0], "quantity") if found else None
+
+
+def compared(trigger: TriggerRecord, variable: int) -> tuple[int, int]:
+    """The comparison and quantity of a trigger's one condition on a variable."""
+    [attributes] = conditions_on(trigger, variable)
+    return attr_int(attributes, "comparison"), attr_int(attributes, "quantity")
 
 
 @pytest.mark.parametrize("player", PLAYERS)
@@ -357,14 +371,28 @@ def test_waves_are_announced_with_a_countdown(game_build: GameBuild) -> None:
     for number, wave in enumerate(waves, 1):
         trigger = triggers[f"game.wave.{number}.warning"]
         assert not trigger["looping"]
-        assert requested(trigger, variables["game.wave"]) == number - 2
         assert requested(trigger, variables["game.phase"]) == 2
+        # DE never fires a condition that compares a variable to -1, so the first wave is
+        # awaited as "no wave yet" instead.
+        expected = (LESS, 0) if number == 1 else (EQUAL, number - 2)
+        assert compared(trigger, variables["game.wave"]) == expected
         [timer] = effects(trigger, "display_timer")
         seconds = (
             balance()["preparation_seconds"] if number == 1 else balance()["intermission_seconds"]
         )
         assert timer["display_time"] == seconds
         assert wave["key"] in timer["message"] and "%d" in timer["message"]
+
+
+def test_no_acting_trigger_compares_a_variable_to_minus_one(game_build: GameBuild) -> None:
+    """DE parks a trigger whose Variable Value condition has quantity -1 and never fires it;
+    only the objectives that just display their text rely on that."""
+    for trigger in snapshot(game_build)["triggers"]:
+        if trigger["display_as_objective"] and not trigger["effects"]:
+            continue
+        for c in trigger["conditions"]:
+            if c["type"] == "variable_value":
+                assert attr_int(c["attributes"], "quantity") != -1, trigger["name"]
 
 
 def test_no_flat_income_or_forced_population(game_build: GameBuild) -> None:

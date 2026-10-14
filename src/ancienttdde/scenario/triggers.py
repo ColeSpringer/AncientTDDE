@@ -125,6 +125,9 @@ class Builder:
     def value(
         self, trigger: TriggerHandle, key: str, amount: int, comparison: int = Comparison.EQUAL
     ) -> None:
+        # DE parks a trigger whose Variable Value condition has quantity -1 and never fires it.
+        if amount == -1:
+            raise ValueError(f"A condition on {key} with quantity -1 never fires")
         condition(
             trigger,
             "variable_value",
