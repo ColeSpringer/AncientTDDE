@@ -35,9 +35,10 @@ run's level; run options are selected in game, in the row of Outposts below the 
   lives line and no defeat line.
 - Two humans and one computer with the slots between them empty: the chat names the computer
   as the enemy, the waves come to both lanes with the announced hit points (select an enemy),
-  a leak costs lives, and a defeat declares the computer the winner. A lobby without a
-  computer stops at once with the "Ancient TD stopped" objective and its chat line, and the
-  wave and lives lines leave the objectives.
+  a leak costs lives, and a defeat declares the computer the winner. The enemies walk their
+  lanes as in a solo game: none wanders off, stops short or turns back under fire. A lobby
+  without a computer stops at once with the "Ancient TD stopped" objective and its chat
+  line, and the wave and lives lines leave the objectives.
 - Automatic land/water trade startup and pairs spawning without colliding with barriers.
 - Every lumber tree holds 32,000 wood from the start (each lane swaps its placed trees for
   created ones on the same tiles as it begins) and the lumberjacks chop without orders; record

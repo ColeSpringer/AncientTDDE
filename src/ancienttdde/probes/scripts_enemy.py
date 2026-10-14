@@ -21,7 +21,7 @@ DEFINITION = ProbeDefinition(
         ProbeCase(
             "scripts-enemy.passive",
             "Watch player 8 before and after the triggered spawn.",
-            "It builds/trains nothing autonomously; triggered enemies follow the given task.",
+            "It builds, trains and moves nothing on its own; triggered enemies follow the task.",
         ),
         ProbeCase(
             "scripts-enemy.save-load",

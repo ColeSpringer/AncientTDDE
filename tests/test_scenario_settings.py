@@ -1,5 +1,8 @@
 """Scenario settings the game and the probes share."""
 
+import re
+from pathlib import Path
+
 import pytest
 from AoE2ScenarioParser.datasets.object_support import StartingAge
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
@@ -72,3 +75,55 @@ def test_players_are_reset_to_an_empty_controlled_start(scenario: AoE2DEScenario
     assert player.starting_age == StartingAge.DARK_AGE
     assert (player.population_cap, player.allied_victory) == (200, False)
     assert (player.food, player.wood, player.gold, player.stone) == (0, 0, 0, 0)
+
+
+# The strategic numbers DE's own AI scripts name; DE rejects a script naming any other.
+DE_NAMES = Path(__file__).parent / "support/de-strategic-numbers.txt"
+DE_STRATEGIC_NUMBERS = frozenset(
+    line.strip() for line in DE_NAMES.read_text().splitlines() if line.strip()[:1] not in ("", "#")
+)
+
+
+def test_passive_ai_switches_off_the_engines_unit_management() -> None:
+    """DE manages a computer player's units itself unless its script zeroes these numbers:
+    online on 2026-10-14 its explorer share ordered wave villagers about their lane."""
+    script = asset_text("passive.per")
+    actions = re.findall(r"\((set-strategic-number (sn-[a-z-]+) (\d+)|disable-self)\)", script)
+    assert script.count("(defrule") == 1 and actions[-1][0] == "disable-self"
+    named = [(name, int(value)) for _, name, value in actions if name]
+    settings = dict(named)
+    assert len(settings) == len(named)
+    assert set(settings) <= DE_STRATEGIC_NUMBERS
+    assert settings == {
+        "sn-percent-civilian-explorers": 0,
+        "sn-cap-civilian-explorers": 0,
+        "sn-minimum-civilian-explorers": 0,
+        "sn-total-number-explorers": 0,
+        "sn-number-explore-groups": 0,
+        "sn-number-boat-explore-groups": 0,
+        "sn-percent-civilian-builders": 0,
+        "sn-cap-civilian-builders": 0,
+        "sn-percent-civilian-gatherers": 0,
+        "sn-cap-civilian-gatherers": 0,
+        "sn-number-civilian-militia": 0,
+        "sn-allow-civilian-defense": 0,
+        "sn-allow-civilian-offense": 0,
+        "sn-disable-villager-garrison": 3,
+        "sn-number-garrison-units": 0,
+        "sn-maximum-garrison-fill": 0,
+        "sn-garrison-rams": 0,
+        "sn-number-attack-groups": 0,
+        "sn-number-boat-attack-groups": 0,
+        "sn-disable-attack-groups": 1,
+        "sn-number-defend-groups": 0,
+        "sn-disable-defend-groups": 1,
+        "sn-task-ungrouped-soldiers": 0,
+        "sn-gather-defense-units": 0,
+        "sn-gather-idle-soldiers-at-center": 0,
+        "sn-percent-enemy-sighted-response": 0,
+        "sn-enemy-sighted-response-distance": 0,
+        "sn-sentry-distance": 0,
+        "sn-maximum-gaia-attack-response": 0,
+        "sn-disable-trade-evasion": 1,
+        "sn-do-not-scale-for-difficulty-level": 1,
+    }
