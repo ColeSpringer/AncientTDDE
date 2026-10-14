@@ -1,6 +1,7 @@
 """Keep generated output away from sources and publish it only once it is complete."""
 
 from collections.abc import Iterable
+from itertools import takewhile
 from pathlib import Path
 
 from ancienttdde.common.manifest import ManifestKind, read_kind
@@ -51,6 +52,15 @@ def resolve_output(root: Path, output: Path | None, default: str) -> Path:
     return directory
 
 
+def artifact_folders(directory: Path, names: Iterable[str]) -> set[Path]:
+    """The folders between the output directory and its nested artifacts."""
+    return {
+        folder
+        for name in names
+        for folder in takewhile(lambda path: path != directory, (directory / name).parents)
+    }
+
+
 def prepare_output(
     root: Path, output: Path | None, default: str, names: Iterable[str], *, kind: ManifestKind
 ) -> Path:
@@ -61,8 +71,11 @@ def prepare_output(
     """
     directory = resolve_output(root, output, default)
     owned = (*names, "manifest.json")
-    if any((directory / name).is_symlink() for name in owned):
-        raise ValueError("Output cannot replace artifact symlinks")
+    folders = artifact_folders(directory, owned)
+    if any(path.is_symlink() for path in (*(directory / name for name in owned), *folders)):
+        raise ValueError("Output cannot replace artifact symlinks or their folders")
+    if any(folder.exists() and not folder.is_dir() for folder in folders):
+        raise ValueError("Output has a file where an artifact folder goes")
     if (directory / "manifest.json").exists():
         try:
             owner = read_kind(directory / "manifest.json")
@@ -76,7 +89,9 @@ def prepare_output(
 
 
 def publish(staging: Path, directory: Path, names: Iterable[str]) -> None:
-    """Move staged artifacts into place, writing the manifest last."""
-    directory.mkdir(parents=True, exist_ok=True)
-    for name in (*names, "manifest.json"):
+    """Move staged artifacts into place, creating every folder first and the manifest last."""
+    owned = (*names, "manifest.json")
+    for name in owned:
+        (directory / name).parent.mkdir(parents=True, exist_ok=True)
+    for name in owned:
         (staging / name).replace(directory / name)

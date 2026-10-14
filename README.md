@@ -31,8 +31,18 @@ uv run ruff check . && uv run ruff format --check .
 ```
 
 `--root` runs a command against another project directory, and `--output` writes to
-another directory. Builds refuse to overwrite sources or another tool's output. Only the
-generated `.aoe2scenario` file needs installing in DE.
+another directory. Builds refuse to overwrite sources or another tool's output.
+
+## Installing in DE
+
+Copy one of these into `C:\Users\<you>\Games\Age of Empires 2 DE\<steam id>`: the scenario
+to host it (the lobby sends it to the other players), or the mod folder to publish it from
+DE's Mods → My Mods → Publish Mod while signed in to Xbox Live.
+
+```
+.build/game/ancient-td-de.aoe2scenario  ->  resources\_common\scenario\
+.build/game/Ancient TD DE\              ->  mods\local\
+```
 
 ## Editing XS
 

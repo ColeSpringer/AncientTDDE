@@ -17,8 +17,8 @@ from ancienttdde.audit.validation import (
 from ancienttdde.common.manifest import read_kind
 from ancienttdde.common.output import resolve_output
 from ancienttdde.game.balance import Assumptions, load_inputs
+from ancienttdde.game.build import MOD_FOLDER, build_game, validate_game
 from ancienttdde.game.build import SCENARIO_NAME as GAME_SCENARIO
-from ancienttdde.game.build import build_game, validate_game
 from ancienttdde.game.report import REPORT_TITLE, render_report
 from ancienttdde.map.build import SCENARIO_NAME as MAP_SCENARIO
 from ancienttdde.map.build import build_map, validate_map_build
@@ -128,6 +128,8 @@ def build(
         directory = build_map(root, output) if map_only else build_game(root, output)
     destination = directory / (MAP_SCENARIO if map_only else GAME_SCENARIO)
     typer.echo(f"{'Map foundation' if map_only else 'Playable game'} built: {destination}")
+    if not map_only:
+        typer.echo(f"Mod folder for publishing: {directory / MOD_FOLDER}")
     typer.echo("In-game verification remains pending.")
 
 

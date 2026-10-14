@@ -7,6 +7,7 @@ from ancienttdde.common.output import prepare_output, project_path, publish
 
 KIND = "ancient-td-game"
 NAMES = ("scenario.aoe2scenario", "scenario.json")
+NESTED = "mod/resources/scenario.aoe2scenario"
 
 
 @pytest.fixture
@@ -73,6 +74,25 @@ def test_output_does_not_replace_artifact_symlinks(project: Path, tmp_path: Path
         prepare(project, output)
 
 
+def test_output_does_not_write_through_symlinked_artifact_folders(
+    project: Path, tmp_path: Path
+) -> None:
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "mod").symlink_to(tmp_path / "elsewhere", target_is_directory=True)
+    with pytest.raises(ValueError, match="symlink"):
+        prepare_output(project, output, ".build/game", (*NAMES, NESTED), kind=KIND)
+
+
+def test_output_does_not_put_artifact_folders_over_files(project: Path, tmp_path: Path) -> None:
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "manifest.json").write_text(json.dumps({"schema_version": 1, "kind": KIND}))
+    (output / "mod").write_text("")
+    with pytest.raises(ValueError, match="file where an artifact folder"):
+        prepare_output(project, output, ".build/game", (*NAMES, NESTED), kind=KIND)
+
+
 @pytest.mark.parametrize("content", ['{"kind": "stock-de-map"}', "{}"])
 def test_output_does_not_take_over_another_manifest(
     project: Path, tmp_path: Path, content: str
@@ -123,6 +143,30 @@ def test_publishing_moves_artifacts_and_writes_the_manifest_last(
     assert moved == [*NAMES, "manifest.json"]
     published = {path.name: path.read_text() for path in (tmp_path / "out").iterdir()}
     assert published == {name: name for name in (*NAMES, "manifest.json")}
+
+
+def test_publishing_creates_the_folders_of_nested_artifacts(tmp_path: Path) -> None:
+    staging = tmp_path / "staging"
+    (staging / NESTED).parent.mkdir(parents=True)
+    for name in (NESTED, "manifest.json"):
+        (staging / name).write_text(name)
+    publish(staging, tmp_path / "out", (NESTED,))
+    assert (tmp_path / "out" / NESTED).read_text() == NESTED
+
+
+def test_publishing_creates_every_folder_before_moving_anything(tmp_path: Path) -> None:
+    staging = tmp_path / "staging"
+    (staging / NESTED).parent.mkdir(parents=True)
+    names = (*NAMES, NESTED, "manifest.json")
+    for name in names:
+        (staging / name).write_text(name)
+    output = tmp_path / "out"
+    output.mkdir()
+    (output / "mod").write_text("")
+    with pytest.raises(OSError):
+        publish(staging, output, (*NAMES, NESTED))
+    assert [path.name for path in output.iterdir()] == ["mod"]
+    assert all((staging / name).is_file() for name in names)
 
 
 def test_project_paths_cannot_leave_their_base(tmp_path: Path) -> None:

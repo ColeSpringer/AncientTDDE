@@ -178,6 +178,7 @@ def game_build(tmp_path_factory: pytest.TempPathFactory) -> GameBuild:
     output = tmp_path_factory.mktemp("game-build")
     result = CliRunner().invoke(app, ["build", "--root", str(ROOT), "--output", str(output)])
     assert result.exit_code == 0, result.output
+    assert f"Mod folder for publishing: {output / 'Ancient TD DE'}" in result.output
     return output, read_game_manifest(output / "manifest.json")
 
 

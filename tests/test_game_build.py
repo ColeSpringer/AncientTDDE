@@ -48,6 +48,23 @@ def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: Ga
     assert verify_game(output, ROOT) == first
 
 
+def test_the_mod_folder_holds_the_same_scenario(game_build: GameBuild, tmp_path: Path) -> None:
+    import shutil
+
+    from ancienttdde.game.build import MOD_SCENARIO, SCENARIO_NAME, read_manifest
+
+    output, _ = game_build
+    assert MOD_SCENARIO == "Ancient TD DE/resources/_common/scenario/ancient-td-de.aoe2scenario"
+    assert (output / MOD_SCENARIO).read_bytes() == (output / SCENARIO_NAME).read_bytes()
+    edited = tmp_path / "edited"
+    shutil.copytree(output, edited)
+    copy = edited / MOD_SCENARIO
+    copy.write_bytes(copy.read_bytes() + b"\0")
+    rehash_artifacts(edited, MOD_SCENARIO)
+    with pytest.raises(ValueError, match="mod copy differs from the scenario"):
+        read_manifest(edited / "manifest.json")
+
+
 def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -493,7 +510,7 @@ def test_validation_rejects_tampered_logic_even_with_updated_hashes(
 ) -> None:
     import shutil
 
-    from ancienttdde.game.build import ARTIFACTS, compare_game
+    from ancienttdde.game.build import ARTIFACTS, MOD_SCENARIO, compare_game
     from ancienttdde.scenario.inspect import inspect_scenario
     from ancienttdde.scenario.snapshot import content_digest
 
@@ -511,6 +528,7 @@ def test_validation_rejects_tampered_logic_even_with_updated_hashes(
     with xs_checker(scenario):
         save_scenario(scenario, edited / "changed.aoe2scenario")
     (edited / "changed.aoe2scenario").replace(path)
+    shutil.copyfile(path, edited / MOD_SCENARIO)
     snapshot = inspect_scenario(path, include_terrain=True, include_game_settings=True)
     (edited / "scenario.json").write_text(json.dumps(snapshot))
     manifest = json.loads((edited / "manifest.json").read_text())
@@ -543,12 +561,13 @@ def test_validation_compares_the_build_with_a_build_of_current_definitions(
     with xs_checker(scenario):
         save_scenario(scenario, edited / "changed.aoe2scenario")
     (edited / "changed.aoe2scenario").replace(path)
+    shutil.copyfile(path, edited / build.MOD_SCENARIO)
     snapshot = inspect_scenario(path, include_terrain=True, include_game_settings=True)
     (edited / "scenario.json").write_text(json.dumps(snapshot))
     manifest = json.loads((edited / "manifest.json").read_text())
     manifest["normalized_sha256"] = content_digest(snapshot)
     (edited / "manifest.json").write_text(json.dumps(manifest))
-    rehash_artifacts(edited, "ancient-td-de.aoe2scenario", "scenario.json")
+    rehash_artifacts(edited, "ancient-td-de.aoe2scenario", build.MOD_SCENARIO, "scenario.json")
 
     def rebuild(root: Path, expected: Path | None = None) -> Path:
         # The session build is a build of the current definitions; copying it saves a rebuild.

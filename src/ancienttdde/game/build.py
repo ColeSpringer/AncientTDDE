@@ -1,6 +1,7 @@
 """Build and independently reconstruct self-contained playable game artifacts."""
 
 import json
+import shutil
 from functools import partial
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -37,10 +38,14 @@ from ancienttdde.scenario.inspect import inspect_scenario
 from ancienttdde.scenario.snapshot import ScenarioSnapshot, content_digest, validate_references
 
 SCENARIO_NAME = "ancient-td-de.aoe2scenario"
+# The scenario again, laid out as a local DE mod: copy the folder into mods/local to publish it.
+MOD_FOLDER = "Ancient TD DE"
+MOD_SCENARIO = f"{MOD_FOLDER}/resources/_common/scenario/{SCENARIO_NAME}"
 # The declarations the scenario embeds before assets/runtime.xs, for checking that file alone.
 PRELUDE = "runtime-prelude.xs"
 ARTIFACTS = (
     SCENARIO_NAME,
+    MOD_SCENARIO,
     "map.json",
     "scenario.json",
     "instructions.md",
@@ -73,6 +78,9 @@ def read_manifest(path: Path) -> GameManifest:
             "Game manifest must record every artifact this version builds; "
             f"rebuild with {rebuild(path.parent)}"
         )
+    hashes = {r["path"]: r["sha256"] for r in base["artifacts"]}
+    if hashes[MOD_SCENARIO] != hashes[SCENARIO_NAME]:
+        raise ValueError("Game mod copy differs from the scenario")
     return GameManifest(
         **base,
         kind="ancient-td-game",
@@ -141,6 +149,8 @@ def build_game(root: Path, output: Path | None = None) -> Path:
         write_json(staging / "validation.json", report)
         worker(root, staging / "map.json", staging / SCENARIO_NAME)
         snapshot = inspect_game(staging / SCENARIO_NAME)
+        (staging / MOD_SCENARIO).parent.mkdir(parents=True)
+        shutil.copyfile(staging / SCENARIO_NAME, staging / MOD_SCENARIO)
         write_json(staging / "scenario.json", snapshot)
         (staging / "instructions.md").write_text(
             instructions(balance, shop, profiles), encoding="utf-8"
