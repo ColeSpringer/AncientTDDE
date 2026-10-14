@@ -95,8 +95,8 @@ the row of Outposts below the shop.
 - The dock offers no Fishing Lines, Gillnets or Galleon, the blacksmith no infantry or
   archer armor, and a bought castle no unique technology that touches only units no lane
   has; Celts see none of them.
-- Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, no towers, and with
-  Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason
+- Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, no towers of their own,
+  and with Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason
   researched: towers hit moving targets and shoot adjacent enemies; a King buys 2000 wood or
   1500 stone.
 - 2,000 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
@@ -120,6 +120,9 @@ the row of Outposts below the shop.
   preparation: starting Kings at the stall, resources, population, technologies researched,
   tower attack and hit points on existing and new towers, cheaper tower stone, relics inside
   the first monastery, and starting traders that trade at once.
+- A profile's starting towers stand complete within the first seconds, one north and one south
+  of the path per pair, fire from the first wave and take the lane's tower attack and hit point
+  bonuses.
 - A lane with a King price discount converts gold at its own price while the opening chat
   names the base price; scaled kill rewards pay the scaled stone and wood.
 - A purchase a profile grants from the start is owned before the first second ends: its

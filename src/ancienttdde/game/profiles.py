@@ -7,6 +7,7 @@ Kings, King prices, kill rewards, raider caps and tower attack are the XS's own 
 
 from dataclasses import astuple
 
+from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
@@ -50,6 +51,25 @@ def apply_native(
                     operation=operation,
                     quantity=amount,
                 )
+    # Starting towers stand in mirrored pairs: the north tile of a site, then its south tile.
+    pairs = lane.sites.towers
+    wanted = sum(count for _, count in effects.towers) // 2
+    if wanted > len(pairs):
+        raise ValueError(f"P{player} has {len(pairs)} tower sites for {wanted} starting pairs")
+    site = 0
+    for name, count in effects.towers:
+        if count % 2:
+            raise ValueError(f"P{player} cannot mirror {count} starting {name}: counts are even")
+        for _ in range(count // 2):
+            for tile in pairs[site]:
+                effect(
+                    trigger,
+                    "create_object",
+                    source_player=player,
+                    object_list_unit_id=BuildingInfo[name].ID,
+                    **at(tile),
+                )
+            site += 1
     for _ in range(effects.relics):
         garrison_relic(game, trigger, lane.sites.monasteries[0])
     for medium, count in effects.traders:

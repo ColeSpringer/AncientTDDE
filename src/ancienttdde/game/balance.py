@@ -51,6 +51,9 @@ CARAVAN_SPEED = 1.2
 FOOD_PER_KING = 3000
 # A tile of tower range covers more of the lane; its worth in Kings when a profile adds it.
 RANGE_KINGS = 0.25
+# A starting tower saves its cost and fires from the first wave: each point of the damage per
+# second it deals against the knight line's armor is worth this many Kings.
+TOWER_DPS_KINGS = 0.02
 # The population a bought castle supports, and the building's own worth in Kings.
 CASTLE_POPULATION = 20
 CASTLE_KINGS = 1.0
@@ -153,6 +156,11 @@ def damage_per_hit(attack: float, armor: float) -> float:
 
 def tower_dps(unit: StockUnit, bonus: float, pierce_armor: float) -> float:
     return damage_per_hit(unit.attack(PIERCE_CLASS) + bonus, pierce_armor) / unit.reload
+
+
+def table_armor(inputs: Inputs) -> float:
+    """The pierce armor the tower tables measure damage against: the knight line's."""
+    return inputs.stock.unit("KNIGHT").armor(PIERCE_CLASS)
 
 
 @dataclass(frozen=True)
@@ -501,6 +509,12 @@ def technology_kings(name: str, inputs: Inputs, exchange: Rates) -> float:
     )
 
 
+def tower_kings(name: str, inputs: Inputs, exchange: Rates) -> float:
+    """What a tower standing from the start is worth: its cost and its base damage per second."""
+    unit = inputs.stock.unit(name)
+    return exchange.kings(**unit.cost) + tower_dps(unit, 0, table_armor(inputs)) * TOWER_DPS_KINGS
+
+
 def trader_kings(
     medium: str, count: int, inputs: Inputs, assumptions: Assumptions, exchange: Rates
 ) -> float:
@@ -553,6 +567,8 @@ def profile_value(profile: Profile, inputs: Inputs, assumptions: Assumptions) ->
     for family, amount in profile.attack:
         solo += attack_kings(family, amount, inputs, exchange)
     solo += exchange.kings(stone=profile.tower_stone * assumptions.towers_per_run)
+    for name, amount in profile.towers:
+        solo += amount * tower_kings(name, inputs, exchange)
     solo += relic_kings(profile.relics, inputs, exchange)
     for medium, count in profile.traders:
         solo += trader_kings(medium, count, inputs, assumptions, exchange)

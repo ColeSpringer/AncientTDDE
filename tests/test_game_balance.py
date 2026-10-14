@@ -569,3 +569,29 @@ def test_the_rivals_table_prices_the_configured_raiders(tmp_path: Path) -> None:
     )
     assert first.cart_seconds == pytest.approx(expected)
     assert "A hussar raider kills a trade cart" in rivals_section(data)
+
+
+def test_a_starting_tower_is_worth_its_cost_and_its_base_damage() -> None:
+    from ancienttdde.game.balance import (
+        TOWER_DPS_KINGS,
+        Assumptions,
+        profile_value,
+        rates,
+        table_armor,
+        tower_dps,
+        tower_kings,
+    )
+    from ancienttdde.game.civilizations import Profile
+
+    data = inputs()
+    exchange = rates(data)
+    watch = data.stock.unit("WATCH_TOWER")
+    cost = exchange.kings(**watch.cost)
+    assert table_armor(data) == 2
+    expected = cost + tower_dps(watch, 0, 2) * TOWER_DPS_KINGS
+    assert tower_kings("WATCH_TOWER", data, exchange) == pytest.approx(expected)
+    worths = [tower_kings(name, data, exchange) for name in data.balance.towers.members]
+    assert worths == sorted(worths) and worths[-1] > 2 * worths[0]
+    pair = profile_value(Profile(towers=(("KEEP", 2),)), data, Assumptions())
+    assert pair.solo == pytest.approx(2 * tower_kings("KEEP", data, exchange))
+    assert pair.pvp == pair.solo

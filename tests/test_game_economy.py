@@ -593,9 +593,10 @@ def test_pad_exhibits_stay_where_the_map_puts_them_with_their_captions(
 def test_creation_tiles_hold_only_the_originals_arrival_flags(
     game_build: GameBuild, player: int
 ) -> None:
-    """XS creates Kings, bought units and trebuchets on these tiles. The original's flags stay
-    on the transfer arrivals and the bought villagers' spots: villagers are teleported there,
-    or created without a collision check. Every other creation tile holds nothing."""
+    """XS creates Kings, bought units and trebuchets on these tiles, and native triggers a
+    profile's starting towers. The original's flags stay on the transfer arrivals and the
+    bought villagers' spots: villagers are teleported there, or created without a collision
+    check. Every other creation tile holds nothing."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance, load_lanes
@@ -615,6 +616,7 @@ def test_creation_tiles_hold_only_the_originals_arrival_flags(
     # Trebuchets arrive on this lane's islets for whoever holds the siege.
     assert set(lane.sites.siege[: balance.interaction.siege.trebuchets_per_rival]) <= tiles
     assert {spawn.tiles[0] for spawn in lane.sites.raiders.values()} <= tiles
+    assert {tile for pair in lane.sites.towers for tile in pair} <= tiles
     marked = {transfer.arrival for transfer in lane.sites.transfers.values()}
     marked |= {spot for spawn in lane.sites.villagers.values() for spot in spawn.tiles}
     assert marked <= tiles

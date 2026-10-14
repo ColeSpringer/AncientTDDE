@@ -21,6 +21,10 @@ TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
 # lane's King keeps the last.
 SIEGE_ISLETS = 3
 SPARE_ISLET = SIEGE_ISLETS - 1
+# Where a profile's starting towers stand: the build row nearest the path on each side of the
+# lane, in these columns relative to the Accursed Tower pads, a mirrored pair per column.
+TOWER_OFFSETS = (-7, 7, -3, 3)
+TOWER_PAIRS = len(TOWER_OFFSETS)
 
 
 @dataclass(frozen=True)
@@ -59,6 +63,8 @@ class LaneSites:
     carts: tuple[Tile, ...]
     cogs: tuple[Tile, ...]
     expansion: Mapping[str, tuple[Rect, Rect]]
+    # Mirrored pairs of tiles for starting towers: the north build row, then the south.
+    towers: tuple[tuple[Tile, Tile], ...]
     # Where bought raiders appear in the land and water trade areas, by medium.
     raiders: Mapping[str, Spawn]
     # The islets where a rival's trebuchets stand near this lane's towers, in order.
@@ -121,6 +127,24 @@ def reference(anchors: Mapping[str, object], key: str) -> int:
     return value
 
 
+def tower_sites(
+    prefix: str, north: Rect, south: Rect, pads: Mapping[str, Tile]
+) -> tuple[tuple[Tile, Tile], ...]:
+    """Mirrored pairs on the build rows nearest the path, flanking the Accursed Tower pads."""
+    columns = {tile[0] for tile in pads.values()}
+    if len(columns) != 1:
+        raise ValueError(f"{prefix}: the Accursed Tower pads must share a column")
+    [column] = columns
+    top, bottom = north[3], south[1]
+    pairs: list[tuple[Tile, Tile]] = []
+    for offset in TOWER_OFFSETS:
+        x = column + offset
+        if not (within(north, x, top) and within(south, x, bottom)):
+            raise ValueError(f"{prefix}: starting tower column {x} lies outside the build rows")
+        pairs.append(((x, top), (x, bottom)))
+    return tuple(pairs)
+
+
 def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
     prefix = f"lane.p{player}"
     transfers: dict[str, Transfer] = {}
@@ -130,8 +154,9 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
         transfers[name] = Transfer(region(anchors, key), arrival, walk)
     king_spawn, king_rally = tiles(anchors, f"{prefix}.kings")
     x, y = numbers(anchor(anchors, f"{prefix}.castle").get("point"), f"{prefix}.castle", 2)
+    special = {side: single(anchors, f"{prefix}.special.{side}") for side in ("left", "right")}
     return LaneSites(
-        special={side: single(anchors, f"{prefix}.special.{side}") for side in ("left", "right")},
+        special=special,
         king_spawn=king_spawn,
         king_rally=king_rally,
         transfers=transfers,
@@ -155,6 +180,12 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
             )
             for row in ("third", "fourth")
         },
+        towers=tower_sites(
+            prefix,
+            region(anchors, f"{prefix}.build.north"),
+            region(anchors, f"{prefix}.build.south"),
+            special,
+        ),
         raiders={medium: spawn(anchors, f"{prefix}.raiders.{medium}") for medium in RAIDER_MEDIA},
         siege=tuple(
             point_tile(anchors, f"siege.p{player}.{index}") for index in range(1, SIEGE_ISLETS + 1)

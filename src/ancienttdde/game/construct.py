@@ -72,8 +72,8 @@ from ancienttdde.scenario.xs import check_xs, xs_checker
 def clear_sites(
     game: Game, lanes: tuple[EngineLane, ...], shop: Shop, interaction: Interaction
 ) -> None:
-    """Take the map's marker flags off the tiles the XS creates units on with a collision
-    check, the King stall and siege islets among them; the transfer arrivals and bought
+    """Take the map's marker flags off the tiles units are created on, the King stall, the
+    siege islets and the starting tower sites among them; the transfer arrivals and bought
     villagers' spots keep the original's flags. Anything else on those tiles is a content
     error.
     """

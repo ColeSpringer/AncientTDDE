@@ -123,11 +123,12 @@ def test_native_effects_are_the_part_native_triggers_apply() -> None:
         kings=1,
         resources=Resources(0, 0, 500, 0),
         attack=(("towers", 2),),
+        towers=(("KEEP", 2),),
         technologies=("MASONRY",),
         raiders=(("land", 1),),
     )
     assert profile.native == NativeEffects(
-        resources=Resources(0, 0, 500, 0), technologies=("MASONRY",)
+        resources=Resources(0, 0, 500, 0), towers=(("KEEP", 2),), technologies=("MASONRY",)
     )
     assert not profile.neutral
     # Kings, raiders and tower attack are applied by the XS, so profiles differing only there
@@ -184,6 +185,15 @@ def test_native_effects_are_the_part_native_triggers_apply() -> None:
         ("tree_technology", "BRITONS cannot research STONE_SHAFT_MINING"),
         ("tree_purchase", "BRITONS cannot be granted bombard_attack_400: it needs Bombard Towers"),
         ("tree_bombard", "BRITONS cannot raise bombard attack: it lacks Bombard Towers"),
+        ("tree_towers", "BRITONS cannot start with Bombard Towers: it lacks them"),
+        ("tree_newer_civilization", "SAXONS cannot start with Bombard Towers: it lacks them"),
+        ("towers_odd", "Starting towers stand in mirrored pairs: KEEP must be even"),
+        (
+            "towers_unknown",
+            "towers must name WATCH_TOWER or GUARD_TOWER or KEEP or BOMBARD_TOWER: DONJON",
+        ),
+        ("towers_amount", "KEEP must be an integer between 0 and 8"),
+        ("towers_many", "A profile starts with at most 8 towers"),
         ("unwatched_technology", "SQUIRES is not in the stock snapshot"),
     ],
 )
@@ -285,6 +295,20 @@ def test_invalid_profiles_are_rejected(defect: str, message: str, tmp_path: Path
             first["profile"]["purchases"] = ["bombard_attack_400"]
         case "tree_bombard":
             first["profile"]["attack"] = {"bombard": 5}
+        case "tree_towers":
+            first["profile"]["towers"] = {"BOMBARD_TOWER": 2}
+        case "tree_newer_civilization":
+            # A civilization past the pinned dataset is checked by its DAT id.
+            saxons = next(row for row in civilizations if row["key"] == "SAXONS")
+            saxons["profile"]["towers"] = {"BOMBARD_TOWER": 2}
+        case "towers_odd":
+            first["profile"]["towers"] = {"KEEP": 1}
+        case "towers_unknown":
+            first["profile"]["towers"] = {"DONJON": 2}
+        case "towers_amount":
+            first["profile"]["towers"] = {"KEEP": 10}
+        case "towers_many":
+            first["profile"]["towers"] = {"WATCH_TOWER": 6, "KEEP": 4}
         case "unwatched_technology":
             first["profile"]["technologies"] = ["SQUIRES"]
         case _:
@@ -297,11 +321,11 @@ def test_a_granted_attack_purchase_may_join_the_profiles_own_attack(tmp_path: Pa
     """The XS adds both, so they may raise the same towers past 255 together."""
     data = json.loads(CONTENT.read_text(encoding="utf-8"))
     turks = next(row for row in data["civilizations"] if row["key"] == "TURKS")
-    assert turks["profile"]["attack"] == {"bombard": 25}
+    assert turks["profile"]["attack"] == {"bombard": 10}
     turks["profile"]["purchases"] = ["bombard_attack_400"]
     loaded = next(c for c in load(write(tmp_path, data)).civilizations if c.key == "TURKS")
     assert loaded.profile.purchases == ("bombard_attack_400",)
-    assert loaded.profile.attack == (("bombard", 25),)
+    assert loaded.profile.attack == (("bombard", 10),)
 
 
 def test_the_default_profile_is_light_and_needs_no_native_triggers() -> None:
@@ -498,6 +522,41 @@ def test_civilizations_the_snapshot_predates_load_without_tree_checks(tmp_path: 
     # Without the snapshot nothing is checked against a tree, as the tests of the loader alone do.
     data["civilizations"][0]["profile"]["attack"] = {"bombard": 5}
     assert load_profiles(write(tmp_path, data), balance(), shop()).by_id(1) is not None
+
+
+def test_starting_towers_come_in_mirrored_pairs_the_civilization_can_build() -> None:
+    from ancienttdde.game.civilizations import Profile, adjustments
+    from ancienttdde.game.stock import load_stock
+
+    profiles = load()
+    stock = load_stock(ROOT / "content/balance/stock.json")
+    towered = {c.key: dict(c.profile.towers) for c in profiles.civilizations if c.profile.towers}
+    # Fortress civilizations start with Keeps, gunpowder ones with Bombard Towers, tower
+    # civilizations with Guard or Watch Towers.
+    assert {key for key, towers in towered.items() if "KEEP" in towers} >= {
+        "TEUTONS",
+        "BYZANTINES",
+        "JURCHENS",
+    }
+    assert {key for key, towers in towered.items() if "BOMBARD_TOWER" in towers} >= {
+        "CHINESE",
+        "TURKS",
+        "BOHEMIANS",
+        "SPANISH",
+        "PORTUGUESE",
+    }
+    assert towered["KOREANS"] == {"GUARD_TOWER": 2} and towered["SICILIANS"] == {"WATCH_TOWER": 4}
+    assert 15 <= len(towered) <= 25
+    for civilization in profiles.civilizations:
+        lacks = stock.civilization(civilization.id).lacks
+        for name, amount in civilization.profile.towers:
+            assert amount % 2 == 0 and name not in lacks, (civilization.key, name)
+    assert adjustments(Profile(towers=(("KEEP", 2), ("WATCH_TOWER", 4))), {}) == [
+        "+2 starting Keeps",
+        "+4 starting Watch Towers",
+    ]
+    teutons = profiles.by_id(4)
+    assert teutons is not None and "+2 starting Keeps" in profiles.chat(teutons)
 
 
 def test_the_default_profile_has_one_display_name() -> None:

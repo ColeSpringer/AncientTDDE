@@ -468,3 +468,38 @@ def test_lane_sites_read_the_siege_positions_near_the_lane(player: int) -> None:
     data, _ = content()
     sites = load_sites(data.get("anchors", {}), player)
     assert sites.siege == tuple(tile(point(f"siege.p{player}.{i}")) for i in (1, 2, 3))
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_lane_sites_hold_mirrored_tower_pairs_flanking_the_pads(player: int) -> None:
+    from ancienttdde.game.sites import TOWER_OFFSETS, load_sites
+
+    data, _ = content()
+    sites = load_sites(data.get("anchors", {}), player)
+    _, _, _, north = rect(f"lane.p{player}.build.north")
+    _, south, _, _ = rect(f"lane.p{player}.build.south")
+    column = rect(f"lane.p{player}.special.left")[0]
+    assert sites.towers == tuple(((column + d, north), (column + d, south)) for d in TOWER_OFFSETS)
+    assert [above[0] for above, _ in sites.towers] == [26, 40, 30, 36]
+    for above, below in sites.towers:
+        assert above in buildable() and below in buildable()
+        assert above[1] + below[1] == 2 * lane_y(player)
+
+
+@pytest.mark.parametrize(
+    ("key", "region", "message"),
+    [
+        ("special.right", [34, 18, 34, 18], "lane.p1: the Accursed Tower pads must share a column"),
+        ("build.north", [30, 10, 47, 12], "lane.p1: starting tower column 26 lies outside"),
+    ],
+)
+def test_tower_sites_name_the_lane_whose_anchors_are_off(
+    key: str, region: list[int], message: str
+) -> None:
+    from ancienttdde.game.sites import load_sites
+
+    data, _ = content()
+    anchors = {k: dict(v) for k, v in data.get("anchors", {}).items()}
+    anchors[f"lane.p1.{key}"]["region"] = region
+    with pytest.raises(ValueError, match=message):
+        load_sites(anchors, 1)

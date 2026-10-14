@@ -350,8 +350,9 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBui
             assert set(orders[0]["selected_object_ids"]) == traders
 
 
-def test_lanes_start_without_towers(game_build: GameBuild) -> None:
-    """The original's lanes own no tower at the start; each builds its own."""
+def test_lanes_own_no_towers_until_their_profile_applies(game_build: GameBuild) -> None:
+    """The original's lanes own no tower at the start; a civilization profile's starting
+    towers arrive by its native trigger, and each lane may build Watch Towers for the rest."""
     from ancienttdde.game.config import load_balance
 
     output, _ = game_build
@@ -367,6 +368,12 @@ def test_lanes_start_without_towers(game_build: GameBuild) -> None:
             if e["type"] == "create_object"
         ]
         assert not set(created) & families, player
+        enabled = [
+            e["attributes"]["object_list_unit_id"]
+            for e in triggers[f"lane.p{player}.initialize"]["effects"]
+            if e["type"] == "enable_disable_object" and e["attributes"]["enabled"] == 1
+        ]
+        assert enabled == [79], player
     placed = [u for u in snapshot["units"] if 1 <= u["player_id"] <= 7]
     assert not [u for u in placed if u["unit_const"] in families]
 

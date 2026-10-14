@@ -59,14 +59,15 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
 
 def creation_tiles(lane: EngineLane, shop: Shop, interaction: Interaction) -> set[Tile]:
     """Every tile a unit of the lane's appears on: the King stall, the transfer arrivals
-    villagers are teleported to, the spots of bought units and the islets where a rival's
-    trebuchets arrive. Only the marked tiles may hold anything, their marker flags: a checked
-    spot would stay blocked, and a teleport or an unchecked spot would put the unit inside
-    whatever stands there. Enemies appear on the lane's spawn column without collision
-    checks."""
+    villagers are teleported to, the spots of bought units, the sites of a profile's starting
+    towers and the islets where a rival's trebuchets arrive. Only the marked tiles may hold
+    anything, their marker flags: a checked spot would stay blocked, and a teleport or an
+    unchecked spot would put the unit inside whatever stands there. Enemies appear on the
+    lane's spawn column without collision checks."""
     tiles = {lane.sites.king_spawn}
     tiles.update(transfer.arrival for transfer in lane.sites.transfers.values())
     tiles.update(lane.sites.siege[: interaction.siege.trebuchets_per_rival])
+    tiles.update(tile for pair in lane.sites.towers for tile in pair)
     for purchase in shop.purchases:
         for spawned in purchase_spawns(lane, purchase, interaction.raiders):
             tiles.add((spawned.x10 // 10, spawned.y10 // 10))

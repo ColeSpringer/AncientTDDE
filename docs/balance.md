@@ -29,6 +29,7 @@ The data files give the towers, enemies and technologies; these settings and con
 | accursed from minute | 20.0 |
 | food per King | 3000 |
 | Kings per tile of tower range | 0.25 |
+| Kings per point of starting tower DPS | 0.02 |
 | lane length (tiles) | 48 |
 | land trade route (tiles) | 196 |
 | water trade route (tiles) | 197 |
@@ -252,72 +253,72 @@ Kings one lane earns over the scheduled run on Normal without buying anything.
 
 ## Civilizations
 
-Each profile's adjustments and their worth in Kings over a run (Solo), the content's estimate of what the civilization's own bonuses are worth here (Native, with the extra with PvP on after a plus), and the two together solo and with PvP on. The towers column lists the towers the civilization's own technology tree lacks; a flat attack bonus is priced at the smallest rung of its family's attack ladder.
+Each profile's adjustments and their worth in Kings over a run (Solo), the content's estimate of what the civilization's own bonuses are worth here (Native, with the extra with PvP on after a plus), and the two together solo and with PvP on. The towers column lists the towers the civilization's own technology tree lacks; a flat attack bonus is priced at the smallest rung of its family's attack ladder, and a starting tower at its cost plus its base damage per second.
 
 | Civilization | Lacks | Profile | Solo | Native | Total | PvP |
 | --- | --- | --- | --- | --- | --- | --- |
-| Britons | Bombard Tower | +1 starting King, +300 stone, +3 tower attack, Fletching researched | 2.5 | 0.2 | 2.7 | 2.7 |
+| Britons | Bombard Tower | +1 starting King, +3 tower attack, +2 starting Guard Towers, Fletching researched | 2.6 | 0.2 | 2.8 | 2.8 |
 | Franks | Bombard Tower, Keep | +1 starting King, +300 food, Castle (+20 population, castle research) from the start, +1 land raider with PvP on | 2.7 | 0.2 +0.1 | 2.9 | 3.5 |
 | Goths | Bombard Tower, Guard Tower, Keep | +1 starting King, kill rewards pay 25 percent more stone and wood, +10 population | 3.0 | 0.3 | 3.3 | 3.3 |
-| Teutons | - | +1 starting King, +2 tower attack, +25 bombard tower attack, +400 tower hit points, Masonry researched | 2.8 | 1.0 +0.1 | 3.8 | 4.1 |
-| Japanese | Bombard Tower | +1 starting King, +300 stone, +4 tower attack, Arrowslits researched | 2.7 | 0.1 +0.2 | 2.8 | 3.0 |
-| Chinese | - | +25 bombard tower attack, +250 tower hit points, Chemistry researched, 2 resource villagers from the start, +1 naval raider with PvP on | 2.6 | 0.2 +0.3 | 2.8 | 3.7 |
-| Byzantines | - | +1 starting King, +300 stone, +500 gold, +400 tower hit points, +1 starting relic | 2.5 | 0.0 +0.6 | 2.5 | 3.3 |
+| Teutons | - | +1 starting King, +25 bombard tower attack, +400 tower hit points, +2 starting Keeps, Masonry researched | 2.6 | 1.0 +0.1 | 3.6 | 3.9 |
+| Japanese | Bombard Tower | +1 starting King, +4 tower attack, +2 starting Guard Towers, Arrowslits researched | 2.8 | 0.1 +0.2 | 2.9 | 3.1 |
+| Chinese | - | +10 bombard tower attack, +250 tower hit points, +2 starting Bombard Towers, Chemistry researched, 2 resource villagers from the start | 3.0 | 0.2 +0.3 | 3.2 | 3.6 |
+| Byzantines | - | +1 starting King, +300 stone, +500 gold, +400 tower hit points, +2 starting Keeps, +1 starting relic | 2.8 | 0.0 +0.6 | 2.8 | 3.6 |
 | Persians | Bombard Tower, Keep | +1 starting King, +300 wood, +1 starting trade cog, 2 building villagers from the start | 3.2 | 0.1 | 3.3 | 3.3 |
 | Saracens | Bombard Tower | Kings cost 10 percent less gold, +1 starting trade cart, +1 naval raider with PvP on | 2.6 | 0.4 +0.2 | 3.0 | 3.7 |
-| Turks | - | +1 starting King, Kings cost 5 percent less gold, +25 bombard tower attack, +1 land raider with PvP on | 3.0 | 0.9 +0.3 | 3.9 | 4.7 |
+| Turks | - | +1 starting King, +10 bombard tower attack, +2 starting Bombard Towers, +1 land raider with PvP on | 2.5 | 0.9 +0.3 | 3.4 | 4.2 |
 | Vikings | Bombard Tower, Keep | +400 wood, 3 trade cogs from the start, +1 naval raider with PvP on | 3.4 | 0.0 | 3.4 | 3.9 |
-| Mongols | Bombard Tower, Keep | +1 starting King, kill rewards pay 20 percent more stone and wood, +1 land raider with PvP on | 2.4 | 0.0 +0.2 | 2.4 | 3.1 |
-| Celts | Bombard Tower | kill rewards pay 15 percent more stone and wood, +3 tower attack, 2000 wood from the start | 2.8 | 0.2 +0.3 | 3.0 | 3.3 |
-| Spanish | - | +1 starting King, towers cost 10 less stone, +1 starting trade cart, 2 building villagers from the start | 3.0 | 0.5 | 3.5 | 3.5 |
+| Mongols | Bombard Tower, Keep | +1 starting King, +300 food, kill rewards pay 25 percent more stone and wood, +1 land raider with PvP on | 2.8 | 0.0 +0.2 | 2.8 | 3.5 |
+| Celts | Bombard Tower | kill rewards pay 15 percent more stone and wood, +3 tower attack, +2 starting Watch Towers, 2000 wood from the start | 3.0 | 0.2 +0.3 | 3.2 | 3.5 |
+| Spanish | - | towers cost 10 less stone, +2 starting Bombard Towers, +1 starting trade cart, 2 building villagers from the start | 3.0 | 0.5 | 3.5 | 3.5 |
 | Aztecs | Bombard Tower, Keep | +700 gold, 3 relics and 2 monks from the start | 3.5 | 0.2 | 3.7 | 3.7 |
-| Mayans | Bombard Tower | kill rewards pay 20 percent more stone and wood, 2 building villagers from the start | 2.4 | 0.3 | 2.7 | 2.7 |
+| Mayans | Bombard Tower | kill rewards pay 25 percent more stone and wood, 2 building villagers from the start | 2.7 | 0.3 | 3.0 | 3.0 |
 | Huns | Bombard Tower, Guard Tower, Keep | kill rewards pay 25 percent more stone and wood, +40 population, +1 land raider with PvP on | 2.9 | 0.0 +0.3 | 2.9 | 3.7 |
-| Koreans | - | +1 starting King, kill rewards pay 15 percent more stone and wood, Castle Age and Guard Tower from the start | 3.0 | 1.2 | 4.2 | 4.2 |
+| Koreans | - | +1 starting King, +300 stone, +2 starting Guard Towers, Castle Age and Guard Tower from the start | 2.5 | 1.2 | 3.7 | 3.7 |
 | Italians | - | +1 starting trade cog, 3 trade carts from the start, +1 naval raider with PvP on | 3.5 | 0.4 | 3.9 | 4.4 |
 | Hindustanis | Bombard Tower, Keep | Kings cost 5 percent less gold, +1 starting trade cart, 2 resource villagers from the start | 2.7 | 0.6 | 3.3 | 3.3 |
-| Incas | Bombard Tower | +2 starting Kings, +300 stone, towers cost 20 less stone, +20 population | 3.1 | 0.3 | 3.4 | 3.4 |
+| Incas | Bombard Tower | +2 starting Kings, towers cost 20 less stone, +2 starting Guard Towers, +20 population | 3.2 | 0.3 | 3.5 | 3.5 |
 | Magyars | Bombard Tower, Keep | +2 starting Kings, kill rewards pay 15 percent more stone and wood, +1 land raider with PvP on | 3.0 | 0.0 +0.1 | 3.0 | 3.6 |
-| Slavs | Bombard Tower, Keep | +2 starting Kings, +400 food, towers cost 25 less stone | 2.5 | 0.4 | 2.9 | 2.9 |
-| Portuguese | - | Kings cost 10 percent less gold, +2 starting trade cogs, +1 naval raider with PvP on | 3.9 | 0.1 | 4.0 | 4.5 |
+| Slavs | Bombard Tower, Keep | +2 starting Kings, +400 food, towers cost 25 less stone, +2 starting Watch Towers | 2.8 | 0.4 | 3.2 | 3.2 |
+| Portuguese | - | Kings cost 5 percent less gold, +2 starting Bombard Towers, +1 starting trade cog, +1 naval raider with PvP on | 3.0 | 0.1 | 3.1 | 3.6 |
 | Ethiopians | Bombard Tower | +300 food, +300 stone, 175 gold every 2 minutes from the start | 3.4 | 0.2 +0.1 | 3.6 | 3.7 |
 | Malians | Bombard Tower | +1 starting King, Kings cost 7 percent less gold, 2000 wood from the start | 3.2 | 0.3 | 3.5 | 3.5 |
 | Berbers | Bombard Tower, Keep | +2 starting Kings, +1 starting trade cog, +1 land raider with PvP on | 3.1 | 0.4 | 3.5 | 4.0 |
-| Khmer | Bombard Tower | +1 starting King, +500 food, +300 wood, kill rewards pay 10 percent more stone and wood, +15 population | 2.4 | 0.1 | 2.5 | 2.5 |
+| Khmer | Bombard Tower | +1 starting King, +500 food, +300 wood, kill rewards pay 15 percent more stone and wood, +15 population | 2.8 | 0.1 | 2.9 | 2.9 |
 | Malay | - | +1 starting King, +1 starting trade cog, Castle Age and Guard Tower from the start, +1 naval raider with PvP on | 3.1 | 0.0 +0.3 | 3.1 | 3.9 |
 | Burmese | Bombard Tower | +500 wood, 3 relics and 2 monks from the start | 3.4 | 0.2 | 3.6 | 3.6 |
 | Vietnamese | - | +1 starting King, +400 wood, Kings cost 7 percent less gold, +2 tower attack | 2.9 | 0.4 | 3.3 | 3.3 |
-| Bulgarians | Bombard Tower | +1 starting King, +300 stone, kill rewards pay 10 percent more stone and wood, +2 tower attack, Fletching researched | 2.9 | 0.1 | 3.0 | 3.0 |
+| Bulgarians | Bombard Tower | +1 starting King, kill rewards pay 10 percent more stone and wood, +2 tower attack, +2 starting Guard Towers, Fletching researched | 3.0 | 0.1 | 3.1 | 3.1 |
 | Tatars | Keep | +2 starting Kings, +20 bombard tower attack, +1 land raider with PvP on | 2.9 | 0.0 +0.4 | 2.9 | 3.8 |
 | Cumans | Bombard Tower, Guard Tower, Keep | +300 wood, kill rewards pay 25 percent more stone and wood, 2 resource villagers from the start, +1 land raider with PvP on | 2.9 | 0.0 +0.1 | 2.9 | 3.5 |
 | Lithuanians | - | +300 food, 3 relics and 2 monks from the start, +1 land raider with PvP on | 3.3 | 0.0 +0.2 | 3.3 | 4.0 |
 | Burgundians | - | +300 food, 175 gold every 2 minutes from the start | 3.2 | 0.3 | 3.5 | 3.5 |
-| Sicilians | Bombard Tower, Guard Tower, Keep | +300 stone, Third row of towers from the start | 3.2 | 0.3 | 3.5 | 3.5 |
+| Sicilians | Bombard Tower, Guard Tower, Keep | +4 starting Watch Towers, Third row of towers from the start | 3.5 | 0.3 | 3.8 | 3.8 |
 | Poles | - | Kings cost 5 percent less gold, kill rewards pay 25 percent more stone and wood, +1 land raider with PvP on | 2.5 | 0.6 | 3.1 | 3.6 |
-| Bohemians | - | kill rewards pay 15 percent more stone and wood, +25 bombard tower attack, Chemistry researched | 2.6 | 0.9 | 3.5 | 3.5 |
+| Bohemians | - | kill rewards pay 10 percent more stone and wood, +10 bombard tower attack, +2 starting Bombard Towers, Chemistry researched | 2.6 | 0.9 | 3.5 | 3.5 |
 | Dravidians | - | +400 wood, 3 trade cogs from the start | 3.4 | 0.2 | 3.6 | 3.6 |
 | Bengalis | Bombard Tower | +1 starting relic, +1 starting trade cog, 2 building villagers from the start | 3.1 | 0.0 +0.2 | 3.1 | 3.3 |
-| Gurjaras | Bombard Tower | kill rewards pay 20 percent more stone and wood, 2 resource villagers from the start, +1 land raider with PvP on | 2.4 | 0.0 +0.1 | 2.4 | 3.0 |
-| Romans | Bombard Tower | +1 starting King, +2 tower attack, Masonry researched, 2 building villagers from the start | 2.6 | 0.3 | 2.9 | 2.9 |
-| Armenians | Keep | +2 starting Kings, kill rewards pay 10 percent more stone and wood | 2.7 | 1.5 | 4.2 | 4.2 |
-| Georgians | Bombard Tower | +1 starting King, +300 stone, +3 tower attack, +1 starting relic, Masonry researched, +1 land raider with PvP on | 3.2 | 0.3 +0.1 | 3.5 | 4.1 |
+| Gurjaras | Bombard Tower | kill rewards pay 30 percent more stone and wood, 2 resource villagers from the start, +1 land raider with PvP on | 3.0 | 0.0 +0.1 | 3.0 | 3.6 |
+| Romans | Bombard Tower | +1 starting King, +2 tower attack, +2 starting Watch Towers, Masonry researched, 2 building villagers from the start | 2.9 | 0.3 | 3.2 | 3.2 |
+| Armenians | Keep | +1 starting King, +300 food, kill rewards pay 20 percent more stone and wood | 2.5 | 1.5 | 4.0 | 4.0 |
+| Georgians | Bombard Tower | +1 starting King, +3 tower attack, +2 starting Watch Towers, +1 starting relic, Masonry researched, +1 land raider with PvP on | 3.2 | 0.3 +0.1 | 3.5 | 4.1 |
 | Achaemenids | Bombard Tower | +1 starting King, +1 starting trade cart, +15 population, 2 building villagers from the start | 3.3 | 0.0 | 3.3 | 3.3 |
-| Athenians | Bombard Tower | +1 starting King, +400 food, +400 wood, +1 starting trade cog, +1 naval raider with PvP on | 2.4 | 0.1 | 2.5 | 3.0 |
+| Athenians | Bombard Tower | +1 starting King, +400 food, +400 wood, +2 starting trade cogs, +1 naval raider with PvP on | 3.5 | 0.1 | 3.6 | 4.1 |
 | Spartans | Bombard Tower, Keep | +300 food, kill rewards pay 25 percent more stone and wood, 2 resource villagers from the start | 2.8 | 0.1 | 2.9 | 2.9 |
 | Shu | Bombard Tower, Keep | +2 starting Kings, +300 wood, Fletching researched | 2.7 | 0.2 | 2.9 | 2.9 |
-| Wu | Bombard Tower | +1 starting King, +300 wood, kill rewards pay 15 percent more stone and wood, +15 population | 2.6 | 0.0 +0.2 | 2.6 | 2.8 |
+| Wu | Bombard Tower | +1 starting King, +300 wood, kill rewards pay 20 percent more stone and wood, +15 population | 3.0 | 0.0 +0.2 | 3.0 | 3.2 |
 | Wei | Bombard Tower | +1 starting King, +2 tower attack, +10 population, 2 resource villagers from the start | 2.8 | 0.0 | 2.8 | 2.8 |
-| Jurchens | Bombard Tower | +500 wood, kill rewards pay 15 percent more stone and wood, +3 tower attack, +800 tower hit points, Masonry researched, Architecture researched | 2.4 | 0.4 +0.5 | 2.8 | 3.7 |
+| Jurchens | Bombard Tower | +1 starting King, +3 tower attack, +800 tower hit points, +2 starting Keeps, Masonry researched, Architecture researched | 2.4 | 0.4 +0.5 | 2.8 | 3.7 |
 | Khitans | Bombard Tower, Keep | +1 starting King, +300 food, kill rewards pay 10 percent more stone and wood, 2 resource villagers from the start, +1 land raider with PvP on | 2.8 | 0.0 | 2.8 | 3.3 |
 | Macedonians | Bombard Tower, Keep | +2 starting Kings, +300 stone, +2 tower attack, +1 land raider with PvP on | 2.7 | 0.0 +0.2 | 2.7 | 3.4 |
-| Thracians | Bombard Tower | +1 starting King, +300 wood, kill rewards pay 20 percent more stone and wood, +3 tower attack | 3.3 | 0.0 | 3.3 | 3.3 |
-| Puru | Bombard Tower | kill rewards pay 30 percent more stone and wood, 3 trade carts from the start | 4.5 | 0.4 | 4.9 | 4.9 |
+| Thracians | Bombard Tower | +1 starting King, kill rewards pay 20 percent more stone and wood, +3 tower attack, +2 starting Watch Towers | 3.4 | 0.0 | 3.4 | 3.4 |
+| Puru | Bombard Tower | kill rewards pay 20 percent more stone and wood, 3 trade carts from the start | 3.8 | 0.4 | 4.2 | 4.2 |
 | Muisca | Bombard Tower | Kings cost 5 percent less gold, 3 trade carts from the start | 3.3 | 0.0 | 3.3 | 3.3 |
 | Mapuche | Guard Tower, Keep | +1 starting King, +300 food, +300 wood, kill rewards pay 25 percent more stone and wood | 3.0 | 0.1 | 3.1 | 3.1 |
 | Tupi | Bombard Tower | +1 starting King, +250 food, +250 wood, +250 stone, +250 gold, kill rewards pay 10 percent more stone and wood, +3 tower attack | 2.9 | 0.4 | 3.3 | 3.3 |
-| Saxons | Bombard Tower | +1 starting King, +300 stone, +3 tower attack, +1 starting relic | 3.0 | 0.1 | 3.1 | 3.1 |
+| Saxons | Bombard Tower | +1 starting King, +3 tower attack, +2 starting Guard Towers, +1 starting relic | 3.1 | 0.1 | 3.2 | 3.2 |
 | Varangians | Bombard Tower, Keep | Kings cost 5 percent less gold, 3 trade carts from the start, +1 naval raider with PvP on | 3.3 | 0.5 | 3.8 | 4.3 |
-| Danes | Bombard Tower | kill rewards pay 20 percent more stone and wood, 2 resource villagers from the start | 2.4 | 0.1 +0.7 | 2.5 | 3.2 |
+| Danes | Bombard Tower | kill rewards pay 25 percent more stone and wood, 2 resource villagers from the start, +1 naval raider with PvP on | 2.7 | 0.1 +0.7 | 2.8 | 4.0 |
 | Any other civilization | - | +3 starting Kings | 3.0 | 0.0 | 3.0 | 3.0 |
 
 ## Rivals

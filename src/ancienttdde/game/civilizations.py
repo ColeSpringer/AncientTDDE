@@ -18,7 +18,13 @@ from ancienttdde.common.data import integer, object_value, read_object, rows, te
 from ancienttdde.game.catalog import RESOURCES, Raider, Shop, SiegePowerUp, Traders
 from ancienttdde.game.config import RESERVED_TECHNOLOGIES, UNRESEARCHABLE, Balance, Resources
 from ancienttdde.game.restricted import POINTLESS, TECHNOLOGIES
-from ancienttdde.game.sites import RAIDER_MEDIA, TRADE_MEDIA, RaiderMedium, TradeMedium
+from ancienttdde.game.sites import (
+    RAIDER_MEDIA,
+    TOWER_PAIRS,
+    TRADE_MEDIA,
+    RaiderMedium,
+    TradeMedium,
+)
 from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name, technology
 
@@ -34,6 +40,7 @@ KNOWN_CIVILIZATIONS: dict[str, int] = {
 NOT_PLAYABLE = frozenset(member.name for member in CivilizationOld) - KNOWN_CIVILIZATIONS.keys()
 FIRST_NEWER_CIVILIZATION = max(KNOWN_CIVILIZATIONS.values()) + 1
 NO_RESOURCES = Resources(0, 0, 0, 0)
+MAX_STARTING_TOWERS = 2 * TOWER_PAIRS
 
 
 @dataclass(frozen=True)
@@ -48,6 +55,9 @@ class NativeEffects:
     tower_stone: int = 0
     relics: int = 0
     traders: tuple[tuple[TradeMedium, int], ...] = ()
+    # Towers standing in the build rows from the start, by definition and count: each count is
+    # even, as the towers stand in mirrored pairs across the lane.
+    towers: tuple[tuple[str, int], ...] = ()
     # Shop purchases the lane holds from the start, by key.
     purchases: tuple[str, ...] = ()
 
@@ -63,6 +73,7 @@ class Profile:
     tower_stone: int = 0
     relics: int = 0
     traders: tuple[tuple[TradeMedium, int], ...] = ()
+    towers: tuple[tuple[str, int], ...] = ()
     technologies: tuple[str, ...] = ()
     population: int = 0
     raiders: tuple[tuple[RaiderMedium, int], ...] = ()
@@ -194,6 +205,8 @@ def adjustments(profile: Profile, names: Mapping[str, str]) -> list[str]:
         parts.append(f"+{profile.tower_hit_points} tower hit points")
     if profile.tower_stone:
         parts.append(f"towers cost {profile.tower_stone} less stone")
+    for name, amount in profile.towers:
+        parts.append(f"+{amount} starting {plural(amount, display_name(name))}")
     if profile.relics:
         parts.append(f"+{profile.relics} starting {plural(profile.relics, 'relic')}")
     for medium, amount in profile.traders:
@@ -237,7 +250,7 @@ def bounded(row: dict[str, object], key: str, low: int, high: int) -> int:
 
 
 def media[T: str](
-    raw: dict[str, object], key: str, allowed: tuple[T, ...]
+    raw: dict[str, object], key: str, allowed: tuple[T, ...], high: int = 3
 ) -> tuple[tuple[T, int], ...]:
     """Counts by medium, in the media's order; a missing or zero count is left out."""
     if key not in raw:
@@ -246,7 +259,7 @@ def media[T: str](
     for medium in counts:
         if medium not in allowed:
             raise ValueError(f"{key} must name {' or '.join(allowed)}: {medium}")
-    found = [(medium, bounded(counts, medium, 0, 3)) for medium in allowed]
+    found = [(medium, bounded(counts, medium, 0, high)) for medium in allowed]
     return tuple((medium, extra) for medium, extra in found if extra > 0)
 
 
@@ -282,12 +295,24 @@ PROFILE_SETTINGS = frozenset(
         "tower_stone",
         "relics",
         "traders",
+        "towers",
         "technologies",
         "population",
         "raiders",
         "purchases",
     }
 )
+
+
+def starting_towers(raw: dict[str, object], balance: Balance) -> tuple[tuple[str, int], ...]:
+    """Towers by definition and count, in the families' order; the counts are even."""
+    towers = media(raw, "towers", balance.towers.members, MAX_STARTING_TOWERS)
+    for name, amount in towers:
+        if amount % 2:
+            raise ValueError(f"Starting towers stand in mirrored pairs: {name} must be even")
+    if sum(amount for _, amount in towers) > MAX_STARTING_TOWERS:
+        raise ValueError(f"A profile starts with at most {MAX_STARTING_TOWERS} towers")
+    return towers
 
 
 def granted_purchases(raw: dict[str, object], shop: Shop) -> tuple[str, ...]:
@@ -348,6 +373,7 @@ def load_profile(raw: dict[str, object], balance: Balance, shop: Shop) -> Profil
         tower_stone=bounded(raw, "tower_stone", 0, 100),
         relics=bounded(raw, "relics", 0, 3),
         traders=traders,
+        towers=starting_towers(raw, balance),
         technologies=profile_technologies(raw, balance),
         population=bounded(raw, "population", 0, 100),
         raiders=media(raw, "raiders", RAIDER_MEDIA),
@@ -385,13 +411,15 @@ def check_settings(row: dict[str, object], allowed: frozenset[str], label: str) 
             raise ValueError(f"Unknown {label} setting: {key}")
 
 
-def check_tree(key: str, profile: Profile, shop: Shop, balance: Balance, stock: Stock) -> None:
+def check_tree(
+    key: str, identifier: int, profile: Profile, shop: Shop, balance: Balance, stock: Stock
+) -> None:
     """A profile may not grant what the civilization's own technology tree rules out, as the
     stock data snapshot records it; a civilization the snapshot predates is not checked."""
     for name in profile.technologies:
         if name not in stock.technologies:
             raise ValueError(f"{name} is not in the stock snapshot; add it to the watched ones")
-    record = stock.find(by_key(key))
+    record = stock.find(identifier)
     if record is None:
         return
     for name in profile.technologies:
@@ -406,10 +434,9 @@ def check_tree(key: str, profile: Profile, shop: Shop, balance: Balance, stock: 
         if all(member in record.lacks for member in members):
             lacked = " and ".join(f"{display_name(member)}s" for member in members)
             raise ValueError(f"{key} cannot raise {family} attack: it lacks {lacked}")
-
-
-def by_key(key: str) -> int:
-    return KNOWN_CIVILIZATIONS.get(key, 0)
+    for name, _ in profile.towers:
+        if name in record.lacks:
+            raise ValueError(f"{key} cannot start with {display_name(name)}s: it lacks them")
 
 
 def load_profiles(path: Path, balance: Balance, shop: Shop, stock: Stock | None = None) -> Profiles:
@@ -442,7 +469,7 @@ def load_profiles(path: Path, balance: Balance, shop: Shop, stock: Stock | None 
             raise ValueError(f"Duplicate civilization id: {identifier}")
         profile = load_profile(object_value(row.get("profile", {}), "profile"), balance, shop)
         if stock is not None:
-            check_tree(key, profile, shop, balance, stock)
+            check_tree(key, identifier, profile, shop, balance, stock)
         civilizations.append(
             Civilization(
                 key=key,

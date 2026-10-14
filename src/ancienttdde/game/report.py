@@ -5,6 +5,7 @@ from dataclasses import fields
 from ancienttdde.game.balance import (
     FOOD_PER_KING,
     RANGE_KINGS,
+    TOWER_DPS_KINGS,
     Assumptions,
     Inputs,
     attack_ladder,
@@ -14,6 +15,7 @@ from ancienttdde.game.balance import (
     profile_table,
     rates,
     rivalry,
+    table_armor,
     tower_dps,
     wave_needs,
 )
@@ -55,6 +57,7 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
     rows += [
         ["food per King", str(FOOD_PER_KING)],
         ["Kings per tile of tower range", str(RANGE_KINGS)],
+        ["Kings per point of starting tower DPS", str(TOWER_DPS_KINGS)],
         ["lane length (tiles)", str(inputs.lane_tiles)],
         ["land trade route (tiles)", f"{inputs.land_route:.0f}"],
         ["water trade route (tiles)", f"{inputs.water_route:.0f}"],
@@ -71,6 +74,7 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
 
 def towers_section(inputs: Inputs) -> str:
     stock, balance = inputs.stock, inputs.balance
+    armor = table_armor(inputs)
     ladder = attack_ladder(inputs.shop)
     levels = [0] + [step.attack for step in ladder]
     headers = ["Tower", "HP", "Attack", "Reload", "Range", "Cost"] + [
@@ -91,11 +95,12 @@ def towers_section(inputs: Inputs) -> str:
                 f"{unit.range:g}",
                 cost,
             ]
-            + [f"{tower_dps(unit, bonus + level, 2):.0f}" for level in bought]
+            + [f"{tower_dps(unit, bonus + level, armor):.0f}" for level in bought]
         )
     return (
-        "Damage per second against 2 pierce armor (the knight line), at each cumulative tower "
-        "attack purchase; the Accursed Towers take no attack purchases.\n\n" + table(headers, rows)
+        f"Damage per second against {armor:g} pierce armor (the knight line), at each "
+        "cumulative tower attack purchase; the Accursed Towers take no attack purchases.\n\n"
+        + table(headers, rows)
     )
 
 
@@ -310,7 +315,8 @@ def civilizations_section(inputs: Inputs, assumptions: Assumptions) -> str:
         "estimate of what the civilization's own bonuses are worth here (Native, with the "
         "extra with PvP on after a plus), and the two together solo and with PvP on. The "
         "towers column lists the towers the civilization's own technology tree lacks; a flat "
-        "attack bonus is priced at the smallest rung of its family's attack ladder.\n\n"
+        "attack bonus is priced at the smallest rung of its family's attack ladder, and a "
+        "starting tower at its cost plus its base damage per second.\n\n"
         + table(["Civilization", "Lacks", "Profile", "Solo", "Native", "Total", "PvP"], rows)
     )
 

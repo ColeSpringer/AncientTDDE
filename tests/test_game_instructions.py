@@ -72,7 +72,7 @@ def test_instructions_state_the_starting_grant_and_research() -> None:
     text = instructions(balance(), shop(), profiles())
     assert "Starting Resources" not in text and "lobby's resources" not in text
     assert "starts with 750 food, 1500 wood, 1500 stone and 400 gold" in text
-    # Lanes start without towers, as in the original.
+    # Lanes start without towers of their own, as in the original; profiles add some.
     assert "three Kings in the shop, villagers in its build and resource areas" in text
     assert "Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason" in text
     assert "The shop sells 2000 wood for 1 King and 1500 stone for 1 King." in text
@@ -247,3 +247,14 @@ def test_instructions_explain_what_villagers_build_and_where_population_comes_fr
         "civilization profiles that add some below" in text
     )
     assert "Every game rules out Yasama and Stronghold" in text
+
+
+def test_instructions_place_the_starting_towers() -> None:
+    from ancienttdde.game.instructions import instructions
+
+    text = instructions(balance(), shop(), profiles())
+    assert (
+        "A profile's starting towers stand in mirrored pairs on the build rows beside the path."
+        in text
+    )
+    assert "+2 starting Keeps" in text and "+2 starting Bombard Towers" in text
