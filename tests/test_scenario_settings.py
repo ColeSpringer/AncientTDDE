@@ -82,15 +82,67 @@ DE_NAMES = Path(__file__).parent / "support/de-strategic-numbers.txt"
 DE_STRATEGIC_NUMBERS = frozenset(
     line.strip() for line in DE_NAMES.read_text().splitlines() if line.strip()[:1] not in ("", "#")
 )
+# DE loads a rule of at most 32 facts and actions, nested ones included: its own HD AI reaches
+# exactly 32, and a 33-element rule fails to load with "ERR6002: Rule too long".
+DE_RULE_SIZE = 32
+# An AI script's strings, comments, brackets and other tokens.
+AI_TOKEN = re.compile(r'"[^"]*"|;[^\n]*|[()]|[^\s()";]+')
+type Element = list[str]  # one fact or action: its name, then its arguments
+type Rule = tuple[list[Element], list[Element]]
+
+
+def ai_rules(script: str) -> list[Rule]:
+    """Each rule's facts and actions, a nested fact counted as an element of its own."""
+    rules: list[Rule] = []
+    depth, in_actions = 0, False
+    for token in AI_TOKEN.findall(script):
+        if token[0] in '";':
+            continue
+        if token == "(":
+            depth += 1
+            if depth == 1:
+                rules.append(([], []))
+                in_actions = False
+            else:
+                facts, actions = rules[-1]
+                (actions if in_actions else facts).append([])
+        elif token == ")":
+            depth -= 1
+        elif depth == 1:
+            assert token in ("defrule", "=>"), token
+            in_actions = token == "=>"
+        elif depth > 1:
+            facts, actions = rules[-1]
+            (actions if in_actions else facts)[-1].append(token)
+    assert depth == 0
+    return rules
+
+
+def test_ai_rules_count_nested_facts_and_skip_strings_and_comments() -> None:
+    script = """; a comment with (brackets) and => an arrow
+    (defrule (or (a 1) (b)) ; (c)
+    => (chat-to-all "x; (y") (disable-self))
+    (defrule (true) => (set-strategic-number sn-x 0))"""
+    assert ai_rules(script) == [
+        ([["or"], ["a", "1"], ["b"]], [["chat-to-all"], ["disable-self"]]),
+        ([["true"]], [["set-strategic-number", "sn-x", "0"]]),
+    ]
+
+
+def test_passive_ai_rules_fit_des_rule_size() -> None:
+    rules = ai_rules(asset_text("passive.per"))
+    assert rules
+    assert all(len(facts) + len(actions) <= DE_RULE_SIZE for facts, actions in rules)
 
 
 def test_passive_ai_switches_off_the_engines_unit_management() -> None:
     """DE manages a computer player's units itself unless its script zeroes these numbers:
-    online on 2026-10-14 its explorer share ordered wave villagers about their lane."""
-    script = asset_text("passive.per")
-    actions = re.findall(r"\((set-strategic-number (sn-[a-z-]+) (\d+)|disable-self)\)", script)
-    assert script.count("(defrule") == 1 and actions[-1][0] == "disable-self"
-    named = [(name, int(value)) for _, name, value in actions if name]
+    online its explorer share ordered wave villagers about their lane."""
+    rules = ai_rules(asset_text("passive.per"))
+    assert all(facts == [["true"]] and actions[-1] == ["disable-self"] for facts, actions in rules)
+    numbers = [action for _, actions in rules for action in actions[:-1]]
+    assert all(action[0] == "set-strategic-number" for action in numbers)
+    named = [(name, int(value)) for _, name, value in numbers]
     settings = dict(named)
     assert len(settings) == len(named)
     assert set(settings) <= DE_STRATEGIC_NUMBERS

@@ -28,6 +28,7 @@ run's level; run options are selected in game, in the row of Outposts below the 
 
 ## Full game
 
+- Solo and online lobbies load with no AI Script Error dialog: the passive AI parses.
 - Solo victory and defeat, and a repeat on the first and last lane. No "has been
   defeated" line appears at the start; when a solo lane falls, the result line and the
   result objective still appear.

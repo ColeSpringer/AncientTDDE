@@ -2,8 +2,10 @@
 ; XS give their units every order. DE runs its own unit management for a computer player
 ; whatever its script says, with these numbers at their defaults: a share of its civilians
 ; explore, idle soldiers are tasked, groups form to defend its town, units answer sighted
-; enemies and garrison. Online on 2026-10-14 that management ordered wave villagers about
-; their lane, so each part of it that orders units is switched off before the script retires.
+; enemies and garrison. Online that management ordered wave villagers about their lane, so
+; each part of it that orders units is switched off before the script retires.
+; DE loads at most 32 facts and actions in one rule, so the numbers come in two rules, the
+; civilians' and then the soldiers'.
 (defrule
     (true)
 =>
@@ -21,6 +23,12 @@
     (set-strategic-number sn-allow-civilian-defense 0)
     (set-strategic-number sn-allow-civilian-offense 0)
     (set-strategic-number sn-disable-villager-garrison 3)
+    (set-strategic-number sn-disable-trade-evasion 1)
+    (disable-self)
+)
+(defrule
+    (true)
+=>
     (set-strategic-number sn-number-garrison-units 0)
     (set-strategic-number sn-maximum-garrison-fill 0)
     (set-strategic-number sn-garrison-rams 0)
@@ -36,7 +44,6 @@
     (set-strategic-number sn-enemy-sighted-response-distance 0)
     (set-strategic-number sn-sentry-distance 0)
     (set-strategic-number sn-maximum-gaia-attack-response 0)
-    (set-strategic-number sn-disable-trade-evasion 1)
     (set-strategic-number sn-do-not-scale-for-difficulty-level 1)
     (disable-self)
 )
