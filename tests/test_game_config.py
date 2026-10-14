@@ -217,7 +217,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("waves", 55, "hit_points"), 6_000_000, "hit_points"),
         (("waves", 0, "count"), 4, "count"),
         (("waves", 55, "count"), 2, "one enemy"),
-        (("waves", 39, "pierce_armor"), 600, "pierce_armor"),
+        (("waves", 39, "pierce_armor"), 256, "pierce_armor"),
         (("waves", 0, "unit"), "KING", "King"),
         (("waves", 0, "unit"), "CHARLEMAGNE", "boss unit"),
         (("endless", "templates"), ["Charlemagne"], "boss"),

@@ -1,21 +1,31 @@
-"""Wave configuration, spawns, routing, the game clock and results."""
+"""The enemy, wave spawns, routing, the game clock and results.
+
+DE numbers a multiplayer game's players by their lobby colors and skips closed slots, so the
+computer the host left in the last slot may hold any number. The XS takes the highest-numbered
+computer in the game as the enemy; every native effect on the enemy's units exists once per
+number it may hold, gated on the enemy variable. The XS sets the waves' hit points and armor
+itself.
+"""
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
-from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
-from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
+from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
-from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane
+from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.objectives import objective
 from ancienttdde.game.script import State
 from ancienttdde.game.triggers import Game
 from ancienttdde.models import Rect
-from ancienttdde.scenario.triggers import PIERCE, TriggerHandle, area, condition, effect
+from ancienttdde.scenario.triggers import TriggerHandle, area, condition, effect
 
 # Seconds between the orders that keep every enemy in a lane walking.
 ROUTE_SECONDS = 10
+# The player numbers the enemy may hold.
+ENEMY_SLOTS = range(1, 9)
+# The player numbers that hold defense lanes.
+LANE_SLOTS = range(1, 8)
 
 
 def game_clock(game: Game) -> None:
@@ -24,48 +34,33 @@ def game_clock(game: Game) -> None:
     effect(clock, "script_call", message="void ancientClockEffect() { ancientTick(); }")
 
 
-def configure_waves(game: Game, balance: Balance) -> None:
-    """Each scheduled wave's enemies get the hit points of the difficulty the run plays."""
-    for index, wave in enumerate(balance.waves, 1):
-        for level, difficulty in enumerate(balance.difficulty.levels):
-            configure = game.trigger(f"game.wave.{index}.configure.{difficulty.key}", looping=False)
-            game.value(configure, "game.wave", index - 1)
-            game.value(configure, "game.difficulty", level)
-            # A boss's hit points above the attribute's limit are set on the unit by the XS.
-            game.set_attribute(
-                configure,
-                8,
-                wave.object_id,
-                ObjectAttribute.HIT_POINTS,
-                min(MAX_HIT_POINTS, balance.hit_points(index - 1, level)),
+def enemy_diplomacy(game: Game) -> None:
+    """The original's one-way alliance for whichever number the enemy holds, set for each lane
+    that plays: the lane treats the enemy as an enemy, and the enemy treats the lane as an
+    ally, so its units attack nothing while the lane's towers fire at them. Cleared and closed
+    lanes need none, so no effect names a player who is not in the game."""
+    for lane in LANE_SLOTS:
+        prefix = f"lane.p{lane}"
+        for enemy in ENEMY_SLOTS:
+            if enemy == lane:
+                continue
+            trigger = game.trigger(f"{prefix}.enemy.e{enemy}", looping=False)
+            game.value(trigger, "game.enemy", enemy)
+            game.value(trigger, f"{prefix}.active", 1)
+            effect(
+                trigger,
+                "change_diplomacy",
+                source_player=lane,
+                target_player=enemy,
+                diplomacy=DiplomacyState.ENEMY,
             )
-            if wave.pierce_armor is not None:
-                effect(
-                    configure,
-                    "modify_attribute",
-                    source_player=8,
-                    object_list_unit_id=wave.object_id,
-                    object_attributes=ObjectAttribute.ARMOR,
-                    operation=Operation.SET,
-                    armour_attack_class=PIERCE,
-                    armour_attack_quantity=wave.pierce_armor,
-                )
-            game.set_value(configure, "game.configured", index)
-
-
-def endless_growth(game: Game, balance: Balance) -> None:
-    """Endless enemies take each new level's hit points. The XS adds their armor, which a
-    native effect could not raise past 255."""
-    units = [balance.waves[t].object_id for t in balance.endless.templates]
-    for level in range(1, balance.endless_levels + 1):
-        for index, difficulty in enumerate(balance.difficulty.levels):
-            grow = game.trigger(f"game.endless.{level}.{difficulty.key}", looping=True)
-            game.value(grow, "game.endless_request", level)
-            game.value(grow, "game.difficulty", index)
-            for position, unit in enumerate(units):
-                hit_points = balance.endless_hit_points(level, position, index)
-                game.set_attribute(grow, 8, unit, ObjectAttribute.HIT_POINTS, hit_points)
-            game.set_value(grow, "game.endless_request", 0)
+            effect(
+                trigger,
+                "change_diplomacy",
+                source_player=enemy,
+                target_player=lane,
+                diplomacy=DiplomacyState.ALLY,
+            )
 
 
 def show_status(game: Game, trigger: TriggerHandle, shown: str, hidden: str) -> None:
@@ -177,14 +172,16 @@ def spawn_rows(lane: EngineLane) -> tuple[Band, ...]:
     )
 
 
-def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane, bands: tuple[Band, ...]) -> None:
+def send_down_the_lane(
+    trigger: TriggerHandle, lane: EngineLane, enemy: int, bands: tuple[Band, ...]
+) -> None:
     """Every enemy in the bands walks its band to the exit. The enemy is allied to every lane,
     so nothing stops it on the way; each new order makes a walking unit pause."""
     for band, row in bands:
         effect(
             trigger,
             "task_object",
-            source_player=8,
+            source_player=enemy,
             location_x=lane.exit_x,
             location_y=row,
             action_type=ActionType.MOVE,
@@ -192,38 +189,53 @@ def send_down_the_lane(trigger: TriggerHandle, lane: EngineLane, bands: tuple[Ba
         )
 
 
+def enemy_numbers(lane: EngineLane) -> tuple[int, ...]:
+    """The numbers the enemy may hold while this lane plays: any but the lane's own."""
+    return tuple(enemy for enemy in ENEMY_SLOTS if enemy != lane.player)
+
+
 def lane_spawned(game: Game, lane: EngineLane) -> None:
-    """The XS creates each batch of enemies; this acknowledges it by sending the new batch
-    off. The batch first takes the No Attack stance, which it keeps: a unit a tower hits
-    would otherwise stop to answer it, which the alliance forbids."""
+    """The XS creates each batch of enemies; the trigger for the enemy's number acknowledges
+    it by sending the new batch off. The batch first takes the No Attack stance, which it
+    keeps: a unit a tower hits would otherwise stop to answer it, which the alliance forbids."""
     prefix = f"lane.p{lane.player}"
-    spawned = game.trigger(f"{prefix}.spawned", looping=True)
-    game.value(spawned, f"{prefix}.active", 1)
-    game.value(spawned, f"{prefix}.spawn", 1)
     _, y1, _, y2 = lane.path
-    effect(
-        spawned,
-        "change_object_stance",
-        source_player=8,
-        attack_stance=AttackStance.NO_ATTACK_STANCE,
-        **area((lane.spawn_x, y1, lane.spawn_x + 1, y2)),
-    )
-    send_down_the_lane(spawned, lane, spawn_rows(lane))
-    game.set_value(spawned, f"{prefix}.spawn", 0)
+    for enemy in enemy_numbers(lane):
+        spawned = game.trigger(f"{prefix}.spawned.e{enemy}", looping=True)
+        game.value(spawned, "game.enemy", enemy)
+        game.value(spawned, f"{prefix}.active", 1)
+        game.value(spawned, f"{prefix}.spawn", 1)
+        effect(
+            spawned,
+            "change_object_stance",
+            source_player=enemy,
+            attack_stance=AttackStance.NO_ATTACK_STANCE,
+            **area((lane.spawn_x, y1, lane.spawn_x + 1, y2)),
+        )
+        send_down_the_lane(spawned, lane, enemy, spawn_rows(lane))
+        game.set_value(spawned, f"{prefix}.spawn", 0)
 
 
 def lane_route(game: Game, lane: EngineLane) -> None:
     """Every enemy in the lane is ordered on again now and then, in case one lost its way."""
     prefix = f"lane.p{lane.player}"
-    move = game.trigger(f"{prefix}.route", looping=True)
-    condition(move, "timer", timer=ROUTE_SECONDS)
-    game.value(move, f"{prefix}.active", 1)
-    send_down_the_lane(move, lane, lane_rows(lane))
+    for enemy in enemy_numbers(lane):
+        move = game.trigger(f"{prefix}.route.e{enemy}", looping=True)
+        condition(move, "timer", timer=ROUTE_SECONDS)
+        game.value(move, "game.enemy", enemy)
+        game.value(move, f"{prefix}.active", 1)
+        send_down_the_lane(move, lane, enemy, lane_rows(lane))
 
 
 def declare_results(game: Game) -> None:
-    for winner in range(1, 9):
+    """A victory goes to the winning lane; a defeat to whichever number the enemy holds."""
+    for winner in LANE_SLOTS:
         finish = game.trigger(f"game.result.p{winner}", looping=False)
         game.value(finish, "game.winner", winner)
-        game.value(finish, "game.phase", State.DEFEAT if winner == 8 else State.VICTORY)
+        game.value(finish, "game.phase", State.VICTORY)
         effect(finish, "declare_victory", source_player=winner, enabled=1)
+    for enemy in ENEMY_SLOTS:
+        finish = game.trigger(f"game.result.e{enemy}", looping=False)
+        game.value(finish, "game.winner", enemy)
+        game.value(finish, "game.phase", State.DEFEAT)
+        effect(finish, "declare_victory", source_player=enemy, enabled=1)

@@ -27,6 +27,14 @@ int laneVariable(int player = 1, int field = 0) {
     return (cLaneBase + (player - 1) * cLaneStride + field);
 }
 
+// DE numbers a multiplayer game's players by their lobby colors and skips closed slots, so the
+// computer the host left in the last slot may hold any number. The highest-numbered player in the
+// game that no human controls is the enemy whose units the waves are; the humans in slots 1-7
+// hold the lanes, and the other computers' lanes are cleared.
+int ancientEnemy() {
+    return (xsTriggerVariable(vEnemy));
+}
+
 int laneValue(int player = 1, int field = 0) {
     return (xsTriggerVariable(laneVariable(player, field)));
 }
@@ -80,7 +88,7 @@ int ancientWhole(float value = 0.0) {
 // Kills of the enemy's units alone: rival traders, raiders and siege a lane kills count for
 // nothing.
 int ancientWaveKills(int player = 1) {
-    return (ancientWhole(xsPlayerAttribute(8, cAttributeKillsByPlayer1 + player - 1)));
+    return (ancientWhole(xsPlayerAttribute(ancientEnemy(), cAttributeKillsByPlayer1 + player - 1)));
 }
 
 string ancientCount(int count = 0, string single = "", string plural = "") {
@@ -111,6 +119,7 @@ void ancientShowLives(int player = 1) {
 
 // Clear a computer-filled or eliminated lane. Query the object classes a lane's units belong
 // to; DE documents no all-objects wildcard, and class N is addressed as cArcherClass + N.
+// Enemies still walking the lane go as the sweep comes to their type.
 void ancientCleanupLane(int player = 1) {
     for (kind = 0; < cLaneClasses) {
         ancientUnitArray = xsGetPlayerUnitIds(player, cArcherClass + laneClass(kind), ancientUnitArray);
@@ -266,9 +275,32 @@ void ancientGrant(int player = 1, int civ = 0) {
     }
 }
 
+// Nothing can play the enemy: the game stops and says why, and its native triggers take the
+// wave and lives lines off the screen.
+void ancientStop(string reason = "") {
+    xsSetTriggerVariable(vPhase, sUnplayable);
+    xsSetTriggerVariable(vCountdown, 0);
+    for (slot = 1; <= 7) {
+        laneSet(slot, fSpawn, 0);
+    }
+    xsChatData("Ancient TD stopped: " + reason);
+}
+
 // The first human lane chooses the run options. Solo runs play the lobby's difficulty;
-// competitive games play one fixed level and start with PvP off.
+// competitive games play one fixed level and start with PvP off. A lobby without a computer
+// player has no enemy and cannot play.
 void ancientInitialize() {
+    int enemy = 0;
+    for (candidate = 1; <= 8) {
+        if (xsGetPlayerInGame(candidate) && (xsGetPlayerType(candidate) != cPlayerTypeHuman)) enemy = candidate;
+    }
+    xsSetTriggerVariable(vEnemy, enemy);
+    if (enemy == 0) {
+        ancientStop("no computer player is in the game. The last computer player is the enemy; add one in the lobby and start again.");
+        return;
+    }
+    // The map has lanes for players 1-7 only.
+    if (xsGetPlayerInGame(8) && (xsGetPlayerType(8) == cPlayerTypeHuman)) xsChatData("P8 has no defense lane: the lanes belong to players 1 to 7.");
     int participants = 0;
     int chooser = 0;
     for (player = 1; <= 7) {
@@ -301,6 +333,7 @@ void ancientInitialize() {
     }
     xsSetTriggerVariable(vDifficulty, level);
     xsChatData("Ancient TD: human defense lanes = %d", participants);
+    xsChatData("Enemy: " + ancientPlayer(enemy) + ", the last computer player.");
     if (participants == 0) return;
     xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
     string window = " within " + ancientText(cChoice) + " game seconds";
@@ -333,13 +366,17 @@ int ancientEndlessArmor(int endless = 0) {
     return (steps * cArmorStep);
 }
 
+// The hit points an endless template's enemies carry at a growth level.
+int ancientEndlessHitPoints(int position = 0, int level = 1) {
+    return (endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates + position) * cEndlessLevels + level - 1));
+}
+
 // The hit points a wave's enemies carry: a boss's can exceed the attribute's limit, which the
-// native configuration applied, so the rest is set on the unit itself.
+// wave's configuration applied, so the rest is set on the unit itself.
 int ancientWaveHitPoints(int wave = 0) {
     if (wave < cWaveCount) return (waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + wave));
     int endless = wave - cWaveCount;
-    int position = endless % cEndlessTemplates;
-    return (endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates + position) * cEndlessLevels + ancientEndlessLevel(endless) - 1));
+    return (ancientEndlessHitPoints(endless % cEndlessTemplates, ancientEndlessLevel(endless)));
 }
 
 // The enemies a wave brings: their number and kind, or the boss's name.
@@ -372,26 +409,46 @@ void ancientBeginPreparation() {
     }
 }
 
-// Native triggers set the endless enemies' hit points for a new level, clearing the request;
-// the wave spawns once they have. The script adds each armor step itself, past the 255 a
-// native effect stops at.
+// Set an attribute of the enemy's definition of a wave unit, for the enemies created from then
+// on, as a native Modify Attribute would for a fixed player.
+void ancientSetEnemyAttribute(int unit = -1, int attribute = 0, int amount = 0) {
+    // The value parameter is a float; DE does not promote an int argument.
+    float value = 1.0 * amount;
+    xsEffectAmount(cSetAttribute, unit, attribute, value, ancientEnemy());
+}
+
+// A scheduled wave's enemies take the difficulty's hit points, within the attribute's limit, and
+// the pierce armor the schedule gives them in place of the unit's own. An armor value packs the
+// class with the amount, as the attack steps do.
+void ancientConfigureWave(int wave = 0) {
+    int pattern = ancientTemplate(wave);
+    int hitpoints = ancientWaveHitPoints(wave);
+    if (hitpoints > cHitPointCap) hitpoints = cHitPointCap;
+    ancientSetEnemyAttribute(waveUnit(pattern), cHitpoints, hitpoints);
+    int armor = wavePierceArmor(pattern);
+    if (armor >= 0) ancientSetEnemyAttribute(waveUnit(pattern), cArmor, 256 * cPierceClass + armor);
+}
+
+// Each new round of the templates sets the endless enemies' hit points for its level, and every
+// endless wave adds an armor step, past the 255 a native effect stops at.
 void ancientConfigureEndless(int wave = 0) {
     int endless = wave - cWaveCount;
     int level = ancientEndlessLevel(endless);
     if (level > xsTriggerVariable(vEndlessLevel)) {
         xsSetTriggerVariable(vEndlessLevel, level);
-        xsSetTriggerVariable(vEndlessRequest, level);
+        for (position = 0; < cEndlessTemplates) {
+            ancientSetEnemyAttribute(waveUnit(endlessTemplate(position)), cHitpoints, ancientEndlessHitPoints(position, level));
+        }
     }
     int armor = xsTriggerVariable(vArmor);
     int target = ancientEndlessArmor(endless);
     while (armor < target) {
         armor = armor + cArmorStep;
         for (enemy = 0; < cEndlessUnits) {
-            ancientAddPierce(8, endlessUnit(enemy), cArmor, cArmorStep);
+            ancientAddPierce(ancientEnemy(), endlessUnit(enemy), cArmor, cArmorStep);
         }
     }
     xsSetTriggerVariable(vArmor, armor);
-    xsSetTriggerVariable(vConfigured, ancientTemplate(wave) + 1);
 }
 
 // The options become fixed by the chooser's first selection, which announces itself, or
@@ -635,7 +692,7 @@ int ancientCollect(int live = -1, int slice = -1) {
     }
     for (kind = 0; < cEnemyTypes) {
         if ((slice < 0) || (kind == live) || (kind % cSweepTicks == slice)) {
-            ancientUnitArray = xsGetPlayerUnitIds(8, enemyType(kind), ancientUnitArray);
+            ancientUnitArray = xsGetPlayerUnitIds(ancientEnemy(), enemyType(kind), ancientUnitArray);
             int lives = enemyLives(kind);
             bool boss = (enemyBoss(kind) == 1);
             for (index = 0; < xsArrayGetSize(ancientUnitArray)) {
@@ -708,7 +765,7 @@ int ancientCollect(int live = -1, int slice = -1) {
 }
 
 void ancientFinish(bool victory = false) {
-    int winner = 8;
+    int winner = ancientEnemy();
     if (victory) {
         for (player = 1; <= 7) {
             if (laneValue(player, fActive) == 1) winner = player;
@@ -750,6 +807,7 @@ void ancientStartWave() {
     // The countdown to this wave ends now, even when practice started it early.
     xsSetTriggerVariable(vWaveDisplay, 2);
     if (wave < cWaveCount) {
+        ancientConfigureWave(wave);
         string number = ancientText(wave + 1) + " of " + ancientText(cWaveCount);
         xsChatData("Wave " + number + ": " + ancientWaveEnemies(wave) + ".");
         return;
@@ -801,13 +859,15 @@ int ancientRowOffset(int count = 1, int index = 0) {
 // A batch of the wave's enemies for a lane, created silently and without collision checks so
 // nothing holds a wave back. The lane's native trigger then sends them down the lane.
 // A boss comes alone with the attribute's limit of hit points; the rest waits in the lane's
-// reservoir, which its unit draws on as it is hit.
-void ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
+// reservoir, which its unit draws on as it is hit. Returns how many enemies appeared.
+int ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
     int count = waveCount(pattern);
     int unit = -1;
+    int made = 0;
     for (index = 0; < count) {
         vector spot = xsVectorSet(0.5 + laneSpawnX(player), 0.5 + laneY(player) + ancientRowOffset(count, index), 0.0);
-        unit = xsCreateUnit(waveUnit(pattern), 8, spot, false, false, false);
+        unit = xsCreateUnit(waveUnit(pattern), ancientEnemy(), spot, false, false, false);
+        if (unit >= 0) made = made + 1;
     }
     if ((waveBoss(pattern) == 1) && (unit >= 0)) {
         ancientBossBuffers();
@@ -820,6 +880,7 @@ void ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
         xsArraySetInt(ancientBossQuarter, player, 4);
     }
     laneSet(player, fSpawn, 1);
+    return (made);
 }
 
 // Sudden death costs every survivor lives at each interval, more each time.
@@ -1216,7 +1277,7 @@ void ancientEconomy(int state = 0) {
 
 void ancientTick() {
     int state = xsTriggerVariable(vPhase);
-    if ((state == sVictory) || (state == sDefeat)) return;
+    if ((state == sVictory) || (state == sDefeat) || (state == sUnplayable)) return;
     if (state == sInitialization) {
         ancientInitialize();
         return;
@@ -1249,7 +1310,7 @@ void ancientTick() {
     // Losses resolve as one batch on the next clock event.
     if (xsTriggerVariable(vStage) == cStageSudden) ancientDrain();
     // Native requests are acknowledged once. Waiting preserves a common wave schedule.
-    bool ready = (xsTriggerVariable(vEndlessRequest) == 0);
+    bool ready = true;
     for (player = 1; <= 7) {
         if ((laneValue(player, fActive) == 1) &&
             ((laneValue(player, fInitialized) == 0) || (laneValue(player, fSpawn) > 0))) ready = false;
@@ -1305,12 +1366,17 @@ void ancientTick() {
             if (count + waveCount(pattern) > cEnemyCap) capacity = false;
         }
     }
-    // A batch waits for the native triggers to configure the wave's enemies.
-    bool configured = (xsTriggerVariable(vConfigured) == pattern + 1);
-    if ((batches < waveBatches(pattern)) && (cooldown <= 0) && capacity && configured) {
+    if ((batches < waveBatches(pattern)) && (cooldown <= 0) && capacity) {
         int hitpoints = ancientWaveHitPoints(wave);
+        int made = 0;
         for (slot = 1; <= 7) {
-            if (laneValue(slot, fActive) == 1) ancientSpawnBatch(slot, pattern, hitpoints);
+            if (laneValue(slot, fActive) == 1) made = made + ancientSpawnBatch(slot, pattern, hitpoints);
+        }
+        // A batch no enemy of which appeared means DE creates nothing for the enemy's number;
+        // the game stops rather than clearing empty waves.
+        if (made == 0) {
+            ancientStop("DE created none of the enemy's units for " + ancientPlayer(ancientEnemy()) + ", so the waves cannot come.");
+            return;
         }
         xsSetTriggerVariable(vBatches, batches + 1);
         cooldown = waveInterval(pattern);

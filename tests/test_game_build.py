@@ -74,10 +74,11 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
         for suffix in (
             "initialize",
             "king",
-            "spawned",
             "buy.tower_attack_4",
             "transfer.build",
             "bonus.gold",
+            *(f"spawned.e{enemy}" for enemy in range(1, 9) if enemy != player),
+            *(f"enemy.e{enemy}" for enemy in range(1, 9) if enemy != player),
         ):
             trigger = triggers[f"lane.p{player}.{suffix}"]
             assert not trigger["execute_on_load"]
@@ -399,38 +400,81 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
     game_build: GameBuild,
 ) -> None:
     """The original's one-way alliance: the enemy's units attack nothing while every lane's
-    towers fire at them, and they walk at their stock speed. Each new batch takes the No Attack
-    stance in the spawn column, so a unit a tower hits does not turn to answer it."""
+    towers fire at them, and they walk at their stock speed. The map presets it for the enemy
+    in slot 8; a trigger per number the enemy may hold sets it once the XS has chosen. Each
+    new batch takes the No Attack stance in the spawn column, so a unit a tower hits does not
+    turn to answer it."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.config import load_lanes
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
     players = snapshot["players"]
     assert [p["player_id"] for p in players[:9]] == list(range(9))
     assert players[8]["diplomacy"][:7] == [DiplomacyState.ALLY] * 7
     for player in range(1, 8):
         assert players[player]["diplomacy"][7] == DiplomacyState.ENEMY
+    for lane_number in range(1, 8):
+        for enemy in range(1, 9):
+            if enemy == lane_number:
+                assert f"lane.p{lane_number}.enemy.e{enemy}" not in triggers
+                continue
+            trigger = triggers[f"lane.p{lane_number}.enemy.e{enemy}"]
+            assert not trigger["looping"]
+            requested = {
+                c["attributes"]["variable"]: c["attributes"]["quantity"]
+                for c in trigger["conditions"]
+                if c["type"] == "variable_value"
+            }
+            assert len(trigger["conditions"]) == 2
+            assert requested == {
+                variables["game.enemy"]: enemy,
+                variables[f"lane.p{lane_number}.active"]: 1,
+            }
+            stances_set = {
+                (e["attributes"]["source_player"], e["attributes"]["target_player"]): e[
+                    "attributes"
+                ]["diplomacy"]
+                for e in trigger["effects"]
+                if e["type"] == "change_diplomacy"
+            }
+            assert stances_set == {
+                (lane_number, enemy): DiplomacyState.ENEMY,
+                (enemy, lane_number): DiplomacyState.ALLY,
+            }
+            assert len(trigger["effects"]) == 2
     anchors = json.loads((output / "map.json").read_text())["anchors"]
     stances: dict[str, list[dict[str, object]]] = {}
+    expected: list[str] = []
     for lane in load_lanes(object_value(anchors, "anchors")):
         _, y1, _, y2 = lane.path
-        spawned = next(
-            t for t in snapshot["triggers"] if t["name"] == f"lane.p{lane.player}.spawned"
-        )
-        kinds = [e["type"] for e in spawned["effects"]]
-        assert kinds.count("change_object_stance") == 1
-        assert kinds.index("change_object_stance") < kinds.index("task_object")
-        [stance] = [
-            e["attributes"] for e in spawned["effects"] if e["type"] == "change_object_stance"
-        ]
-        assert (stance["source_player"], stance["attack_stance"]) == (8, NO_ATTACK_STANCE)
-        assert (stance["area_x1"], stance["area_y1"], stance["area_x2"], stance["area_y2"]) == (
-            lane.spawn_x,
-            y1,
-            lane.spawn_x + 1,
-            y2,
-        )
+        assert f"lane.p{lane.player}.spawned" not in triggers
+        for enemy in range(1, 9):
+            if enemy == lane.player:
+                assert f"lane.p{lane.player}.spawned.e{enemy}" not in triggers
+                continue
+            spawned = triggers[f"lane.p{lane.player}.spawned.e{enemy}"]
+            expected.append(spawned["name"])
+            assert [
+                c["attributes"]["quantity"]
+                for c in spawned["conditions"]
+                if c["attributes"]["variable"] == variables["game.enemy"]
+            ] == [enemy]
+            kinds = [e["type"] for e in spawned["effects"]]
+            assert kinds.count("change_object_stance") == 1
+            assert kinds.index("change_object_stance") < kinds.index("task_object")
+            [stance] = [
+                e["attributes"] for e in spawned["effects"] if e["type"] == "change_object_stance"
+            ]
+            assert (stance["source_player"], stance["attack_stance"]) == (enemy, NO_ATTACK_STANCE)
+            assert (
+                stance["area_x1"],
+                stance["area_y1"],
+                stance["area_x2"],
+                stance["area_y2"],
+            ) == (lane.spawn_x, y1, lane.spawn_x + 1, y2)
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
             if change["type"] == "change_object_stance":
@@ -443,7 +487,7 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
                 and attributes["object_list_unit_id"] != KING
             ):
                 assert attributes["object_attributes"] != ObjectAttribute.MOVEMENT_SPEED
-    assert sorted(stances) == sorted(f"lane.p{player}.spawned" for player in range(1, 8))
+    assert sorted(stances) == sorted(expected)
 
 
 def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: GameBuild) -> None:
@@ -470,38 +514,82 @@ def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: Ga
     for lane in load_lanes(object_value(anchors, "anchors")):
         x1, y1, x2, y2 = lane.path
         center = lane.center_y
-        # The XS creates each batch at the spawn tile's center.
-        for name, columns in (
-            (f"lane.p{lane.player}.spawned", (lane.spawn_x, lane.spawn_x + 1)),
-            (f"lane.p{lane.player}.route", (x1, x2)),
-        ):
-            trigger = triggers[name]
-            assert trigger["looping"]
-            orders = [e["attributes"] for e in trigger["effects"] if e["type"] == "task_object"]
-            bands = [(o["area_y1"], o["area_y2"], o["location_x"], o["location_y"]) for o in orders]
-            assert bands == [
-                (y1, center - 1, lane.exit_x, center - 1),
-                (center, center, lane.exit_x, center),
-                (center + 1, y2, lane.exit_x, center + 1),
+        assert f"lane.p{lane.player}.route" not in triggers
+        for enemy in range(1, 9):
+            if enemy == lane.player:
+                assert f"lane.p{lane.player}.route.e{enemy}" not in triggers
+                continue
+            # The XS creates each batch at the spawn tile's center.
+            for name, columns in (
+                (f"lane.p{lane.player}.spawned.e{enemy}", (lane.spawn_x, lane.spawn_x + 1)),
+                (f"lane.p{lane.player}.route.e{enemy}", (x1, x2)),
+            ):
+                trigger = triggers[name]
+                assert trigger["looping"]
+                orders = [e["attributes"] for e in trigger["effects"] if e["type"] == "task_object"]
+                bands = [
+                    (o["area_y1"], o["area_y2"], o["location_x"], o["location_y"]) for o in orders
+                ]
+                assert bands == [
+                    (y1, center - 1, lane.exit_x, center - 1),
+                    (center, center, lane.exit_x, center),
+                    (center + 1, y2, lane.exit_x, center + 1),
+                ]
+                assert all(o["source_player"] == enemy and o["action_type"] == MOVE for o in orders)
+                assert all((o["area_x1"], o["area_x2"]) == columns for o in orders)
+                requested = {
+                    c["attributes"]["variable"]: c["attributes"]["quantity"]
+                    for c in trigger["conditions"]
+                    if c["type"] == "variable_value"
+                }
+                assert requested[variables["game.enemy"]] == enemy
+                assert requested[variables[f"lane.p{lane.player}.active"]] == 1
+            route = triggers[f"lane.p{lane.player}.route.e{enemy}"]
+            assert [
+                c["attributes"]["timer"] for c in route["conditions"] if c["type"] == "timer"
+            ] == [10]
+            spawned = triggers[f"lane.p{lane.player}.spawned.e{enemy}"]
+            requested = {
+                c["attributes"]["variable"]: c["attributes"]["quantity"]
+                for c in spawned["conditions"]
+                if c["type"] == "variable_value"
+            }
+            assert requested[variables[f"lane.p{lane.player}.spawn"]] == 1
+            [cleared] = [
+                e["attributes"] for e in spawned["effects"] if e["type"] == "change_variable"
             ]
-            assert all(o["source_player"] == 8 and o["action_type"] == MOVE for o in orders)
-            assert all((o["area_x1"], o["area_x2"]) == columns for o in orders)
-        route = triggers[f"lane.p{lane.player}.route"]
-        assert [c["attributes"]["timer"] for c in route["conditions"] if c["type"] == "timer"] == [
-            10
-        ]
-        spawned = triggers[f"lane.p{lane.player}.spawned"]
+            assert (cleared["variable"], cleared["quantity"]) == (
+                variables[f"lane.p{lane.player}.spawn"],
+                0,
+            )
+
+
+def test_results_go_to_the_winning_lane_or_to_whichever_number_the_enemy_holds(
+    game_build: GameBuild,
+) -> None:
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
+    declared = {
+        name: trigger
+        for name, trigger in triggers.items()
+        if any(e["type"] == "declare_victory" for e in trigger["effects"])
+    }
+    assert set(declared) == {f"game.result.p{p}" for p in range(1, 8)} | {
+        f"game.result.e{e}" for e in range(1, 9)
+    }
+    for name, trigger in declared.items():
+        player = int(name[-1])
+        phase = 6 if name.startswith("game.result.p") else 8
         requested = {
             c["attributes"]["variable"]: c["attributes"]["quantity"]
-            for c in spawned["conditions"]
+            for c in trigger["conditions"]
             if c["type"] == "variable_value"
         }
-        assert requested[variables[f"lane.p{lane.player}.spawn"]] == 1
-        [cleared] = [e["attributes"] for e in spawned["effects"] if e["type"] == "change_variable"]
-        assert (cleared["variable"], cleared["quantity"]) == (
-            variables[f"lane.p{lane.player}.spawn"],
-            0,
-        )
+        assert requested == {variables["game.winner"]: player, variables["game.phase"]: phase}
+        [victory] = [e["attributes"] for e in trigger["effects"] if e["type"] == "declare_victory"]
+        assert victory["source_player"] == player
 
 
 @pytest.mark.parametrize("change", ["resource_bonus", "ai_personality"])
@@ -805,39 +893,51 @@ def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
     snapshot = json.loads((output / "scenario.json").read_text())
     anchors = json.loads((output / "map.json").read_text())["anchors"]
     triggers = {t["name"]: t for t in snapshot["triggers"]}
+    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
     for player in range(1, 8):
         x, y = (int(v) for v in anchors[f"siege.p{player}.3"]["point"])
-        keeper = triggers[f"game.keeper.p{player}"]
-        assert not keeper["looping"] and keeper["enabled"]
-        [standing] = keeper["conditions"]
-        attributes = standing["attributes"]
-        assert standing["type"] == "objects_in_area"
-        assert (attributes["source_player"], attributes["object_list"]) == (player, KING)
-        assert attributes["quantity"] == 1
-        assert (
-            attributes["area_x1"],
-            attributes["area_y1"],
-            attributes["area_x2"],
-            attributes["area_y2"],
-        ) == (x, y, x, y)
-        [rename] = keeper["effects"]
-        named = rename["attributes"]
-        assert rename["type"] == "change_object_name"
-        assert (named["source_player"], named["object_list_unit_id"]) == (player, KING)
-        assert (named["area_x1"], named["area_y1"], named["area_x2"], named["area_y2"]) == (
-            x,
-            y,
-            x,
-            y,
-        )
-        assert named["message"] == f"Slot keeper: P{player}'s cleared lane stays in the game"
-        cleanup = triggers[f"lane.p{player}.cleanup"]
-        ended = [
-            e["attributes"]["trigger_id"]
-            for e in cleanup["effects"]
-            if e["type"] == "deactivate_trigger"
-        ]
-        assert ended and keeper["id"] not in ended
+        for role, message, inverted in (
+            ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
+            (".enemy", f"Enemy: P{player}'s units are the waves; its King keeps the slot", 0),
+        ):
+            keeper = triggers[f"game.keeper{role}.p{player}"]
+            assert not keeper["looping"] and keeper["enabled"]
+            [holding, standing] = keeper["conditions"]
+            held = holding["attributes"]
+            assert holding["type"] == "variable_value"
+            assert (held["variable"], held["quantity"], held["inverted"]) == (
+                variables["game.enemy"],
+                player,
+                inverted,
+            )
+            attributes = standing["attributes"]
+            assert standing["type"] == "objects_in_area"
+            assert (attributes["source_player"], attributes["object_list"]) == (player, KING)
+            assert attributes["quantity"] == 1
+            assert (
+                attributes["area_x1"],
+                attributes["area_y1"],
+                attributes["area_x2"],
+                attributes["area_y2"],
+            ) == (x, y, x, y)
+            [rename] = keeper["effects"]
+            named = rename["attributes"]
+            assert rename["type"] == "change_object_name"
+            assert (named["source_player"], named["object_list_unit_id"]) == (player, KING)
+            assert (named["area_x1"], named["area_y1"], named["area_x2"], named["area_y2"]) == (
+                x,
+                y,
+                x,
+                y,
+            )
+            assert named["message"] == message
+            cleanup = triggers[f"lane.p{player}.cleanup"]
+            ended = [
+                e["attributes"]["trigger_id"]
+                for e in cleanup["effects"]
+                if e["type"] == "deactivate_trigger"
+            ]
+            assert ended and keeper["id"] not in ended
 
 
 def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(

@@ -27,8 +27,11 @@ from ancienttdde.scenario.objects import technology
 # a float the engine keeps, so the XS tops a boss up after creating it.
 MAX_HIT_POINTS = 32767
 BOSS_HIT_POINTS = 5_000_000
-# The schedule may hold this many waves; every wave is a trigger per difficulty level.
+# The schedule may hold this many waves; every wave has a countdown trigger.
 MAX_WAVES = 60
+# A wave's own pierce armor is set with a technology-style effect, whose value packs the armor
+# class with the amount in one byte.
+MAX_WAVE_ARMOR = 255
 # A batch stands side by side across the lane: one row above and below its center, or three
 # rows. The lane's path must hold those rows.
 MAX_BATCH = 3
@@ -99,8 +102,8 @@ LOBBY_DIFFICULTIES = {
     "easiest": 4,
 }
 DIFFICULTY_LEVELS = ("easy", "normal", "hard")
-# Endless waves stop growing once every one has reached the hit point limit; more growth
-# levels than this would need a trigger per level and difficulty for little difference.
+# Endless waves stop growing once every one has reached the hit point limit; the hit point
+# table holds a row per level and difficulty, and more levels than this would add little.
 MAX_ENDLESS_LEVELS = 30
 # Raiders cannot reach across a one-tile wall: land raiders fight in melee, naval raiders at
 # the fire ships' short range.
@@ -499,7 +502,9 @@ def load_balance(path: Path) -> Balance:
             interval=integer(row, "interval", 2, 120),
             duration=integer(row, "duration", 1, 600),
             hit_points=integer(row, "hit_points", 1, BOSS_HIT_POINTS if boss else MAX_HIT_POINTS),
-            pierce_armor=integer(row, "pierce_armor", 0, 500) if "pierce_armor" in row else None,
+            pierce_armor=integer(row, "pierce_armor", 0, MAX_WAVE_ARMOR)
+            if "pierce_armor" in row
+            else None,
         )
         if (wave.batches - 1) * wave.interval >= wave.duration:
             raise ValueError(f"Wave duration cannot contain all batches: {key}")

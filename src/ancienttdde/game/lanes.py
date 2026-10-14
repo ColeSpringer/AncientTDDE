@@ -4,6 +4,7 @@ from dataclasses import asdict
 
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
 from ancienttdde.game.catalog import Shop
@@ -125,10 +126,10 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
 
 
 def lane_cleanup(game: Game, lane: EngineLane) -> None:
-    """Clear a computer-filled or eliminated lane, mill included. The XS leaves one King on the
-    lane's spare siege islet, which can be neither attacked nor deleted, so DE does not defeat
-    the slot. Then end the lane's other triggers: they could never act again, and its lives
-    line leaves the objectives."""
+    """Clear a computer-filled or eliminated lane, mill and walking enemies included. The XS
+    leaves one King on the lane's spare siege islet, which can be neither attacked nor deleted,
+    so DE does not defeat the slot. Then end the lane's other triggers: they could never act
+    again, and its lives line leaves the objectives."""
     player = lane.player
     prefix = f"lane.p{player}"
     cleanup = game.trigger(f"{prefix}.cleanup", looping=True)
@@ -140,7 +141,6 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
     )
     for protection in ("disable_unit_attackable", "disable_object_deletion"):
         effect(cleanup, protection, source_player=player, object_list_unit_id=game.stock("king"))
-    effect(cleanup, "remove_object", source_player=8, **area(lane.path))
     game.set_value(cleanup, f"{prefix}.cleanup", 0)
     for identifier in game.names.registered("trigger", f"{prefix}."):
         if identifier != cleanup.trigger_id:
@@ -148,27 +148,41 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
 
 
 def lane_keeper(game: Game, lane: EngineLane) -> None:
-    """Name the King a cleared lane keeps, so selecting it explains itself. The trigger is not
-    one of the lane's own, which the cleanup ends as the King appears."""
+    """Name the King a cleared lane keeps, so selecting it explains itself; the enemy's own
+    cleared lane says whose the waves are. The triggers are not among the lane's own, which
+    the cleanup ends as the King appears."""
     player = lane.player
     tile = lane.sites.siege[SPARE_ISLET]
-    keeper = game.trigger(f"game.keeper.p{player}", looping=False)
-    condition(
-        keeper,
-        "objects_in_area",
-        source_player=player,
-        object_list=game.stock("king"),
-        quantity=1,
-        **area((*tile, *tile)),
-    )
-    effect(
-        keeper,
-        "change_object_name",
-        source_player=player,
-        object_list_unit_id=game.stock("king"),
-        message=f"Slot keeper: P{player}'s cleared lane stays in the game",
-        **area((*tile, *tile)),
-    )
+    enemy = game.names.resolve("variable", "game.enemy")
+    for role, message, inverted in (
+        ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
+        (".enemy", f"Enemy: P{player}'s units are the waves; its King keeps the slot", 0),
+    ):
+        keeper = game.trigger(f"game.keeper{role}.p{player}", looping=False)
+        condition(
+            keeper,
+            "variable_value",
+            variable=enemy,
+            quantity=player,
+            comparison=Comparison.EQUAL,
+            inverted=inverted,
+        )
+        condition(
+            keeper,
+            "objects_in_area",
+            source_player=player,
+            object_list=game.stock("king"),
+            quantity=1,
+            **area((*tile, *tile)),
+        )
+        effect(
+            keeper,
+            "change_object_name",
+            source_player=player,
+            object_list_unit_id=game.stock("king"),
+            message=message,
+            **area((*tile, *tile)),
+        )
 
 
 def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:

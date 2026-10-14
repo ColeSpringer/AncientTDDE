@@ -8,24 +8,30 @@ from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance
 from ancienttdde.game.triggers import Game
+from ancienttdde.game.waves import LANE_SLOTS
 from ancienttdde.scenario.triggers import condition, effect
 
 
 def pvp_diplomacy(game: Game) -> None:
-    """With PvP on, every defense slot becomes every other's enemy when the first wave starts."""
-    trigger = game.trigger("game.pvp", looping=False)
-    game.value(trigger, "game.pvp", 1)
-    game.value(trigger, "game.wave", 0, Comparison.LARGER_OR_EQUAL)
-    for source in range(1, 8):
-        for target in range(1, 8):
-            if source != target:
-                effect(
-                    trigger,
-                    "change_diplomacy",
-                    source_player=source,
-                    target_player=target,
-                    diplomacy=DiplomacyState.ENEMY,
-                )
+    """With PvP on, every two lanes that play become enemies when the first wave starts. A
+    cleared lane, the enemy's own among them, or a closed one never plays, so no effect names
+    a player who is not in the game."""
+    for source in LANE_SLOTS:
+        for target in LANE_SLOTS:
+            if source == target:
+                continue
+            trigger = game.trigger(f"game.pvp.p{source}.p{target}", looping=False)
+            game.value(trigger, "game.pvp", 1)
+            game.value(trigger, "game.wave", 0, Comparison.LARGER_OR_EQUAL)
+            game.value(trigger, f"lane.p{source}.active", 1)
+            game.value(trigger, f"lane.p{target}.active", 1)
+            effect(
+                trigger,
+                "change_diplomacy",
+                source_player=source,
+                target_player=target,
+                diplomacy=DiplomacyState.ENEMY,
+            )
 
 
 def open_pvp_pads(game: Game, shop: Shop) -> None:

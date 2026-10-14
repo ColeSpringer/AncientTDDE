@@ -225,6 +225,24 @@ def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
     assert filled(text, "waveHitPoints")[last] == balance.hit_points(len(balance.waves) - 1, 2)
 
 
+def test_prelude_lists_the_armor_a_wave_sets_and_the_enemy_variable() -> None:
+    """The XS configures each wave on the enemy's definitions itself, whatever number the enemy
+    holds: a wave without its own pierce armor reads -1."""
+    from ancienttdde.game.script import GLOBAL_VARIABLES, State
+
+    balance, _, _, _ = content()
+    text = prelude()
+    armor = filled(text, "wavePierceArmor")
+    assert armor == {
+        index: -1 if wave.pierce_armor is None else wave.pierce_armor
+        for index, wave in enumerate(balance.waves)
+    }
+    assert 100 in armor.values()
+    assert f"const int vEnemy = {GLOBAL_VARIABLES.index('enemy')};" in text
+    assert f"const int sUnplayable = {State.UNPLAYABLE};" in text
+    assert "configured" not in GLOBAL_VARIABLES and "endless_request" not in GLOBAL_VARIABLES
+
+
 def test_prelude_holds_no_test_only_names() -> None:
     text = prelude()
     assert "cBuy" not in text and "Tech =" not in text
@@ -388,7 +406,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "sudden_survivor",
         "endless_continues",
         "endless_growth",
-        "endless_waits",
+        "endless_configures",
         "endless_armor_past_255",
         "endless_result",
         "resume_endless",
@@ -431,6 +449,12 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "boss_hitpoints",
         "boss_leak",
         "pvp_waits_for_first_wave",
+        "enemy_last_computer",
+        "enemy_first_slot",
+        "enemy_missing",
+        "enemy_refused",
+        "enemy_human_eighth",
+        "wave_hitpoints",
     ],
 )
 def test_shared_engine(engine_runner: Path, case: str) -> None:

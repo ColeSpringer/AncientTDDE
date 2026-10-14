@@ -41,6 +41,8 @@ class State(IntEnum):
     BOSS = 4
     ELIMINATION = 5
     VICTORY = 6
+    # The lobby has no computer player, so nothing can play the enemy.
+    UNPLAYABLE = 7
     DEFEAT = 8
 
 
@@ -67,6 +69,8 @@ GLOBAL_VARIABLES = (
     "participants",
     "survivors",
     "winner",
+    # The player whose units the waves are: the highest-numbered computer in the game.
+    "enemy",
     "wave",
     "elapsed",
     "remaining",
@@ -78,7 +82,6 @@ GLOBAL_VARIABLES = (
     "setup_elapsed",
     "resume_phase",
     "sudden_round",
-    "configured",
     # What the objectives show: the current wave number and seconds until the next one.
     "display_wave",
     "countdown",
@@ -92,13 +95,12 @@ GLOBAL_VARIABLES = (
     "assists",
     # Waves cleared, for the result.
     "cleared",
-    # After the schedule: the stage, the endless growth level applied and one awaiting the
-    # native triggers, the pierce armor added, and seconds until sudden death next costs lives.
-    # wave_display asks the native triggers to count down to the next endless wave (1), to
-    # clear the countdown when a wave starts (2) or to count down the choice window (3).
+    # After the schedule: the stage, the endless growth level applied, the pierce armor added,
+    # and seconds until sudden death next costs lives. wave_display asks the native triggers to
+    # count down to the next endless wave (1), to clear the countdown when a wave starts (2) or
+    # to count down the choice window (3).
     "stage",
     "endless_level",
-    "endless_request",
     "armor",
     "drain",
     "wave_display",
@@ -522,6 +524,10 @@ def render_prelude(
         "waveDuration": [w.duration for w in balance.waves],
         "waveBoss": [int(w.boss) for w in balance.waves],
         "waveEnemies": [w.enemies for w in balance.waves],
+        # The pierce armor a wave's enemies carry instead of the unit's own, -1 to keep it.
+        "wavePierceArmor": [
+            -1 if w.pierce_armor is None else w.pierce_armor for w in balance.waves
+        ],
         # Indexed by level * cWaveCount + wave.
         "waveHitPoints": [
             balance.hit_points(wave, level)
@@ -656,7 +662,9 @@ def render_xs(
     """Prefix the shared runtime with this build's constants and lookup tables.
 
     The runtime eliminates a lane once xsGetPlayerInGame turns false, which DE reports for
-    defeated, resigned and dropped players. assets/runtime.xs is embedded verbatim in the
+    defeated, resigned and dropped players. DE numbers a multiplayer game's players by their
+    lobby colors and skips closed slots, so the runtime takes the highest-numbered computer in
+    the game as the enemy rather than player 8. assets/runtime.xs is embedded verbatim in the
     game scenario, so notes about it live here rather than in its comments.
     """
     return render_prelude(balance, lanes, shop, profiles, stock) + asset_text("runtime.xs")

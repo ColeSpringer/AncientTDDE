@@ -37,7 +37,8 @@ another directory. Builds refuse to overwrite sources or another tool's output.
 
 Copy one of these into `C:\Users\<you>\Games\Age of Empires 2 DE\<steam id>`: the scenario
 to host it (the lobby sends it to the other players), or the mod folder to publish it from
-DE's Mods → My Mods → Publish Mod while signed in to Xbox Live.
+DE's Mods → My Mods → Publish Mod while signed in to Xbox Live. Any lobby layout with at
+least one computer works: the highest-numbered computer player is the enemy.
 
 ```
 .build/game/ancient-td-de.aoe2scenario  ->  resources\_common\scenario\

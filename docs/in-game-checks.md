@@ -14,12 +14,17 @@ Use the standard DE data set, fixed starts, locked teams and All Visible for Rev
 The host selects Fast, the highest lobby game speed, in the lobby: the scenario format
 cannot set it. DE also offers a default under Options → Game → Game Speed.
 
-Keep all eight slots occupied. Put humans in any of slots 1–7 and computers in the
-others; slot 8 must be the computer enemy. Only human-controlled defense lanes take part:
-the game clears computer-filled lanes at the start and gives them no resources, enemies or
-say in victory. Civilization choices stay unlocked, and a solo player may use any defense
-lane. The lobby's Difficulty sets a solo run's level; run options are selected in game, in
-the row of Outposts below the shop.
+Put humans in any slots and at least one computer in another. DE numbers a multiplayer
+game's players by their lobby colors and skips empty slots, so a computer shown in slot 8
+plays as P3 when slots 3–7 are empty; the script takes the highest-numbered computer in the
+game as the enemy and announces it ("Enemy: P3, the last computer player."). A human
+holding player number 8 has no lane and is told so. Only human-controlled defense lanes take
+part: the game clears the other computer-filled lanes at
+the start and gives them no resources, enemies or say in victory. The enemy's civilization
+bonuses apply to its units: the build presets Britons for slot 8, and a computer in another
+slot plays the civilization the lobby gives it. Civilization choices stay unlocked, and a solo
+player may use any defense lane. The lobby's Difficulty sets a solo
+run's level; run options are selected in game, in the row of Outposts below the shop.
 
 ## Full game
 
@@ -28,6 +33,11 @@ the row of Outposts below the shop.
   result objective still appear.
 - Two nonconsecutive human slots with AI filling the others; AI lanes stay unpaid, show no
   lives line and no defeat line.
+- Two humans and one computer with the slots between them empty: the chat names the computer
+  as the enemy, the waves come to both lanes with the announced hit points (select an enemy),
+  a leak costs lives, and a defeat declares the computer the winner. A lobby without a
+  computer stops at once with the "Ancient TD stopped" objective and its chat line, and the
+  wave and lives lines leave the objectives.
 - Automatic land/water trade startup and pairs spawning without colliding with barriers.
 - Every lumber tree holds 32,000 wood from the start (each lane swaps its placed trees for
   created ones on the same tiles as it begins) and the lumberjacks chop without orders; record

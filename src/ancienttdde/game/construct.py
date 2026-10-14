@@ -25,7 +25,7 @@ from ancienttdde.game.instructions import instructions
 from ancienttdde.game.interaction import open_pvp_pads, pvp_diplomacy, siege_countdowns
 from ancienttdde.game.labels import caption_transfers, name_objects
 from ancienttdde.game.lanes import lane_actions
-from ancienttdde.game.objectives import run_objectives
+from ancienttdde.game.objectives import hide_on_stop, run_objectives
 from ancienttdde.game.restrictions import restrict_competitive
 from ancienttdde.game.script import render_prelude, render_xs
 from ancienttdde.game.selection import (
@@ -46,9 +46,8 @@ from ancienttdde.game.spawns import creation_tiles, marked_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
-    configure_waves,
     declare_results,
-    endless_growth,
+    enemy_diplomacy,
     game_clock,
     game_status,
     wave_warnings,
@@ -251,13 +250,14 @@ def settings(
             lock_personality=True,
             starting_age=StartingAge.FEUDAL_AGE,
         )
+        # The original's one-way alliance with the enemy in its usual slot: lanes shoot the
+        # enemy's units, and the enemy treats every lane as an ally, so its units attack nothing
+        # while the lanes' towers fire at them. The enemy's trigger sets the same for whichever
+        # number it holds.
         diplomacy: list[int] = [DiplomacyState.NEUTRAL] * 16
         if player.human:
-            # Lanes shoot the enemy's units.
             diplomacy[7] = DiplomacyState.ENEMY
         else:
-            # The enemy treats every lane as an ally, so its units attack nothing while the
-            # lanes' towers fire at them: the original's one-way alliance.
             diplomacy[:7] = [DiplomacyState.ALLY] * 7
         diplomacy[player.player_id - 1] = DiplomacyState.ALLY
         player.diplomacy = diplomacy
@@ -326,9 +326,8 @@ def add_logic(
     run_objectives(game)
     options_objectives(game, balance)
     chooser_view(game, anchors)
-    configure_waves(game, balance)
-    endless_growth(game, balance)
     wave_warnings(game, balance)
+    enemy_diplomacy(game)
     pvp_diplomacy(game)
     open_pvp_pads(game, shop)
     siege_countdowns(game, balance)
@@ -337,6 +336,7 @@ def add_logic(
     restrict_competitive(game)
     for lane in lanes:
         lane_actions(game, lane, balance, shop, profiles)
+    hide_on_stop(game)
     declare_results(game)
 
 

@@ -99,3 +99,21 @@ def run_objectives(game: Game) -> None:
     )
     for ending, phase in (("victory", State.VICTORY), ("defeat", State.DEFEAT)):
         reveal(game, f"game.reveal.result.{ending}", result, {"game.phase": phase})
+    stopped = objective(
+        game,
+        "game.objective.stopped",
+        "Ancient TD stopped: nothing can play the enemy (the chat says why)",
+        "The last computer player is the enemy. Add one in the lobby and start again.",
+    )
+    reveal(game, "game.reveal.stopped", stopped, {"game.phase": State.UNPLAYABLE})
+
+
+def hide_on_stop(game: Game) -> None:
+    """Once the game stops, the wave status and every lane's lives line leave the objectives;
+    after the lanes' triggers, which the lines belong to."""
+    hide = game.trigger("game.hide.stopped", looping=False)
+    game.value(hide, "game.phase", State.UNPLAYABLE)
+    lines = ["game.status.next", "game.status.spawning"]
+    lines += [f"lane.p{player}.status" for player in range(1, 8)]
+    for name in lines:
+        effect(hide, "deactivate_trigger", trigger_id=game.names.resolve("trigger", name))

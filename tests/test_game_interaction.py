@@ -74,75 +74,26 @@ def tile(point: list[float]) -> tuple[int, int]:
     return math.floor(point[0]), math.floor(point[1])
 
 
-def test_each_scheduled_wave_is_configured_once_per_difficulty(game_build: GameBuild) -> None:
+def test_the_xs_alone_configures_the_waves_enemies(game_build: GameBuild) -> None:
+    """The enemy may hold any player number, so no native trigger sets a wave unit's hit points
+    or armor for a fixed player: the XS sets them on the enemy's definitions (see the wave and
+    endless cases in test_game_script.py). The one native change to an enemy unit holds the
+    keeper King in place."""
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
-    for number, wave in enumerate(balance().waves, 1):
-        assert f"game.wave.{number}.configure" not in triggers
-        for level, difficulty in enumerate(balance().difficulty.levels):
-            trigger = triggers[f"game.wave.{number}.configure.{difficulty.key}"]
-            assert not trigger["looping"]
-            assert requested(trigger, variables["game.wave"]) == number - 1
-            assert requested(trigger, variables["game.difficulty"]) == level
-            [hit_points] = [
-                e for e in effects(trigger, "modify_attribute") if e["object_attributes"] == 0
-            ]
-            assert (hit_points["source_player"], hit_points["object_list_unit_id"]) == (
-                8,
-                wave.object_id,
-            )
-            assert hit_points["quantity"] == min(32767, balance().hit_points(number - 1, level))
-            armor = [
-                e for e in effects(trigger, "modify_attribute") if e["object_attributes"] == ARMOR
-            ]
-            if wave.pierce_armor is None:
-                assert not armor
-            else:
-                [set_armor] = armor
-                assert (set_armor["operation"], set_armor["armour_attack_class"]) == (SET, PIERCE)
-                assert set_armor["armour_attack_quantity"] == wave.pierce_armor
-            assert sets(trigger, variables["game.configured"]) == [(number, SET)]
-
-
-def test_endless_levels_set_every_template_to_its_grown_hit_points(game_build: GameBuild) -> None:
-    data = snapshot(game_build)
-    triggers = triggers_by_name(data)
-    variables = variables_by_name(data)
-    endless = balance().endless
-    units = [balance().waves[t].object_id for t in endless.templates]
-    assert len(set(units)) == len(units)
-    for level in range(1, balance().endless_levels + 1):
-        for index, difficulty in enumerate(balance().difficulty.levels):
-            trigger = triggers[f"game.endless.{level}.{difficulty.key}"]
-            assert trigger["looping"]
-            assert requested(trigger, variables["game.endless_request"]) == level
-            assert requested(trigger, variables["game.difficulty"]) == index
-            grown = {
-                attr_int(e, "object_list_unit_id"): attr_int(e, "quantity")
-                for e in effects(trigger, "modify_attribute")
-            }
-            assert grown == {
-                unit: balance().endless_hit_points(level, position, index)
-                for position, unit in enumerate(units)
-            }
-            assert all(
-                (e["source_player"], e["object_attributes"], e["operation"]) == (8, HIT_POINTS, SET)
-                for e in effects(trigger, "modify_attribute")
-            )
-            assert sets(trigger, variables["game.endless_request"]) == [(0, SET)]
-
-
-def test_no_native_trigger_adds_endless_armor(game_build: GameBuild) -> None:
-    """A native armor change stops at 255; the XS adds each endless armor step (see the endless
-    cases in test_game_script.py). The schedule only sets the rams' armor."""
-    data = snapshot(game_build)
-    assert "game.endless.armor" not in triggers_by_name(data)
-    assert "game.armor_request" not in variables_by_name(data)
+    assert not [
+        name for name in triggers if ".configure" in name or name.startswith("game.endless.")
+    ]
+    assert "game.configured" not in variables and "game.endless_request" not in variables
+    assert "game.enemy" in variables
+    wave_units = {wave.object_id for wave in balance().waves}
     for trigger in data["triggers"]:
         for change in effects(trigger, "modify_attribute"):
-            if change["source_player"] == 8 and change["object_attributes"] == ARMOR:
-                assert change["operation"] == SET, trigger["name"]
+            unit = attr_int(change, "object_list_unit_id")
+            assert unit not in wave_units, trigger["name"]
+            if change["source_player"] == 8:
+                assert (trigger["name"], unit) == ("game.initialize", KING)
 
 
 def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild) -> None:
@@ -173,6 +124,7 @@ def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild)
             "Siege",
         ),
         ("result", {"game.phase": 6}, ["game.cleared"], "Result"),
+        ("stopped", {"game.phase": 7}, [], "stopped"),
     ],
 )
 def test_objectives_appear_when_they_apply(
@@ -496,22 +448,30 @@ def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(
     assert [keeper["x"], keeper["y"]] == spots["enemy.keeper"]["point"]
 
 
-def test_pvp_makes_every_defense_slot_an_enemy_at_the_first_wave(game_build: GameBuild) -> None:
+def test_pvp_makes_every_two_playing_lanes_enemies_at_the_first_wave(game_build: GameBuild) -> None:
+    """One trigger per ordered pair of lanes, each gated on both lanes playing: the enemy's own
+    cleared lane and closed lanes stay out of it."""
     data = snapshot(game_build)
-    trigger = triggers_by_name(data)["game.pvp"]
+    triggers = triggers_by_name(data)
     variables = variables_by_name(data)
-    assert not trigger["looping"]
-    assert requested(trigger, variables["game.pvp"]) == 1
-    wave_id = variables["game.wave"]
-    [wave] = [c for c in conditions(trigger, "variable_value") if c["variable"] == wave_id]
-    assert (attr_int(wave, "quantity"), attr_int(wave, "comparison")) == (0, LARGER_OR_EQUAL)
-    pairs = {
-        (attr_int(e, "source_player"), attr_int(e, "target_player"))
-        for e in effects(trigger, "change_diplomacy")
-        if e["diplomacy"] == ENEMY
-    }
-    assert pairs == {(p, q) for p in PLAYERS for q in PLAYERS if p != q}
-    assert len(effects(trigger, "change_diplomacy")) == len(pairs)
+    assert "game.pvp" not in triggers
+    pairs = {(p, q) for p in PLAYERS for q in PLAYERS if p != q}
+    for source, target in pairs:
+        trigger = triggers[f"game.pvp.p{source}.p{target}"]
+        assert not trigger["looping"]
+        assert requested(trigger, variables["game.pvp"]) == 1
+        assert requested(trigger, variables[f"lane.p{source}.active"]) == 1
+        assert requested(trigger, variables[f"lane.p{target}.active"]) == 1
+        wave_id = variables["game.wave"]
+        [wave] = [c for c in conditions(trigger, "variable_value") if c["variable"] == wave_id]
+        assert (attr_int(wave, "quantity"), attr_int(wave, "comparison")) == (0, LARGER_OR_EQUAL)
+        [change] = effects(trigger, "change_diplomacy")
+        assert (change["source_player"], change["target_player"], change["diplomacy"]) == (
+            source,
+            target,
+            ENEMY,
+        )
+    assert len([name for name in triggers if name.startswith("game.pvp.p")]) == len(pairs)
 
 
 # Each PvP pad's gate: the open column of its Hay Stack box, opposite its King.

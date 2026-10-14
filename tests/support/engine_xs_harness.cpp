@@ -61,10 +61,17 @@ std::vector<Applied> applied;
 bool operator==(const Applied &a, const Applied &b) {
     return a.effect == b.effect && a.unit == b.unit && a.attribute == b.attribute && a.amount == b.amount && a.player == b.player;
 }
+constexpr int cSetAttribute = 0;
+constexpr int cAddAttribute = 4;
+// Each player's definition of a unit type's hit points once an effect changed them; units
+// created afterwards take them, as in DE.
+std::array<std::map<int, float>, 9> typeHitpoints{};
 void xsEffectAmount(int effect, int unit, int attribute, float amount, int player) {
     applied.push_back({effect, unit, attribute, amount, player});
+    if (attribute != cHitpoints) return;
+    if (effect == cSetAttribute) typeHitpoints.at(player)[unit] = amount;
+    if (effect == cAddAttribute) typeHitpoints.at(player)[unit] = (typeHitpoints[player].count(unit) ? typeHitpoints[player][unit] : 100) + amount;
 }
-constexpr int cAddAttribute = 4;
 constexpr int cArmor = 8;
 constexpr int cAttack = 9;
 float xsGetObjectAttribute(int player, int object, int attribute, int = -1) {
@@ -93,11 +100,13 @@ int classOf(int type) {
     std::cerr << "No class recorded for object " << type << '\n';
     std::exit(1);
 }
+// The enemy the XS chose: the highest-numbered computer in the game.
+int enemy();
 // Queries of the enemy's units since the counter was last cleared.
 int enemyQueries = 0;
 // DE documents object and class queries only; there is no documented all-objects wildcard.
 int xsGetPlayerUnitIds(int player, int objectOrClass, int target = -1) {
-    if (player == 8) ++enemyQueries;
+    if (player > 0 && player == enemy()) ++enemyQueries;
     if (objectOrClass < 0) {
         std::cerr << "Unit queries need a documented object or class ID\n";
         std::exit(1);
@@ -139,17 +148,21 @@ std::array<int, 9> spawns{};
 int laneOfRow(float y);
 // Creations that played DE's creation sound, by owner.
 std::array<int, 9> audible{};
+// An owner DE creates nothing for, as it did for a player number no one in the lobby held.
+int refusedOwner = -1;
 // A unit, building or object on the spot blocks a collision-checked creation, as in DE.
 int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCollision) {
+    if (owner == refusedOwner) return -1;
     if (checkCollision)
         for (auto &[id, u] : units)
             if (std::abs(u.pos[0] - pos[0]) < 0.5f && std::abs(u.pos[1] - pos[1]) < 0.5f) return -1;
     int id = sequence++;
-    units.emplace(id, Unit{type, pos, 100, owner});
+    float hp = typeHitpoints.at(owner).count(type) ? typeHitpoints[owner][type] : 100;
+    units.emplace(id, Unit{type, pos, hp, owner});
     ++created[owner][type];
     if (sound) ++audible[owner];
     if (type == 434) { if (onSpareIslet(owner, pos)) ++spareKings[owner]; else ++kingsCreated[owner]; }
-    if (owner == 8) { int lane = laneOfRow(pos[1]); if (lane > 0) ++spawns[lane]; }
+    if (owner > 0 && owner == enemy()) { int lane = laneOfRow(pos[1]); if (lane > 0) ++spawns[lane]; }
     return id;
 }
 float xsVectorGetX(vector pos) { return pos[0]; }
@@ -178,6 +191,7 @@ void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n';
 int lane(int player, int field) { return xsTriggerVariable(laneVariable(player, field)); }
 void setLane(int player, int field, int value) { xsSetTriggerVariable(laneVariable(player, field), value); }
 int phase() { return xsTriggerVariable(vPhase); }
+int enemy() { return xsTriggerVariable(vEnemy); }
 int laneOfRow(float y) {
     for (int p = 1; p <= 7; ++p) if (y >= laneLowY(p) && y < laneHighY(p) + 1) return p;
     return 0;
@@ -211,18 +225,10 @@ void resetXsBuffers() {
     // The lookup tables live in the same arrays, so they are filled again on the next lookup.
     ancientTablesReady=false;
 }
-// Endless growth levels the native triggers applied, and countdowns shown.
-std::vector<int> endlessLevels;
+// Countdowns shown.
 int waveTimers = 0, timerClears = 0, choiceTimers = 0;
 // Native triggers acknowledge one request per lane each pass, as the generated ones do.
 void nativeEffects() {
-    if (xsTriggerVariable(vEndlessRequest) > 0) {
-        endlessLevels.push_back(xsTriggerVariable(vEndlessRequest));
-        xsSetTriggerVariable(vEndlessRequest, 0);
-    }
-    // The configure triggers set a scheduled wave's enemies up before any batch may spawn.
-    int configuring = xsTriggerVariable(vWave);
-    if (configuring >= 0 && configuring < cWaveCount) xsSetTriggerVariable(vConfigured, configuring + 1);
     if (xsTriggerVariable(vWaveDisplay) == 1) ++waveTimers;
     if (xsTriggerVariable(vWaveDisplay) == 2) ++timerClears;
     if (xsTriggerVariable(vWaveDisplay) == 3) ++choiceTimers;
@@ -251,30 +257,37 @@ void nativeEffects() {
             }
         }
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
-        // The XS creates each batch; the lane's trigger sends it down the lane and clears the flag.
-        if (lane(p, fActive) && lane(p, fSpawn)) { ++acknowledged[p]; setLane(p, fSpawn, 0); }
+        // The XS creates each batch; the lane's trigger for the enemy's number sends it down the
+        // lane and clears the flag.
+        if (lane(p, fActive) && lane(p, fSpawn) && enemy() > 0 && enemy() != p) { ++acknowledged[p]; setLane(p, fSpawn, 0); }
     }
 }
 // Waves clear the field each second; a lane's own Kings and life display stay.
 void clearEnemies() {
     for (auto it = units.begin(); it != units.end();) {
-        if (it->second.owner == 8) it = units.erase(it); else ++it;
+        if (enemy() > 0 && it->second.owner == enemy()) it = units.erase(it); else ++it;
     }
 }
 void tick(bool clear=false) { if (clear) clearEnemies(); ancientTick(); nativeEffects(); }
 // Enemies of a type other than the current wave's are looked at once in cSweepTicks seconds.
 void sweep() { for (int n=0; n<cSweepTicks; ++n) tick(); }
-void start(std::initializer_list<int> humans) {
-    occupied.fill(true);
+// The first second of a game whose lobby holds these players: closed slots hold no player and
+// no objects, as DE leaves them.
+void lobby(std::initializer_list<int> humans, int players) {
+    occupied.fill(false);
+    for (int p=1; p<=players; ++p) occupied[p]=true;
     playerTypes.fill(cPlayerTypeComputer);
     for (int p:humans) playerTypes[p]=cPlayerTypeHuman;
     for (int p=1; p<=7; ++p) {
+        if (!occupied[p]) continue;
         units.emplace(laneLife(p), Unit{598, {134.5f, 67.5f + 3 * (p - 1), 0}, 500, p});
         // The lane's two monasteries, in its relic pocket as on the map.
         for (int m=0; m<2; ++m) units.emplace(sequence++, Unit{cMonastery, {lanePocketX1(p) + 0.5f + m, lanePocketY1(p) + 0.5f, 0}, 2100, p});
     }
     tick();
 }
+// A full lobby: computers in every slot no human holds, the enemy in the eighth.
+void start(std::initializer_list<int> humans) { lobby(humans, 8); }
 // A fresh game in the same process: every record of the previous one is cleared, while the
 // case's own setup (civilizations, lobby difficulty) stays.
 void restart(std::initializer_list<int> humans) {
@@ -283,7 +296,9 @@ void restart(std::initializer_list<int> humans) {
     outpostHitpoints.fill(500);
     kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); acknowledged.fill(0); audible.fill(0);
     applied.clear();
-    endlessLevels.clear(); waveTimers = timerClears = choiceTimers = 0;
+    for (auto &hp : typeHitpoints) hp.clear();
+    refusedOwner = -1;
+    waveTimers = timerClears = choiceTimers = 0;
     resetXsBuffers();
     start(humans);
 }
@@ -371,17 +386,39 @@ void buy(int player, int purchase) {
     for (int n=0; n<=cStillSamples; ++n) tick();
     require(bought[player].size()==before+1 && bought[player].back()==purchase, "The purchase was not made");
 }
-// The pierce armor the XS added to the enemy's definition of a unit, packed as attack is.
+// The pierce armor the XS added to the enemy's definition of a unit, packed as attack is; the
+// armor a wave sets outright is not a step.
 int armorAdded(int unit) {
     int total = 0;
     for (auto &a : applied) {
-        if (a.player != 8 || a.unit != unit || a.attribute != cArmor) continue;
+        if (a.player != enemy() || a.unit != unit || a.attribute != cArmor || a.effect == cSetAttribute) continue;
         int value = int(a.amount);
         require(a.effect == cAddAttribute && float(value) == a.amount && value / 256 == 3
                 && value % 256 > 0, "Armor was not added as pierce steps");
         total += value % 256;
     }
     return total;
+}
+// The hit points the XS set on a player's definition of a unit, in order, from the given
+// record on.
+std::vector<float> hitpointsSet(int player, int unit, size_t from = 0) {
+    std::vector<float> values;
+    for (size_t i = from; i < applied.size(); ++i) {
+        auto &a = applied[i];
+        if (a.player == player && a.unit == unit && a.attribute == cHitpoints && a.effect == cSetAttribute) values.push_back(a.amount);
+    }
+    return values;
+}
+// The pierce armor the XS set outright on the enemy's definition of a unit, or -1.
+int armorSet(int unit) {
+    int armor = -1;
+    for (auto &a : applied) {
+        if (a.player != enemy() || a.unit != unit || a.attribute != cArmor || a.effect != cSetAttribute) continue;
+        int value = int(a.amount);
+        require(float(value) == a.amount && value / 256 == 3, "Armor was not set as a pierce value");
+        armor = value % 256;
+    }
+    return armor;
 }
 int own(std::initializer_list<int> purchases) {
     int owned = 0;
@@ -496,20 +533,33 @@ int main(int argc, char** argv) {
         require(mentions("Endless wave 1 (wave " + waveNumber(1) + ")")==1 && mentions("Endless wave 2 (wave " + waveNumber(2) + ")")==1,
                 "Endless waves were not announced");
         int first = endlessTemplate(0), second = endlessTemplate(1);
-        require(spawns[4] > 0 && xsTriggerVariable(vConfigured)==second + 1, "Endless waves did not spawn their template");
+        require(spawns[4] > 0 && created[enemy()][waveUnit(second)] > 0, "Endless waves did not spawn their template");
         require(first != second, "Endless waves did not move through their templates");
         require(waveTimers >= 2, "Endless waves were not counted down");
     } else if(test=="endless_growth") {
+        // Each round of the templates sets every template enemy's grown hit points on the
+        // enemy's definition once, as its first wave starts; every endless wave adds an armor step.
         start({4});
         select(4, cControlEndless); tick();
+        reachWave(cWaveCount - 1);
+        size_t mark = applied.size();
         reachWave(cWaveCount);
-        require(endlessLevels==std::vector<int>{1}, "The first endless wave was not configured once");
-        for(int t=0;t<cEndlessTemplates;++t)
+        int difficulty = xsTriggerVariable(vDifficulty);
+        auto grown = [&](int level, int t) { return float(endlessHitPoints((difficulty * cEndlessTemplates + t) * cEndlessLevels + level - 1)); };
+        for(int t=0;t<cEndlessTemplates;++t) {
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark)==std::vector<float>{grown(1, t)}, "The first endless wave did not set each template's hit points once");
             require(armorAdded(waveUnit(endlessTemplate(t)))==cArmorStep, "The first endless wave did not add one armor step");
-        reachWave(cWaveCount + cEndlessTemplates);
-        require(endlessLevels==std::vector<int>({1, 2}), "A new round of templates did not grow");
+        }
+        mark = applied.size();
+        reachWave(cWaveCount + cEndlessTemplates - 1);
         for(int t=0;t<cEndlessTemplates;++t)
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark).empty(), "A wave within a round of templates set hit points again");
+        mark = applied.size();
+        reachWave(cWaveCount + cEndlessTemplates);
+        for(int t=0;t<cEndlessTemplates;++t) {
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark)==std::vector<float>{grown(2, t)}, "A new round of templates did not grow");
             require(armorAdded(waveUnit(endlessTemplate(t)))==(cEndlessTemplates + 1) * cArmorStep, "Armor did not rise every wave");
+        }
         require(xsTriggerVariable(vArmor)==(cEndlessTemplates + 1) * cArmorStep, "Armor total was not kept");
         int hitpoints = endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates) * cEndlessLevels + 1);
         require(mentions(ancientText(hitpoints) + " HP each")>=1, "The grown hit points were not announced");
@@ -522,22 +572,23 @@ int main(int argc, char** argv) {
         for(int t=0;t<cEndlessTemplates;++t)
             require(armorAdded(waveUnit(endlessTemplate(t)))==steps * cArmorStep, "Endless armor stopped short");
         require(steps * cArmorStep > 255, "The case does not pass 255");
-        for(auto &a : applied) require(a.player==8 || a.attribute!=cArmor, "Armor reached a lane's units");
-    } else if(test=="endless_waits") {
+        for(auto &a : applied) require(a.player==enemy() || a.attribute!=cArmor, "Armor reached a lane's units");
+    } else if(test=="endless_configures") {
+        // An endless wave sets its templates' hit points and adds its armor step as it starts,
+        // before its first batch appears.
         start({4});
         select(4, cControlEndless); tick();
         reachWave(cWaveCount - 1);
         for(int n=0;n<10000 && phase()!=sPreparation;++n) tick(true);
-        // Without the native triggers, the endless wave starts but waits for its configuration.
-        for(int n=0;n<10000 && xsTriggerVariable(vWave)<cWaveCount;++n) { clearEnemies(); ancientTick(); }
-        require(xsTriggerVariable(vEndlessRequest)==1, "The endless wave did not ask for its configuration");
-        require(armorAdded(waveUnit(endlessTemplate(0)))==cArmorStep, "The script did not add the endless wave's armor");
+        size_t mark = applied.size();
         int before = spawns[4];
-        for(int n=0;n<5;++n) { clearEnemies(); ancientTick(); }
-        require(spawns[4]==before && lane(4,fSpawn)==0, "An endless wave spawned before its configuration applied");
-        nativeEffects(); nativeEffects();
-        for(int n=0;n<5;++n) tick(true);
-        require(spawns[4]>before, "The endless wave did not spawn after its configuration applied");
+        for(int n=0;n<10000 && xsTriggerVariable(vWave)<cWaveCount;++n) tick(true);
+        require(xsTriggerVariable(vWave)==cWaveCount && spawns[4]==before, "The endless wave spawned as it started");
+        for(int t=0;t<cEndlessTemplates;++t)
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark).size()==1, "The endless wave did not set its templates' hit points as it started");
+        require(armorAdded(waveUnit(endlessTemplate(0)))==cArmorStep, "The script did not add the endless wave's armor");
+        tick(true);
+        require(spawns[4]>before, "The endless wave did not spawn after its configuration");
     } else if(test=="endless_result") {
         start({4});
         select(4, cControlEndless); tick();
@@ -554,15 +605,15 @@ int main(int argc, char** argv) {
         reachWave(cWaveCount + 1);
         for(int n=0;n<20;++n) tick(true);
         auto saved=variables; auto savedUnits=units; auto savedAttributes=attributes; auto savedSpawns=spawns;
-        auto savedLevels=endlessLevels; auto savedApplied=applied;
+        auto savedApplied=applied;
         for(int n=0;n<400;++n) tick(true);
-        auto expected=variables; auto expectedSpawns=spawns; auto expectedLevels=endlessLevels; auto expectedApplied=applied;
+        auto expected=variables; auto expectedSpawns=spawns; auto expectedApplied=applied;
         variables=saved; units=savedUnits; attributes=savedAttributes; spawns=savedSpawns;
-        endlessLevels=savedLevels; applied=savedApplied;
+        applied=savedApplied;
         resetXsBuffers();
         for(int n=0;n<400;++n) tick(true);
         require(variables==expected && spawns==expectedSpawns, "Reload changed endless progress or spawns");
-        require(endlessLevels==expectedLevels && applied==expectedApplied && !applied.empty(), "Reload repeated or lost endless growth");
+        require(applied==expectedApplied && !applied.empty(), "Reload repeated or lost endless growth");
     } else if(test=="resume") {
         start({2,7});
         setLane(2, fOwned, own({cBuyGold1000, cBuyKingEveryMinute, cBuyAttack1Every5}));
@@ -650,7 +701,7 @@ int main(int argc, char** argv) {
         // A pair appears side by side across the lane, a triple with one in the middle.
         start({2}); advanceTo(sWave); tick();
         std::vector<float> rows;
-        for(auto &[id, u] : units) if(u.owner==8) { require(u.pos[0]==laneSpawnX(2)+0.5f, "An enemy appeared off the spawn column"); rows.push_back(u.pos[1]); }
+        for(auto &[id, u] : units) if(u.owner==enemy()) { require(u.pos[0]==laneSpawnX(2)+0.5f, "An enemy appeared off the spawn column"); rows.push_back(u.pos[1]); }
         std::sort(rows.begin(), rows.end());
         require(rows==std::vector<float>({laneY(2)-0.5f, laneY(2)+1.5f}), "The pair did not appear one row above and below the center");
         int triple=-1; for(int w=0;w<cWaveCount;++w) if(waveCount(w)==3) { triple=w; break; }
@@ -658,7 +709,7 @@ int main(int argc, char** argv) {
         reachWave(triple); tick(true);
         for(int n=0;n<10 && spawns[2]==0;++n) tick();
         rows.clear();
-        for(auto &[id, u] : units) if(u.owner==8) rows.push_back(u.pos[1]);
+        for(auto &[id, u] : units) if(u.owner==enemy()) rows.push_back(u.pos[1]);
         std::sort(rows.begin(), rows.end());
         require(rows==std::vector<float>({laneY(2)-0.5f, laneY(2)+0.5f, laneY(2)+1.5f}), "A triple did not fill the three rows");
     } else if(test=="spawn_silent") {
@@ -711,7 +762,7 @@ int main(int argc, char** argv) {
         require(most <= (cEnemyTypes + cSweepTicks - 1) / cSweepTicks + 1, "A second queried every enemy type at once");
         auto current = [&]() {
             int n=0;
-            for(auto &[id, u] : units) if(u.owner==8 && u.type==enemyType(live) && laneOfRow(u.pos[1])==2) ++n;
+            for(auto &[id, u] : units) if(u.owner==enemy() && u.type==enemyType(live) && laneOfRow(u.pos[1])==2) ++n;
             return n;
         };
         int swept=0;
@@ -731,7 +782,7 @@ int main(int argc, char** argv) {
         // A boss comes alone at the attribute's limit and draws the rest from its lane's
         // reservoir as it is hit, so it falls only once the whole amount is spent.
         start({5}); reachWave(cWaveCount-1); tick(true);
-        int boss=-1; for(auto &[id, u] : units) if(u.owner==8) boss=id;
+        int boss=-1; for(auto &[id, u] : units) if(u.owner==enemy()) boss=id;
         require(boss>=0 && units.at(boss).type==waveUnit(cWaveCount-1), "The last boss did not appear");
         int total = waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + cWaveCount - 1);
         require(total > cHitPointCap && units.at(boss).hp == float(cHitPointCap) && lane(5, fBoss)==total, "The boss did not bring its reservoir");
@@ -1628,5 +1679,82 @@ int main(int argc, char** argv) {
             }
             require(first==7, "A pair of lanes did not share going first");
         }
+    } else if(test=="enemy_last_computer") {
+        // DE numbers a multiplayer game's players by colour and skips closed slots: two humans and
+        // the computer the host saw in the last slot play as P1, P2 and P3. The highest-numbered
+        // computer is the enemy, its lane is cleared, and the waves come to the human lanes.
+        lobby({1,2}, 3);
+        require(enemy()==3 && xsTriggerVariable(vParticipants)==2, "The last computer was not made the enemy");
+        require(mentions("Enemy: P3, the last computer player.")==1, "The enemy was not announced");
+        require(cleanups[3]==1 && onlySpareKing(3), "The enemy's own lane was not cleared");
+        for(int p=4;p<=7;++p) require(cleanups[p]==1 && unitsOf(p, cKing)==0, "A closed slot was given a King");
+        advanceTo(sWave); tick();
+        require(spawns[1]>0 && spawns[1]==spawns[2] && spawns[3]==0, "The waves did not come to the human lanes alone");
+        int owned=0;
+        for(auto &[id, u] : units) if(u.type==waveUnit(0)) { require(u.owner==3, "An enemy belonged to another player"); ++owned; }
+        require(owned==spawns[1]+spawns[2] && acknowledged[1]>0 && acknowledged[2]>0, "The enemy's units were not created for the enemy and sent off");
+        int difficulty = xsTriggerVariable(vDifficulty);
+        require(hitpointsSet(3, waveUnit(0))==std::vector<float>{float(waveHitPoints(difficulty * cWaveCount))}, "The wave's hit points were not set on the enemy's definition");
+        require(hitpointsSet(8, waveUnit(0)).empty() && mentions("refused to create")==0, "Player 8 was still treated as the enemy");
+        attributes[3][cAttributeKillsByPlayer1]=cKillsPerReward;
+        tick(true);
+        require(resource(1, cAttributeStone)==cKillStone && resource(2, cAttributeStone)==0, "Kills of the enemy's units were not read from the enemy");
+        setLane(1,fLives,0); setLane(2,fLives,0); tick(true); tick(true);
+        require(phase()==sDefeat && xsTriggerVariable(vWinner)==3, "The defeat did not go to the enemy");
+    } else if(test=="enemy_first_slot") {
+        // The computer may hold a lower number than the humans; the lanes are then the others.
+        lobby({2,3}, 3);
+        require(enemy()==1 && lane(2,fActive)==1 && lane(3,fActive)==1 && lane(1,fActive)==0, "The computer in the first slot was not made the enemy");
+        require(cleanups[1]==1 && onlySpareKing(1) && grants[1]==0, "The enemy's lane was not cleared");
+        advanceTo(sWave); tick();
+        require(spawns[2]>0 && spawns[2]==spawns[3] && spawns[1]==0, "The waves did not come to the human lanes");
+        for(auto &[id, u] : units) if(u.type==waveUnit(0)) require(u.owner==1, "An enemy belonged to another player");
+        setLane(2,fLives,0); tick(); tick();
+        require(phase()==sVictory && xsTriggerVariable(vWinner)==3, "The last human lane did not win");
+    } else if(test=="enemy_missing") {
+        // Two humans and no computer: nothing can play the enemy, so the game says so and stops.
+        lobby({1,2}, 2);
+        require(phase()==sUnplayable && enemy()==0, "A lobby without a computer started");
+        require(mentions("Ancient TD stopped: no computer player is in the game")==1, "The missing computer was not explained");
+        for(int n=0;n<400;++n) tick();
+        require(phase()==sUnplayable && lane(1,fActive)==0 && lane(2,fActive)==0, "An unplayable lobby went on");
+        require(spawns[1]==0 && spawns[2]==0 && grants[1]==0 && grants[2]==0 && cleanups[1]==0, "An unplayable lobby set lanes up");
+        require(mentions("Ancient TD stopped")==1, "The explanation was repeated");
+    } else if(test=="enemy_refused") {
+        // DE creating nothing for the enemy stops the game with an explanation instead of
+        // clearing empty waves, paying for them and declaring a victory.
+        start({1});
+        refusedOwner = 8;
+        advanceTo(sWave); tick();
+        require(phase()==sUnplayable && spawns[1]==0, "Refused creations did not stop the game");
+        require(mentions("Ancient TD stopped: DE created none of the enemy's units for P8, so the waves cannot come.")==1, "The refusal was not explained");
+        for(int n=0;n<400;++n) tick();
+        require(phase()==sUnplayable && xsTriggerVariable(vCleared)==0 && mentions("cleared:")==0 && mentions("Ancient TD stopped")==1, "A stopped game went on");
+    } else if(test=="enemy_human_eighth") {
+        // A human holding number 8 in a full lobby has no lane on the map: the highest-numbered
+        // computer below is the enemy, and the human is told.
+        lobby({2,8}, 8);
+        require(enemy()==7 && xsTriggerVariable(vParticipants)==1 && lane(2,fActive)==1, "A human in the eighth slot displaced the enemy");
+        require(mentions("P8 has no defense lane: the lanes belong to players 1 to 7.")==1, "The laneless human was not told");
+        advanceTo(sWave); tick();
+        require(spawns[2]>0, "The waves did not come");
+        for(auto &[id, u] : units) if(u.type==waveUnit(0)) require(u.owner==7, "An enemy belonged to another player");
+    } else if(test=="wave_hitpoints") {
+        // Each scheduled wave sets its enemies' hit points on the enemy's definition as it
+        // starts, within the attribute's limit, so the first batch already carries them; the
+        // schedule's pierce armor is set the same way, and no other wave touches armor.
+        start({2}); advanceTo(sWave);
+        int difficulty = xsTriggerVariable(vDifficulty);
+        require(hitpointsSet(enemy(), waveUnit(0))==std::vector<float>{float(waveHitPoints(difficulty * cWaveCount))}, "The first wave's hit points were not set as it started");
+        tick();
+        for(auto &[id, u] : units) if(u.owner==enemy()) require(u.hp==float(waveHitPoints(difficulty * cWaveCount)), "An enemy appeared without the wave's hit points");
+        int armored=-1; for(int w=0;w<cWaveCount;++w) if(wavePierceArmor(w)>=0) { armored=w; break; }
+        require(armored>=0, "The schedule gives no wave its own armor");
+        reachWave(armored);
+        for(int w=0;w<armored;++w) if(waveUnit(w)!=waveUnit(armored)) require(armorSet(waveUnit(w))==-1, "A wave without armor in the schedule set armor");
+        require(armorSet(waveUnit(armored))==wavePierceArmor(armored), "The schedule's pierce armor was not set");
+        require(hitpointsSet(enemy(), waveUnit(armored)).back()==float(waveHitPoints(difficulty * cWaveCount + armored)), "The armored wave's hit points were not set");
+        reachWave(cWaveCount - 1);
+        require(hitpointsSet(enemy(), waveUnit(cWaveCount - 1)).back()==float(cHitPointCap), "A boss's definition was not capped at the attribute's limit");
     } else require(false,"Unknown case");
 }

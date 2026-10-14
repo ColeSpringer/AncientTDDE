@@ -170,11 +170,12 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
     )
     return (
         "# Ancient TD DE\n\n"
-        "Host with the standard DE data set and all eight player slots. Put humans in "
-        "any of slots 1–7 and fill the remaining slots with computers. Keep player 8 as "
-        "the computer enemy. The embedded passive AI handles every computer slot. "
-        "Only human-controlled defense lanes participate; computer-filled defense lanes "
-        "are cleared automatically, and do not affect victory. "
+        "Host with the standard DE data set. Put humans in any slots and at least one "
+        "computer in another: DE numbers the players by their lobby colors and skips empty "
+        "slots, and the highest-numbered computer player is the enemy, whatever slot it was "
+        "shown in. The embedded passive AI handles every computer slot. "
+        "Only human-controlled defense lanes participate; other computer-filled defense "
+        "lanes are cleared automatically, and do not affect victory. "
         "Use fixed start positions, locked teams and Fast (the highest lobby game speed). "
         "The host must select game speed in the lobby; the scenario cannot set that control. "
         "Civilizations remain selectable. Set Reveal Map to All Visible. For solo runs, the "
