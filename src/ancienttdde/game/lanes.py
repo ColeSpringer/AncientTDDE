@@ -13,6 +13,7 @@ from ancienttdde.game.economy import (
     lane_bonuses,
     lane_gatherers,
     lane_kings,
+    lane_lumber,
     lane_messages,
     lane_transfers,
     starting_relics,
@@ -119,6 +120,7 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
             )
     starting_relics(game, init, lane, balance)
     lane_gatherers(game, init, lane)
+    lane_lumber(game, init, lane)
     game.set_value(init, f"{prefix}.initialized", 1)
 
 

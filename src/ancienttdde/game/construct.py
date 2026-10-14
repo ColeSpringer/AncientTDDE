@@ -48,7 +48,6 @@ from ancienttdde.game.waves import (
     configure_waves,
     declare_results,
     endless_growth,
-    endless_lumber,
     game_clock,
     game_status,
     wave_warnings,
@@ -319,7 +318,6 @@ def add_logic(
     profiles: Profiles,
     anchors: dict[str, object],
 ) -> None:
-    endless_lumber(game, lanes)
     endless_deposits(game, balance)
     name_objects(game, lanes, shop, balance)
     game_clock(game)

@@ -680,38 +680,58 @@ def test_generated_spawns_and_starter_buildings_avoid_map_blockers(game_build: G
                 assert not created & (blocked - freed), f"{trigger['name']} creates on a blocker"
 
 
-def test_an_endless_tree_grows_behind_each_lumber_tree_at_the_start(game_build: GameBuild) -> None:
-    """The placed trees stay, so the lumberjacks' work orders can name them; the endless
-    trees created behind them take the raised wood amount."""
+def test_each_lane_swaps_its_lumber_trees_for_endless_ones_as_it_starts(
+    game_build: GameBuild,
+) -> None:
+    """The endless amount applies to trees created after it, not to the placed ones, so a
+    lane's initialize trigger removes each placed tree and creates one on its tile, after the
+    orders that name the placed trees."""
     from ancienttdde.map.geometry import cells
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     anchors = json.loads((ROOT / "content/maps/foundation.json").read_text())["anchors"]
-    trigger = next(t for t in snapshot["triggers"] if t["name"] == "game.lumber")
-    assert not trigger["conditions"] and not trigger["looping"]
-    first, *rest = trigger["effects"]
-    assert first["type"] == "modify_attribute"
-    assert first["attributes"]["source_player"] == 0
-    assert first["attributes"]["object_list_unit_id"] == 399
-    assert first["attributes"]["object_attributes"] == 21
-    assert first["attributes"]["operation"] == 1
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    deposits = triggers["game.deposits"]
+    assert not deposits["conditions"] and not deposits["looping"]
+    [amount] = [e for e in deposits["effects"] if e["attributes"]["object_list_unit_id"] == 399]
+    assert amount["type"] == "modify_attribute"
+    assert amount["attributes"]["source_player"] == 0
+    assert amount["attributes"]["object_attributes"] == 21
+    assert amount["attributes"]["operation"] == 1
     # DE applies this value as a 16-bit number: a DE trial turned 1,000,000 into 16,960.
-    assert 30_000 <= first["attributes"]["quantity"] <= 32_767
-    assert all(e["type"] == "create_object" for e in rest)
-    created = {(e["attributes"]["location_x"], e["attributes"]["location_y"]) for e in rest}
-    assert all(e["attributes"]["source_player"] == 0 for e in rest)
-    assert all(e["attributes"]["object_list_unit_id"] == 399 for e in rest)
-    occupied = {(int(u["x"]), int(u["y"])) for u in snapshot["units"]}
+    assert 30_000 <= amount["attributes"]["quantity"] <= 32_767
     trees = [u for u in snapshot["units"] if u["unit_const"] == 399 and u["player_id"] == 0]
-    placed: set[tuple[int, int]] = set()
     for player in range(1, 8):
         economy = cells(tuple(anchors[f"lane.p{player}.economy"]["region"]))
-        lane = {(int(u["x"]), int(u["y"])) for u in trees if (int(u["x"]), int(u["y"])) in economy}
-        assert len(lane) == 4, f"P{player} needs four lumber trees"
-        placed |= lane
-    assert created == {(x + 1, y) for x, y in placed} and len(rest) == 28
-    assert not created & occupied
+        placed = {
+            u["reference_id"]: (int(u["x"]), int(u["y"]))
+            for u in trees
+            if (int(u["x"]), int(u["y"])) in economy
+        }
+        assert len(placed) == 4, f"P{player} needs four lumber trees"
+        init = triggers[f"lane.p{player}.initialize"]
+        # The amount is set in an earlier trigger that waits on nothing.
+        assert deposits["id"] < init["id"]
+        kinds = [e["type"] for e in init["effects"]]
+        swaps = [
+            index
+            for index, e in enumerate(init["effects"])
+            if e["type"] == "remove_object"
+            and set(attr_list(e["attributes"], "selected_object_ids")) & set(placed)
+        ]
+        assert len(swaps) == 4
+        # The lumberjacks' orders name the placed trees, so every order comes first.
+        assert max(i for i, kind in enumerate(kinds) if kind == "task_object") < min(swaps)
+        for index in swaps:
+            removal, creation = init["effects"][index], init["effects"][index + 1]
+            [reference] = attr_list(removal["attributes"], "selected_object_ids")
+            assert removal["attributes"]["source_player"] == 0
+            assert creation["type"] == "create_object"
+            assert creation["attributes"]["source_player"] == 0
+            assert creation["attributes"]["object_list_unit_id"] == 399
+            created = (creation["attributes"]["location_x"], creation["attributes"]["location_y"])
+            assert created == placed[reference]
 
 
 def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: GameBuild) -> None:

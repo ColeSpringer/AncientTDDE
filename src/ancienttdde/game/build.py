@@ -24,7 +24,6 @@ from ancienttdde.game.config import load_balance, load_lanes
 from ancienttdde.game.instructions import instructions
 from ancienttdde.game.spawns import creation_tiles
 from ancienttdde.game.stock import load_stock
-from ancienttdde.game.waves import check_lumber_room
 from ancienttdde.map.build import CONTENT_INPUTS as MAP_INPUTS
 from ancienttdde.map.build import read_content
 from ancienttdde.map.foundation import migrate_map, validate_map
@@ -135,7 +134,6 @@ def build_game(root: Path, output: Path | None = None) -> Path:
         reserved={t for lane in lanes for t in creation_tiles(lane, shop, balance.interaction)},
         entrances={lane.sites.king_rally for lane in lanes},
     )
-    check_lumber_room(lanes, data, config)
     directory.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="ancienttdde-game-", dir=directory.parent) as temporary:
         staging = Path(temporary)

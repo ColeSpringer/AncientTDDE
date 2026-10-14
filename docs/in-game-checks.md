@@ -29,8 +29,9 @@ the row of Outposts below the shop.
 - Two nonconsecutive human slots with AI filling the others; AI lanes stay unpaid, show no
   lives line and no defeat line.
 - Automatic land/water trade startup and pairs spawning without colliding with barriers.
-- An endless tree with 32,000 wood stands behind each lumber tree from the start, and the
-  lumberjacks move on to it once their placed tree is gone.
+- Every lumber tree holds 32,000 wood from the start (each lane swaps its placed trees for
+  created ones on the same tiles as it begins) and the lumberjacks chop without orders; record
+  a lumberjack standing idle at the start.
 - The resource villagers gather gold, berries, stone and wood from the first second
   without orders; the build-area villagers wait.
 - A player-owned mill beside the berries in every human lane. Computer-filled and

@@ -69,6 +69,40 @@ def lane_gatherers(game: Game, trigger: TriggerHandle, lane: EngineLane) -> None
         )
 
 
+def lumber_trees(game: Game, lane: EngineLane) -> list[tuple[int, Tile]]:
+    """The lane's four placed lumber trees: each one's reference and tile."""
+    placed = [
+        (reference, (int(x), int(y)))
+        for reference, (x, y) in game.gaia("tree").items()
+        if within(lane.economy, x, y)
+    ]
+    if len(placed) != 4:
+        raise ValueError(f"P{lane.player} economy needs four lumber trees, found {len(placed)}")
+    return placed
+
+
+def lane_lumber(game: Game, trigger: TriggerHandle, lane: EngineLane) -> None:
+    """Swap the lane's placed lumber trees for endless ones on the same tiles.
+
+    After the lumberjacks' orders, which name the placed trees: the trees go before the
+    lumberjacks move, and they fall back to the nearest tree, the new one on the spot.
+    """
+    for reference, tile in lumber_trees(game, lane):
+        effect(
+            trigger,
+            "remove_object",
+            source_player=0,
+            selected_object_ids=[game.placement(reference)],
+        )
+        effect(
+            trigger,
+            "create_object",
+            source_player=0,
+            object_list_unit_id=game.stock("tree"),
+            **at(tile),
+        )
+
+
 def lane_kings(game: Game, lane: EngineLane) -> None:
     """Kings the XS creates at a lane's stall walk into the shop, clearing it for the next."""
     player = lane.player
@@ -212,9 +246,10 @@ def lane_bonuses(game: Game, lane: EngineLane, balance: Balance) -> None:
 
 
 def endless_deposits(game: Game, balance: Balance) -> None:
-    """Deposits created later hold more than a run uses; placed deposits keep their amounts."""
+    """Deposits and trees created later hold more than a run uses. Placed ones keep their
+    amounts, so each lane swaps its placed lumber trees for created ones (`lane_lumber`)."""
     trigger = game.trigger("game.deposits", looping=False)
-    for kind in ("forage-bush", "gold-mine", "stone-mine"):
+    for kind in ("forage-bush", "gold-mine", "stone-mine", "tree"):
         effect(
             trigger,
             "modify_attribute",

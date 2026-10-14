@@ -334,7 +334,7 @@ def test_new_deposits_hold_more_than_a_run_uses(game_build: GameBuild) -> None:
     trigger = triggers_by_name(snapshot(game_build))["game.deposits"]
     assert not trigger["looping"] and not trigger["conditions"]
     changes = {e["object_list_unit_id"]: e for e in effects(trigger, "modify_attribute")}
-    assert sorted(changes) == [59, 66, 102]
+    assert sorted(changes) == [59, 66, 102, 399]
     for change in changes.values():
         assert change["source_player"] == 0 and change["object_attributes"] == 21
         assert change["quantity"] == balance()["economy"]["endless_deposit"] <= 32767
