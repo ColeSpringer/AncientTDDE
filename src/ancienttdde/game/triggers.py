@@ -1,9 +1,17 @@
 """The playable game's named variables, triggers and map placements."""
 
+from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
+from ancienttdde.game.controls import Lobby
 from ancienttdde.game.script import variable_names
-from ancienttdde.scenario.triggers import Builder
+from ancienttdde.scenario.triggers import Builder, TriggerHandle
+
+# The human lanes each kind of lobby has; the script counts them in the first second.
+LOBBY_LANES: dict[Lobby, tuple[int, int]] = {
+    "solo": (1, Comparison.EQUAL),
+    "competitive": (2, Comparison.LARGER_OR_EQUAL),
+}
 
 
 class Game(Builder):
@@ -28,6 +36,11 @@ class Game(Builder):
     def forget_gaia(self, kind: str) -> None:
         """Drop the cached Gaia objects of a kind after adding or removing some."""
         self.gaia_positions.pop(kind, None)
+
+    def lobby(self, trigger: TriggerHandle, lobby: Lobby) -> None:
+        """The condition that the lobby is of this kind."""
+        lanes, comparison = LOBBY_LANES[lobby]
+        self.value(trigger, "game.participants", lanes, comparison)
 
     def placement(self, reference_id: int) -> int:
         """Return the ID of an instance the map placed, rejecting any other ID."""

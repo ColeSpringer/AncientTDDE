@@ -148,12 +148,13 @@ the row of Outposts below the shop.
 
 ## Modes and competition
 
-- The chooser's view opens on the four run options (Standard, Endless, Practice, PvP on),
-  with "Run options close in" counting down 60 game seconds and two on-screen lines naming
-  the options and practice controls left to right. DE draws each Outpost's one-word caption
-  and each pad exhibit's short tag above it (never a Sign's); every exhibit stands where the
-  original placed it. Selecting an Outpost shows its full option, and an exhibit its full
-  purchase.
+- The chooser's view opens on the run options, with "Run options close in" counting down
+  60 game seconds. Within the first second the row keeps only what the lobby can use, and
+  on-screen lines name it left to right: Standard, Endless and Practice with the practice
+  controls beside them in a solo run; Standard and PvP on in a competitive game. DE draws
+  each Outpost's one-word caption and each pad exhibit's short tag above it (never a
+  Sign's); every exhibit stands where the original placed it. Selecting an Outpost shows its
+  full option, and an exhibit its full purchase.
 - The first human lane's first selection fixes the options and begins preparation at once,
   even when it is the default (Standard in a competitive game keeps PvP off); a later
   selection, or one by another lane, changes nothing

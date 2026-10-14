@@ -33,6 +33,7 @@ from ancienttdde.game.selection import (
     options_objectives,
     place_controls,
     retire_controls,
+    trim_controls,
 )
 from ancienttdde.game.shop import (
     caption_displays,
@@ -331,6 +332,7 @@ def add_logic(
     pvp_diplomacy(game)
     open_pvp_pads(game, shop)
     siege_countdowns(game, balance)
+    trim_controls(game)
     retire_controls(game)
     restrict_competitive(game)
     for lane in lanes:

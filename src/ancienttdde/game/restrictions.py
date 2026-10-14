@@ -11,7 +11,6 @@ live in restricted.py.
 
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.datasets.techs import TechInfo
-from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.technology_state import TechnologyState
 from AoE2ScenarioParser.datasets.units import UnitInfo
@@ -87,7 +86,7 @@ def restrict_reach(game: Game, player: int) -> None:
 def restrict_competitive(game: Game) -> None:
     """With rivals beside every lane, no tower may reach the next lane."""
     trigger = game.trigger("game.restrict.competitive", looping=False)
-    game.value(trigger, "game.participants", 2, Comparison.LARGER_OR_EQUAL)
+    game.lobby(trigger, "competitive")
     for player in range(1, 8):
         for name in TOWER_RANGE:
             effect(

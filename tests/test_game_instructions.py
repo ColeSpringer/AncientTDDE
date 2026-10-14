@@ -116,6 +116,10 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
     assert "the first selection is final and preparation begins at once" in text
     assert "Standard and PvP off are the defaults when the time runs out" in text
     assert (
+        "The row keeps only the options the lobby can use: a solo run loses PvP on at once, "
+        "and a competitive game loses Endless, Practice and the practice controls." in text
+    )
+    assert (
         "Competitive games choose PvP on, which puts raiders and the siege power-up on sale "
         "from the first wave and opens their pads; without it PvP stays off." in text
     )

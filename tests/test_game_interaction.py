@@ -27,7 +27,7 @@ from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerReco
 
 PLAYERS = range(1, 8)
 SET, ADD, SUBTRACT = 1, 2, 3
-LESS, LARGER_OR_EQUAL = 1, 4
+EQUAL, LESS, LARGER_OR_EQUAL = 0, 1, 4
 HIT_POINTS, SPEED, ARMOR, MAX_RANGE = 0, 5, 8, 12
 TOTAL_MISSILES, MAX_TOTAL_MISSILES = 102, 107
 PIERCE, ENEMY, MOVE = 3, 3, 3
@@ -321,55 +321,164 @@ def removed(trigger: TriggerRecord) -> set[int]:
     }
 
 
-def test_controls_that_no_longer_apply_go_once_the_options_are_fixed(
-    game_build: GameBuild,
-) -> None:
-    from ancienttdde.game.controls import MODES, controls
+# The condition each kind of lobby holds on the human-lane count the script publishes.
+LOBBY_CONDITIONS = {"solo": (1, EQUAL), "competitive": (2, LARGER_OR_EQUAL)}
+
+
+def lobby_condition(trigger: TriggerRecord, variables: dict[str, int]) -> tuple[int, int]:
+    [held] = [
+        c
+        for c in conditions(trigger, "variable_value")
+        if c["variable"] == variables["game.participants"]
+    ]
+    return attr_int(held, "quantity"), attr_int(held, "comparison")
+
+
+def test_each_control_applies_to_its_lobby() -> None:
+    from ancienttdde.game.controls import CONTROLS, LOBBIES, controls, ruled_out
+
+    standard, _, _, pvp_on = CONTROLS[:4]
+    assert standard.applies("solo") and standard.applies("competitive")
+    assert pvp_on.applies("competitive") and not pvp_on.applies("solo")
+    assert [c.key for c in controls("run", "solo")] == ["standard", "endless", "practice"]
+    assert [c.key for c in controls("run", "competitive")] == ["standard", "pvp_on"]
+    assert controls("practice", "solo") == controls("practice")
+    assert controls("practice", "competitive") == ()
+    assert [c.key for c in ruled_out("solo")] == ["pvp_on"]
+    assert [c.key for c in ruled_out("competitive")] == [
+        "endless",
+        "practice",
+        "next_wave",
+        "kings",
+        "resources",
+        "lives",
+    ]
+    for lobby in LOBBIES:
+        kept = controls("run", lobby) + controls("practice", lobby)
+        assert sorted(kept + ruled_out(lobby), key=CONTROLS.index) == list(CONTROLS)
+
+
+def test_controls_the_lobby_rules_out_leave_the_row_at_once(game_build: GameBuild) -> None:
+    """The script counts the human lanes in the first second; a solo run then loses PvP on,
+    a competitive game the solo modes and the practice controls."""
+    from ancienttdde.game.controls import LOBBIES, ruled_out
 
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
     units = control_units(game_build)
-    run = triggers["game.controls.run.remove"]
-    assert not run["looping"]
-    assert requested(run, variables["game.locked"]) == 1
-    assert removed(run) == {units[c.key]["reference_id"] for c in controls("run")}
+    for lobby in LOBBIES:
+        trim = triggers[f"game.controls.{lobby}.trim"]
+        assert not trim["looping"] and trim["enabled"]
+        assert len(conditions(trim, "variable_value")) == 1
+        assert lobby_condition(trim, variables) == LOBBY_CONDITIONS[lobby]
+        assert removed(trim) == {units[c.key]["reference_id"] for c in ruled_out(lobby)}
+        assert len(trim["effects"]) == 1
+
+
+def test_controls_that_no_longer_apply_go_once_the_options_are_fixed(
+    game_build: GameBuild,
+) -> None:
+    """Each lobby removes only the controls it kept, so no Remove Object effect selects an
+    object that is already gone."""
+    from ancienttdde.game.controls import LOBBIES, MODES, controls
+
+    data = snapshot(game_build)
+    triggers = triggers_by_name(data)
+    variables = variables_by_name(data)
+    units = control_units(game_build)
+    for lobby in LOBBIES:
+        run = triggers[f"game.controls.run.remove.{lobby}"]
+        assert not run["looping"]
+        assert requested(run, variables["game.locked"]) == 1
+        assert lobby_condition(run, variables) == LOBBY_CONDITIONS[lobby]
+        assert removed(run) == {units[c.key]["reference_id"] for c in controls("run", lobby)}
     practice = triggers["game.controls.practice.remove"]
     assert not practice["looping"]
     assert requested(practice, variables["game.locked"]) == 1
-    [mode] = conditions(practice, "variable_value")[1:]
-    assert mode["variable"] == variables["game.mode"]
+    assert lobby_condition(practice, variables) == LOBBY_CONDITIONS["solo"]
+    [mode] = [
+        c for c in conditions(practice, "variable_value") if c["variable"] == variables["game.mode"]
+    ]
     assert (attr_int(mode, "quantity"), attr_int(mode, "comparison")) == (
         MODES.index("practice"),
         LESS,
     )
     assert removed(practice) == {units[c.key]["reference_id"] for c in controls("practice")}
+    # Over a run, each lobby removes every control once.
+    every = sorted(u["reference_id"] for u in units.values())
+    removals = {
+        "solo": (
+            "game.controls.solo.trim",
+            "game.controls.run.remove.solo",
+            "game.controls.practice.remove",
+        ),
+        "competitive": ("game.controls.competitive.trim", "game.controls.run.remove.competitive"),
+    }
+    for keys in removals.values():
+        assert sorted(ref for key in keys for ref in removed(triggers[key])) == every
 
 
-def test_option_lines_never_complete_and_are_deactivated_once_locked(
+def test_option_lines_name_the_lobby_controls_and_leave_once_locked(
     game_build: GameBuild,
 ) -> None:
-    """DE keeps a fired objective listed, struck through; a deactivated one leaves the box."""
-    from ancienttdde.game.controls import MODES
+    """A line appears once the script has counted the human lanes and never completes. DE
+    keeps a fired objective listed, struck through; a deactivated one leaves the box."""
+    from ancienttdde.game.controls import MODES, control_labels
 
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
-    for key in ("game.objective.options", "game.objective.practice_controls"):
+    labels = control_labels(balance())
+
+    def listing(*keys: str) -> str:
+        return ", ".join(labels[key] for key in keys)
+
+    lines = {
+        "game.objective.options.solo": (
+            "solo",
+            "Run options below the shop, left to right: "
+            + listing("standard", "endless", "practice"),
+            "game.hide.options",
+        ),
+        "game.objective.options.competitive": (
+            "competitive",
+            "Run options below the shop, left to right: " + listing("standard", "pvp_on"),
+            "game.hide.options",
+        ),
+        "game.objective.practice_controls": (
+            "solo",
+            "Practice controls (Practice runs) to their right: "
+            + listing("next_wave", "kings", "resources", "lives"),
+            "game.hide.practice_controls",
+        ),
+    }
+    for key, (lobby, text, hider_key) in lines.items():
         line = triggers[key]
-        assert line["display_as_objective"] and line["enabled"] and not line["effects"]
+        assert line["display_as_objective"] and not line["enabled"] and not line["effects"]
+        assert line["short_description"] == text
         assert requested(line, variables["game.phase"]) == -1
-        hider = triggers[key.replace("objective", "hide")]
+        # Revealed only while the options are open: a reveal after the lock would stick.
+        reveal = triggers[key.replace("objective", "reveal")]
+        assert not reveal["looping"] and len(reveal["conditions"]) == 2
+        assert lobby_condition(reveal, variables) == LOBBY_CONDITIONS[lobby]
+        assert requested(reveal, variables["game.locked"]) == 0
+        assert [e["trigger_id"] for e in effects(reveal, "activate_trigger")] == [line["id"]]
+        hider = triggers[hider_key]
         assert not hider["looping"]
         assert requested(hider, variables["game.locked"]) == 1
-        assert [e["trigger_id"] for e in effects(hider, "deactivate_trigger")] == [line["id"]]
-    assert triggers["game.objective.options"]["short_description"] == (
-        "Run options below the shop, left to right: Standard, Endless, Practice, PvP on"
+        assert line["id"] in [e["trigger_id"] for e in effects(hider, "deactivate_trigger")]
+    assert triggers["game.objective.options.solo"]["description"] == (
+        "The first human lane selects one; Standard is taken after 60 game seconds."
     )
+    assert triggers["game.objective.options.competitive"]["description"] == (
+        "The first human lane selects one; Standard with PvP off is taken after 60 game seconds."
+    )
+    assert len(effects(triggers["game.hide.options"], "deactivate_trigger")) == 2
+    assert len(conditions(triggers["game.hide.options"], "variable_value")) == 1
     [_, mode] = conditions(triggers["game.hide.practice_controls"], "variable_value")
     assert mode["variable"] == variables["game.mode"]
     assert (attr_int(mode, "quantity"), attr_int(mode, "inverted")) == (MODES.index("practice"), 1)
-    assert len(conditions(triggers["game.hide.options"], "variable_value")) == 1
 
 
 def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(
