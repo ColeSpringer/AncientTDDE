@@ -7,6 +7,10 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("owned", "That purchase is already yours; move your Kings off its pad."),
     ("requires", "That purchase needs another one first; its sign names it."),
     ("relics", "Monks must collect the last relics before more can be bought."),
+    (
+        "monasteries",
+        "Your monasteries have no room for another relic purchase; your Kings stay.",
+    ),
     ("civilization", "Your civilization lacks the towers that purchase improves."),
     ("no_room", "No room for the purchase to appear; move units off its arrival spots."),
     ("gold", "Gold converted into Kings; they arrive at your stall."),

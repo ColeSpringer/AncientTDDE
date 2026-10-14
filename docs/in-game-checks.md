@@ -46,6 +46,9 @@ the row of Outposts below the shop.
   seconds, the objectives read "Wave 1 arrives in N s" (between waves "Wave N arrives in",
   during a wave "Wave N: N s of spawning left"), and the top timer counts down; record
   which of the three shows on your HUD.
+- A wave starts with "Wave N of 56: 30 Villagers" (a boss wave with its name alone); hit points
+  and endless armor are told only in the "Next:" notice before it, the first wave's with
+  "Prepare your towers".
 - Enemies appear in pairs side by side, one row above and one below the lane's center
   (threes fill the three rows), and walk in files to the exit.
 - Each of the ten bosses shows at most 32,767 hit points and is refilled from the total the
@@ -140,6 +143,11 @@ the row of Outposts below the shop.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
   appear and work; a lane starts with no population headroom of its own, the Huns
   included, so only +80 population, the castle and a profile's own population raise it.
+- The relic pad keeps the Kings and says the monasteries have no room once the lane's two
+  cannot take three more relics: after six purchases on top of the two starting relics,
+  fewer when the profile grants relics or the relic purchase, or for the Armenians' free
+  relic. Relics the monks still carry count; a relic lying anywhere in the monks' pocket
+  holds the pad until a monk collects it.
 - An Armenian lane finds a free relic in one of its monasteries, and a Saxon lane's towers
   and Accursed Towers fire one arrow of their own after Castle Age.
 - The trade-income probe's routes are short; on the game map, time a cart and a cog on
@@ -178,7 +186,8 @@ the row of Outposts below the shop.
 - The raider and siege pads are road blocks with Hay Stack borders on the shop's east side,
   the land raider's in the old 4th-row block; each one's King stands centred in its
   beach-side Hay Stack line. A line of Hay Stacks across each pad's entrance keeps Kings out
-  (solo runs never open them) until PvP on is selected, which removes them at once.
+  (solo runs never open them) until PvP on is selected, which removes them at once. The
+  three boxes line up on one west column and each gate line meets its box's rows squarely.
 - Raiders arrive below their market or dock, walk clear, fight rival traders and raiders,
   and cannot leave their trade area; the third raider of a kind is refused (a fourth for
   the listed civilizations) and upgraded fire ships still count.

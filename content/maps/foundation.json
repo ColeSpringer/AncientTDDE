@@ -2680,6 +2680,15 @@
       "reference_id": 20180,
       "label": "Player 1 monastery 2"
     },
+    "lane.p1.relic_pocket": {
+      "region": [
+        134,
+        118,
+        141,
+        125
+      ],
+      "label": "Player 1 monasteries and the monks that fill them"
+    },
     "lane.p1.castle": {
       "point": [
         168.0,
@@ -3191,6 +3200,15 @@
       ],
       "reference_id": 20093,
       "label": "Player 2 monastery 2"
+    },
+    "lane.p2.relic_pocket": {
+      "region": [
+        126,
+        118,
+        132,
+        125
+      ],
+      "label": "Player 2 monasteries and the monks that fill them"
     },
     "lane.p2.castle": {
       "point": [
@@ -3704,6 +3722,15 @@
       "reference_id": 20096,
       "label": "Player 3 monastery 2"
     },
+    "lane.p3.relic_pocket": {
+      "region": [
+        134,
+        110,
+        141,
+        116
+      ],
+      "label": "Player 3 monasteries and the monks that fill them"
+    },
     "lane.p3.castle": {
       "point": [
         168.0,
@@ -4215,6 +4242,15 @@
       ],
       "reference_id": 20099,
       "label": "Player 4 monastery 2"
+    },
+    "lane.p4.relic_pocket": {
+      "region": [
+        126,
+        110,
+        132,
+        116
+      ],
+      "label": "Player 4 monasteries and the monks that fill them"
     },
     "lane.p4.castle": {
       "point": [
@@ -4728,6 +4764,15 @@
       "reference_id": 20103,
       "label": "Player 5 monastery 2"
     },
+    "lane.p5.relic_pocket": {
+      "region": [
+        134,
+        102,
+        141,
+        108
+      ],
+      "label": "Player 5 monasteries and the monks that fill them"
+    },
     "lane.p5.castle": {
       "point": [
         161.0,
@@ -5239,6 +5284,15 @@
       ],
       "reference_id": 20234,
       "label": "Player 6 monastery 2"
+    },
+    "lane.p6.relic_pocket": {
+      "region": [
+        126,
+        101,
+        132,
+        108
+      ],
+      "label": "Player 6 monasteries and the monks that fill them"
     },
     "lane.p6.castle": {
       "point": [
@@ -5752,6 +5806,15 @@
       "reference_id": 20104,
       "label": "Player 7 monastery 2"
     },
+    "lane.p7.relic_pocket": {
+      "region": [
+        134,
+        93,
+        141,
+        100
+      ],
+      "label": "Player 7 monasteries and the monks that fill them"
+    },
     "lane.p7.castle": {
       "point": [
         161.0,
@@ -6249,7 +6312,7 @@
     },
     "shop.land_raider": {
       "region": [
-        168,
+        166,
         36,
         169,
         38
@@ -6258,7 +6321,7 @@
     },
     "shop.naval_raider": {
       "region": [
-        167,
+        166,
         20,
         169,
         22
@@ -8751,6 +8814,13 @@
       "y": 49.5
     },
     {
+      "key": "shop.naval_raider.border.166.19",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 166.5,
+      "y": 19.5
+    },
+    {
       "key": "shop.naval_raider.border.167.19",
       "object_key": "map.object_857",
       "player_id": 0,
@@ -8917,6 +8987,20 @@
       "player_id": 0,
       "x": 170.5,
       "y": 33.5
+    },
+    {
+      "key": "shop.land_raider.border.166.35",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 166.5,
+      "y": 35.5
+    },
+    {
+      "key": "shop.land_raider.border.166.39",
+      "object_key": "map.object_857",
+      "player_id": 0,
+      "x": 166.5,
+      "y": 39.5
     }
   ],
   "placement_removals": [

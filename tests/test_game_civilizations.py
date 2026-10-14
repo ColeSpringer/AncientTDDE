@@ -6,6 +6,7 @@ from typing import Any
 
 import pytest
 from AoE2ScenarioParser.datasets.object_support import CivilizationOld
+from conftest import stock
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "content/balance/civilizations.json"
@@ -23,12 +24,6 @@ def shop():
     anchors = json.loads((ROOT / "content/maps/foundation.json").read_text(encoding="utf-8"))
     families = [name for name, _ in balance().towers.families]
     return load_shop(ROOT / "content/balance/shop.json", anchors["anchors"], families)
-
-
-def stock():
-    from ancienttdde.game.stock import load_stock
-
-    return load_stock(ROOT / "content/balance/stock.json")
 
 
 def load(path: Path = CONTENT):

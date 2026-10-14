@@ -711,6 +711,7 @@
       "name": "Danes"
     }
   ],
+  "monastery_relics": 10,
   "relic_gold_per_minute": 30,
   "schema_version": 1,
   "source": {

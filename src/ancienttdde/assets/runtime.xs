@@ -311,20 +311,6 @@ void ancientInitialize() {
     }
 }
 
-// Preparation follows the chooser's selection, or the end of the choice window.
-void ancientBeginPreparation() {
-    xsSetTriggerVariable(vPhase, sPreparation);
-    xsSetTriggerVariable(vRemaining, cPreparation);
-    xsSetTriggerVariable(vCountdown, cPreparation);
-    xsChatData("Prepare your towers. First wave in %d game seconds.", cPreparation);
-    for (newcomer = 1; <= 7) {
-        if (laneValue(newcomer, fActive) == 1) {
-            xsChatData(ancientTowerAccess(newcomer));
-            xsChatData(ancientCivilization(newcomer));
-        }
-    }
-}
-
 // The schedule position whose enemies and timing a wave uses: endless waves repeat the
 // templates in turn.
 int ancientTemplate(int wave = 0) {
@@ -356,12 +342,34 @@ int ancientWaveHitPoints(int wave = 0) {
     return (endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates + position) * cEndlessLevels + ancientEndlessLevel(endless) - 1));
 }
 
+// The enemies a wave brings: their number and kind, or the boss's name.
+string ancientWaveEnemies(int wave = 0) {
+    int pattern = ancientTemplate(wave);
+    if (waveBoss(pattern) == 1) return (waveKey(pattern));
+    return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern));
+}
+
+// The enemies with their hit points and, past the finale, their armor.
 string ancientWaveText(int wave = 0) {
     int pattern = ancientTemplate(wave);
     string armor = "";
     if (wave >= cWaveCount) armor = ", +" + ancientText(ancientEndlessArmor(wave - cWaveCount)) + " pierce armor";
-    if (waveBoss(pattern) == 1) return (waveKey(pattern) + ", a boss with " + ancientText(ancientWaveHitPoints(wave)) + " HP");
-    return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
+    if (waveBoss(pattern) == 1) return (ancientWaveEnemies(wave) + ", a boss with " + ancientText(ancientWaveHitPoints(wave)) + " HP" + armor);
+    return (ancientWaveEnemies(wave) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
+}
+
+// Preparation follows the chooser's selection, or the end of the choice window.
+void ancientBeginPreparation() {
+    xsSetTriggerVariable(vPhase, sPreparation);
+    xsSetTriggerVariable(vRemaining, cPreparation);
+    xsSetTriggerVariable(vCountdown, cPreparation);
+    xsChatData("Prepare your towers. First wave in " + ancientText(cPreparation) + " game seconds: " + ancientWaveText(0) + ".");
+    for (newcomer = 1; <= 7) {
+        if (laneValue(newcomer, fActive) == 1) {
+            xsChatData(ancientTowerAccess(newcomer));
+            xsChatData(ancientCivilization(newcomer));
+        }
+    }
 }
 
 // Native triggers set the endless enemies' hit points for a new level, clearing the request;
@@ -743,12 +751,12 @@ void ancientStartWave() {
     xsSetTriggerVariable(vWaveDisplay, 2);
     if (wave < cWaveCount) {
         string number = ancientText(wave + 1) + " of " + ancientText(cWaveCount);
-        xsChatData("Wave " + number + ": " + ancientWaveText(wave) + ".");
+        xsChatData("Wave " + number + ": " + ancientWaveEnemies(wave) + ".");
         return;
     }
     ancientConfigureEndless(wave);
     string extra = ancientExtraWave(true) + " " + ancientText(wave - cWaveCount + 1) + " (wave " + ancientText(wave + 1) + ")";
-    xsChatData(extra + ": " + ancientWaveText(wave) + ".");
+    xsChatData(extra + ": " + ancientWaveEnemies(wave) + ".");
 }
 
 // After the finale, a solo Endless run and competitors who all survived it play on.
@@ -851,7 +859,13 @@ int ancientPadAt(float x = 0.0, float y = 0.0) {
     return (0);
 }
 
-bool ancientRelicsWaiting(int player = 1) {
+// Loose relics in the lane's pocket, which its monks have yet to collect, and in its relic
+// enclosure, which the enclosure's monks store once it is bought; one pass counts both.
+int ancientLoosePocket = 0;
+int ancientLooseEnclosure = 0;
+void ancientCountLooseRelics(int player = 1) {
+    ancientLoosePocket = 0;
+    ancientLooseEnclosure = 0;
     ancientRelicArray = xsGetPlayerUnitIds(0, cRelic, ancientRelicArray);
     for (index = 0; < xsArrayGetSize(ancientRelicArray)) {
         int relic = xsArrayGetInt(ancientRelicArray, index);
@@ -859,10 +873,29 @@ bool ancientRelicsWaiting(int player = 1) {
             vector position = xsGetUnitPosition(relic);
             float x = xsVectorGetX(position);
             float y = xsVectorGetY(position);
-            if ((x >= laneRelicX1(player)) && (x < laneRelicX2(player) + 1) && (y >= laneRelicY1(player)) && (y < laneRelicY2(player) + 1)) return (true);
+            if ((x >= lanePocketX1(player)) && (x < lanePocketX2(player) + 1) && (y >= lanePocketY1(player)) && (y < lanePocketY2(player) + 1)) ancientLoosePocket = ancientLoosePocket + 1;
+            if ((x >= laneEnclosureX1(player)) && (x < laneEnclosureX2(player) + 1) && (y >= laneEnclosureY1(player)) && (y < laneEnclosureY2(player) + 1)) ancientLooseEnclosure = ancientLooseEnclosure + 1;
         }
     }
-    return (false);
+}
+
+// The room left in the lane's monasteries once the relics its monks carry and, with the relic
+// enclosure bought, the enclosure's loose relics are stored. DE counts the relics inside.
+int ancientRelicRoom(int player = 1) {
+    int room = xsGetObjectCount(player, cMonastery) * cMonasteryRelics;
+    room = room - ancientWhole(xsPlayerAttribute(player, cAttributeRelics));
+    room = room - xsGetObjectCount(player, cMonkWithRelic);
+    if (ancientOwns(player, shopMask(cRelicEnclosurePurchase))) room = room - ancientLooseEnclosure;
+    return (room);
+}
+
+// Why the relic pad refuses now: relics its monks have yet to collect, or monasteries without
+// room for the purchase's; 0 when it can sell.
+int ancientRelicRefusal(int player = 1) {
+    ancientCountLooseRelics(player);
+    if (ancientLoosePocket > 0) return (cMessageRelics);
+    if (ancientRelicRoom(player) < cRelicsPerPurchase) return (cMessageMonasteries);
+    return (0);
 }
 
 // Raiders and siege are for sale only in a competitive game with PvP on, from its first wave.
@@ -900,7 +933,7 @@ int ancientRefusal(int player = 1, int purchase = 0) {
     if (ancientOwns(player, shopMask(purchase))) return (cMessageOwned);
     int needed = shopRequires(purchase);
     if ((needed > 0) && (ancientOwns(player, shopMask(needed)) == false)) return (cMessageRequires);
-    if ((purchase == cRelicsPurchase) && ancientRelicsWaiting(player)) return (cMessageRelics);
+    if ((purchase == cRelicsPurchase) && (ancientRelicRefusal(player) > 0)) return (ancientRelicRefusal(player));
     if ((shopTech(purchase) > 0) && (xsGetTechState(shopTech(purchase), player) == cTechStateDisabled)) return (cMessageCivilization);
     int medium = shopRaider(purchase);
     if ((medium == 0) && (purchase != cSiegePurchase)) return (0);

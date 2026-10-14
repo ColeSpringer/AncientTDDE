@@ -124,6 +124,7 @@ def test_tower_and_enemy_numbers_match_the_installed_data() -> None:
     assert stock.unit("LIGHT_CAVALRY").attack(MELEE) == 7
     assert stock.unit("GOLD_MINE").storage == 800 and stock.unit("TREE_A").storage == 125
     assert stock.relic_gold_per_minute == 30
+    assert stock.monastery_relics == 10
 
 
 def test_technologies_record_costs_and_their_tower_effects() -> None:

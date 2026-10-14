@@ -41,6 +41,7 @@ class Unit:
     class_: int
     hit_points: int
     line_of_sight: float
+    garrison_capacity: int
     speed: float | None
     resource_storages: tuple[ResourceStorage, ResourceStorage, ResourceStorage]
     type_50: Type50 | None

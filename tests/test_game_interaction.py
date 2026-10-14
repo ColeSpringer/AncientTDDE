@@ -514,13 +514,15 @@ def test_pvp_makes_every_defense_slot_an_enemy_at_the_first_wave(game_build: Gam
     assert len(effects(trigger, "change_diplomacy")) == len(pairs)
 
 
-# Each PvP pad's column nearest its entrance, opposite its King.
+# Each PvP pad's gate: the open column of its Hay Stack box, opposite its King.
 GATES = {
-    "naval_raider": {(167, y) for y in range(20, 23)},
+    "naval_raider": {(166, y) for y in range(20, 23)},
     "siege": {(166, y) for y in range(24, 34)},
-    "land_raider": {(168, y) for y in range(36, 39)},
+    "land_raider": {(166, y) for y in range(36, 39)},
 }
 HAY_STACK = 857
+# The beach-side Hay Stack line every PvP box ends at.
+BEACH = 171
 
 
 def test_pvp_pads_stay_sealed_with_hay_until_pvp_is_switched_on(game_build: GameBuild) -> None:
@@ -601,6 +603,26 @@ def test_the_gates_cut_only_the_pvp_pads_off_from_the_kings(game_build: GameBuil
         pad = cells(purchase.pad_region)
         assert bool(pad & gated) == (purchase.key not in GATES), purchase.key
         assert pad & opened, purchase.key
+
+
+def test_pvp_pad_gates_close_their_hay_stack_boxes(game_build: GameBuild) -> None:
+    """Each gate stands in its pad's first column, where its box's Hay Stack rows begin: the
+    rows run unbroken from there to the beach-side line, nothing of the box lies beyond, and
+    the three boxes share that column."""
+    data = snapshot(game_build)
+    hay = {
+        (math.floor(u["x"]), math.floor(u["y"]))
+        for u in data["units"]
+        if u["unit_const"] == HAY_STACK
+    }
+    spots = anchors(game_build)
+    assert len({x for gate in GATES.values() for x, _ in gate}) == 1
+    for key, gate in GATES.items():
+        x1, y1, _, y2 = spots[f"shop.{key}"]["region"]
+        assert gate == {(x1, y) for y in range(y1, y2 + 1)}, key
+        for row in (y1 - 1, y2 + 1):
+            assert {(x, row) for x in range(x1, BEACH + 1)} <= hay, (key, row)
+            assert (x1 - 1, row) not in hay, (key, row)
 
 
 @pytest.mark.parametrize("player", PLAYERS)

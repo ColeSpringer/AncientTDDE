@@ -359,9 +359,9 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     _, config = read_content(root)
     sizes = blocking_sizes(config)
     settings(game, balance, lanes, shop, anchors, sizes)
-    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop, profiles))
+    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop, profiles, stock))
     prelude.write_text(
-        render_prelude(balance, lanes, shop, profiles, extern=True), encoding="utf-8"
+        render_prelude(balance, lanes, shop, profiles, stock, extern=True), encoding="utf-8"
     )
     add_logic(game, balance, lanes, shop, profiles, anchors)
     scenario.message_manager.instructions = instructions(balance, shop, profiles).replace(

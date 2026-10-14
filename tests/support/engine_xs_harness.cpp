@@ -22,6 +22,7 @@ constexpr int cAttributeFood = 0;
 constexpr int cAttributeWood = 1;
 constexpr int cAttributeStone = 2;
 constexpr int cAttributeGold = 3;
+constexpr int cAttributeRelics = 7;
 constexpr int cAttributeKills = 20;
 // Kept by the enemy (player 8): how many of its units each player has killed.
 constexpr int cAttributeKillsByPlayer1 = 326;
@@ -77,7 +78,7 @@ int classOf(int type) {
         case 68: case 129: case 130: case 131: return 3;  // Mill and its age forms
         case 50: return 49;                               // Farm
         case 286: return 43;                              // Monk with Relic
-        case 82: case 598: return 3;                      // Castle, Outpost
+        case 82: case 104: case 598: return 3;            // Castle, Monastery, Outpost
         case 83: case 293: return 4;                      // Villager
         case 125: return 18;                              // Monk
         case 128: return 19;                              // Trade Cart
@@ -267,7 +268,11 @@ void start(std::initializer_list<int> humans) {
     occupied.fill(true);
     playerTypes.fill(cPlayerTypeComputer);
     for (int p:humans) playerTypes[p]=cPlayerTypeHuman;
-    for (int p=1; p<=7; ++p) units.emplace(laneLife(p), Unit{598, {134.5f, 67.5f + 3 * (p - 1), 0}, 500, p});
+    for (int p=1; p<=7; ++p) {
+        units.emplace(laneLife(p), Unit{598, {134.5f, 67.5f + 3 * (p - 1), 0}, 500, p});
+        // The lane's two monasteries, in its relic pocket as on the map.
+        for (int m=0; m<2; ++m) units.emplace(sequence++, Unit{cMonastery, {lanePocketX1(p) + 0.5f + m, lanePocketY1(p) + 0.5f, 0}, 2100, p});
+    }
     tick();
 }
 // A fresh game in the same process: every record of the previous one is cleared, while the
@@ -609,7 +614,7 @@ int main(int argc, char** argv) {
             require(mentions("First wave in " + std::to_string(s) + " game seconds.")==1, "A mark of the first wave's countdown was missed");
         }
         require(expected > 0 && marks()==expected
-                && mentions("Prepare your towers. First wave in " + std::to_string(cPreparation) + " game seconds.")==1,
+                && mentions("Prepare your towers. First wave in " + std::to_string(cPreparation) + " game seconds: ")==1,
                 "The first wave was counted down at other times");
         reachWave(1);
         require(marks()==expected, "A later wave was counted down as the first");
@@ -835,13 +840,56 @@ int main(int argc, char** argv) {
     } else if(test=="shop_relics") {
         start({3});
         int relic=sequence++;
-        units.emplace(relic, Unit{cRelic, {laneRelicX2(3)+0.5f, laneRelicY1(3)+0.5f, 0}, 1, 0});
+        units.emplace(relic, Unit{cRelic, {lanePocketX1(3)+0.5f, lanePocketY1(3)+0.5f, 0}, 1, 0});
         kingsOn(3, cBuyRelics, 1);
         for(int n=0;n<3;++n) tick();
         require(bought[3].empty() && told(3, cMessageRelics)==1, "Relics were sold over uncollected relics");
         units.erase(relic);
         tick(); tick();
         require(bought[3]==std::vector<int>{cBuyRelics}, "Collected relics did not reopen the purchase");
+    } else if(test=="shop_monasteries") {
+        // DE counts the relics inside a lane's monasteries; the script adds the relics its monks
+        // carry and, once the relic enclosure is bought, the enclosure's relics still lying loose,
+        // against the room of every monastery the lane owns.
+        start({3});
+        float x = lanePocketX1(3) + 0.5f, y = lanePocketY1(3) + 0.5f;
+        int full = 2 * cMonasteryRelics;
+        // The monks collect the bought relics and leave their spots free for the next purchase.
+        auto collect = [&]() { for (auto it = units.begin(); it != units.end();) { if (it->second.type == cRelic || it->second.type == 125) it = units.erase(it); else ++it; } };
+        auto attempt = [&]() { kingsOn(3, cBuyRelics, 1); for(int n=0;n<3;++n) tick(); };
+        attributes[3][cAttributeRelics] = full - cRelicsPerPurchase;
+        attempt();
+        require(bought[3]==std::vector<int>{cBuyRelics}, "Room for exactly one purchase was refused");
+        require(told(3, cMessageRelics)==0, "The purchase's own relics were counted before they appeared");
+        collect();
+        attributes[3][cAttributeRelics] = full - cRelicsPerPurchase + 1;
+        attempt();
+        require(bought[3].size()==1 && told(3, cMessageMonasteries)==1 && kingsOnPad(3, cBuyRelics)==1, "Relics were sold without room for all of them");
+        attributes[3][cAttributeRelics] = full - cRelicsPerPurchase;
+        int carrier = sequence++;
+        units.emplace(carrier, Unit{cMonkWithRelic, {x, y + 2, 0}, 30, 3});
+        tick(); tick();
+        require(bought[3].size()==1 && kingsOnPad(3, cBuyRelics)==1, "A relic a monk carries was not counted");
+        units.erase(carrier);
+        tick(); tick();
+        require(bought[3].size()==2, "Room freed by a stored relic did not reopen the pad");
+        collect();
+        // The enclosure's loose relics count only once it is the lane's, with its monasteries.
+        float ex = laneEnclosureX1(3) + 0.5f, ey = laneEnclosureY1(3) + 0.5f;
+        units.emplace(sequence++, Unit{cRelic, {ex, ey, 0}, 1, 0});
+        attempt();
+        require(bought[3].size()==3, "An unbought enclosure's relic held the purchase back");
+        collect();
+        units.emplace(sequence++, Unit{cRelic, {ex, ey, 0}, 1, 0});
+        units.emplace(sequence++, Unit{cMonastery, {ex + 2, ey, 0}, 2100, 3});
+        units.emplace(sequence++, Unit{cMonastery, {ex + 2, ey + 3, 0}, 2100, 3});
+        setLane(3, fOwned, lane(3, fOwned) + shopMask(cBuyRelicEnclosure));
+        attributes[3][cAttributeRelics] = 2 * full - cRelicsPerPurchase;
+        attempt();
+        require(bought[3].size()==3 && kingsOnPad(3, cBuyRelics)==1, "A bought enclosure's loose relic was not counted");
+        attributes[3][cAttributeRelics] = 2 * full - cRelicsPerPurchase - 1;
+        tick(); tick();
+        require(bought[3].size()==4, "The enclosure's room did not open the pad");
     } else if(test=="shop_inactive") {
         start({2});
         kingsOn(1, cBuyTowerAttack4, 3);

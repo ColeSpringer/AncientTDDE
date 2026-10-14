@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-from conftest import ROOT, compile_harness
+from conftest import ROOT, compile_harness, stock
 
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.game.catalog import Shop
@@ -67,7 +67,7 @@ def prelude() -> str:
     from ancienttdde.game.script import render_prelude
 
     balance, lanes, shop, profiles = content()
-    return render_prelude(balance, lanes, shop, profiles)
+    return render_prelude(balance, lanes, shop, profiles, stock())
 
 
 def filled(text: str, name: str) -> dict[int, int]:
@@ -103,7 +103,9 @@ def engine_runner(tmp_path_factory: pytest.TempPathFactory) -> Path:
     from ancienttdde.game.script import render_xs
 
     balance, lanes, shop, profiles = content()
-    script = harness_constants() + render_xs(balance, lanes, shop, harness_profiles(profiles))
+    script = harness_constants() + render_xs(
+        balance, lanes, shop, harness_profiles(profiles), stock()
+    )
     # XS counted loops implicitly declare/increment their integer counter.
     script = re.sub(
         r"for \((\w+) = ([^;]+); ([<]=?) (.+)\) \{",
@@ -171,12 +173,20 @@ def test_each_table_fills_in_its_own_function() -> None:
         assert text.index(f"void {filler}()") < text.index("void ancientTables()")
 
 
-def test_prelude_passes_the_whole_relic_column() -> None:
-    _, lanes, _, _ = content()
+def test_prelude_passes_the_relic_pocket_and_enclosure_and_the_relic_numbers() -> None:
+    _, lanes, shop, _ = content()
     text = prelude()
-    x1, _, x2, _ = lanes[0].sites.relic_column
-    assert filled(text, "laneRelicX1")[1] == x1
-    assert filled(text, "laneRelicX2")[1] == x2
+    sites = lanes[0].sites
+    for name, region in (("Pocket", sites.relic_pocket), ("Enclosure", sites.relic_enclosure)):
+        x1, y1, x2, y2 = region
+        assert filled(text, f"lane{name}X1")[1] == x1 and filled(text, f"lane{name}Y1")[1] == y1
+        assert filled(text, f"lane{name}X2")[1] == x2 and filled(text, f"lane{name}Y2")[1] == y2
+    assert "const int cMonastery = 104;" in text and "const int cMonkWithRelic = 286;" in text
+    assert (
+        "const int cMonasteryRelics = 10;" in text and "const int cRelicsPerPurchase = 3;" in text
+    )
+    enclosure = shop.get("relic_enclosure").index
+    assert f"const int cRelicEnclosurePurchase = {enclosure};" in text
 
 
 def test_prelude_counts_still_samples() -> None:
@@ -260,7 +270,7 @@ def test_prelude_lists_granted_purchases_by_slot() -> None:
     from ancienttdde.game.script import grant_table, render_prelude
 
     balance, lanes, shop, profiles = content()
-    text = render_prelude(balance, lanes, shop, harness_profiles(profiles))
+    text = render_prelude(balance, lanes, shop, harness_profiles(profiles), stock())
     assert "const int cGrantSlots = 3;" in text and "const int cGrantSlots = 1;" in prelude()
     grants = text.split("int civGrant")[1].split("}")[0]
     castle_age, castle = shop.get("castle_age").index, shop.get("castle").index
@@ -328,6 +338,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "shop_requires",
         "shop_pending",
         "shop_relics",
+        "shop_monasteries",
         "shop_inactive",
         "gold_kings",
         "kill_rewards",

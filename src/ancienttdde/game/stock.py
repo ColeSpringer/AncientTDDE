@@ -166,6 +166,8 @@ class Stock:
     units: Mapping[str, StockUnit]
     technologies: Mapping[str, StockTechnology]
     relic_gold_per_minute: int
+    # The relics one Monastery garrisons.
+    monastery_relics: int
 
     def unit(self, name: str) -> StockUnit:
         if name not in self.units:
@@ -315,4 +317,5 @@ def load_stock(path: Path) -> Stock:
         units=units,
         technologies=technologies,
         relic_gold_per_minute=integer(raw, "relic_gold_per_minute", 0, 10000),
+        monastery_relics=integer(raw, "monastery_relics", 1, 100),
     )

@@ -40,6 +40,7 @@ from ancienttdde.game.stock import (
 ATTRIBUTE_SET, ATTRIBUTE_ADD, ATTRIBUTE_MULTIPLY, DISABLE_TECH = 0, 4, 5, 102
 HIT_POINTS, ARMOR, ATTACK, MAXIMUM_RANGE, MINIMUM_RANGE = 0, 8, 9, 12, 20
 WATCH_TOWER = BuildingInfo["WATCH_TOWER"].ID
+MONASTERY = BuildingInfo["MONASTERY"].ID
 RELIC_GOLD_PRODUCTION_RATE = 191
 TREE_NAMES = {"GUARD_TOWER": "Guard Tower", "KEEP": "Keep", "BOMBARD_TOWER": "Bombard Tower"}
 # Tree files named differently from the data file's civilization names.
@@ -240,6 +241,7 @@ def snapshot(dat_path: Path, trees: Path | None, wanted: set[str]) -> dict[str, 
             "civilizations": len(dat.civs),
         },
         "relic_gold_per_minute": int(gaia.resources[RELIC_GOLD_PRODUCTION_RATE]),
+        "monastery_relics": int(cast(Unit, gaia.units[MONASTERY]).garrison_capacity),
         "civilizations": civilizations,
         "units": units,
         "technologies": technologies,

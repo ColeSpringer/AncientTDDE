@@ -15,6 +15,7 @@ from ancienttdde.game.catalog import (
     AgeUp,
     Investment,
     Raider,
+    RelicEnclosure,
     Relics,
     Repair,
     Shop,
@@ -27,6 +28,7 @@ from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS, SPARE_ISLET
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns
+from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name
 from ancienttdde.scenario.triggers import PIERCE
 
@@ -382,11 +384,20 @@ def strings(name: str, values: list[str]) -> str:
     return f'string {name}(int index = 0) {{\n{cases}\n    return ("");\n}}\n'
 
 
+def relics_per_purchase(lanes: Sequence[EngineLane]) -> int:
+    """The relics the relic purchase creates, the same in every lane."""
+    counts = sorted({len(lane.sites.relics) for lane in lanes})
+    if len(counts) > 1:
+        raise ValueError(f"Lanes differ in the relics a purchase creates: {counts}")
+    return counts[0] if counts else 0
+
+
 def render_prelude(
     balance: Balance,
     lanes: tuple[EngineLane, ...],
     shop: Shop,
     profiles: Profiles,
+    stock: Stock,
     *,
     extern: bool = False,
 ) -> str:
@@ -402,6 +413,7 @@ def render_prelude(
     repair = shop.first(Repair)
     repairs = repair.effect if repair and isinstance(repair.effect, Repair) else Repair(1, 0)
     relics = shop.first(Relics)
+    enclosure = shop.first(RelicEnclosure)
     siege = shop.first(SiegePowerUp)
     interaction = balance.interaction
     lines = [interaction.raiders.kind(medium).line_ids for medium in RAIDER_MEDIA]
@@ -443,6 +455,11 @@ def render_prelude(
         cShopCount=len(purchases),
         cInvestCount=len(investments),
         cRelicsPurchase=relics.index if relics else 0,
+        cRelicEnclosurePurchase=enclosure.index if enclosure else 0,
+        cRelicsPerPurchase=relics_per_purchase(lanes),
+        cMonastery=BuildingInfo["MONASTERY"].ID,
+        cMonkWithRelic=UnitInfo["MONK_WITH_RELIC"].ID,
+        cMonasteryRelics=stock.monastery_relics,
         cRepairMask=repair.mask if repair else 0,
         cRepairInterval=repairs.interval,
         cRepairStone=repairs.stone,
@@ -549,10 +566,14 @@ def render_prelude(
         "laneLife": [0] + [lane.life_reference for lane in lanes],
         "laneStallX10": [0] + [center(lane.sites.king_spawn)[0] for lane in lanes],
         "laneStallY10": [0] + [center(lane.sites.king_spawn)[1] for lane in lanes],
-        "laneRelicX1": [0] + [lane.sites.relic_column[0] for lane in lanes],
-        "laneRelicY1": [0] + [lane.sites.relic_column[1] for lane in lanes],
-        "laneRelicX2": [0] + [lane.sites.relic_column[2] for lane in lanes],
-        "laneRelicY2": [0] + [lane.sites.relic_column[3] for lane in lanes],
+        "lanePocketX1": [0] + [lane.sites.relic_pocket[0] for lane in lanes],
+        "lanePocketY1": [0] + [lane.sites.relic_pocket[1] for lane in lanes],
+        "lanePocketX2": [0] + [lane.sites.relic_pocket[2] for lane in lanes],
+        "lanePocketY2": [0] + [lane.sites.relic_pocket[3] for lane in lanes],
+        "laneEnclosureX1": [0] + [lane.sites.relic_enclosure[0] for lane in lanes],
+        "laneEnclosureY1": [0] + [lane.sites.relic_enclosure[1] for lane in lanes],
+        "laneEnclosureX2": [0] + [lane.sites.relic_enclosure[2] for lane in lanes],
+        "laneEnclosureY2": [0] + [lane.sites.relic_enclosure[3] for lane in lanes],
         "laneEconomyX1": [0] + [lane.economy[0] for lane in lanes],
         "laneEconomyY1": [0] + [lane.economy[1] for lane in lanes],
         "laneEconomyX2": [0] + [lane.economy[2] for lane in lanes],
@@ -626,7 +647,11 @@ def render_prelude(
 
 
 def render_xs(
-    balance: Balance, lanes: tuple[EngineLane, ...], shop: Shop, profiles: Profiles
+    balance: Balance,
+    lanes: tuple[EngineLane, ...],
+    shop: Shop,
+    profiles: Profiles,
+    stock: Stock,
 ) -> str:
     """Prefix the shared runtime with this build's constants and lookup tables.
 
@@ -634,4 +659,4 @@ def render_xs(
     defeated, resigned and dropped players. assets/runtime.xs is embedded verbatim in the
     game scenario, so notes about it live here rather than in its comments.
     """
-    return render_prelude(balance, lanes, shop, profiles) + asset_text("runtime.xs")
+    return render_prelude(balance, lanes, shop, profiles, stock) + asset_text("runtime.xs")

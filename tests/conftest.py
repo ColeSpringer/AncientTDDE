@@ -19,6 +19,7 @@ from ancienttdde.common.data import JSONValue, read_object, rows
 from ancienttdde.common.hashing import hash_file
 from ancienttdde.game.build import GameManifest
 from ancienttdde.game.build import read_manifest as read_game_manifest
+from ancienttdde.game.stock import Stock, load_stock
 from ancienttdde.map.models import FoundationConfig, MapDocument
 from ancienttdde.models import ObjectMapping
 from ancienttdde.probes.build import build_probes
@@ -27,6 +28,13 @@ from ancienttdde.probes.suite import read_manifest as read_probe_manifest
 from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerRecord
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@cache
+def stock() -> Stock:
+    """The stock DE data snapshot the build reads."""
+    return load_stock(ROOT / "content/balance/stock.json")
+
 
 # Stock object IDs the probe tests look for.
 KING = 434

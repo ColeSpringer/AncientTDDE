@@ -54,10 +54,11 @@ class LaneSites:
     endless: Mapping[str, tuple[Tile, ...]]
     villagers: Mapping[str, Spawn]
     relics: tuple[Tile, ...]
-    # The tiles bought relics wait on until the lane's monks collect them.
-    relic_column: Rect
     monks: tuple[Tile, ...]
     monasteries: tuple[int, ...]
+    # The sealed pocket holding the monasteries, the monks and the tiles bought relics wait
+    # on: a loose relic anywhere in it is one the monks have yet to collect.
+    relic_pocket: Rect
     castle: Tile
     relic_enclosure: Rect
     carts: tuple[Tile, ...]
@@ -166,9 +167,9 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
             area: spawn(anchors, f"{prefix}.villagers.{area}") for area in ("build", "economy")
         },
         relics=tiles(anchors, f"{prefix}.relics"),
-        relic_column=region(anchors, f"{prefix}.relics"),
         monks=tiles(anchors, f"{prefix}.monks"),
         monasteries=tuple(reference(anchors, f"{prefix}.monastery.{i}") for i in (1, 2)),
+        relic_pocket=region(anchors, f"{prefix}.relic_pocket"),
         castle=(int(x), int(y)),
         relic_enclosure=region(anchors, f"{prefix}.relic_enclosure"),
         carts=tiles(anchors, f"{prefix}.carts"),

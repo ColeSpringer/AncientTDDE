@@ -316,6 +316,33 @@ def test_relic_enclosures_hold_twenty_relics_and_their_monks(player: int) -> Non
 
 
 @pytest.mark.parametrize("player", PLAYERS)
+def test_relic_pockets_hold_the_monks_ground_and_both_monasteries(player: int) -> None:
+    """The script counts a relic as held when its holder stands in the pocket: the monks'
+    whole ground and both monasteries lie in it, and nothing of another lane's or of the
+    relic enclosure does."""
+    from ancienttdde.game.sites import load_sites
+
+    data, _ = content()
+    pocket = cells(load_sites(data.get("anchors", {}), player).relic_pocket)
+    assert reachable([tile(p) for p in points(f"lane.p{player}.monks")]) <= pocket
+    assert region(f"lane.p{player}.relics") <= pocket
+    units = {u["reference_id"]: u for u in data["units"]}
+
+    def monasteries(lane: int) -> set[Cell]:
+        found: set[Cell] = set()
+        for index in (1, 2):
+            monastery = anchor(f"lane.p{lane}.monastery.{index}")
+            found |= footprint(units[monastery.get("reference_id", -1)], 3)
+        return found
+
+    assert monasteries(player) <= pocket
+    assert not pocket & region(f"lane.p{player}.relic_enclosure")
+    for other in PLAYERS:
+        if other != player:
+            assert not pocket & (monk_ground(other) | monasteries(other)), other
+
+
+@pytest.mark.parametrize("player", PLAYERS)
 @pytest.mark.parametrize(
     ("kind", "medium", "route"), [("carts", "land", "land"), ("cogs", "water", "water")]
 )
