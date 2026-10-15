@@ -48,11 +48,17 @@ def lock_lobby_options(scenario: AoE2DEScenario) -> None:
     scenario.sections["Options"].all_techs = 0
 
 
-def embed_passive_ai(scenario: AoE2DEScenario, slots: Iterable[int]) -> None:
-    passive = asset_text("passive.per")
+def embed_passive_ai(
+    scenario: AoE2DEScenario,
+    slots: Iterable[int],
+    rules: str = "",
+    name: str = "Ancient TD Passive",
+) -> None:
+    """Embed the passive AI, followed by the build's own rules, in the slots under the name."""
+    passive = asset_text("passive.per") + rules
     data = scenario.sections["PlayerDataTwo"]
     for slot in slots:
-        data.ai_names[slot] = "Ancient TD Passive"
+        data.ai_names[slot] = name
         data.ai_files[slot].ai_per_file_text = passive
         # The embedded name and script take effect only with the custom AI type, 0.
         data.ai_type[slot] = 0

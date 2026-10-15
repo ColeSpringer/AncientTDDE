@@ -22,6 +22,9 @@ int ancientLastNotice = -1;
 // its reservoir it was in.
 int ancientBossLast = -1;
 int ancientBossQuarter = -1;
+// Enemies in each lane's spawn column, and the wave whose standing enemies were reported.
+int ancientColumnCounts = -1;
+int ancientStuckWave = -1;
 
 int laneVariable(int player = 1, int field = 0) {
     return (cLaneBase + (player - 1) * cLaneStride + field);
@@ -280,9 +283,6 @@ void ancientGrant(int player = 1, int civ = 0) {
 void ancientStop(string reason = "") {
     xsSetTriggerVariable(vPhase, sUnplayable);
     xsSetTriggerVariable(vCountdown, 0);
-    for (slot = 1; <= 7) {
-        laneSet(slot, fSpawn, 0);
-    }
     xsChatData("Ancient TD stopped: " + reason);
 }
 
@@ -678,6 +678,7 @@ void ancientBossTrack(int player = 1, int unit = -1) {
 // looks at them all. Without a slice, every type is looked at.
 int ancientCollect(int live = -1, int slice = -1) {
     if (ancientLeakCounts < 0) ancientLeakCounts = xsArrayCreateInt(8, 0, "ancientLeakCounts");
+    if (ancientColumnCounts < 0) ancientColumnCounts = xsArrayCreateInt(8, 0, "ancientColumnCounts");
     // Each lane's first row and the row past its last, read once rather than for every enemy.
     if (ancientLaneRows < 0) {
         ancientLaneRows = xsArrayCreateInt(16, 0, "ancientLaneRows");
@@ -689,6 +690,7 @@ int ancientCollect(int live = -1, int slice = -1) {
     for (slot = 1; <= 7) {
         laneSet(slot, fCount, 0);
         xsArraySetInt(ancientLeakCounts, slot, 0);
+        xsArraySetInt(ancientColumnCounts, slot, 0);
     }
     for (kind = 0; < cEnemyTypes) {
         if ((slice < 0) || (kind == live) || (kind % cSweepTicks == slice)) {
@@ -713,6 +715,7 @@ int ancientCollect(int live = -1, int slice = -1) {
                                 xsRemoveUnit(unit);
                             } else {
                                 laneSet(defender, fCount, laneValue(defender, fCount) + 1);
+                                if (x < 1.5 + laneSpawnX(defender)) xsArraySetInt(ancientColumnCounts, defender, xsArrayGetInt(ancientColumnCounts, defender) + 1);
                                 if (boss) ancientBossTrack(defender, unit);
                             }
                         }
@@ -739,7 +742,6 @@ int ancientCollect(int live = -1, int slice = -1) {
                 if (xsTriggerVariable(vSiegeOwner) == player) ancientEndSiege(true);
                 laneSet(player, fActive, 0);
                 laneSet(player, fLives, 0);
-                laneSet(player, fSpawn, 0);
                 laneSet(player, fPurchase, 0);
                 laneSet(player, fKings, 0);
                 laneSet(player, fCleanup, 1);
@@ -778,9 +780,6 @@ void ancientFinish(bool victory = false) {
     }
     xsSetTriggerVariable(vWinner, winner);
     xsSetTriggerVariable(vCountdown, 0);
-    for (slot = 1; <= 7) {
-        laneSet(slot, fSpawn, 0);
-    }
     ancientResult();
 }
 
@@ -857,7 +856,7 @@ int ancientRowOffset(int count = 1, int index = 0) {
 }
 
 // A batch of the wave's enemies for a lane, created silently and without collision checks so
-// nothing holds a wave back. The lane's native trigger then sends them down the lane.
+// nothing holds a wave back. The enemy's AI then sends them down the lane.
 // A boss comes alone with the attribute's limit of hit points; the rest waits in the lane's
 // reservoir, which its unit draws on as it is hit. Returns how many enemies appeared.
 int ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
@@ -879,7 +878,6 @@ int ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
         xsArraySetInt(ancientBossLast, player, shown);
         xsArraySetInt(ancientBossQuarter, player, 4);
     }
-    laneSet(player, fSpawn, 1);
     return (made);
 }
 
@@ -1329,11 +1327,10 @@ void ancientTick() {
     ancientEconomy(state);
     // Losses resolve as one batch on the next clock event.
     if (xsTriggerVariable(vStage) == cStageSudden) ancientDrain();
-    // Native requests are acknowledged once. Waiting preserves a common wave schedule.
+    // Every lane's native setup must have run before the schedule starts.
     bool ready = true;
     for (player = 1; <= 7) {
-        if ((laneValue(player, fActive) == 1) &&
-            ((laneValue(player, fInitialized) == 0) || (laneValue(player, fSpawn) > 0))) ready = false;
+        if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 0)) ready = false;
         // Once the lane's own setup has run, its granted purchases are placed and its native
         // effect set requested, once; -1 records that there is none to request.
         if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 1) && (laneValue(player, fProfile) == 0)) {
@@ -1403,11 +1400,21 @@ void ancientTick() {
         cooldown = waveInterval(pattern);
     }
     xsSetTriggerVariable(vSpawnClock, cooldown - 1);
+    // Enemies still in a spawn column well after the last batch: the enemy's AI, the only
+    // thing that walks them, is not running. Said once per wave.
+    if ((waveInterval(pattern) - cooldown >= cWalkWait) && (ancientStuckWave != wave)) {
+        for (stuck = 1; <= 7) {
+            if ((ancientStuckWave != wave) && (laneValue(stuck, fActive) == 1) && (xsArrayGetInt(ancientColumnCounts, stuck) > 0)) {
+                ancientStuckWave = wave;
+                xsChatData("Ancient TD: enemies stand at P%d's spawn; the enemy's AI is not walking them (its script did not load or was replaced).", stuck);
+            }
+        }
+    }
     xsSetTriggerVariable(vElapsed, elapsed);
     int spawning = waveDuration(pattern) - elapsed;
     if (spawning < 0) spawning = 0;
     xsSetTriggerVariable(vCountdown, spawning);
-    // The final batch must already have been acknowledged and all enemies resolved.
+    // The final batch must have been created and every enemy resolved.
     if ((elapsed >= waveDuration(pattern)) && (batches == waveBatches(pattern)) && (alive == 0)) {
         ancientWaveCleared(wave);
         ancientNextWave(wave);

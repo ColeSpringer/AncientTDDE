@@ -1,0 +1,20 @@
+# AI script constants as DE's own Promisory AI defines them (<DE>/resources/_common/ai/Promisory/const.per,
+# build 185872): the UserPatch values DE reads in up- commands. Extend it from that file.
+action-default 0
+action-move 1
+action-patrol 2
+actionid-move 610
+all-units-class -1
+object-data-action 5
+object-data-id 0
+object-data-move-x 50
+object-data-move-y 51
+object-data-point-x 8
+object-data-point-y 9
+object-data-type 1
+search-local 1
+search-remote 2
+stance-aggressive 0
+stance-defensive 1
+stance-no-attack 3
+stance-stand-ground 2

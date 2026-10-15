@@ -48,6 +48,7 @@ from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
     declare_results,
     enemy_diplomacy,
+    enemy_walk_rules,
     game_clock,
     game_status,
     wave_warnings,
@@ -264,7 +265,7 @@ def settings(
     disable_automatic_victory(scenario)
     lock_lobby_options(scenario)
     scenario.xs_manager.script_name = ""
-    embed_passive_ai(scenario, range(8))
+    embed_passive_ai(scenario, range(8), enemy_walk_rules(lanes), "Ancient TD")
     for unit in scenario.unit_manager.units[0]:
         # Gaia trade endpoints and displays must not convert to a nearby player.
         unit.capture_flag = CaptureFlag.NEVER

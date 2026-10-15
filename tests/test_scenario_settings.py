@@ -1,12 +1,11 @@
 """Scenario settings the game and the probes share."""
 
-import re
 from pathlib import Path
 
 import pytest
 from AoE2ScenarioParser.datasets.object_support import StartingAge
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
-from conftest import new_scenario
+from conftest import DE_RULE_SIZE, ai_rules, new_scenario
 
 from ancienttdde.common.data import asset_text
 from ancienttdde.scenario.settings import (
@@ -82,40 +81,6 @@ DE_NAMES = Path(__file__).parent / "support/de-strategic-numbers.txt"
 DE_STRATEGIC_NUMBERS = frozenset(
     line.strip() for line in DE_NAMES.read_text().splitlines() if line.strip()[:1] not in ("", "#")
 )
-# DE loads a rule of at most 32 facts and actions, nested ones included: its own HD AI reaches
-# exactly 32, and a 33-element rule fails to load with "ERR6002: Rule too long".
-DE_RULE_SIZE = 32
-# An AI script's strings, comments, brackets and other tokens.
-AI_TOKEN = re.compile(r'"[^"]*"|;[^\n]*|[()]|[^\s()";]+')
-type Element = list[str]  # one fact or action: its name, then its arguments
-type Rule = tuple[list[Element], list[Element]]
-
-
-def ai_rules(script: str) -> list[Rule]:
-    """Each rule's facts and actions, a nested fact counted as an element of its own."""
-    rules: list[Rule] = []
-    depth, in_actions = 0, False
-    for token in AI_TOKEN.findall(script):
-        if token[0] in '";':
-            continue
-        if token == "(":
-            depth += 1
-            if depth == 1:
-                rules.append(([], []))
-                in_actions = False
-            else:
-                facts, actions = rules[-1]
-                (actions if in_actions else facts).append([])
-        elif token == ")":
-            depth -= 1
-        elif depth == 1:
-            assert token in ("defrule", "=>"), token
-            in_actions = token == "=>"
-        elif depth > 1:
-            facts, actions = rules[-1]
-            (actions if in_actions else facts)[-1].append(token)
-    assert depth == 0
-    return rules
 
 
 def test_ai_rules_count_nested_facts_and_skip_strings_and_comments() -> None:
@@ -179,3 +144,10 @@ def test_passive_ai_switches_off_the_engines_unit_management() -> None:
         "sn-disable-trade-evasion": 1,
         "sn-do-not-scale-for-difficulty-level": 1,
     }
+
+
+def test_the_builds_rules_follow_the_passive_ai(scenario: AoE2DEScenario) -> None:
+    rules = "(defrule\n    (true)\n=>\n    (disable-self)\n)\n"
+    embed_passive_ai(scenario, range(1, 8), rules)
+    data = scenario.sections["PlayerDataTwo"]
+    assert data.ai_files[1].ai_per_file_text == asset_text("passive.per") + rules

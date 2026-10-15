@@ -62,6 +62,9 @@ CLASS_CHUNK = 255
 # Every this many seconds, the enemy count looks at every enemy type, not only the current
 # wave's.
 SWEEP_TICKS = 5
+# Seconds after a batch by which its enemies have left the spawn column when the enemy's AI
+# walks them; one still there later is reported.
+WALK_WAIT = 8
 
 
 GLOBAL_VARIABLES = (
@@ -118,7 +121,6 @@ LANE_VARIABLES = (
     "active",
     "lives",
     "initialized",
-    "spawn",
     "purchase",
     "cleanup",
     "count",
@@ -498,6 +500,7 @@ def render_prelude(
         cPierceClass=PIERCE,
         cClassChunk=CLASS_CHUNK,
         cSweepTicks=SWEEP_TICKS,
+        cWalkWait=WALK_WAIT,
         cFamilies=len(balance.towers.families),
     )
     stride = len(purchases) + 1

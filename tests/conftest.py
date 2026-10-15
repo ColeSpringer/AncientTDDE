@@ -3,6 +3,7 @@
 import contextlib
 import io
 import json
+import re
 import shutil
 import subprocess
 from collections.abc import Mapping
@@ -28,6 +29,49 @@ from ancienttdde.probes.suite import read_manifest as read_probe_manifest
 from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerRecord
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+# DE loads a rule of at most 32 facts and actions, nested ones included: its own HD AI reaches
+# exactly 32, and a 33-element rule fails to load with "ERR6002: Rule too long".
+DE_RULE_SIZE = 32
+# An AI script's strings, comments, brackets and other tokens.
+AI_TOKEN = re.compile(r'"[^"]*"|;[^\n]*|[()]|[^\s()";]+')
+type Element = list[str]  # one fact or action: its name, then its arguments
+type Rule = tuple[list[Element], list[Element]]
+
+
+def ai_rules(script: str) -> list[Rule]:
+    """Each rule's facts and actions, a nested fact counted as an element of its own."""
+    rules: list[Rule] = []
+    depth, in_actions, in_rule, head = 0, False, False, ""
+    for token in AI_TOKEN.findall(script):
+        if token[0] in '";':
+            continue
+        if token == "(":
+            depth += 1
+            if depth == 1:
+                in_actions, in_rule, head = False, False, ""
+            elif in_rule:
+                facts, actions = rules[-1]
+                (actions if in_actions else facts).append([])
+        elif token == ")":
+            depth -= 1
+        elif depth == 1:
+            if not head:
+                # A constant definition is no rule; any other top-level form is one.
+                head = token
+                assert head in ("defconst", "defrule"), head
+                in_rule = head == "defrule"
+                if in_rule:
+                    rules.append(([], []))
+            elif in_rule:
+                assert token == "=>", token
+                in_actions = True
+        elif depth > 1 and in_rule:
+            facts, actions = rules[-1]
+            (actions if in_actions else facts)[-1].append(token)
+    assert depth == 0
+    return rules
 
 
 @cache

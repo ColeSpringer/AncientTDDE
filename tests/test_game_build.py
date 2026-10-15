@@ -1,6 +1,7 @@
 """Reload playable artifacts and reject changes hidden behind edited hashes."""
 
 import json
+import operator
 import re
 from pathlib import Path
 from typing import Any
@@ -9,9 +10,12 @@ import pytest
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from conftest import (
+    DE_RULE_SIZE,
     KING,
     ROOT,
     GameBuild,
+    Rule,
+    ai_rules,
     attr_int,
     attr_list,
     attr_number,
@@ -26,9 +30,6 @@ from ancienttdde.cli import app
 from ancienttdde.common.data import asset_text
 from ancienttdde.map.geometry import Position
 from ancienttdde.scenario.xs import xs_checker
-
-MOVE = 1
-NO_ATTACK_STANCE = 3
 
 
 def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: GameBuild) -> None:
@@ -77,7 +78,6 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
             "buy.tower_attack_4",
             "transfer.build",
             "bonus.gold",
-            *(f"spawned.e{enemy}" for enemy in range(1, 9) if enemy != player),
             *(f"enemy.e{enemy}" for enemy in range(1, 9) if enemy != player),
         ):
             trigger = triggers[f"lane.p{player}.{suffix}"]
@@ -300,11 +300,193 @@ def test_only_what_stands_in_the_way_closes_a_pads_side() -> None:
 def test_ai_fillers_use_embedded_passive_ai(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
-    passive = asset_text("passive.per").strip()
-    assert all(ai["script"].strip() == passive for ai in snapshot["embedded_ai"])
+    passive = asset_text("passive.per")
+    assert all(ai["script"].startswith(passive) for ai in snapshot["embedded_ai"])
+    assert len({ai["script"] for ai in snapshot["embedded_ai"]}) == 1
+    assert all(ai["name"] == "Ancient TD" for ai in snapshot["embedded_ai"])
     assert all(p["lock_personality"] for p in snapshot["players"][1:])
     scenario = load_scenario(output / "ancient-td-de.aoe2scenario")
     assert all(p.lock_personality for p in scenario.player_manager.players[1:])
+
+
+def test_the_enemy_ai_walks_every_lane_band_to_its_exit_row(game_build: GameBuild) -> None:
+    """Online, a computer in a lane slot ignores the orders the native triggers give its
+    units, so the enemy's own AI sends its standing units in each band of a lane to the
+    band's exit row. Each band is searched within its own radius, so one lane's cap bounds
+    a search and the engine's 240-unit limit never hides a unit."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.config import load_balance, load_lanes
+    from ancienttdde.game.waves import (
+        WALK_CONSTANTS,
+        WALK_SEARCH,
+        lane_rows,
+        walk_middle,
+        walk_radius,
+    )
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    script = snapshot["embedded_ai"][0]["script"]
+    constants = {n: int(v) for n, v in re.findall(r"\(defconst (\S+) (-?\d+)\)", script)}
+    assert {name: constants[name] for name in WALK_CONSTANTS} == WALK_CONSTANTS
+    assert constants["ancient-band-y"] == constants["ancient-band-x"] + 1
+    assert constants["ancient-walk-y"] == constants["ancient-walk-x"] + 1
+    rules = ai_rules(script)[len(ai_rules(asset_text("passive.per"))) :]
+    assert all(len(facts) + len(actions) <= DE_RULE_SIZE for facts, actions in rules)
+    assert load_balance(ROOT / "content/balance/game.json").max_enemies_per_lane <= WALK_SEARCH
+    walks: dict[tuple[int, int], tuple[int, int, int, int, int, int]] = {}
+    for facts, actions in rules:
+        assert facts == [["true"]]
+        names = [action[0] for action in actions]
+        assert names.index("up-set-target-point") < names.index("up-filter-distance")
+        assert names.index("up-filter-distance") < names.index("up-find-local")
+        assert ["up-find-local", "c:", "all-units-class", "c:", str(WALK_SEARCH)] in actions
+        assert ["up-set-target-point", "ancient-band-x"] in actions
+        standing = [
+            "up-remove-objects",
+            "search-local",
+            "object-data-action",
+            "==",
+            "actionid-move",
+        ]
+        assert standing in actions
+        walk = ["up-target-point", "ancient-walk-x", "action-move", "-1", "stance-no-attack"]
+        assert actions[-1] == walk
+        bounds = {
+            (a[2], a[3]): int(a[4])
+            for a in actions
+            if a[0] == "up-remove-objects" and a[4].lstrip("-").isdigit()
+        }
+        goals = {a[1]: int(a[2]) for a in actions if a[0] == "set-goal"}
+        radius = next(int(a[4]) for a in actions if a[0] == "up-filter-distance")
+        point = (goals["ancient-band-x"], goals["ancient-band-y"])
+        assert point not in walks
+        walks[point] = (
+            radius,
+            bounds["object-data-point-y", "<"],
+            bounds["object-data-point-y", ">"],
+            bounds["object-data-point-x", ">"],
+            goals["ancient-walk-x"],
+            goals["ancient-walk-y"],
+        )
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    lanes = load_lanes(object_value(anchors, "anchors"))
+    expected: dict[tuple[int, int], tuple[int, int, int, int, int, int]] = {}
+    for lane in lanes:
+        middle = walk_middle(lane)
+        radius = walk_radius(lane)
+        for (x1, y1, x2, y2), row in lane_rows(lane):
+            # The tile before the exit is the exit to the XS, which removes the unit there.
+            expected[middle, row] = (radius, y1, y2, lane.exit_x - 2, lane.exit_x, row)
+            # The radius reaches every position in the band before the exit, far row edges
+            # included; another lane's path begins a radius away, so a search holds one lane's
+            # enemies and at most a sliver of the next, which the row bounds drop.
+            corners = [(x, y) for x in (x1, lane.exit_x - 1) for y in (y1, y2 + 1)]
+            assert all(((x - middle) ** 2 + (y - row) ** 2) ** 0.5 <= radius for x, y in corners)
+            assert x1 <= lane.spawn_x and lane.exit_x <= x2
+            for other in lanes:
+                if other is not lane:
+                    _, oy1, _, oy2 = other.path
+                    assert min(abs(oy1 - row), abs(oy2 - row)) >= radius
+    assert walks == expected
+
+
+def test_the_walk_rules_use_the_constant_values_des_own_ai_defines() -> None:
+    from ancienttdde.game.waves import WALK_CONSTANTS
+
+    lines = (Path(__file__).parent / "support/de-ai-constants.txt").read_text().splitlines()
+    defined = {
+        name: int(value)
+        for name, value in (line.split() for line in lines if line and not line.startswith("#"))
+    }
+    assert {name: defined[name] for name in WALK_CONSTANTS} == WALK_CONSTANTS
+
+
+def walk_orders(
+    rules: list[Rule], constants: dict[str, int], units: list[dict[str, float]]
+) -> dict[int, tuple[int, int, str]]:
+    """Run the walk rules as DE's AI does over the enemy's units, each a dict with x, y and
+    action; a found unit's tile and action feed the removals. Returns each ordered unit's
+    point and stance by its index."""
+    goals: dict[str, int] = {}
+    orders: dict[int, tuple[int, int, str]] = {}
+    compare = {"<": operator.lt, ">": operator.gt, "==": operator.eq}
+    for _, actions in rules:
+        selected: list[int] = []
+        target = (0, 0)
+        radius = 0.0
+        for action in actions:
+            match action:
+                case ["set-goal", name, value]:
+                    goals[name] = int(value)
+                case ["up-full-reset-search"]:
+                    selected = []
+                case ["up-set-target-point", name]:
+                    target = (goals[name], goals[name[:-1] + "y"])
+                case ["up-filter-distance", "c:", _, "c:", most]:
+                    radius = float(most)
+                case ["up-find-local", "c:", "all-units-class", "c:", count]:
+                    near = [
+                        i
+                        for i, u in enumerate(units)
+                        if ((u["x"] - target[0]) ** 2 + (u["y"] - target[1]) ** 2) ** 0.5 <= radius
+                    ]
+                    selected = near[: int(count)]
+                case ["up-remove-objects", "search-local", field, op, value]:
+                    number = constants[value] if value in constants else int(value)
+                    kept: list[int] = []
+                    for i in selected:
+                        data = {
+                            "object-data-point-x": int(units[i]["x"]),
+                            "object-data-point-y": int(units[i]["y"]),
+                            "object-data-action": int(units[i]["action"]),
+                        }
+                        if not compare[op](data[field], number):
+                            kept.append(i)
+                    selected = kept
+                case ["up-target-point", name, "action-move", "-1", stance]:
+                    for i in selected:
+                        assert i not in orders, f"unit {i} ordered twice"
+                        orders[i] = (goals[name], goals[name[:-1] + "y"], stance)
+                case _:
+                    raise AssertionError(action)
+    return orders
+
+
+def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: GameBuild) -> None:
+    """Run as DE's AI runs them, the rules order every enemy standing before the exit in a lane
+    to that lane's exit on its own row, and nothing else: not a walking unit, not one at the
+    exit, not the keeper King on its islet."""
+    from ancienttdde.common.data import object_value
+    from ancienttdde.game.config import load_lanes
+    from ancienttdde.game.sites import SPARE_ISLET
+    from ancienttdde.game.waves import WALK_CONSTANTS
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    script = snapshot["embedded_ai"][0]["script"]
+    constants = {n: int(v) for n, v in re.findall(r"\(defconst (\S+) (-?\d+)\)", script)}
+    rules = ai_rules(script)[len(ai_rules(asset_text("passive.per"))) :]
+    anchors = json.loads((output / "map.json").read_text())["anchors"]
+    standing, walking = 0.0, float(WALK_CONSTANTS["actionid-move"])
+    units: list[dict[str, float]] = []
+    expected: dict[int, tuple[int, int, str]] = {}
+    for lane in load_lanes(object_value(anchors, "anchors")):
+        center, spot = lane.center_y, lane.spawn_x + 0.5
+        for y, row in (
+            (center - 0.5, center - 1),
+            (center + 0.5, center),
+            (center + 1.5, center + 1),
+        ):
+            # A new batch stands on the spawn column; a straggler stands halfway along.
+            for x in (spot, spot + 20):
+                expected[len(units)] = (lane.exit_x, row, "stance-no-attack")
+                units.append({"x": x, "y": y, "action": standing})
+        units.append({"x": spot + 10, "y": center + 0.5, "action": walking})
+        units.append({"x": lane.exit_x - 0.5, "y": center + 0.5, "action": standing})
+        islet_x, islet_y = lane.sites.siege[SPARE_ISLET]
+        units.append({"x": islet_x + 0.5, "y": islet_y + 0.5, "action": standing})
+    assert walk_orders(rules, constants, units) == expected
 
 
 def test_the_runtime_checks_cleanly_against_the_build_prelude(
@@ -401,11 +583,7 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
 ) -> None:
     """The original's one-way alliance: the enemy's units attack nothing while every lane's
     towers fire at them, and they walk at their stock speed. The map presets it for the enemy
-    in slot 8; a trigger per number the enemy may hold sets it once the XS has chosen. Each
-    new batch takes the No Attack stance in the spawn column, so a unit a tower hits does not
-    turn to answer it."""
-    from ancienttdde.common.data import object_value
-    from ancienttdde.game.config import load_lanes
+    in slot 8; a trigger per number the enemy may hold sets it once the XS has chosen."""
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -445,41 +623,13 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
                 (enemy, lane_number): DiplomacyState.ALLY,
             }
             assert len(trigger["effects"]) == 2
-    anchors = json.loads((output / "map.json").read_text())["anchors"]
-    stances: dict[str, list[dict[str, object]]] = {}
-    expected: list[str] = []
-    for lane in load_lanes(object_value(anchors, "anchors")):
-        _, y1, _, y2 = lane.path
-        assert f"lane.p{lane.player}.spawned" not in triggers
-        for enemy in range(1, 9):
-            if enemy == lane.player:
-                assert f"lane.p{lane.player}.spawned.e{enemy}" not in triggers
-                continue
-            spawned = triggers[f"lane.p{lane.player}.spawned.e{enemy}"]
-            expected.append(spawned["name"])
-            assert [
-                c["attributes"]["quantity"]
-                for c in spawned["conditions"]
-                if c["attributes"]["variable"] == variables["game.enemy"]
-            ] == [enemy]
-            kinds = [e["type"] for e in spawned["effects"]]
-            assert kinds.count("change_object_stance") == 1
-            assert kinds.index("change_object_stance") < kinds.index("task_object")
-            [stance] = [
-                e["attributes"] for e in spawned["effects"] if e["type"] == "change_object_stance"
-            ]
-            assert (stance["source_player"], stance["attack_stance"]) == (enemy, NO_ATTACK_STANCE)
-            assert (
-                stance["area_x1"],
-                stance["area_y1"],
-                stance["area_x2"],
-                stance["area_y2"],
-            ) == (lane.spawn_x, y1, lane.spawn_x + 1, y2)
+    # The enemy's own AI gives its units their stance and their walk; no trigger orders them.
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
-            if change["type"] == "change_object_stance":
-                stances.setdefault(trigger["name"], []).append(change["attributes"])
             attributes = change["attributes"]
+            assert change["type"] != "change_object_stance"
+            if change["type"] == "task_object" and trigger["name"].startswith("lane.p"):
+                assert attributes["source_player"] == int(trigger["name"][6])
             # The protected keeper King is the one enemy unit held in place.
             if (
                 change["type"] == "modify_attribute"
@@ -487,81 +637,22 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
                 and attributes["object_list_unit_id"] != KING
             ):
                 assert attributes["object_attributes"] != ObjectAttribute.MOVEMENT_SPEED
-    assert sorted(stances) == sorted(expected)
 
 
-def test_each_lane_sends_the_batches_the_xs_creates_down_its_rows(game_build: GameBuild) -> None:
-    """The XS creates every batch itself; no trigger creates an enemy. Each lane's
-    acknowledgment orders the new batch in the spawn column, and its ten-second route keeps
-    every enemy in the lane walking, each row band to its own exit tile, so pairs created side
-    by side stay side by side."""
-    from ancienttdde.common.data import object_value
-    from ancienttdde.game.config import load_lanes
-
+def test_no_trigger_creates_or_moves_a_wave(game_build: GameBuild) -> None:
+    """The XS creates every batch and the enemy's AI walks it: the scenario holds no wave
+    trigger, no spawn acknowledgement and no route order."""
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
-    triggers = {t["name"]: t for t in snapshot["triggers"]}
-    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
-    lane_waves = [
-        t for t in snapshot["triggers"] if t["name"].startswith("lane.") and ".wave." in t["name"]
-    ]
-    assert not lane_waves
+    lane_names = {t["name"] for t in snapshot["triggers"] if t["name"].startswith("lane.")}
+    assert not any(
+        ".wave." in name or ".spawned" in name or ".route" in name for name in lane_names
+    )
+    assert not any(v["name"].endswith(".spawn") for v in snapshot["variables"])
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
             if change["type"] == "create_object":
                 assert change["attributes"]["source_player"] != 8
-    anchors = json.loads((output / "map.json").read_text())["anchors"]
-    for lane in load_lanes(object_value(anchors, "anchors")):
-        x1, y1, x2, y2 = lane.path
-        center = lane.center_y
-        assert f"lane.p{lane.player}.route" not in triggers
-        for enemy in range(1, 9):
-            if enemy == lane.player:
-                assert f"lane.p{lane.player}.route.e{enemy}" not in triggers
-                continue
-            # The XS creates each batch at the spawn tile's center.
-            for name, columns in (
-                (f"lane.p{lane.player}.spawned.e{enemy}", (lane.spawn_x, lane.spawn_x + 1)),
-                (f"lane.p{lane.player}.route.e{enemy}", (x1, x2)),
-            ):
-                trigger = triggers[name]
-                assert trigger["looping"]
-                orders = [e["attributes"] for e in trigger["effects"] if e["type"] == "task_object"]
-                bands = [
-                    (o["area_y1"], o["area_y2"], o["location_x"], o["location_y"]) for o in orders
-                ]
-                assert bands == [
-                    (y1, center - 1, lane.exit_x, center - 1),
-                    (center, center, lane.exit_x, center),
-                    (center + 1, y2, lane.exit_x, center + 1),
-                ]
-                assert all(o["source_player"] == enemy and o["action_type"] == MOVE for o in orders)
-                assert all((o["area_x1"], o["area_x2"]) == columns for o in orders)
-                requested = {
-                    c["attributes"]["variable"]: c["attributes"]["quantity"]
-                    for c in trigger["conditions"]
-                    if c["type"] == "variable_value"
-                }
-                assert requested[variables["game.enemy"]] == enemy
-                assert requested[variables[f"lane.p{lane.player}.active"]] == 1
-            route = triggers[f"lane.p{lane.player}.route.e{enemy}"]
-            assert [
-                c["attributes"]["timer"] for c in route["conditions"] if c["type"] == "timer"
-            ] == [10]
-            spawned = triggers[f"lane.p{lane.player}.spawned.e{enemy}"]
-            requested = {
-                c["attributes"]["variable"]: c["attributes"]["quantity"]
-                for c in spawned["conditions"]
-                if c["type"] == "variable_value"
-            }
-            assert requested[variables[f"lane.p{lane.player}.spawn"]] == 1
-            [cleared] = [
-                e["attributes"] for e in spawned["effects"] if e["type"] == "change_variable"
-            ]
-            assert (cleared["variable"], cleared["quantity"]) == (
-                variables[f"lane.p{lane.player}.spawn"],
-                0,
-            )
 
 
 def test_results_go_to_the_winning_lane_or_to_whichever_number_the_enemy_holds(

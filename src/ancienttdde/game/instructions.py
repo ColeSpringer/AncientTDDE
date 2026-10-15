@@ -173,7 +173,7 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "Host with the standard DE data set. Put humans in any slots and at least one "
         "computer in another: DE numbers the players by their lobby colors and skips empty "
         "slots, and the highest-numbered computer player is the enemy, whatever slot it was "
-        "shown in. The embedded passive AI handles every computer slot. "
+        "shown in. The embedded AI runs every computer slot and walks the enemy's units. "
         "Only human-controlled defense lanes participate; other computer-filled defense "
         "lanes are cleared automatically, and do not affect victory. "
         "Use fixed start positions, locked teams and Fast (the highest lobby game speed). "

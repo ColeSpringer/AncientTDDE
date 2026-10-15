@@ -7,8 +7,8 @@ For every check, record the DE build, civilization, lane, player count and what 
 ## Hosting the game
 
 Build with `uv run ancienttdde build` and copy `.build/game/ancient-td-de.aoe2scenario`
-into DE's scenario directory. The scenario embeds its XS and the passive AI for every
-computer slot, so no other file needs installing.
+into DE's scenario directory. The scenario embeds its XS and the AI for every computer
+slot, so no other file needs installing; the enemy's AI walks its units down the lanes.
 
 Use the standard DE data set, fixed starts, locked teams and All Visible for Reveal Map.
 The host selects Fast, the highest lobby game speed, in the lobby: the scenario format
@@ -28,7 +28,9 @@ run's level; run options are selected in game, in the row of Outposts below the 
 
 ## Full game
 
-- Solo and online lobbies load with no AI Script Error dialog: the passive AI parses.
+- Solo and online lobbies load with no AI Script Error dialog: the AI parses. Each batch
+  starts walking within a second or two of appearing; if the enemy's AI is not running, the
+  chat says so once per wave, about ten seconds after a batch.
 - Solo victory and defeat, and a repeat on the first and last lane. No "has been
   defeated" line appears at the start; when a solo lane falls, the result line and the
   result objective still appear.
@@ -68,10 +70,9 @@ run's level; run options are selected in game, in the row of Outposts below the 
   player is told at three quarters, half and a quarter; a boss reaching the exit costs 5
   lives.
 - Enemies never attack towers, villagers or Kings (the enemy is allied to every lane; lanes
-  are its enemies), and towers still fire at them; enemies take the No Attack stance as they
-  appear and walk past firing towers at their stock speed without turning, pausing or
-  bunching (archers especially). The only pause is a brief one every 10 seconds when the
-  lane's enemies are ordered on again; record any other. No sound plays when enemies appear.
+  are its enemies), and towers still fire at them; enemies walk past firing towers at their
+  stock speed without turning, pausing or bunching (archers especially); record any pause.
+  No sound plays when enemies appear.
 - No stutter in the first second (the script fills its lookup tables then), in the choice
   window or in preparation, and late waves with 60 or more enemies alive and 30 or more idle
   Kings stay smooth.

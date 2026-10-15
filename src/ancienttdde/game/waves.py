@@ -1,14 +1,15 @@
-"""The enemy, wave spawns, routing, the game clock and results.
+"""The enemy, the wave clock, the AI rules that walk the waves, and results.
 
 DE numbers a multiplayer game's players by their lobby colors and skips closed slots, so the
 computer the host left in the last slot may hold any number. The XS takes the highest-numbered
-computer in the game as the enemy; every native effect on the enemy's units exists once per
-number it may hold, gated on the enemy variable. The XS sets the waves' hit points and armor
-itself.
+computer in the game as the enemy; the native diplomacy and result effects exist once per
+number it may hold, gated on the enemy variable. The XS creates the waves and sets their hit
+points and armor itself; the enemy's own AI walks them, since a computer in a lane slot
+ignores native orders online.
 """
 
-from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
-from AoE2ScenarioParser.datasets.trigger_lists.attack_stance import AttackStance
+from collections.abc import Sequence
+
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
@@ -18,14 +19,29 @@ from ancienttdde.game.objectives import objective
 from ancienttdde.game.script import State
 from ancienttdde.game.triggers import Game
 from ancienttdde.models import Rect
-from ancienttdde.scenario.triggers import TriggerHandle, area, condition, effect
+from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
-# Seconds between the orders that keep every enemy in a lane walking.
-ROUTE_SECONDS = 10
 # The player numbers the enemy may hold.
 ENEMY_SLOTS = range(1, 9)
 # The player numbers that hold defense lanes.
 LANE_SLOTS = range(1, 8)
+# The AI goal pairs that hold the point a band is searched around and the point its standing
+# enemies are sent to.
+BAND_GOAL = 508
+WALK_GOAL = 510
+# The most units one AI search returns; a band's search stays within its lane's cap.
+WALK_SEARCH = 240
+# The DE AI script constants the walk rules use, with the values DE's own scripts define.
+WALK_CONSTANTS = {
+    "all-units-class": -1,
+    "search-local": 1,
+    "object-data-action": 5,
+    "object-data-point-x": 8,
+    "object-data-point-y": 9,
+    "actionid-move": 610,
+    "action-move": 1,
+    "stance-no-attack": 3,
+}
 
 
 def game_clock(game: Game) -> None:
@@ -165,66 +181,50 @@ def lane_rows(lane: EngineLane) -> tuple[Band, ...]:
     )
 
 
-def spawn_rows(lane: EngineLane) -> tuple[Band, ...]:
-    """The lane's bands in the spawn column alone, where the XS creates each batch."""
-    return tuple(
-        ((lane.spawn_x, y1, lane.spawn_x + 1, y2), row) for (_, y1, _, y2), row in lane_rows(lane)
-    )
+def walk_middle(lane: EngineLane) -> int:
+    """The column halfway along the lane's path, where each band's search is centred."""
+    x1, _, x2, _ = lane.path
+    return (x1 + x2) // 2
 
 
-def send_down_the_lane(
-    trigger: TriggerHandle, lane: EngineLane, enemy: int, bands: tuple[Band, ...]
-) -> None:
-    """Every enemy in the bands walks its band to the exit. The enemy is allied to every lane,
-    so nothing stops it on the way; each new order makes a walking unit pause."""
-    for band, row in bands:
-        effect(
-            trigger,
-            "task_object",
-            source_player=enemy,
-            location_x=lane.exit_x,
-            location_y=row,
-            action_type=ActionType.MOVE,
-            **area(band),
-        )
+def walk_radius(lane: EngineLane) -> int:
+    """How far from a band's middle its search reaches: the path's whole length, no more."""
+    x1, _, x2, _ = lane.path
+    return (x2 - x1) // 2 + 1
 
 
-def enemy_numbers(lane: EngineLane) -> tuple[int, ...]:
-    """The numbers the enemy may hold while this lane plays: any but the lane's own."""
-    return tuple(enemy for enemy in ENEMY_SLOTS if enemy != lane.player)
-
-
-def lane_spawned(game: Game, lane: EngineLane) -> None:
-    """The XS creates each batch of enemies; the trigger for the enemy's number acknowledges
-    it by sending the new batch off. The batch first takes the No Attack stance, which it
-    keeps: a unit a tower hits would otherwise stop to answer it, which the alliance forbids."""
-    prefix = f"lane.p{lane.player}"
-    _, y1, _, y2 = lane.path
-    for enemy in enemy_numbers(lane):
-        spawned = game.trigger(f"{prefix}.spawned.e{enemy}", looping=True)
-        game.value(spawned, "game.enemy", enemy)
-        game.value(spawned, f"{prefix}.active", 1)
-        game.value(spawned, f"{prefix}.spawn", 1)
-        effect(
-            spawned,
-            "change_object_stance",
-            source_player=enemy,
-            attack_stance=AttackStance.NO_ATTACK_STANCE,
-            **area((lane.spawn_x, y1, lane.spawn_x + 1, y2)),
-        )
-        send_down_the_lane(spawned, lane, enemy, spawn_rows(lane))
-        game.set_value(spawned, f"{prefix}.spawn", 0)
-
-
-def lane_route(game: Game, lane: EngineLane) -> None:
-    """Every enemy in the lane is ordered on again now and then, in case one lost its way."""
-    prefix = f"lane.p{lane.player}"
-    for enemy in enemy_numbers(lane):
-        move = game.trigger(f"{prefix}.route.e{enemy}", looping=True)
-        condition(move, "timer", timer=ROUTE_SECONDS)
-        game.value(move, "game.enemy", enemy)
-        game.value(move, f"{prefix}.active", 1)
-        send_down_the_lane(move, lane, enemy, lane_rows(lane))
+def enemy_walk_rules(lanes: Sequence[EngineLane]) -> str:
+    """AI rules that send the enemy's standing units in each lane band to the band's exit
+    row. Online, a computer in a lane slot ignores the orders the native triggers give its
+    units, while its own AI's orders reach them."""
+    lines = [f"(defconst {name} {value})" for name, value in WALK_CONSTANTS.items()]
+    for name, goal in (("band", BAND_GOAL), ("walk", WALK_GOAL)):
+        lines.append(f"(defconst ancient-{name}-x {goal})")
+        lines.append(f"(defconst ancient-{name}-y {goal + 1})")
+    for lane in lanes:
+        middle = walk_middle(lane)
+        for (_, y1, _, y2), row in lane_rows(lane):
+            lines += [
+                "(defrule",
+                "    (true)",
+                "=>",
+                f"    (set-goal ancient-band-x {middle})",
+                f"    (set-goal ancient-band-y {row})",
+                "    (up-full-reset-search)",
+                "    (up-set-target-point ancient-band-x)",
+                f"    (up-filter-distance c: -1 c: {walk_radius(lane)})",
+                f"    (up-find-local c: all-units-class c: {WALK_SEARCH})",
+                f"    (up-remove-objects search-local object-data-point-y < {y1})",
+                f"    (up-remove-objects search-local object-data-point-y > {y2})",
+                # From the tile before the exit on, the XS counts a unit as through.
+                f"    (up-remove-objects search-local object-data-point-x > {lane.exit_x - 2})",
+                "    (up-remove-objects search-local object-data-action == actionid-move)",
+                f"    (set-goal ancient-walk-x {lane.exit_x})",
+                f"    (set-goal ancient-walk-y {row})",
+                "    (up-target-point ancient-walk-x action-move -1 stance-no-attack)",
+                ")",
+            ]
+    return "\n".join(lines) + "\n"
 
 
 def declare_results(game: Game) -> None:

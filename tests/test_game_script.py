@@ -459,6 +459,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "choice_once",
         "spawn_rows",
         "spawn_silent",
+        "walk_watchdog",
         "shop_cached_pad_moves",
         "collect_sweep",
         "boss_hitpoints",

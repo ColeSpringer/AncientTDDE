@@ -207,7 +207,7 @@ int laneOfRow(float y) {
     for (int p = 1; p <= 7; ++p) if (y >= laneLowY(p) && y < laneHighY(p) + 1) return p;
     return 0;
 }
-std::array<int, 9> grants{}, cleanups{}, acknowledged{};
+std::array<int, 9> grants{}, cleanups{};
 std::array<std::vector<int>, 9> bought{};
 // Message codes each lane's native message triggers delivered to its player.
 std::array<std::vector<int>, 9> sent{};
@@ -232,7 +232,7 @@ void resetXsBuffers() {
     ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPad=-1;
     ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientSamplePad=-1;
     ancientLastNotice=-1; ancientSpawnArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
-    ancientLaneRows=-1;
+    ancientLaneRows=-1; ancientColumnCounts=-1; ancientStuckWave=-1;
     // The lookup tables live in the same arrays, so they are filled again on the next lookup.
     ancientTablesReady=false;
 }
@@ -268,9 +268,6 @@ void nativeEffects() {
             }
         }
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
-        // The XS creates each batch; the lane's trigger for the enemy's number sends it down the
-        // lane and clears the flag.
-        if (lane(p, fActive) && lane(p, fSpawn) && enemy() > 0 && enemy() != p) { ++acknowledged[p]; setLane(p, fSpawn, 0); }
     }
 }
 // Waves clear the field each second; a lane's own Kings and life display stay.
@@ -305,7 +302,7 @@ void restart(std::initializer_list<int> humans) {
     variables.fill(0); units.clear(); chat.clear(); researched.clear(); techStates.clear();
     for (int p=0; p<9; ++p) { sent[p].clear(); bought[p].clear(); attributes[p].clear(); created[p].clear(); }
     outpostHitpoints.fill(500);
-    kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); acknowledged.fill(0); audible.fill(0);
+    kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); audible.fill(0);
     applied.clear(); techChanges.clear();
     for (auto &hp : typeHitpoints) hp.clear();
     refusedOwner = -1;
@@ -727,6 +724,17 @@ int main(int argc, char** argv) {
         // Wave spawns make no sound.
         start({2}); advanceTo(sWave); for(int n=0;n<5;++n) tick();
         require(spawns[2]>0 && audible[8]==0, "A wave spawn played the creation sound");
+    } else if(test=="walk_watchdog") {
+        // The harness never walks the enemies, as DE without the enemy's AI would not: once the
+        // wave's last batch is cWalkWait seconds old, the standing enemies are reported, once.
+        start({2}); advanceTo(sWave);
+        int limit = waveBatches(0) * waveInterval(0) + cWalkWait + 2;
+        int n = 0;
+        while(mentions("not walking")==0 && n < limit) { tick(); ++n; }
+        require(mentions("not walking")==1, "Standing enemies were not reported");
+        require(n > cWalkWait, "Standing enemies were reported while batches were still coming");
+        for(int m=0;m<30;++m) tick();
+        require(mentions("not walking")==1, "The report was repeated within the wave");
     } else if(test=="shop_cached_pad_moves") {
         // A King standing on a pad counts in every sample once it has stood still long enough,
         // and stops counting once it leaves, whether it walks off or drifts off a little at a time.
@@ -1729,7 +1737,7 @@ int main(int argc, char** argv) {
         require(spawns[1]>0 && spawns[1]==spawns[2] && spawns[3]==0, "The waves did not come to the human lanes alone");
         int owned=0;
         for(auto &[id, u] : units) if(u.type==waveUnit(0)) { require(u.owner==3, "An enemy belonged to another player"); ++owned; }
-        require(owned==spawns[1]+spawns[2] && acknowledged[1]>0 && acknowledged[2]>0, "The enemy's units were not created for the enemy and sent off");
+        require(owned==spawns[1]+spawns[2], "The enemy's units were not created for the enemy");
         int difficulty = xsTriggerVariable(vDifficulty);
         require(hitpointsSet(3, waveUnit(0))==std::vector<float>{float(waveHitPoints(difficulty * cWaveCount))}, "The wave's hit points were not set on the enemy's definition");
         require(hitpointsSet(8, waveUnit(0)).empty() && mentions("refused to create")==0, "Player 8 was still treated as the enemy");

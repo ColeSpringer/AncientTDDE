@@ -27,7 +27,6 @@ from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
 from ancienttdde.game.sites import SPARE_ISLET
 from ancienttdde.game.triggers import Game
-from ancienttdde.game.waves import lane_route, lane_spawned
 from ancienttdde.scenario.triggers import STORAGE, area, condition, effect
 
 
@@ -41,8 +40,6 @@ def lane_actions(
     )
     lane_initialize(game, lane, balance)
     lane_profiles(game, lane, balance, profiles, shop)
-    lane_spawned(game, lane)
-    lane_route(game, lane)
     lane_status(game, lane, balance)
     lane_kings(game, lane)
     lane_transfers(game, lane)

@@ -1,9 +1,10 @@
-; The computer players own the waves and the cleared lanes, and the scenario's triggers and
-; XS give their units every order. DE runs its own unit management for a computer player
-; whatever its script says, with these numbers at their defaults: a share of its civilians
-; explore, idle soldiers are tasked, groups form to defend its town, units answer sighted
-; enemies and garrison. Online that management ordered wave villagers about their lane, so
-; each part of it that orders units is switched off before the script retires.
+; The computer players own the waves and the cleared lanes. DE runs its own unit management
+; for a computer player whatever its script says, with these numbers at their defaults: a
+; share of its civilians explore, idle soldiers are tasked, groups form to defend its town,
+; units answer sighted enemies and garrison. Online that management ordered wave villagers
+; about their lane, so each part of it that orders units is switched off first. The game
+; build appends the rules that walk the enemy's units down the lanes; the scenario's
+; triggers and XS give every other order.
 ; DE loads at most 32 facts and actions in one rule, so the numbers come in two rules, the
 ; civilians' and then the soldiers'.
 (defrule
