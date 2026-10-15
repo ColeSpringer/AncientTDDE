@@ -65,14 +65,20 @@ def embed_passive_ai(
 
 
 def reset_player(
-    player: Player, *, human: bool, civilization: str, lock_personality: bool, starting_age: int
+    player: Player,
+    *,
+    human: bool,
+    civilization: str,
+    lock_personality: bool,
+    starting_age: int,
+    population_cap: int,
 ) -> None:
-    """Start the player with no stockpile, a 200 population cap and no allied victory."""
+    """Start the player with no stockpile, the population cap and no allied victory."""
     player.human = human
     player.civilization = civilization
     player.lock_civ = False
     player.lock_personality = lock_personality
     player.starting_age = starting_age
-    player.population_cap = 200
+    player.population_cap = population_cap
     player.allied_victory = False
     player.food = player.wood = player.gold = player.stone = 0

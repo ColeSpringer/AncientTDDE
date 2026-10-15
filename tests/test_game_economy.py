@@ -22,6 +22,7 @@ from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerReco
 
 PLAYERS = range(1, 8)
 KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
+MONK_WITH_RELIC, POPULATION = 286, 110
 HAY_STACK, SIGN, ACCURSED = 857, 819, 684
 TOWERS, BOMBARD = (79, 234, 235, 236), (236,)
 ATTACK, PIERCE, SET, ADD, SUBTRACT = 9, 3, 1, 2, 3
@@ -171,7 +172,7 @@ def test_lanes_start_with_the_original_economy(game_build: GameBuild, player: in
         (1, SET): start["wood"],
         (2, SET): start["stone"],
         (3, SET): start["gold"],
-        (4, SET): 0,
+        (4, SET): balance()["economy"]["starting_population"],
     }
     researched = {
         e["technology"]: e["force_research_technology"]
@@ -306,15 +307,29 @@ def test_resource_bonuses_pay_once_and_open_endless_deposits(
 
 @pytest.mark.parametrize("player", PLAYERS)
 def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: int) -> None:
+    from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance
     from ancienttdde.game.messages import MESSAGES, message_code, message_texts
 
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
-    texts = message_texts(load_balance(ROOT / "content/balance/game.json"))
+    balance = load_balance(ROOT / "content/balance/game.json")
+    families = [name for name, _ in balance.towers.families]
+    shop = load_shop(ROOT / "content/balance/shop.json", anchors(game_build), families)
+    texts = message_texts(balance, shop)
     # The gold per King depends on the difficulty, which the game announces when it starts.
     assert texts["gold"] == "Gold converted into Kings; they arrive at your stall."
+    # The population refusal names the purchase that adds room, as the shop sells it.
+    assert texts["population"] == (
+        "No population room for that purchase: +65 population adds some. Your Kings stay."
+    )
+    assert texts["population_limit"] == (
+        "That purchase would take your lane past its population limit of 200; your Kings stay."
+    )
+    assert texts["population_full"] == (
+        "Your lane's room already reaches its population limit of 200; your Kings stay."
+    )
     # The objectives show only the shared siege cooldown; the last buyer waits longer.
     assert "longer for its last buyer" in texts["siege_cooldown"]
     for key, _ in MESSAGES:
@@ -418,13 +433,13 @@ def test_no_flat_income_or_forced_population(game_build: GameBuild) -> None:
     assert not any(name.endswith(".income") for name in triggers)
     for trigger in data["triggers"]:
         # The population purchase, and a civilization profile applied once, may add headroom;
-        # the lane's setup only levels it to zero.
+        # the lane's setup only sets the starting room.
         if trigger["name"].endswith(".buy.population") or ".profile." in trigger["name"]:
             continue
         for e in effects(trigger, "modify_resource"):
             if e["tribute_list"] == 4:
                 assert trigger["name"].endswith(".initialize") and e["operation"] == SET
-                assert e["quantity"] == 0
+                assert e["quantity"] == balance()["economy"]["starting_population"]
 
 
 @pytest.mark.parametrize("player", PLAYERS)
@@ -749,7 +764,28 @@ def test_the_status_line_switches_between_the_wait_and_the_wave(game_build: Game
 
 
 @pytest.mark.parametrize("player", PLAYERS)
-def test_population_starts_at_zero_headroom_for_every_lane(
+def test_kings_and_monks_take_no_population(game_build: GameBuild, player: int) -> None:
+    """The lane's setup sets the population cost of its Kings and monks to zero, so the shop's
+    currency and the relics' monks never hold a purchase back."""
+    init = triggers_by_name(snapshot(game_build))[f"lane.p{player}.initialize"]
+    freed = {
+        e["object_list_unit_id"]: (e["operation"], e["quantity"])
+        for e in effects(init, "modify_attribute")
+        if e["object_attributes"] == POPULATION and e["source_player"] == player
+    }
+    assert freed == {KING: (SET, 0), MONK: (SET, 0), MONK_WITH_RELIC: (SET, 0)}
+    # Before the lane's room is set, so the Kings on the map never land on top of it.
+    order = [
+        (e["type"], e["attributes"].get("object_attributes"), e["attributes"].get("tribute_list"))
+        for e in init["effects"]
+    ]
+    room = order.index(("modify_resource", None, 4))
+    zeroed = [i for i, o in enumerate(order) if o == ("modify_attribute", POPULATION, None)]
+    assert len(zeroed) == 3 and max(zeroed) < room
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_population_starts_with_the_contents_room_for_every_lane(
     game_build: GameBuild, player: int
 ) -> None:
     init = triggers_by_name(snapshot(game_build))[f"lane.p{player}.initialize"]
@@ -758,5 +794,6 @@ def test_population_starts_at_zero_headroom_for_every_lane(
         for e in effects(init, "modify_resource")
         if e["tribute_list"] == 4 and e["source_player"] == player
     ]
-    # Civilization bonuses that start with population are levelled; only purchases add it.
-    assert headroom == [(SET, 0)]
+    # Civilization bonuses that start with population are levelled to the same room; only
+    # purchases and the profiles add more.
+    assert headroom == [(SET, balance()["economy"]["starting_population"])]

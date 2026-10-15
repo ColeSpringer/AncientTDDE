@@ -1,5 +1,6 @@
 """Messages the engine sends one lane's player, by code, through that lane's native triggers."""
 
+from ancienttdde.game.catalog import Shop, population_name
 from ancienttdde.game.config import Balance
 
 # In code order; the XS requests a message by setting the lane's message field to its code.
@@ -43,6 +44,18 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("boss_three_quarters", "Your boss has three quarters of its hit points left."),
     ("boss_half", "Your boss has half of its hit points left."),
     ("boss_quarter", "Your boss has a quarter of its hit points left."),
+    (
+        "population",
+        "No population room for that purchase: {population} adds some. Your Kings stay.",
+    ),
+    (
+        "population_limit",
+        "That purchase would take your lane past its population limit of {cap}; your Kings stay.",
+    ),
+    (
+        "population_full",
+        "Your lane's room already reaches its population limit of {cap}; your Kings stay.",
+    ),
 )
 
 
@@ -50,7 +63,11 @@ def message_code(key: str) -> int:
     return [name for name, _ in MESSAGES].index(key) + 1
 
 
-def message_texts(balance: Balance) -> dict[str, str]:
+def message_texts(balance: Balance, shop: Shop) -> dict[str, str]:
     economy = balance.economy
-    values = {"kills": economy.kills_per_reward * economy.rewards_per_king}
+    values = {
+        "kills": economy.kills_per_reward * economy.rewards_per_king,
+        "population": population_name(shop),
+        "cap": balance.population_cap,
+    }
     return {key: text.format(**values) for key, text in MESSAGES}

@@ -139,11 +139,12 @@ def test_resources_population_and_technologies_are_granted_once(
 ) -> None:
     snapshot, _ = profile_scenario
     trigger = triggers_by_name(snapshot)["lane.p1.profile.1"]
-    granted = {
-        (e["tribute_list"], attr_int(e, "operation")): attr_int(e, "quantity")
+    granted = [
+        (e["tribute_list"], attr_int(e, "operation"), attr_int(e, "quantity"))
         for e in effects(trigger, "modify_resource")
-    }
-    assert granted == {(2, ADD): 500, (3, ADD): 100, (4, ADD): 20}
+    ]
+    # The starting traders' room comes last, with the traders.
+    assert granted == [(2, ADD, 500), (3, ADD, 100), (4, ADD, 20), (4, ADD, 3)]
     assert all(e["source_player"] == 1 for e in effects(trigger, "modify_resource"))
     researched = [
         (e["technology"], e["force_research_technology"], e["source_player"])

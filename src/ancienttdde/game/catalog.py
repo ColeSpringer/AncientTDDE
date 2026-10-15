@@ -221,6 +221,12 @@ class Shop:
         return next((p for p in self.purchases if isinstance(p.effect, kind)), None)
 
 
+def population_name(shop: Shop) -> str:
+    """The population purchase as the shop sells it, for texts that point players to it."""
+    purchase = shop.first(Population)
+    return purchase.name if purchase else "more population"
+
+
 def choice[T: str](row: dict[str, object], key: str, options: tuple[T, ...]) -> T:
     value = row.get(key)
     for option in options:
@@ -424,8 +430,14 @@ def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection
             )
         )
     check_requirements(keys)
-    # The engine keeps one repair schedule, one relic delivery and one siege holder.
-    for kind, name in ((Repair, "repair"), (Relics, "relics"), (SiegePowerUp, "siege")):
+    # The engine keeps one repair schedule, one relic delivery, one siege holder and one
+    # population purchase to sell up to the limit.
+    for kind, name in (
+        (Repair, "repair"),
+        (Relics, "relics"),
+        (SiegePowerUp, "siege"),
+        (Population, "population"),
+    ):
         if sum(isinstance(p.effect, kind) for p in purchases) > 1:
             raise ValueError(f"At most one {name} purchase is supported")
     for medium in RAIDER_MEDIA:

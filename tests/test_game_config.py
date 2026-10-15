@@ -4,7 +4,9 @@ import json
 from pathlib import Path
 
 import pytest
+from conftest import stock
 
+PIERCE = 3
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -56,10 +58,38 @@ def test_the_schedule_follows_the_originals_roster_and_cadence() -> None:
         assert wave.enemies == expected, wave.key
     bosses = waves[46:]
     assert all(w.enemies == 1 and w.duration == 1 for w in bosses)
-    # The rams keep half their armor, not the 195 that would turn arrows away.
-    rams = next(w for w in waves if w.unit == "SIEGE_RAM")
-    assert rams.pierce_armor == 100 and all(w.pierce_armor is None for w in waves if w is not rams)
+    # Tiers 1-4 keep each unit's own pierce armor; from tier 5 the schedule adds a step per
+    # tier to it, 10-A the last tier's and the bosses the largest. The rams keep their own
+    # full armor.
+    steps = {5: 10, 6: 15, 7: 20, 8: 30, 9: 40}
+    for index, wave in enumerate(waves[:46]):
+        step = steps.get(min(index // 5 + 1, 9))
+        if wave.unit == "SIEGE_RAM" or step is None:
+            assert wave.pierce_armor is None, wave.key
+        else:
+            assert wave.pierce_armor == stock().unit(wave.unit).armor(PIERCE) + step, wave.key
+    assert all(w.pierce_armor == stock().unit(w.unit).armor(PIERCE) + 50 for w in bosses)
     assert len({w.unit for w in bosses}) == 10 and not {w.unit for w in bosses} & set(units)
+
+
+def test_regular_hit_points_that_a_level_would_clamp_are_rejected(tmp_path: Path) -> None:
+    """A regular wave's hit points on every level must fit the 16-bit attribute, or the
+    highest level silently plays the same wave as the one below."""
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    raw["waves"][45]["hit_points"] = 30000
+    with pytest.raises(ValueError, match="hit_points"):
+        load_balance(write_balance(tmp_path, raw))
+
+
+def test_the_population_cap_is_the_games_own_limit() -> None:
+    from ancienttdde.game.config import load_balance
+
+    balance = load_balance(ROOT / "content/balance/game.json")
+    assert balance.population_cap == 200
+    # Room for a trader purchase and a few villager pairs before more must be bought.
+    assert balance.economy.starting_population == 25
 
 
 def test_villagers_open_the_schedule_as_its_weakest_wave() -> None:
@@ -171,6 +201,7 @@ def write_balance(tmp_path: Path, raw: dict[str, object]) -> Path:
         ("preparation_seconds", True),
         ("max_enemies_per_lane", 100000),
         ("sudden_death_interval", -1),
+        ("population_cap", 150),
     ],
 )
 def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> None:
@@ -207,6 +238,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("economy", "starting_technologies"), ["BALLISTICS", "BALLISTICS"], "twice"),
         (("economy", "starting_technologies"), ["CASTLE_AGE"], "CASTLE_AGE"),
         (("economy", "starting_technologies"), ["GUARD_TOWER"], "GUARD_TOWER"),
+        (("economy", "starting_population"), 500, "starting_population"),
         (("economy", "starting_resources", "stone"), -1, "stone"),
         (("economy", "kill_reward", "kills"), 0, "kills"),
         (("towers", "families", "towers"), ["WATCH_TOWER", "HOUSE"], "Not a tower: HOUSE"),
@@ -309,11 +341,14 @@ def test_difficulty_scales_wave_hit_points_within_the_engine_limit() -> None:
 
     balance = load_balance(ROOT / "content/balance/game.json")
     normal = balance.difficulty.index("normal")
+    hard = balance.difficulty.index("hard")
     for index, wave in enumerate(balance.waves):
         assert balance.hit_points(index, normal) == wave.hit_points
         scaled = [balance.hit_points(index, level) for level in range(3)]
         assert scaled == sorted(scaled)
-        assert wave.boss or max(scaled) <= MAX_HIT_POINTS
+        # No regular wave is clamped on any level: Hard's share fits the attribute.
+        if not wave.boss:
+            assert scaled[hard] == (wave.hit_points * 110 + 50) // 100 <= MAX_HIT_POINTS
     assert balance.hit_points(0, balance.difficulty.index("easy")) == 36
     last = balance.waves[-1]
     assert balance.hit_points(len(balance.waves) - 1, balance.difficulty.index("hard")) == (

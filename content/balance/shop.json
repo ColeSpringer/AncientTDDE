@@ -32,7 +32,7 @@
     {"key": "trade_cogs", "name": "3 trade cogs", "label": "3 trade cogs", "legacy": "Trade Cogs", "kings": 1, "pad": "shop.trade_cogs", "display": 40438, "effect": {"kind": "traders", "medium": "water"}},
     {"key": "relics", "name": "3 relics and 2 monks", "label": "3 relics, 2 monks", "legacy": "Relic", "kings": 1, "pad": "shop.relic", "display": 19241, "effect": {"kind": "relics"}},
     {"key": "relic_enclosure", "name": "20 relics", "label": "20 relics", "legacy": "20 More relics", "kings": 5, "once": true, "pad": "shop.20_more_relics", "display": 18929, "effect": {"kind": "relic_enclosure"}},
-    {"key": "population", "name": "+80 population", "legacy": "80 Population", "kings": 3, "once": true, "pad": "shop.80_population", "display": 19180, "effect": {"kind": "population", "amount": 80}},
+    {"key": "population", "name": "+65 population", "legacy": "80 Population", "kings": 2, "pad": "shop.80_population", "display": 19180, "effect": {"kind": "population", "amount": 65}},
     {"key": "castle", "name": "Castle (+20 population, castle research)", "label": "Castle", "legacy": "Castle", "kings": 1, "once": true, "pad": "shop.castle", "display": 19181, "effect": {"kind": "castle"}},
     {"key": "third_row", "name": "Third row of towers", "label": "Tower row", "legacy": "3rd Row of Towers", "kings": 3, "once": true, "pad": "shop.3rd_row_of_towers", "display": 39329, "effect": {"kind": "expansion", "row": "third"}},
     {"key": "fourth_row", "name": "Fourth row of towers", "label": "Tower row", "legacy": "4th Row of Towers", "kings": 3, "once": true, "requires": "third_row", "pad": "shop.4th_row_of_towers", "display": 39329, "effect": {"kind": "expansion", "row": "fourth"}},

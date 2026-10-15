@@ -87,10 +87,19 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
         ("naval_raider", "Naval raider (fire galley): 2 Kings, when PvP is on"),
         ("siege", "Siege power-up: 15 Kings plus 3 per surviving rival, when PvP is on"),
         ("castle", "Castle (+20 population, castle research): 1 King, once"),
+        ("population", "+65 population: 2 Kings"),
     ],
 )
 def test_captions_state_the_name_price_and_limits(key: str, caption: str) -> None:
     assert shop().get(key).caption == caption
+
+
+def test_population_sells_again_and_the_castle_once() -> None:
+    from ancienttdde.game.catalog import Castle, Population
+
+    population, castle = shop().get("population"), shop().get("castle")
+    assert (population.effect, population.kings, population.once) == (Population(65), 2, False)
+    assert (castle.effect, castle.kings, castle.once) == (Castle(), 1, True)
 
 
 @pytest.mark.parametrize(
@@ -448,6 +457,7 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("old_schema", "Unsupported shop schema"),
         ("previous_schema", "Unsupported shop schema"),
         ("second_siege", "At most one siege purchase"),
+        ("second_population", "At most one population purchase"),
         ("second_land_raider", "At most one land raider purchase"),
         ("siege_kings_per_rival", "kings_per_rival"),
         ("unknown_medium", "medium"),
@@ -498,6 +508,8 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
         raw["schema_version"] = 3
     elif defect == "second_siege":
         first["effect"] = {"kind": "siege", "kings_per_rival": 5}
+    elif defect == "second_population":
+        first["effect"] = {"kind": "population", "amount": 65}
     elif defect == "second_land_raider":
         first["effect"] = {"kind": "raider", "medium": "land"}
     elif defect == "siege_kings_per_rival":

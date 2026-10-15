@@ -48,10 +48,20 @@ def level_name(inputs: Inputs) -> str:
     return inputs.balance.difficulty.levels[inputs.level].name
 
 
+def setting_text(inputs: Inputs, assumptions: Assumptions, name: str) -> str:
+    """One assumption as the table shows it; the attack investments by label and minute."""
+    if name == "attack_investments":
+        return ", ".join(
+            f"{inputs.shop.get(key).label} at minute {minute:g}"
+            for key, minute in assumptions.attack_investments
+        )
+    return str(getattr(assumptions, name))
+
+
 def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
     stock = inputs.stock
     rows = [
-        [field.name.replace("_", " "), str(getattr(assumptions, field.name))]
+        [field.name.replace("_", " "), setting_text(inputs, assumptions, field.name)]
         for field in fields(assumptions)
     ]
     rows += [
@@ -67,8 +77,8 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
     return (
         "The data files give the towers, enemies and technologies; these settings and constants "
         f"fill the gaps. Values in Kings use the shop's prices and the {level_name(inputs)} King "
-        "price, the level every competitive game plays. The trade gold per trip is an estimate "
-        "until it is timed on the game map.\n\n" + table(["Setting", "Value"], rows)
+        "price, the level every competitive game plays. The trade gold per trip is the least "
+        "seen in play; some civilizations bring more.\n\n" + table(["Setting", "Value"], rows)
     )
 
 
@@ -165,8 +175,8 @@ def pressure_section(inputs: Inputs, assumptions: Assumptions) -> str:
     names = " and ".join(levels[index].name for index in others)
     return (
         "Each wave against the lane the assumptions expect at the minute it starts: the Kings "
-        f"it has, the tower attack {assumptions.attack_share * 100:.0f} percent of them buy, its "
-        "Watch Towers and, from minute "
+        f"it has, the tower attack {assumptions.attack_share * 100:.0f} percent of them buy and "
+        "the attack investments it has bought, its Watch Towers and, from minute "
         f"{assumptions.accursed_from_minute:g}, both Accursed Towers. Pressure is the damage per "
         "second the wave needs over what those towers deal; above 1 the wave leaks. The last "
         f"columns are the pressure on {names}, with their own King price and hit points.\n\n"

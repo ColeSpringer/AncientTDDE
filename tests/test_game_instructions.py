@@ -128,6 +128,8 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
         "play Hard" in text
     )
     assert "Competitive games always play Normal" in text
+    assert "Set the lobby's Population to 200" in text
+    assert "Lanes cannot train traders, ships, monks or castle units" in text
     assert "Every 1500 gold on Easy, 2000 on Normal or 3000 on Hard" in text
     assert "Every 2000 gold you hold" not in text
 
@@ -138,7 +140,7 @@ def test_instructions_scale_the_schedule_by_difficulty() -> None:
     text = instructions(balance(), shop(), profiles())
     assert "Hit points below are for Normal: 80% on Easy and 110% on Hard" in text
     assert "1. Villagers: 30 enemies with 45 HP each, 45 game seconds" in text
-    assert "56. Abraha Elephant: boss with 980000 HP" in text
+    assert "56. Abraha Elephant: boss with 1870000 HP" in text
     assert "in threes from wave 31, and each boss comes alone" in text
     assert "costs one life, a boss 5" in text
     assert "restored from its whole amount as it takes damage" in text
@@ -244,7 +246,7 @@ def test_civilizations_are_listed_alphabetically_with_the_default_last() -> None
 def test_the_kill_king_message_counts_wave_kills() -> None:
     from ancienttdde.game.messages import message_texts
 
-    text = message_texts(balance())["kill_king"]
+    text = message_texts(balance(), shop())["kill_king"]
     assert text == "Kill reward: every 100 wave kills earn a King; one arrives at your stall."
 
 
@@ -258,8 +260,10 @@ def test_instructions_explain_what_villagers_build_and_where_population_comes_fr
         "markets, blacksmiths or universities" in text
     )
     assert (
-        "Population comes only from the shop's +80 population and castle, and from the "
-        "civilization profiles that add some below" in text
+        "Bought villagers, traders, raiders and siege need population room: a lane starts with "
+        "room for 25 more, and only the shop's +65 population (again and again, up to the limit "
+        "of 200), the castle and the civilization profiles that add some below give more. "
+        "Houses cannot be built, and Kings and monks take none." in text
     )
     assert "Every game rules out Yasama and Stronghold" in text
 

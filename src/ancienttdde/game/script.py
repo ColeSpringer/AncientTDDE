@@ -14,6 +14,7 @@ from ancienttdde.game.catalog import (
     PAYOUTS,
     AgeUp,
     Investment,
+    Population,
     Raider,
     RelicEnclosure,
     Relics,
@@ -27,7 +28,7 @@ from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Keeper,
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS
-from ancienttdde.game.spawns import Spawned, center, purchase_spawns
+from ancienttdde.game.spawns import Spawned, center, purchase_spawns, spawned_population
 from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name
 from ancienttdde.scenario.triggers import PIERCE
@@ -114,6 +115,8 @@ GLOBAL_VARIABLES = (
     "siege_left",
     "siege_cooldown",
     "siege_display",
+    # Population room held for the siege's trebuchets until they appear.
+    "siege_reserved",
 )
 # A lane's purchase, King and message fields are requests its native triggers acknowledge;
 # owned holds its once-only purchases as bits, kills the kill rewards already paid.
@@ -139,6 +142,9 @@ LANE_VARIABLES = (
     "boss",
     # The native effect set of the lane's civilization profile, 0 for none.
     "profile",
+    # Set a tick after the lane's elimination, once the result is posted: the native defeat
+    # trigger then declares its player defeated.
+    "fallen",
 )
 # Seconds between repeated explanations of the same refused purchase.
 NOTICE_SECONDS = 10
@@ -431,6 +437,7 @@ def render_prelude(
     relics = shop.first(Relics)
     enclosure = shop.first(RelicEnclosure)
     siege = shop.first(SiegePowerUp)
+    population = shop.first(Population)
     interaction = balance.interaction
     lines = [interaction.raiders.kind(medium).line_ids for medium in RAIDER_MEDIA]
     line_size = max(len(line) for line in lines)
@@ -452,6 +459,8 @@ def render_prelude(
         cPreparation=balance.preparation_seconds,
         cIntermission=balance.intermission_seconds,
         cEnemyCap=balance.max_enemies_per_lane,
+        cPopulationCap=balance.population_cap,
+        cPopulationPurchase=population.index if population else 0,
         cHitPointCap=MAX_HIT_POINTS,
         cLaneClasses=len(LANE_CLASSES),
         cSuddenInterval=balance.sudden_death_interval,
@@ -520,9 +529,15 @@ def render_prelude(
     starts: dict[int, int] = {}
     counts: dict[int, int] = {}
     entries: list[Spawned] = []
+    # The population each purchase's units take, which must be the same in every lane.
+    taken: dict[int, int] = {}
     for lane in lanes:
         for purchase in purchases:
-            if made := purchase_spawns(lane, purchase, interaction.raiders):
+            made = purchase_spawns(lane, purchase, interaction.raiders)
+            population = spawned_population(made)
+            if taken.setdefault(purchase.index, population) != population:
+                raise ValueError(f"Lanes differ in the population {purchase.key} takes")
+            if made:
                 starts[lane.player * stride + purchase.index] = len(entries)
                 counts[lane.player * stride + purchase.index] = len(made)
                 entries.extend(made)
@@ -624,6 +639,8 @@ def render_prelude(
         "shopPrice": [0] + [p.kings for p in purchases],
         "shopMask": [0] + [p.mask for p in purchases],
         "shopRequires": [0] + [shop.get(p.requires).index if p.requires else 0 for p in purchases],
+        # The population each purchase's units take; the siege's is counted by rival.
+        "shopPopulation": [0] + [taken[p.index] for p in purchases],
         "shopUpgrade": [0]
         + [TechInfo[p.effect.upgrade].ID if isinstance(p.effect, AgeUp) else 0 for p in purchases],
         "shopTech": [0] + [TechInfo[p.only_with[0]].ID if p.only_with else 0 for p in purchases],

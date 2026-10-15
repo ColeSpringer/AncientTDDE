@@ -10,7 +10,8 @@ Build with `uv run ancienttdde build` and copy `.build/game/ancient-td-de.aoe2sc
 into DE's scenario directory. The scenario embeds its XS and the AI for every computer
 slot, so no other file needs installing; the enemy's AI walks its units down the lanes.
 
-Use the standard DE data set, fixed starts, locked teams and All Visible for Reveal Map.
+Use the standard DE data set, fixed starts, locked teams, All Visible for Reveal Map and
+Population 200, the limit the shop sells room up to (the scenario cannot lock it).
 The host selects Fast, the highest lobby game speed, in the lobby: the scenario format
 cannot set it. DE also offers a default under Options → Game → Game Speed.
 
@@ -37,13 +38,14 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   starts walking within a second or two of appearing; if the enemy's AI is not running, the
   chat says so once per wave, about ten seconds after a batch.
 - Solo victory and defeat, and a repeat on the first and last lane. No "has been
-  defeated" line appears at the start; when a solo lane falls, the result line and the
-  result objective still appear.
+  defeated" line appears at the start; a second after a solo lane's elimination line, the
+  result line and the result objective appear and DE declares its player defeated.
 - Two nonconsecutive human slots with AI filling the others; AI lanes stay unpaid, show no
   lives line and no defeat line.
 - Two humans and one computer with the slots between them empty: the chat names the computer
   as the enemy, the waves come to both lanes with the announced hit points (select an enemy),
-  a leak costs lives, and a defeat declares the computer the winner. The enemies walk their
+  a leak costs lives, a fallen lane's player is declared defeated by DE and can keep
+  watching, and the last defeat declares the computer the winner. The enemies walk their
   lanes as in a solo game: none wanders off, stops short or turns back under fire. A lobby
   without a computer stops at once with the "Ancient TD stopped" objective and its chat
   line, and the wave and lives lines leave the objectives.
@@ -84,9 +86,14 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
 - No stutter in the first second (the script fills its lookup tables then), in the choice
   window or in preparation, and late waves with 60 or more enemies alive and 30 or more idle
   Kings stay smooth.
-- Wave 1 is a little easier than before on Normal and Hard, waves 7–30 press hard, the bosses
-  fall only to a strong attack ladder, and Hard is clearly above Normal (the Pressure table in
-  `docs/balance.md` shows the model for each level).
+- The waves step up at the start of each tier (waves 6, 11, 16, 21, 26, 31, 36, 41 and 47),
+  waves 2–5 press a little harder than the villagers, the rams keep their full armor, the
+  bosses fall only to a strong attack ladder and grow through the finale, and Hard is
+  clearly above Normal (the Pressure table in `docs/balance.md` shows the model for each
+  level). The notice before a wave names the pierce armor the schedule gives it.
+- A boss is refilled from its total once a second, so a lane dealing more than 32,767 in one
+  second kills it with the total unspent; record a boss that falls within a second or two of
+  reaching the towers.
 - Save/reload in preparation, mid-wave, during elimination and sudden death;
   resource grants, spawn cadence and lives match an uninterrupted run, and purchases, pad
   counts and enemy counts keep working after the load (the script's lookup tables survive or
@@ -102,8 +109,8 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   pausing briefly on pads buy nothing; refusals keep the Kings and are
   explained to that player alone, including Bombard Tower attack for civilizations
   without Bombard Towers, and a different refusal is explained at once.
-- Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 4, each raider
-  3, siege 15, each tower-row half 3), in whole rows from the end farthest from the pad's
+- Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 5, each raider
+  2, +65 population 2, siege 15, each tower-row half 3), in whole rows from the end farthest from the pad's
   entrance. A Hay Stack divider splits the tower-row pad: the left half opens the 3rd row,
   the right half the 4th.
 - New Kings and bought units appear on their spots. The original's flags stay on the
@@ -129,8 +136,9 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   every 25 wave kills pay 125 stone and 25 wood (kills count with the enemy allied to the
   lanes). Raiders killing rival traders and raiders earn nothing.
 - Investments pay on their period; the repair crew restores lives for stone.
-- A starting trade cart's return adds about 100 gold on the game's routes (the balance
-  tables' assumption); record the real amount for a cart and a cog.
+- A trader's return adds at least 110 gold on the game's routes (the balance tables'
+  assumption; one civilization brought 137); record a cart's and a cog's amount for other
+  civilizations.
 - Tower attack reaches existing, new and upgraded towers only and keeps rising past +255
   (+750 shows as +750, and the periodic +1 and +3 keep climbing); Accursed Towers appear on
   the reserved pads with 240 pierce attack.
@@ -168,8 +176,17 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
 - Reaching the end of each resource row pays its bonus once and adds endless deposits;
   starting mines and bushes keep their normal amounts.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
-  appear and work; a lane starts with no population headroom of its own, the Huns
-  included, so only +80 population, the castle and a profile's own population raise it.
+  appear and work. A lane starts with room for 25 more units, the Huns included, and its
+  profile's population on top: villagers, traders, raiders and the siege are refused with
+  their Kings kept, and the refusal explained, once that room is used until +65 population
+  or the castle adds more, and again at the 200 limit; +65 population sells again until the
+  room reaches the limit (castle plus two purchases fill a standard lane); Kings and monks
+  take none, so the population reading (DE's current population, which the limit check
+  reads) does not rise as Kings arrive or relics are bought; a profile's starting traders or
+  villagers bring their own room; the siege holds its trebuchets' room from the purchase
+  until they appear, with the population reading unchanged meanwhile. The shop's limit is
+  the content's 200 whatever the lobby's Population setting; record whether a different
+  setting changes the lane's displayed limit.
 - The relic pad keeps the Kings and says the monasteries have no room once the lane's two
   cannot take three more relics: after six purchases on top of the two starting relics,
   fewer when the profile grants relics or the relic purchase, or for the Armenians' free
@@ -177,9 +194,9 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   holds the pad until a monk collects it.
 - An Armenian lane finds a free relic in one of its monasteries, and a Saxon lane's towers
   and Accursed Towers fire one arrow of their own after Castle Age.
-- The trade-income probe's routes are short; on the game map, time a cart and a cog on
-  their real routes and set `trade_gold_per_trip` from that. The civilization bands are
-  tuned to the 100-gold estimate, so trade-heavy profiles may need retuning afterwards.
+- The trade-income probe's routes are short; `trade_gold_per_trip` is the least a trip
+  brought on the game map (110; one civilization brought 137). Record a cart's and a cog's
+  amount for other civilizations.
 
 ## Modes and competition
 
@@ -227,7 +244,8 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   elimination ends it; save/load during the warning and the siege keeps both.
 - Villagers build only towers, mills, camps and farms: no houses, walls, gates, outposts,
   markets, blacksmiths, universities, barracks, docks, castles, monasteries or town
-  centers; docks train only trade cogs; a bought castle trains nothing and fires no arrows;
+  centers; markets and docks train nothing (traders come from the shop); a bought castle
+  trains nothing and fires no arrows;
   monks cannot convert. All of this still holds after buying Castle Age and Imperial Age,
   and the castle stays silent after Fletching, Bodkin Arrow and Bracer. Crenellations,
   Greek Fire, Yasama and Stronghold cannot be researched; in competitive games neither can

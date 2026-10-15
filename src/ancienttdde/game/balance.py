@@ -63,10 +63,11 @@ TOWER_FAMILY = "towers"
 
 @dataclass(frozen=True)
 class Assumptions:
-    """Numbers the data files cannot give. The trade probe measures the first."""
+    """Numbers the data files cannot give; the trade gold per trip was measured in play."""
 
-    # Gold a trader brings home per trip on the map's full-length routes.
-    trade_gold_per_trip: int = 100
+    # Gold a trader brings home per trip on the map's full-length routes: the least seen in
+    # DE runs; some civilizations bring up to 137.
+    trade_gold_per_trip: int = 110
     starting_carts: int = 8
     starting_cogs: int = 4
     # Villagers a lane keeps on gold and on stone, and what each gathers in a minute.
@@ -93,6 +94,14 @@ class Assumptions:
     towers_at_finale: int = 30
     finale_minute: float = 60.0
     accursed_from_minute: float = 20.0
+    # The attack investments the lane buys and the minutes it buys them at: their attack
+    # accrues from then on, on top of the ladder's share and out of the Kings the model does
+    # not otherwise spend, as the lanes in the recorded games bought all three.
+    attack_investments: tuple[tuple[str, float], ...] = (
+        ("attack_1_every_30", 15.0),
+        ("attack_3_every_30", 24.0),
+        ("attack_1_every_5", 32.0),
+    )
 
 
 @dataclass(frozen=True)
@@ -289,6 +298,34 @@ def wave_needs(inputs: Inputs, level: int | None = None) -> tuple[WaveNeed, ...]
     return tuple(needs)
 
 
+type BoughtInvestments = tuple[tuple[Investment, float], ...]
+
+
+def attack_investments(inputs: Inputs, assumptions: Assumptions) -> BoughtInvestments:
+    """The attack investments the expected lane buys, each with its minute, checked once:
+    every one must pay attack to the towers' family, which the pressure model adds to."""
+    bought: list[tuple[Investment, float]] = []
+    for key, minute in assumptions.attack_investments:
+        effect = inputs.shop.get(key).effect
+        if (
+            not isinstance(effect, Investment)
+            or effect.pays != "attack"
+            or effect.family != TOWER_FAMILY
+        ):
+            raise ValueError(f"Not a tower attack investment: {key}")
+        bought.append((effect, minute))
+    return tuple(bought)
+
+
+def investment_attack(bought: BoughtInvestments, minutes: float) -> float:
+    """The tower attack the lane's attack investments have paid by this minute."""
+    return sum(
+        effect.amount * 60 / effect.period * (minutes - minute)
+        for effect, minute in bought
+        if minutes >= minute
+    )
+
+
 @dataclass(frozen=True)
 class Pressure:
     """A wave against the lane the assumptions expect at the minute the wave starts: the damage
@@ -312,8 +349,9 @@ def lane_pressure(
 ) -> tuple[Pressure, ...]:
     """Each scheduled wave against a lane that has earned the baseline income and every earlier
     wave's Kings and kill rewards, grown by its investments, put its attack share into the
-    ladder and built its Watch Towers, with both Accursed Towers once their minute comes. A
-    difficulty level (the competitive one unless given) sets the King price and hit points."""
+    ladder, bought the attack investments at their minutes and built its Watch Towers, with
+    both Accursed Towers once their minute comes. A difficulty level (the competitive one
+    unless given) sets the King price and hit points."""
     level = inputs.level if level is None else level
     balance, economy = inputs.balance, inputs.balance.economy
     ladder = attack_ladder(inputs.shop)
@@ -326,6 +364,7 @@ def lane_pressure(
     kills = 0
     rows: list[Pressure] = []
     needs = wave_needs(inputs, level)
+    bought = attack_investments(inputs, assumptions)
     for index, (wave, need) in enumerate(zip(balance.waves, needs, strict=True)):
         minutes = seconds / 60
         share = min(1.0, minutes / assumptions.investment_minutes)
@@ -336,7 +375,9 @@ def lane_pressure(
             + kills // economy.kills_per_reward // economy.rewards_per_king
         )
         kings = assumptions.starting_kings + growth * earned
-        attack = ladder_attack(ladder, assumptions.attack_share * kings)
+        attack = ladder_attack(ladder, assumptions.attack_share * kings) + investment_attack(
+            bought, minutes
+        )
         progress = min(1.0, (minutes - first) / (assumptions.finale_minute - first))
         added = assumptions.towers_at_finale - assumptions.towers_at_first_wave
         towers = assumptions.towers_at_first_wave + added * progress

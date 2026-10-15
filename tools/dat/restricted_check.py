@@ -24,8 +24,8 @@ from ancienttdde.game.script import LANE_CLASSES
 
 ENABLE_UNIT, UPGRADE_UNIT = 2, 3
 AGES = {101: "FEUDAL_AGE", 102: "CASTLE_AGE", 103: "IMPERIAL_AGE"}
-# Units a lane may still train: traders (the loaded cart included) and mule carts.
-ALLOWED = frozenset({128, 204, 17, 1808})
+# Units the table leaves alone: the loaded trade cart, which nothing trains, and mule carts.
+ALLOWED = frozenset({204, 1808})
 # The buildings a lane keeps or may buy, every age form included: market, dock, monastery,
 # mill, lumber camp, mining camp, Folwark and castle.
 TRAINERS = frozenset(

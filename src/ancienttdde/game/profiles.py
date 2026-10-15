@@ -87,6 +87,10 @@ def apply_native(
                 **at(tile),
             )
         task_traders(game, trigger, lane, medium, tiles[:count])
+    # The starting traders bring their population room with them.
+    traders = sum(count for _, count in effects.traders)
+    if traders:
+        grant_population(trigger, player, traders)
     # A granted purchase's native effects, as the shop applies them after a payment. The XS
     # places its units and marks once-only ones as owned once the lane's setup has run.
     for key in effects.purchases:

@@ -10,7 +10,7 @@ import pytest
 from conftest import ROOT, WATCH_TOWER, compile_harness, stock
 
 from ancienttdde.common.data import object_value, read_object
-from ancienttdde.game.catalog import Shop
+from ancienttdde.game.catalog import Population, Shop
 from ancienttdde.game.civilizations import Civilization, Profile, Profiles
 from ancienttdde.game.config import Balance, EngineLane, Keeper
 from ancienttdde.map.models import MapAnchor
@@ -33,6 +33,7 @@ TEST_CIVILIZATIONS = (
         ),
     ),
     Civilization("TESTTWO", 101, "", Profile()),
+    Civilization("TESTFOUR", 103, "", Profile(purchases=("trade_carts",))),
     Civilization(
         "TESTTHREE",
         102,
@@ -102,6 +103,11 @@ def harness_constants() -> str:
 
     balance, _, shop, _ = content()
     lines = [f"const int cBuy{camel(p.key)} = {p.index};" for p in shop.purchases]
+    # The room the native setup gives a lane, and what the population purchase adds.
+    population = shop.get("population").effect
+    assert isinstance(population, Population)
+    lines.append(f"const int cStartingPopulation = {balance.economy.starting_population};")
+    lines.append(f"const int cPopulationAmount = {population.amount};")
     lines += [
         f"const int c{name.replace(' ', '')}Tech = {tech};"
         for name, tech in tower_access(balance.towers)
@@ -303,10 +309,54 @@ def test_prelude_lists_the_armor_a_wave_sets_and_the_enemy_variable() -> None:
         index: -1 if wave.pierce_armor is None else wave.pierce_armor
         for index, wave in enumerate(balance.waves)
     }
-    assert 100 in armor.values()
+    keys = [wave.key for wave in balance.waves]
+    # The rams keep their own full armor; a tier wave reads its own plus the tier's step.
+    assert armor[keys.index("Siege Rams")] == -1
+    assert armor[keys.index("Nobunaga")] == stock().unit("NOBUNAGA").armor(3) + 10
     assert f"const int vEnemy = {GLOBAL_VARIABLES.index('enemy')};" in text
     assert f"const int sUnplayable = {State.UNPLAYABLE};" in text
     assert "configured" not in GLOBAL_VARIABLES and "endless_request" not in GLOBAL_VARIABLES
+
+
+def test_prelude_declares_the_population_rule() -> None:
+    """The shop refuses units the lane has no population room for, against DE's headroom and
+    population attributes and the game's own limit; relics' monks and the castle take none."""
+    balance, _, shop, _ = content()
+    text = prelude()
+    assert f"const int cPopulationCap = {balance.population_cap};" in text
+    assert f"const int cPopulationPurchase = {shop.get('population').index};" in text
+    # The runtime reads DE's own attribute constants; the prelude declares no copies.
+    from ancienttdde.common.data import asset_text
+
+    runtime = asset_text("runtime.xs")
+    assert "cAttributePopulationCap" in runtime and "cAttributePopulation)" in runtime
+    assert "cAttrHeadroom" not in text + runtime and "cAttrPopulation" not in text + runtime
+    from ancienttdde.game.script import GLOBAL_VARIABLES, LANE_VARIABLES
+
+    assert f"const int fFallen = {LANE_VARIABLES.index('fallen')};" in text
+    assert f"const int vSiegeReserved = {GLOBAL_VARIABLES.index('siege_reserved')};" in text
+    expected = {0: 0} | {p.index: 0 for p in shop.purchases}
+    for key, taken in (
+        ("building_villagers", 2),
+        ("resource_villagers", 2),
+        ("trade_carts", 3),
+        ("trade_cogs", 3),
+        ("land_raider", 1),
+        ("naval_raider", 1),
+    ):
+        expected[shop.get(key).index] = taken
+    assert filled(text, "shopPopulation") == expected
+
+
+def test_prelude_refuses_lanes_whose_purchases_take_different_population() -> None:
+    from dataclasses import replace
+
+    from ancienttdde.game.script import render_prelude
+
+    balance, lanes, shop, profiles = content()
+    fewer = replace(lanes[1], sites=replace(lanes[1].sites, carts=lanes[1].sites.carts[:2]))
+    with pytest.raises(ValueError, match="population"):
+        render_prelude(balance, (lanes[0], fewer, *lanes[2:]), shop, profiles, stock(), keeper())
 
 
 def test_prelude_holds_no_test_only_names() -> None:
@@ -525,6 +575,19 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "enemy_refused",
         "enemy_human_eighth",
         "wave_hitpoints",
+        "shop_population",
+        "shop_population_limit",
+        "population_repeat",
+        "shop_relics_free",
+        "siege_population",
+        "raider_population",
+        "grant_headroom",
+        "fallen_after_result",
+        "fallen_competitive",
+        "siege_reserved",
+        "siege_reserved_cap",
+        "population_limit_first",
+        "next_line_armor",
     ],
 )
 def test_shared_engine(engine_runner: Path, case: str) -> None:

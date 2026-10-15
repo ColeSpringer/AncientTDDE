@@ -1,6 +1,6 @@
 """Hosting and play instructions written into the scenario and its sidecar."""
 
-from ancienttdde.game.catalog import Repair, ResourceGrant, Shop
+from ancienttdde.game.catalog import Repair, ResourceGrant, Shop, population_name
 from ancienttdde.game.civilizations import DEFAULT_NAME, Profiles
 from ancienttdde.game.config import LOBBY_DIFFICULTIES, Balance
 from ancienttdde.game.script import STILL_SAMPLES
@@ -128,9 +128,8 @@ def interaction(balance: Balance, profiles: Profiles) -> str:
         f"{siege.buyer_cooldown} for its buyer. Markets, docks, Kings, life Outposts and yurts "
         "cannot be attacked; traders can. Villagers build towers and economy buildings only: "
         "no houses, walls, gates, outposts, markets, blacksmiths or universities, and no "
-        "military buildings, docks, monasteries or town centers. Lanes cannot train ships "
-        "other than trade cogs, monks or castle units, or convert units, and a bought castle "
-        "never fires."
+        "military buildings, docks, monasteries or town centers. Lanes cannot train traders, "
+        "ships, monks or castle units, or convert units, and a bought castle never fires."
     )
 
 
@@ -178,7 +177,9 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "lanes are cleared automatically, and do not affect victory. "
         "Use fixed start positions, locked teams and Fast (the highest lobby game speed). "
         "The host must select game speed in the lobby; the scenario cannot set that control. "
-        "Civilizations remain selectable. Set Reveal Map to All Visible. For solo runs, the "
+        "Civilizations remain selectable. Set Reveal Map to All Visible. Set the lobby's "
+        f"Population to {balance.population_cap}, the limit the shop sells room up to. For "
+        "solo runs, the "
         f"lobby's Difficulty sets the level: {lobby_levels(balance)}. Competitive games always "
         f"play {balance.difficulty.levels[balance.difficulty.competitive].name}.\n\n"
         "## Run options\n\n"
@@ -201,10 +202,12 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "villagers in its build and resource areas, eight trade carts and four trade cogs that "
         "start trading, and "
         f"{count(economy.starting_relics, 'relic', 'relics')} in its monasteries. "
-        f"{opening_stock(shop)}{starting_research(balance)}Population comes only "
-        "from the shop's +80 population and castle, and from the civilization profiles that "
-        "add some below: houses cannot be built, and Kings, villagers, traders and monks all "
-        "use it.\n\n"
+        f"{opening_stock(shop)}{starting_research(balance)}Bought villagers, traders, raiders "
+        f"and siege need population room: a lane starts with room for "
+        f"{economy.starting_population} more, and only the shop's {population_name(shop)} "
+        f"(again and again, up to the limit of {balance.population_cap}), the castle and the "
+        "civilization profiles that add some below give more. Houses cannot be built, and "
+        "Kings and monks take none.\n\n"
         f"Every {king_prices(balance)} becomes a King at your stall above the "
         "shop. Surviving a wave earns every lane "
         f"{count(economy.wave_kings, 'King', 'Kings')}, every "

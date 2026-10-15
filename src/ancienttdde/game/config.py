@@ -149,6 +149,8 @@ class Economy:
     stone_bonus: int
     endless_deposit: int
     starting_relics: int
+    # The population room a lane starts with, the same for every civilization.
+    starting_population: int
 
 
 @dataclass(frozen=True)
@@ -279,6 +281,8 @@ class Balance:
     preparation_seconds: int
     intermission_seconds: int
     max_enemies_per_lane: int
+    # Each lane's population limit, which the shop's units stay within.
+    population_cap: int
     sudden_death_interval: int
     sudden_death_damage: int
     economy: Economy
@@ -369,6 +373,7 @@ def load_economy(raw: dict[str, object]) -> Economy:
         # Larger amounts wrap around: DE applies resource storage as a 16-bit value.
         endless_deposit=integer(raw, "endless_deposit", 1, 32767),
         starting_relics=integer(raw, "starting_relics", 0, 2),
+        starting_population=integer(raw, "starting_population", 0, 100),
     )
 
 
@@ -531,6 +536,7 @@ def load_balance(path: Path) -> Balance:
         preparation_seconds=integer(raw, "preparation_seconds", 1, 600),
         intermission_seconds=integer(raw, "intermission_seconds", 1, 120),
         max_enemies_per_lane=integer(raw, "max_enemies_per_lane", 5, 100),
+        population_cap=integer(raw, "population_cap", 200, 1000),
         sudden_death_interval=integer(raw, "sudden_death_interval", 1, 60),
         sudden_death_damage=integer(raw, "sudden_death_damage", 1, 10),
         economy=load_economy(object_value(raw.get("economy"), "economy")),
@@ -549,6 +555,13 @@ def load_balance(path: Path) -> Balance:
     )
     if balance.endless_levels > MAX_ENDLESS_LEVELS:
         raise ValueError("hit_point_growth_percent is too small for the endless wave levels")
+    # A regular wave's hit points must fit the attribute on every level, or the highest
+    # level plays the same wave as the one below it.
+    for wave in balance.waves:
+        for level in balance.difficulty.levels:
+            scaled = (wave.hit_points * level.hit_points_percent + 50) // 100
+            if not wave.boss and scaled > MAX_HIT_POINTS:
+                raise ValueError(f"hit_points of {wave.key} exceed the attribute on {level.name}")
     return balance
 
 

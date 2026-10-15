@@ -258,6 +258,7 @@ def settings(
             civilization="RANDOM" if human else "BRITONS",
             lock_personality=True,
             starting_age=StartingAge.FEUDAL_AGE,
+            population_cap=balance.population_cap,
         )
         # The original's one-way alliance with the enemy in its usual slot: lanes shoot the
         # enemy's units, and the enemy treats every lane as an ally, so its units attack nothing

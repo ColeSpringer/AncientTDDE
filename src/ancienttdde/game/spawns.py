@@ -2,6 +2,8 @@
 
 from dataclasses import dataclass
 
+from AoE2ScenarioParser.datasets.units import UnitInfo
+
 from ancienttdde.game.catalog import Castle, Purchase, Raider, Relics, Shop, Traders, Villagers
 from ancienttdde.game.config import EngineLane, Interaction, Raiders
 from ancienttdde.game.sites import Tile
@@ -55,6 +57,19 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
             return (Spawned(stock("castle"), False, 10 * x, 10 * y),)
         case _:
             return ()
+
+
+def free_of_population() -> tuple[int, ...]:
+    """The units a lane's setup frees of population: the Kings it pays with and the relics'
+    monks, with and without a relic."""
+    return (stock("king"), stock("monk"), UnitInfo["MONK_WITH_RELIC"].ID)
+
+
+def spawned_population(made: tuple[Spawned, ...]) -> int:
+    """The population created units take: every one but the relics, which are Gaia, the
+    castle, a building, and the units the lane frees."""
+    free = {*free_of_population(), stock("castle")}
+    return sum(1 for s in made if not s.gaia and s.unit not in free)
 
 
 def creation_tiles(lane: EngineLane, shop: Shop, interaction: Interaction) -> set[Tile]:

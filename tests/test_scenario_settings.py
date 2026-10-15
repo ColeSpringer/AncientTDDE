@@ -63,17 +63,35 @@ def test_passive_ai_is_embedded_only_in_the_requested_slots(scenario: AoE2DEScen
 def test_players_are_reset_to_an_empty_controlled_start(scenario: AoE2DEScenario) -> None:
     player = scenario.player_manager.players[3]
     player.food = 500
+    with pytest.raises(TypeError):
+        reset_player(  # type: ignore[call-arg]  # the cap is never left to a default
+            player,
+            human=False,
+            civilization="BRITONS",
+            lock_personality=True,
+            starting_age=StartingAge.DARK_AGE,
+        )
     reset_player(
         player,
         human=False,
         civilization="BRITONS",
         lock_personality=True,
         starting_age=StartingAge.DARK_AGE,
+        population_cap=200,
     )
     assert (player.human, player.lock_civ, player.lock_personality) == (False, False, True)
     assert player.starting_age == StartingAge.DARK_AGE
     assert (player.population_cap, player.allied_victory) == (200, False)
     assert (player.food, player.wood, player.gold, player.stone) == (0, 0, 0, 0)
+    reset_player(
+        player,
+        human=True,
+        civilization="BRITONS",
+        lock_personality=False,
+        starting_age=StartingAge.DARK_AGE,
+        population_cap=250,
+    )
+    assert player.population_cap == 250
 
 
 # The strategic numbers DE's own AI scripts name; DE rejects a script naming any other.

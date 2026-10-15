@@ -23,6 +23,9 @@ constexpr int cAttributeWood = 1;
 constexpr int cAttributeStone = 2;
 constexpr int cAttributeGold = 3;
 constexpr int cAttributeRelics = 7;
+// DE's population headroom (named the cap in its constants) and current population.
+constexpr int cAttributePopulationCap = 4;
+constexpr int cAttributePopulation = 11;
 constexpr int cAttributeKills = 20;
 // Kept by the enemy (player 8): how many of its units each player has killed.
 constexpr int cAttributeKillsByPlayer1 = 326;
@@ -164,6 +167,9 @@ int laneOfRow(float y);
 std::array<int, 9> audible{};
 // An owner DE creates nothing for, as it did for a player number no one in the lobby held.
 int refusedOwner = -1;
+// DE's population accounting: a unit takes its population while it lives (defined once the
+// XS has named the attributes).
+void populationChange(int owner, int type, int sign);
 // A unit, building or object on the spot blocks a collision-checked creation, as in DE.
 int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCollision) {
     if (owner == refusedOwner) return -1;
@@ -173,6 +179,7 @@ int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCo
     int id = sequence++;
     float hp = typeHitpoints.at(owner).count(type) ? typeHitpoints[owner][type] : 100;
     units.emplace(id, Unit{type, pos, hp, owner});
+    populationChange(owner, type, 1);
     ++created[owner][type];
     if (sound) ++audible[owner];
     if (type == 434) { if (onLaneKeeper(owner, pos) || (owner == enemy() && onKeeperThrone(pos))) ++keeperKings[owner]; else ++kingsCreated[owner]; }
@@ -181,7 +188,12 @@ int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCo
 }
 float xsVectorGetX(vector pos) { return pos[0]; }
 float xsVectorGetY(vector pos) { return pos[1]; }
-bool xsRemoveUnit(int id) { return units.erase(id) == 1; }
+bool xsRemoveUnit(int id) {
+    if (!units.count(id)) return false;
+    populationChange(units[id].owner, units[id].type, -1);
+    units.erase(id);
+    return true;
+}
 // DE writes the value in place of %d.
 void xsChatData(string message, int value = -1) {
     auto at = message.find("%d");
@@ -202,6 +214,20 @@ int xsGetObjectCount(int player, int type) {
 }
 // EMBEDDED_XS
 void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n'; std::exit(1); } }
+// The units the shop sells each take one population; Kings and monks take none, as the
+// lane's setup makes them, and buildings and relics never did.
+int populationCost(int type) {
+    switch (type) {
+        case 83: case 293: case 128: case 17: case 546: case 441: case 1103: case 529: case 42: case 331: return 1;
+    }
+    return 0;
+}
+void populationChange(int owner, int type, int sign) {
+    int cost = populationCost(type);
+    if (cost == 0) return;
+    attributes.at(owner)[cAttributePopulationCap] -= sign * cost;
+    attributes.at(owner)[cAttributePopulation] += sign * cost;
+}
 int lane(int player, int field) { return xsTriggerVariable(laneVariable(player, field)); }
 void setLane(int player, int field, int value) { xsSetTriggerVariable(laneVariable(player, field), value); }
 int phase() { return xsTriggerVariable(vPhase); }
@@ -290,7 +316,7 @@ void nativeEffects() {
 // Waves clear the field each second; a lane's own Kings and life display stay.
 void clearEnemies() {
     for (auto it = units.begin(); it != units.end();) {
-        if (enemy() > 0 && it->second.owner == enemy()) it = units.erase(it); else ++it;
+        if (enemy() > 0 && it->second.owner == enemy()) { populationChange(it->second.owner, it->second.type, -1); it = units.erase(it); } else ++it;
     }
 }
 void tick(bool clear=false) { if (clear) clearEnemies(); ancientTick(); nativeEffects(); }
@@ -305,6 +331,8 @@ void lobby(std::initializer_list<int> humans, int players) {
     for (int p:humans) playerTypes[p]=cPlayerTypeHuman;
     for (int p=1; p<=7; ++p) {
         if (!occupied[p]) continue;
+        // The native setup's starting population room.
+        attributes[p][cAttributePopulationCap] = cStartingPopulation;
         units.emplace(laneLife(p), Unit{598, {134.5f, 67.5f + 3 * (p - 1), 0}, 500, p});
         // The lane's two monasteries, in its relic pocket as on the map.
         for (int m=0; m<2; ++m) units.emplace(sequence++, Unit{cMonastery, {lanePocketX1(p) + 0.5f + m, lanePocketY1(p) + 0.5f, 0}, 2100, p});
@@ -1490,7 +1518,7 @@ int main(int argc, char** argv) {
         for(int round=0; round<3; ++round) { kingsOn(1, cBuyLandRaider, 2); for(int n=0;n<4;++n) tick(true); }
         require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==2 && told(1, cMessageRaiderCap)==1,
                 "The land raider cap was not kept, or the refused Kings were taken");
-        for(auto it=units.begin(); it!=units.end(); ++it) if(it->second.owner==1 && it->second.type==546) { units.erase(it); break; }
+        for(auto it=units.begin(); it!=units.end(); ++it) if(it->second.owner==1 && it->second.type==546) { xsRemoveUnit(it->first); break; }
         for(int n=0;n<4;++n) tick(true);
         require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==0, "A lost raider did not free its place");
     } else if(test=="raider_line") {
@@ -1869,5 +1897,148 @@ int main(int argc, char** argv) {
         require(hitpointsSet(enemy(), waveUnit(armored)).back()==float(waveHitPoints(difficulty * cWaveCount + armored)), "The armored wave's hit points were not set");
         reachWave(cWaveCount - 1);
         require(hitpointsSet(enemy(), waveUnit(cWaveCount - 1)).back()==float(cHitPointCap), "A boss's definition was not capped at the attribute's limit");
+    } else if(test=="shop_population") {
+        // Bought villagers need population room: once a lane's starting room is used up, the
+        // refusal keeps the Kings and says what adds some; room for one is not room for two.
+        start({1});
+        attributes[1][cAttributePopulationCap] = 0;
+        int price = shopPrice(cBuyBuildingVillagers);
+        kingsOn(1, cBuyBuildingVillagers, price);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && kingsOnPad(1, cBuyBuildingVillagers)==price && told(1, cMessagePopulation)==1,
+                "Villagers were sold without population room, or the refused Kings were taken");
+        attributes[1][cAttributePopulationCap] = 1;
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty(), "Two villagers were sold into room for one");
+        attributes[1][cAttributePopulationCap] = 2;
+        for(int n=0;n<4;++n) tick();
+        require(bought[1]==std::vector<int>{cBuyBuildingVillagers} && resource(1, cAttributePopulationCap)==0 && resource(1, cAttributePopulation)==2,
+                "Villagers were not sold into their room, or did not take it");
+    } else if(test=="shop_population_limit") {
+        // The limit holds whatever the headroom says.
+        start({1});
+        int price = shopPrice(cBuyTradeCarts);
+        attributes[1][cAttributePopulationCap] = 50;
+        attributes[1][cAttributePopulation] = cPopulationCap - 2;
+        kingsOn(1, cBuyTradeCarts, price);
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && told(1, cMessagePopulationLimit)==1 && kingsOnPad(1, cBuyTradeCarts)==price,
+                "Traders were sold past the population limit");
+        attributes[1][cAttributePopulation] = cPopulationCap - 3;
+        for(int n=0;n<4;++n) tick();
+        require(bought[1]==std::vector<int>{cBuyTradeCarts} && resource(1, cAttributePopulation)==cPopulationCap,
+                "Traders up to the limit were refused");
+    } else if(test=="population_repeat") {
+        // The population purchase sells again and again until the lane's room reaches the
+        // limit; the native trigger adds its room (the content's 65) each time.
+        start({1});
+        attributes[1][cAttributePopulation] = 30;
+        for(int round=0; round<3; ++round) { buy(1, cBuyPopulation); attributes[1][cAttributePopulationCap] += cPopulationAmount; }
+        kingsOn(1, cBuyPopulation, shopPrice(cBuyPopulation));
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].size()==3 && told(1, cMessagePopulationFull)==1 && kingsOnPad(1, cBuyPopulation)==shopPrice(cBuyPopulation),
+                "Population was sold past the limit, or the refused Kings were taken");
+    } else if(test=="shop_relics_free") {
+        // Relics and their monks need no population room and take none.
+        start({3});
+        buy(3, cBuyRelics);
+        require(unitsOf(3, 125)==2 && resource(3, cAttributePopulationCap)==cStartingPopulation && resource(3, cAttributePopulation)==0, "Monks took population");
+    } else if(test=="siege_population") {
+        // The siege needs room for its trebuchets, two per surviving rival.
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets - 1;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && told(1, cMessagePopulation)==1 && kingsOnPad(1, cBuySiege)==price,
+                "The siege was sold without room for its trebuchets");
+        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets;
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuySiege}, "The siege was refused with room for its trebuchets");
+    } else if(test=="raider_population") {
+        competitive({1,7});
+        attributes[1][cAttributePopulationCap] = 0;
+        kingsOn(1, cBuyLandRaider, shopPrice(cBuyLandRaider));
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].empty() && told(1, cMessagePopulation)==1, "A raider was sold without population room");
+        attributes[1][cAttributePopulationCap] = 1;
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuyLandRaider} && unitsOf(1, 546)==1 && resource(1, cAttributePopulationCap)==0,
+                "A raider with room was refused, or took no room");
+    } else if(test=="grant_headroom") {
+        // A starting purchase's units bring their population room with them.
+        civilizations[2]=103;
+        start({2});
+        tick();
+        require(unitsOf(2, 128)==3 && resource(2, cAttributePopulationCap)==cStartingPopulation && resource(2, cAttributePopulation)==3,
+                "Granted traders did not bring their population room");
+    } else if(test=="fallen_after_result") {
+        // A solo lane that falls is marked for its defeat trigger the tick after its
+        // elimination, once the result is posted, so DE's defeat screen never hides it.
+        start({1}); advanceTo(sWave);
+        setLane(1, fLives, 0);
+        tick();
+        require(lane(1,fActive)==0 && lane(1,fFallen)==0 && mentions("Result:")==0, "The lane was marked fallen before the result");
+        tick();
+        require(lane(1,fFallen)==1 && mentions("Result:")==1 && phase()==sDefeat, "The fallen lane was not marked once the result was posted");
+    } else if(test=="fallen_competitive") {
+        // An eliminated competitor is marked a tick later; the survivors never are.
+        start({1,7}); advanceTo(sWave);
+        setLane(1, fLives, 0);
+        tick();
+        require(lane(1,fFallen)==0, "The competitor was marked fallen in its elimination tick");
+        tick();
+        require(lane(1,fFallen)==1 && lane(7,fFallen)==0 && phase()!=sElimination && phase()!=sDefeat,
+                "The eliminated competitor was not marked fallen, or a survivor was");
+    } else if(test=="siege_reserved") {
+        // The siege holds its trebuchets' room through the warning: nothing else can take
+        // it, they take it as they appear, and the siege's end frees it.
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuySiege} && resource(1, cAttributePopulationCap)==2*cSiegeTrebuchets
+                && xsTriggerVariable(vSiegeReserved)==2*cSiegeTrebuchets, "The siege did not hold its room, or took it early");
+        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].size()==1 && told(1, cMessagePopulation)==1, "Held room was sold");
+        for(int n=0;n<cSiegeWarning+2;++n) tick(true);
+        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, cTrebuchet)==2*cSiegeTrebuchets
+                && resource(1, cAttributePopulationCap)==0 && resource(1, cAttributePopulation)==2*cSiegeTrebuchets, "The trebuchets did not take the held room");
+        for(int n=0;n<cSiegeActive+2;++n) tick(true);
+        // The siege's end frees the room, and the Kings still waiting on the villager pad buy.
+        require(unitsOf(1, cTrebuchet)==0 && bought[1]==std::vector<int>({cBuySiege, cBuyBuildingVillagers})
+                && resource(1, cAttributePopulationCap)==2*cSiegeTrebuchets-2 && resource(1, cAttributePopulation)==2, "The ended siege did not free its room");
+    } else if(test=="siege_reserved_cap") {
+        // The room held for the trebuchets counts against the limit too.
+        competitive({1,3,7});
+        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        attributes[1][cAttributePopulationCap] = 10;
+        attributes[1][cAttributePopulation] = cPopulationCap - 2 * cSiegeTrebuchets - 1;
+        kingsOn(1, cBuySiege, price);
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1]==std::vector<int>{cBuySiege}, "The siege within the limit was refused");
+        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
+        for(int n=0;n<4;++n) tick(true);
+        require(bought[1].size()==1 && told(1, cMessagePopulationLimit)==1, "Units were sold past the limit over the held room");
+    } else if(test=="population_limit_first") {
+        // At the limit a purchase is refused for the limit, whatever the headroom says.
+        start({1});
+        attributes[1][cAttributePopulationCap] = 1;
+        attributes[1][cAttributePopulation] = cPopulationCap;
+        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
+        for(int n=0;n<4;++n) tick();
+        require(bought[1].empty() && told(1, cMessagePopulationLimit)==1 && told(1, cMessagePopulation)==0, "A lane at the limit was told to buy room");
+    } else if(test=="next_line_armor") {
+        // The notice before a wave states the armor the schedule gives it; a wave that keeps
+        // its unit's own armor says nothing of armor.
+        start({2});
+        int armored=-1; for(int w=1;w<cWaveCount;++w) if(wavePierceArmor(w)>=0) { armored=w; break; }
+        require(armored>0, "The schedule gives no wave its own armor");
+        reachWave(armored - 1);
+        require(mentions("pierce armor")==0, "Armor was announced for a wave without its own");
+        reachWave(armored);
+        require(mentions(ancientText(wavePierceArmor(armored)) + " pierce armor")==1, "The schedule's armor was not announced before its wave");
     } else require(false,"Unknown case");
 }

@@ -51,6 +51,15 @@ def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: Ga
     assert verify_game(output, ROOT) == first
 
 
+def test_every_slot_carries_the_contents_population_cap(game_build: GameBuild) -> None:
+    from ancienttdde.game.config import load_balance
+
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    cap = load_balance(ROOT / "content/balance/game.json").population_cap
+    assert [p["population_cap"] for p in snapshot["players"][1:9]] == [cap] * 8
+
+
 def test_the_mod_folder_holds_the_same_scenario(game_build: GameBuild, tmp_path: Path) -> None:
     import shutil
 
@@ -214,6 +223,7 @@ FAR_END_FLAGS = {
     "siege": column(169, range(24, 34)) | column(168, range(24, 29)),
     "land_raider": column(169, range(36, 38)),
     "castle": {(150, 49)},
+    "population": {(145, 49), (146, 49)},
     "king_every_150": column(130, range(18, 23)) | column(129, range(18, 21)),
     "king_every_minute": column(130, range(24, 30))
     | column(129, range(24, 30))
@@ -675,20 +685,39 @@ def test_results_go_to_the_winning_lane_or_to_whichever_number_the_enemy_holds(
         for name, trigger in triggers.items()
         if any(e["type"] == "declare_victory" for e in trigger["effects"])
     }
-    assert set(declared) == {f"game.result.p{p}" for p in range(1, 8)} | {
-        f"game.result.e{e}" for e in range(1, 9)
-    }
+    assert set(declared) == (
+        {f"game.result.p{p}" for p in range(1, 8)}
+        | {f"game.result.e{e}" for e in range(1, 9)}
+        | {f"game.defeat.p{p}" for p in range(1, 8)}
+    )
     for name, trigger in declared.items():
         player = int(name[-1])
-        phase = 6 if name.startswith("game.result.p") else 8
         requested = {
             c["attributes"]["variable"]: c["attributes"]["quantity"]
             for c in trigger["conditions"]
             if c["type"] == "variable_value"
         }
-        assert requested == {variables["game.winner"]: player, variables["game.phase"]: phase}
         [victory] = [e["attributes"] for e in trigger["effects"] if e["type"] == "declare_victory"]
         assert victory["source_player"] == player
+        assert not trigger["looping"]
+        if name.startswith("game.defeat."):
+            # The script marks a fallen lane the tick after its elimination, once the result
+            # is posted: its player is then declared defeated, since another player's declared
+            # victory defeats no one.
+            assert requested == {variables[f"lane.p{player}.fallen"]: 1}
+            assert victory["enabled"] == 0
+        else:
+            phase = 6 if name.startswith("game.result.p") else 8
+            assert requested == {variables["game.winner"]: player, variables["game.phase"]: phase}
+            assert victory["enabled"] == 1
+    # The lane's cleanup ends the lane's own triggers; the defeat is not among them.
+    for player in range(1, 8):
+        ended = [
+            e["attributes"]["trigger_id"]
+            for e in triggers[f"lane.p{player}.cleanup"]["effects"]
+            if e["type"] == "deactivate_trigger"
+        ]
+        assert declared[f"game.defeat.p{player}"]["id"] not in ended
 
 
 @pytest.mark.parametrize("change", ["resource_bonus", "ai_personality"])

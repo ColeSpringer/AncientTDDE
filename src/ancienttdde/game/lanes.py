@@ -5,6 +5,7 @@ from dataclasses import asdict
 from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.attribute import Attribute
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
+from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
 from ancienttdde.game.catalog import Shop
@@ -26,6 +27,7 @@ from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reac
 from ancienttdde.game.script import State
 from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
+from ancienttdde.game.spawns import free_of_population
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import STORAGE, area, condition, effect
 
@@ -43,7 +45,7 @@ def lane_actions(
     lane_status(game, lane, balance)
     lane_kings(game, lane)
     lane_transfers(game, lane)
-    lane_messages(game, lane, balance)
+    lane_messages(game, lane, balance, shop)
     lane_bonuses(game, lane, balance)
     lane_purchases(game, lane, shop, balance)
     lane_controls(game, player)
@@ -72,13 +74,19 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
             quantity=start[resource],
             operation=Operation.SET,
         )
-    # Population comes only from the shop: no civilization starts with headroom of its own.
+    # Kings, the shop's currency, and the relics' monks take no population, set before the
+    # lane's room so the Kings on the map never count against it; the units the shop sells
+    # need room, which it checks.
+    for unit in free_of_population():
+        game.set_attribute(init, player, unit, ObjectAttribute.POPULATION, 0)
+    # Every lane starts with the same population room, whatever its civilization; the shop
+    # and the profiles add more.
     effect(
         init,
         "modify_resource",
         source_player=player,
         tribute_list=Attribute.POPULATION_HEADROOM,
-        quantity=0,
+        quantity=balance.economy.starting_population,
         operation=Operation.SET,
     )
     game.research(init, "FEUDAL_AGE", player=player)

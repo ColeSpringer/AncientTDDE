@@ -6,6 +6,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.action_type import ActionType
 from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
+from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.instructions import bonus_delivered
 from ancienttdde.game.messages import message_code, message_texts
@@ -185,11 +186,11 @@ def lane_transfers(game: Game, lane: EngineLane) -> None:
         )
 
 
-def lane_messages(game: Game, lane: EngineLane, balance: Balance) -> None:
+def lane_messages(game: Game, lane: EngineLane, balance: Balance, shop: Shop) -> None:
     """Each message the XS requests reaches its lane's player once, then the request clears."""
     player = lane.player
     prefix = f"lane.p{player}"
-    for key, text in message_texts(balance).items():
+    for key, text in message_texts(balance, shop).items():
         trigger = game.trigger(f"{prefix}.message.{key}", looping=True)
         game.value(trigger, f"{prefix}.active", 1)
         game.value(trigger, f"{prefix}.message", message_code(key))

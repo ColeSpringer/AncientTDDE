@@ -240,7 +240,8 @@ def enemy_walk_rules(lanes: Sequence[EngineLane]) -> str:
 
 
 def declare_results(game: Game) -> None:
-    """A victory goes to the winning lane; a defeat to whichever number the enemy holds."""
+    """A victory goes to the winning lane, a defeat to whichever number the enemy holds, and
+    a fallen lane's player is declared defeated once the script marks the lane."""
     for winner in LANE_SLOTS:
         finish = game.trigger(f"game.result.p{winner}", looping=False)
         game.value(finish, "game.winner", winner)
@@ -251,3 +252,7 @@ def declare_results(game: Game) -> None:
         game.value(finish, "game.winner", enemy)
         game.value(finish, "game.phase", State.DEFEAT)
         effect(finish, "declare_victory", source_player=enemy, enabled=1)
+    for lane in LANE_SLOTS:
+        fallen = game.trigger(f"game.defeat.p{lane}", looping=False)
+        game.value(fallen, f"lane.p{lane}.fallen", 1)
+        effect(fallen, "declare_victory", source_player=lane, enabled=0)

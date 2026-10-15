@@ -2,7 +2,8 @@
 
 The tables were read from DE's data (empires2_x2_p1.dat, 63 civilizations, October 2026):
 every building villagers raise apart from towers, mills, camps and farms; every unit any
-building trains apart from villagers, traders and mule carts; the technologies that make one
+building trains apart from villagers and mule carts, traders included, since those come from
+the shop against the lane's population room; the technologies that make one
 of those available or upgrade into one, and the civilization bonuses that would multiply
 every tower's volley. Many objects become available only when a lane reaches an age, through
 technologies the game researches for free, so those technologies are listed too; and reaching
@@ -323,6 +324,10 @@ OBJECTS: dict[int, str] = {
     2704: "Elite Varangian Guard",
     2714: "VMREPAIRER",
     2715: "VFREPAIRER",
+    # Traders come from the shop, against the lane's population room; the market and the
+    # dock train none:
+    128: "TCART",
+    17: "COGXX",
     # Villagers build towers and economy buildings only. Houses (population comes from the
     # shop), outposts, walls, gates, and the market, blacksmith and university, which every
     # lane has from the start:

@@ -301,8 +301,11 @@ void ancientGrant(int player = 1, int civ = 0) {
                 ancientUngrant(player, purchase, "is not for this civilization");
             } else if (ancientSpawn(player, purchase) == false) {
                 ancientUngrant(player, purchase, "could not be placed");
-            } else if (shopAttack(purchase) > 0) {
-                ancientAddAttack(player, shopAttackFamily(purchase), shopAttack(purchase));
+            } else {
+                // The units a starting purchase brings bring their population room with them.
+                int taken = shopPopulation(purchase);
+                if (taken > 0) xsSetPlayerAttribute(player, cAttributePopulationCap, xsPlayerAttribute(player, cAttributePopulationCap) + taken);
+                if (shopAttack(purchase) > 0) ancientAddAttack(player, shopAttackFamily(purchase), shopAttack(purchase));
             }
         }
     }
@@ -416,11 +419,13 @@ string ancientWaveEnemies(int wave = 0) {
     return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern));
 }
 
-// The enemies with their hit points and, past the finale, their armor.
+// The enemies with their hit points and the armor the schedule gives them, or past the
+// finale the armor added.
 string ancientWaveText(int wave = 0) {
     int pattern = ancientTemplate(wave);
     string armor = "";
     if (wave >= cWaveCount) armor = ", +" + ancientText(ancientEndlessArmor(wave - cWaveCount)) + " pierce armor";
+    else if (wavePierceArmor(pattern) >= 0) armor = ", " + ancientText(wavePierceArmor(pattern)) + " pierce armor";
     if (waveBoss(pattern) == 1) return (ancientWaveEnemies(wave) + ", a boss with " + ancientText(ancientWaveHitPoints(wave)) + " HP" + armor);
     return (ancientWaveEnemies(wave) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
 }
@@ -589,6 +594,22 @@ void ancientResult() {
     xsChatData(text + ".");
 }
 
+// The lanes still playing besides this one.
+int ancientRivals(int player = 1) {
+    int rivals = 0;
+    for (rival = 1; <= 7) {
+        if ((rival != player) && (laneValue(rival, fActive) == 1)) rivals = rivals + 1;
+    }
+    return (rivals);
+}
+
+// The population room held for the siege's trebuchets until they appear: the shop counts
+// it as taken for the holder, while DE's own room and population stay untouched.
+int ancientReserved(int player = 1) {
+    if ((xsTriggerVariable(vSiegeOwner) == player) && (xsTriggerVariable(vSiegePhase) == 1)) return (xsTriggerVariable(vSiegeReserved));
+    return (0);
+}
+
 // Only one player holds the siege: a short warning, then trebuchets on every surviving rival's
 // islets for a while. A claim made earlier in the same second keeps the holder.
 void ancientClaimSiege(int player = 1, int price = 0) {
@@ -596,6 +617,7 @@ void ancientClaimSiege(int player = 1, int price = 0) {
     xsSetTriggerVariable(vSiegePhase, 1);
     xsSetTriggerVariable(vSiegeLeft, cSiegeWarning);
     xsSetTriggerVariable(vSiegeDisplay, 1);
+    xsSetTriggerVariable(vSiegeReserved, cSiegeTrebuchets * ancientRivals(player));
     xsChatData(ancientPlayer(player) + " bought the siege power-up for " + ancientCount(price, "King", "Kings") + ": trebuchets reach every rival in " + ancientText(cSiegeWarning) + " game seconds.");
 }
 
@@ -618,6 +640,7 @@ int ancientPlaceSiege(int owner = 1) {
 void ancientEndSiege(bool eliminated = false) {
     int owner = xsTriggerVariable(vSiegeOwner);
     if (owner == 0) return;
+    xsSetTriggerVariable(vSiegeReserved, 0);
     for (form = 0; < 2) {
         int kind = cTrebuchet;
         if (form == 1) kind = cPackedTrebuchet;
@@ -655,6 +678,7 @@ void ancientSiege() {
         return;
     }
     if (xsTriggerVariable(vSiegePhase) == 1) {
+        xsSetTriggerVariable(vSiegeReserved, 0);
         int made = ancientPlaceSiege(owner);
         xsSetTriggerVariable(vSiegePhase, 2);
         xsSetTriggerVariable(vSiegeLeft, cSiegeActive);
@@ -796,6 +820,14 @@ int ancientCollect(int live = -1, int slice = -1) {
         if (heir > 0) xsSetTriggerVariable(vChooser, heir);
     }
     return (losses);
+}
+
+// The lanes that fell are marked for their native defeat triggers a tick after their
+// elimination, so the result posted in the same tick reaches their players first.
+void ancientMarkFallen() {
+    for (marker = 1; <= 7) {
+        if ((laneValue(marker, fActive) == 0) && (laneValue(marker, fInitialized) == 1) && (laneValue(marker, fFallen) == 0)) laneSet(marker, fFallen, 1);
+    }
 }
 
 void ancientFinish(bool victory = false) {
@@ -1000,14 +1032,6 @@ bool ancientInteraction() {
     return ((xsTriggerVariable(vPvp) == 1) && (xsTriggerVariable(vWave) >= 0) && (xsTriggerVariable(vParticipants) > 1));
 }
 
-int ancientRivals(int player = 1) {
-    int rivals = 0;
-    for (rival = 1; <= 7) {
-        if ((rival != player) && (laneValue(rival, fActive) == 1)) rivals = rivals + 1;
-    }
-    return (rivals);
-}
-
 // Living raiders of a medium, upgraded forms included, against the player's cap.
 bool ancientRaidersFull(int player = 1, int medium = 1) {
     int living = 0;
@@ -1025,12 +1049,37 @@ int ancientPrice(int player = 1, int purchase = 0) {
     return (shopPrice(purchase));
 }
 
-// The message explaining why a purchase cannot be made now, or 0 when it can.
-int ancientRefusal(int player = 1, int purchase = 0) {
+// The population a purchase's units take: the schedule's count, or the siege's trebuchets
+// for every surviving rival. Kings and monks take none: the lane's setup sets their
+// population cost to zero.
+int ancientPurchasePopulation(int player = 1, int purchase = 0) {
+    if (purchase == cSiegePurchase) return (cSiegeTrebuchets * ancientRivals(player));
+    return (shopPopulation(purchase));
+}
+
+// Why units taking this much population cannot be bought now: the limit, or no room for
+// them, the room held for the holder's siege counted as taken; 0 when they can. DE's
+// headroom runs negative once a lane is over.
+int ancientPopulationRefusal(int player = 1, int taken = 0) {
+    if (taken <= 0) return (0);
+    int held = ancientReserved(player);
+    float people = xsPlayerAttribute(player, cAttributePopulation);
+    if (people + held + taken > cPopulationCap) return (cMessagePopulationLimit);
+    float room = xsPlayerAttribute(player, cAttributePopulationCap);
+    if (room - held < taken) return (cMessagePopulation);
+    return (0);
+}
+
+// The shop's own rules: ownership, requirements, relics, the civilization, PvP, the raider
+// caps and the siege's holder and cooldowns.
+int ancientRuleRefusal(int player = 1, int purchase = 0) {
     if (ancientOwns(player, shopMask(purchase))) return (cMessageOwned);
     int needed = shopRequires(purchase);
     if ((needed > 0) && (ancientOwns(player, shopMask(needed)) == false)) return (cMessageRequires);
-    if ((purchase == cRelicsPurchase) && (ancientRelicRefusal(player) > 0)) return (ancientRelicRefusal(player));
+    if (purchase == cRelicsPurchase) {
+        int relics = ancientRelicRefusal(player);
+        if (relics > 0) return (relics);
+    }
     if ((shopTech(purchase) > 0) && (xsGetTechState(shopTech(purchase), player) == cTechStateDisabled)) return (cMessageCivilization);
     int medium = shopRaider(purchase);
     if ((medium == 0) && (purchase != cSiegePurchase)) return (0);
@@ -1045,6 +1094,20 @@ int ancientRefusal(int player = 1, int purchase = 0) {
     if (holder > 0) return (cMessageSiegeHeld);
     if ((xsTriggerVariable(vSiegeCooldown) > 0) || (laneValue(player, fSiegeCooldown) > 0)) return (cMessageSiegeCooldown);
     return (0);
+}
+
+// The message explaining why a purchase cannot be made now, or 0 when it can: the shop's
+// rules first, then the population its units need. More population sells until the lane's
+// room reaches the limit.
+int ancientRefusal(int player = 1, int purchase = 0) {
+    int code = ancientRuleRefusal(player, purchase);
+    if (code > 0) return (code);
+    if (purchase == cPopulationPurchase) {
+        float people = xsPlayerAttribute(player, cAttributePopulation);
+        if (people + xsPlayerAttribute(player, cAttributePopulationCap) >= cPopulationCap) return (cMessagePopulationFull);
+        return (0);
+    }
+    return (ancientPopulationRefusal(player, ancientPurchasePopulation(player, purchase)));
 }
 
 // Explain a refusal once, again after a pause, and at once when the refusal changes.
@@ -1378,12 +1441,14 @@ void ancientTick() {
     // A full elimination state separates the snapshot from terminal native effects.
     if (state == sElimination) {
         if (losses > 0) return;
+        ancientMarkFallen();
         if (xsTriggerVariable(vSurvivors) == 0) ancientFinish(false);
         else if ((xsTriggerVariable(vParticipants) > 1) && (xsTriggerVariable(vSurvivors) == 1)) ancientFinish(true);
         else xsSetTriggerVariable(vPhase, xsTriggerVariable(vResumePhase));
         return;
     }
     if (xsTriggerVariable(vSurvivors) == 0) {
+        ancientMarkFallen();
         ancientFinish(false);
         return;
     }

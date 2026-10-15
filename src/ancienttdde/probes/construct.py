@@ -46,6 +46,7 @@ def initialize(arena: Arena) -> TriggerHandle:
             civilization="BRITONS",
             lock_personality=not human,
             starting_age=StartingAge.DARK_AGE,
+            population_cap=200,
         )
         diplomacy: list[int] = [DiplomacyState.ENEMY] * 16
         diplomacy[player.player_id - 1] = DiplomacyState.ALLY
