@@ -23,10 +23,10 @@ from ancienttdde.game.catalog import (
     TowerAttack,
 )
 from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
-from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Towers
+from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Keeper, Towers
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
-from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS, SPARE_ISLET
+from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns
 from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name
@@ -413,6 +413,7 @@ def render_prelude(
     shop: Shop,
     profiles: Profiles,
     stock: Stock,
+    keeper: Keeper,
     *,
     extern: bool = False,
 ) -> str:
@@ -470,6 +471,11 @@ def render_prelude(
         cShuffleRadius=SHUFFLE_RADIUS,
         cLifeObject=BuildingInfo["OUTPOST"].ID,
         cKeeperBuilding=BuildingInfo["WATCH_TOWER"].ID,
+        # Where an enemy holding a lane slot keeps its King and tower, in tenths of a tile.
+        cKeeperKingX10=center(keeper.lane_king_tile)[0],
+        cKeeperKingY10=center(keeper.lane_king_tile)[1],
+        cKeeperTowerX10=center(keeper.lane_tower_tile)[0],
+        cKeeperTowerY10=center(keeper.lane_tower_tile)[1],
         cShopCount=len(purchases),
         cInvestCount=len(investments),
         cRelicsPurchase=relics.index if relics else 0,
@@ -502,7 +508,6 @@ def render_prelude(
         cSiegeSharedCooldown=interaction.siege.shared_cooldown,
         cSiegeBuyerCooldown=interaction.siege.buyer_cooldown,
         cSiegeSlots=SIEGE_ISLETS,
-        cSpareSiegeSlot=SPARE_ISLET,
         cTrebuchet=UnitInfo["TREBUCHET"].ID,
         cPackedTrebuchet=UnitInfo["TREBUCHET_PACKED"].ID,
         cPierceClass=PIERCE,
@@ -565,6 +570,9 @@ def render_prelude(
         # Indexed by medium * cRaiderLineSize + member; a shorter line ends in zeros.
         "raiderLine": [0] * line_size
         + [unit for line in lines for unit in line + (0,) * (line_size - len(line))],
+        # Indexed by lane, in tenths of a tile: where a cleared lane's King stands.
+        "keeperX10": [0] + [center(tile)[0] for tile in keeper.lane_kings],
+        "keeperY10": [0] + [center(tile)[1] for tile in keeper.lane_kings],
         # Indexed by lane * cSiegeSlots + position, in tenths of a tile at the islet centers.
         "siegeX10": [0] * SIEGE_ISLETS
         + [center(tile)[0] for lane in lanes for tile in lane.sites.siege],
@@ -676,6 +684,7 @@ def render_xs(
     shop: Shop,
     profiles: Profiles,
     stock: Stock,
+    keeper: Keeper,
 ) -> str:
     """Prefix the shared runtime with this build's constants and lookup tables.
 
@@ -685,4 +694,4 @@ def render_xs(
     the game as the enemy rather than player 8. assets/runtime.xs is embedded verbatim in the
     game scenario, so notes about it live here rather than in its comments.
     """
-    return render_prelude(balance, lanes, shop, profiles, stock) + asset_text("runtime.xs")
+    return render_prelude(balance, lanes, shop, profiles, stock, keeper) + asset_text("runtime.xs")

@@ -85,6 +85,8 @@ void xsEffectAmount(int effect, int unit, int attribute, float amount, int playe
 }
 constexpr int cArmor = 8;
 constexpr int cAttack = 9;
+constexpr int cMovementSpeed = 5;
+constexpr int cMaxRange = 12;
 float xsGetObjectAttribute(int player, int object, int attribute, int = -1) {
     if (object != 598 || attribute != cHitpoints) { std::cerr << "Unexpected object attribute\n"; std::exit(1); }
     return outpostHitpoints.at(player);
@@ -150,9 +152,10 @@ int xsGetGarrisonedInUnitId(int id) { return units.at(id).garrison; }
 vector xsGetUnitPosition(int id) { return units.at(id).pos; }
 vector xsVectorSet(float x, float y, float z) { return {x, y, z}; }
 // Kings the XS created by owner: those a lane earns or buys, and the one a cleared lane keeps
-// on its spare siege islet.
-std::array<int, 9> kingsCreated{}, spareKings{};
-bool onSpareIslet(int owner, vector pos);
+// beside slot 8's keepers (the enemy's stands on the islet above).
+std::array<int, 9> kingsCreated{}, keeperKings{};
+bool onLaneKeeper(int owner, vector pos);
+bool onKeeperThrone(vector pos);
 std::array<std::map<int, int>, 9> created{};
 // Enemies the XS created, by the lane whose rows they appeared in.
 std::array<int, 9> spawns{};
@@ -172,7 +175,7 @@ int xsCreateUnit(int type, int owner, vector pos, bool, bool sound, bool checkCo
     units.emplace(id, Unit{type, pos, hp, owner});
     ++created[owner][type];
     if (sound) ++audible[owner];
-    if (type == 434) { if (onSpareIslet(owner, pos)) ++spareKings[owner]; else ++kingsCreated[owner]; }
+    if (type == 434) { if (onLaneKeeper(owner, pos) || (owner == enemy() && onKeeperThrone(pos))) ++keeperKings[owner]; else ++kingsCreated[owner]; }
     if (owner > 0 && owner == enemy()) { int lane = laneOfRow(pos[1]); if (lane > 0) ++spawns[lane]; }
     return id;
 }
@@ -214,31 +217,29 @@ std::array<std::vector<int>, 9> sent{};
 bool near(const Unit &u, int x10, int y10) {
     return std::abs(u.pos[0] - x10 / 10.0f) < 0.5f && std::abs(u.pos[1] - y10 / 10.0f) < 0.5f;
 }
-// The spare siege islet, which no siege uses, holds a cleared lane's one King.
-bool onSpareIslet(int owner, vector pos) {
+// A cleared lane's one King stands on its own tile beside slot 8's keepers.
+bool onLaneKeeper(int owner, vector pos) {
     if (owner < 1 || owner > 7) return false;
-    int key = owner * cSiegeSlots + cSpareSiegeSlot;
-    return near(Unit{434, pos}, siegeX10(key), siegeY10(key));
+    return near(Unit{434, pos}, keeperX10(owner), keeperY10(owner));
 }
-// The spare islet's corner tile, a tile west and north of its centre.
-bool onKeeperCorner(int owner, vector pos) {
-    if (owner < 1 || owner > 7) return false;
-    int key = owner * cSiegeSlots + cSpareSiegeSlot;
-    return std::abs(pos[0] - (siegeX10(key) / 10.0f - 1.0f)) < 0.5f && std::abs(pos[1] - (siegeY10(key) / 10.0f - 1.0f)) < 0.5f;
-}
-// A cleared lane owns nothing but its spare King; the enemy's cleared lane keeps a tower on
-// the islet beside it, so a lobby's Standard victory never counts the enemy destroyed.
-bool onlyKeepers(int player, bool tower) {
+// The keeper islet an enemy holding a lane slot uses, beyond every tower's reach.
+bool onKeeperSpot(vector pos, int x10, int y10) { return near(Unit{434, pos}, x10, y10); }
+bool onKeeperThrone(vector pos) { return onKeeperSpot(pos, cKeeperKingX10, cKeeperKingY10); }
+// A cleared lane owns nothing but its keeper King; the enemy's cleared lane keeps its King and
+// a tower on the islet above instead, so a lobby's Standard victory never counts the enemy
+// destroyed.
+bool onlyKeepers(int player, bool enemy) {
     int kings = 0, towers = 0, others = 0;
     for (auto &[id, u] : units) {
         if (u.owner != player) continue;
-        if (u.type == 434 && onSpareIslet(player, u.pos)) ++kings;
-        else if (u.type == cKeeperBuilding && onKeeperCorner(player, u.pos)) ++towers;
+        bool throne = enemy ? onKeeperSpot(u.pos, cKeeperKingX10, cKeeperKingY10) : onLaneKeeper(player, u.pos);
+        if (u.type == 434 && throne) ++kings;
+        else if (enemy && u.type == cKeeperBuilding && onKeeperSpot(u.pos, cKeeperTowerX10, cKeeperTowerY10)) ++towers;
         else ++others;
     }
-    return others == 0 && kings == 1 && towers == (tower ? 1 : 0);
+    return others == 0 && kings == 1 && towers == (enemy ? 1 : 0);
 }
-bool onlySpareKing(int player) { return onlyKeepers(player, false); }
+bool onlyKeeperKing(int player) { return onlyKeepers(player, false); }
 void resetXsBuffers() {
     arrays.clear(); floatArrays.clear();
     ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientBuildingArray=-1; ancientLeakCounts=-1;
@@ -318,7 +319,7 @@ void restart(std::initializer_list<int> humans) {
     variables.fill(0); units.clear(); chat.clear(); researched.clear(); techStates.clear();
     for (int p=0; p<9; ++p) { sent[p].clear(); bought[p].clear(); attributes[p].clear(); created[p].clear(); }
     outpostHitpoints.fill(500);
-    kingsCreated.fill(0); spareKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); audible.fill(0);
+    kingsCreated.fill(0); keeperKings.fill(0); spawns.fill(0); grants.fill(0); cleanups.fill(0); audible.fill(0);
     applied.clear(); techChanges.clear();
     for (auto &hp : typeHitpoints) hp.clear();
     refusedOwner = -1;
@@ -401,6 +402,12 @@ std::vector<int> attackSteps(int player, int unit) {
     }
     return steps;
 }
+// The attack the XS added to any definition; keepers held in place are not among them.
+std::vector<Applied> attackEffects() {
+    std::vector<Applied> found;
+    for (auto &a : applied) if (a.attribute == cAttack) found.push_back(a);
+    return found;
+}
 // The towers every attack purchase but the Bombard Tower's raises.
 const std::vector<int> towerFamily = {79, 234, 235, 236};
 // Kings enough for the purchase stand on its pad until it is bought.
@@ -433,6 +440,11 @@ std::vector<float> hitpointsSet(int player, int unit, size_t from = 0) {
     }
     return values;
 }
+// Whether the XS set an attribute of a player's definition of a unit to a value.
+bool attributeSet(int player, int unit, int attribute, float amount) {
+    for (auto &a : applied) if (a.player == player && a.unit == unit && a.attribute == attribute && a.effect == cSetAttribute && a.amount == amount) return true;
+    return false;
+}
 // The pierce armor the XS set outright on the enemy's definition of a unit, or -1.
 int armorSet(int unit) {
     int armor = -1;
@@ -453,8 +465,8 @@ int main(int argc, char** argv) {
     require(argc == 2, "Need case"); string test=argv[1];
     if(test=="cleared_lanes") {
         // Each lane owns its berry mill (and its upgraded form) and one object from every other
-        // class it starts with. A cleared lane keeps none of them, only one King on its spare
-        // siege islet, so DE does not defeat the slot; human lanes keep everything until they fall.
+        // class it starts with. A cleared lane keeps none of them, only one King beside slot 8's
+        // keepers, so DE does not defeat the slot; human lanes keep everything until they fall.
         std::array<std::vector<int>, 9> laneUnits{};
         for(int p=1;p<=7;++p) {
             for(int type: {68, 131, 293, 79, 128, 17, 601, 434, 50, 286}) {
@@ -472,23 +484,24 @@ int main(int argc, char** argv) {
             for(int id: laneUnits[p])
                 require(units.count(id)==human, "Startup cleanup did not distinguish human and AI units");
             require(units.count(laneLife(p))==human, "Startup cleanup kept an AI lane's life display");
-            require(human || (onlySpareKing(p) && spareKings[p]==1), "A cleared lane kept more than its spare King");
+            require(human || (onlyKeeperKing(p) && keeperKings[p]==1), "A cleared lane kept more than its keeper King");
+            require(human || attributeSet(p, cKing, cMovementSpeed, 0.0f), "A cleared lane's King was not held in place");
         }
         resetXsBuffers();
         setLane(2, fLives, 0); tick();
-        require(onlySpareKing(2) && spareKings[2]==1, "An eliminated lane kept more than its spare King");
+        require(onlyKeeperKing(2) && keeperKings[2]==1, "An eliminated lane kept more than its keeper King");
         require(units.count(gaia)==1 && units.count(keeper)==1 && units.count(laneUnits[7][0])==1,
                 "Cleanup removed another owner's units");
         auto remaining=units.size();
         ancientCleanupLane(2);
-        require(units.size()==remaining && onlySpareKing(2), "Repeating cleanup changed what remains");
+        require(units.size()==remaining && onlyKeeperKing(2), "Repeating cleanup changed what remains");
     } else if(test=="slots") {
         start({2,7}); require(xsTriggerVariable(vParticipants)==2, "Nonconsecutive slots miscounted");
         advanceTo(sWave); for(int n=0;n<20;++n) tick(true);
         require(spawns[2]==spawns[7] && spawns[2]>0, "Active lanes received different schedules");
         for(int p:{1,3,4,5,6}) {
             require(!grants[p] && !kingsCreated[p] && !spawns[p], "AI filler was paid or spawned");
-            require(onlySpareKing(p), "AI filler kept more than its spare King");
+            require(onlyKeeperKing(p), "AI filler kept more than its keeper King");
             require(cleanups[p]==1, "AI filler was not cleared exactly once");
         }
     } else if(test=="ai_departures") {
@@ -522,7 +535,7 @@ int main(int argc, char** argv) {
         setLane(7,fLives,0); if(test=="simultaneous") setLane(1,fLives,0);
         tick(); require(phase()==sElimination, "Missing batch elimination state");
         tick(); require(phase()==sDefeat && xsTriggerVariable(vWinner)==8, "Empty field selected a human winner");
-        require(onlySpareKing(7) && (test=="defeat" || onlySpareKing(1)), "A fallen lane kept more than its spare King");
+        require(onlyKeeperKing(7) && (test=="defeat" || onlyKeeperKing(1)), "A fallen lane kept more than its keeper King");
     } else if(test=="survivor" || test=="resign") {
         start({2,7});
         if(test=="resign") occupied[2]=false; else setLane(2,fLives,0);
@@ -533,8 +546,8 @@ int main(int argc, char** argv) {
         for(int n=0;n<30;++n) tick();
         require(kingsCreated[2]==paid && lane(2,fActive)==0, "Eliminated lane still receives Kings");
         // A lane whose player left the game needs no King to keep its slot.
-        if(test=="resign") require(spareKings[2]==0 && unitsOf(2, cKing)==0, "A departed player was given a King");
-        else require(onlySpareKing(2), "A fallen lane kept more than its spare King");
+        if(test=="resign") require(keeperKings[2]==0 && unitsOf(2, cKing)==0, "A departed player was given a King");
+        else require(onlyKeeperKing(2), "A fallen lane kept more than its keeper King");
     } else if(test=="sudden") {
         start({1,7});
         reachWave(cWaveCount);
@@ -1063,7 +1076,7 @@ int main(int argc, char** argv) {
         tick(true);
         for (int unit : towerFamily)
             require(attackSteps(1, unit)==std::vector<int>(6, 1), "Periodic tower attack did not arrive every five seconds");
-        require(applied.size()==6*towerFamily.size(), "Periodic tower attack reached other definitions");
+        require(attackEffects().size()==6*towerFamily.size(), "Periodic tower attack reached other definitions");
     } else if(test=="attack_chunks") {
         // A purchase adds its whole amount to every tower however much was bought before, past
         // the 255 a native effect stops at.
@@ -1071,7 +1084,7 @@ int main(int argc, char** argv) {
         for (int purchase : {cBuyTowerAttack170, cBuyTowerAttack50, cBuyTowerAttack100}) buy(1, purchase);
         for (int unit : towerFamily)
             require(attackSteps(1, unit)==std::vector<int>({170, 50, 100}), "A purchase's attack did not arrive whole");
-        require(applied.size()==3*towerFamily.size(), "Attack reached another definition");
+        require(attackEffects().size()==3*towerFamily.size(), "Attack reached another definition");
         buy(1, cBuyBombardAttack400);
         require(attackSteps(1, 236)==std::vector<int>({170, 50, 100, 255, 145}) && attackSteps(1, 79).size()==3,
                 "Bombard Tower attack did not reach the Bombard Tower alone");
@@ -1080,7 +1093,7 @@ int main(int argc, char** argv) {
         buy(3, cBuyTowerAttack750);
         for (int unit : towerFamily)
             require(attackSteps(3, unit)==std::vector<int>({255, 255, 240}), "+750 was not added in steps of at most 255");
-        for (auto &a : applied) require(a.player==3, "Another lane's towers gained attack");
+        for (auto &a : attackEffects()) require(a.player==3, "Another lane's towers gained attack");
     } else if(test=="repair") {
         start({1});
         setLane(1, fOwned, own({cBuyRepair}));
@@ -1608,7 +1621,7 @@ int main(int argc, char** argv) {
         tick();
         require(mentions("P2: a starting purchase is not for this civilization and stays on sale.")==1,
                 "The grant the civilization cannot use was not reported");
-        require(applied.empty(), "Attack for towers the civilization lacks was added");
+        require(attackEffects().empty(), "Attack for towers the civilization lacks was added");
         require(unitsOf(2, spawnUnit(spawnStart(2 * cSpawnStride + cBuyCastle)))==1 && ancientOwns(2, shopMask(cBuyCastle)),
                 "The other grants did not go through");
     } else if(test=="siege_price") {
@@ -1784,6 +1797,8 @@ int main(int argc, char** argv) {
         require(enemy()==3 && xsTriggerVariable(vParticipants)==2, "The last computer was not made the enemy");
         require(mentions("Enemy: P3, the last computer player.")==1, "The enemy was not announced");
         require(cleanups[3]==1 && onlyKeepers(3, true), "The enemy's own lane was not cleared, keeping its King and tower");
+        require(attributeSet(3, cKing, cMovementSpeed, 0.0f), "The enemy's King was not held in place");
+        for (int unit : towerFamily) require(attributeSet(3, unit, cMaxRange, 0.0f), "An enemy tower type was left able to fire");
         for(int p=4;p<=7;++p) require(cleanups[p]==1 && unitsOf(p, cKing)==0, "A closed slot was given a King");
         advanceTo(sWave); tick();
         require(spawns[1]>0 && spawns[1]==spawns[2] && spawns[3]==0, "The waves did not come to the human lanes alone");

@@ -17,8 +17,8 @@ type RaiderMedium = Literal["land", "naval"]
 RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
 type TradeMedium = Literal["land", "water"]
 TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
-# The islets beside each lane's towers: a rival's trebuchets take the first ones, and a cleared
-# lane's King keeps the last.
+# The islets beside each lane's towers: a rival's trebuchets take the first ones, and the last
+# stays free.
 SIEGE_ISLETS = 3
 SPARE_ISLET = SIEGE_ISLETS - 1
 # Where a profile's starting towers stand: the build row nearest the path on each side of the

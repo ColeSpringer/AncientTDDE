@@ -19,6 +19,7 @@ from ancienttdde.game.sites import (
     Tile,
     TradeMedium,
     load_sites,
+    point_tile,
 )
 from ancienttdde.models import Rect
 from ancienttdde.scenario.objects import technology
@@ -472,7 +473,7 @@ def load_raiders(raw: dict[str, object]) -> Raiders:
 def load_siege(raw: dict[str, object]) -> Siege:
     shared = integer(raw, "shared_cooldown", 0, 600)
     return Siege(
-        # The last of each rival's siege islets stays in reserve for a cleared lane's King.
+        # The last of each rival's siege islets stays free.
         trebuchets_per_rival=integer(raw, "trebuchets_per_rival", 1, SPARE_ISLET),
         warning_seconds=integer(raw, "warning_seconds", 1, 60),
         active_seconds=integer(raw, "active_seconds", 10, 300),
@@ -569,6 +570,36 @@ class EngineLane:
         if medium == "land":
             return "cart", self.sites.carts, self.land_trade_partner
         return "cog", self.sites.cogs, self.water_trade_partner
+
+
+@dataclass(frozen=True)
+class Keeper:
+    """The keeper tiles, on two islets beyond every tower, trebuchet and raider: where slot 8's
+    placed King and tower stand, the tiles around that tower where each cleared lane's King
+    stands (one per lane, in lane order), and where the script puts the King and tower of an
+    enemy holding a lane slot, on the islet above. Everything stands at a tile's centre, so
+    the triggers that watch a tile see what the script creates on it."""
+
+    king_tile: Tile
+    tower_tile: Tile
+    lane_kings: tuple[Tile, ...]
+    lane_king_tile: Tile
+    lane_tower_tile: Tile
+
+
+def load_keeper(anchors: dict[str, object]) -> Keeper:
+    throne, watch = point_tile(anchors, "enemy.keeper"), point_tile(anchors, "enemy.keeper.tower")
+    around = {(watch[0] + dx, watch[1] + dy) for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    lane_kings = tuple(sorted(around - {throne, watch}))
+    if len(lane_kings) != 7:
+        raise ValueError("Slot 8's keeper King must stand beside its tower")
+    return Keeper(
+        throne,
+        watch,
+        lane_kings,
+        point_tile(anchors, "enemy.keeper.lane"),
+        point_tile(anchors, "enemy.keeper.lane.tower"),
+    )
 
 
 def load_lanes(anchors: dict[str, object]) -> tuple[EngineLane, ...]:

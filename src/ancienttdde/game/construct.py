@@ -18,13 +18,21 @@ from ancienttdde.common.data import object_value, read_object
 from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.game.catalog import Shop, load_shop
 from ancienttdde.game.civilizations import Profiles, load_profiles
-from ancienttdde.game.config import Balance, EngineLane, Interaction, load_balance, load_lanes
+from ancienttdde.game.config import (
+    Balance,
+    EngineLane,
+    Interaction,
+    Keeper,
+    load_balance,
+    load_keeper,
+    load_lanes,
+)
 from ancienttdde.game.controls import CONTROLS
 from ancienttdde.game.economy import endless_deposits
 from ancienttdde.game.instructions import instructions
 from ancienttdde.game.interaction import open_pvp_pads, pvp_diplomacy, siege_countdowns
 from ancienttdde.game.labels import caption_transfers, name_objects
-from ancienttdde.game.lanes import lane_actions
+from ancienttdde.game.lanes import KEEPER_KINDS, lane_actions
 from ancienttdde.game.objectives import hide_on_stop, run_objectives
 from ancienttdde.game.restrictions import restrict_competitive
 from ancienttdde.game.script import render_prelude, render_xs
@@ -41,7 +49,7 @@ from ancienttdde.game.shop import (
     place_gates,
     remove_shop_signs,
 )
-from ancienttdde.game.sites import Tile, numbers
+from ancienttdde.game.sites import Tile
 from ancienttdde.game.spawns import creation_tiles, marked_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
@@ -228,6 +236,7 @@ def settings(
     shop: Shop,
     anchors: dict[str, object],
     sizes: Mapping[int, int],
+    keeper: Keeper,
 ) -> None:
     scenario = game.scenario
     clear_sites(game, lanes, shop, balance.interaction)
@@ -240,8 +249,6 @@ def settings(
     caption_displays(game, shop)
     caption_transfers(game, lanes)
     place_controls(game, anchors, balance)
-    keeper = keeper_point(anchors, "enemy.keeper")
-    keeper_tower = keeper_point(anchors, "enemy.keeper.tower")
     scenario.player_manager.active_players = 8
     for player in scenario.player_manager.players[1:]:
         human = player.player_id != 8
@@ -274,24 +281,35 @@ def settings(
     # protected building keeps a lobby's Standard victory from counting it destroyed: Conquest
     # needs an opponent's villagers, soldiers, ships and buildings gone, and a King is none.
     king = scenario.unit_manager.add_unit(
-        player=8, unit_const=game.stock("king"), x=keeper[0], y=keeper[1]
+        player=8,
+        unit_const=game.stock("king"),
+        x=keeper.king_tile[0] + 0.5,
+        y=keeper.king_tile[1] + 0.5,
     )
     tower = scenario.unit_manager.add_unit(
-        player=8, unit_const=game.stock("watch-tower"), x=keeper_tower[0], y=keeper_tower[1]
+        player=8,
+        unit_const=game.stock("watch-tower"),
+        x=keeper.tower_tile[0] + 0.5,
+        y=keeper.tower_tile[1] + 0.5,
     )
     game.names.register("object", "enemy.keeper", king.reference_id)
     game.names.register("object", "enemy.keeper.tower", tower.reference_id)
     init = game.trigger("game.initialize", looping=False)
     game.protect(init, [king.reference_id, tower.reference_id])
-    effect(
-        init,
-        "modify_attribute",
-        source_player=8,
-        object_list_unit_id=game.stock("king"),
-        object_attributes=ObjectAttribute.MOVEMENT_SPEED,
-        quantity=0,
-        operation=Operation.SET,
-    )
+    # The King never leaves its tile and the tower never fires: a human in slot 8 is an enemy
+    # of a lane slot's computer by the scenario's diplomacy, and the islets lie a few tiles apart.
+    for kind, attribute in [("king", ObjectAttribute.MOVEMENT_SPEED)] + [
+        (kind, ObjectAttribute.MAXIMUM_RANGE) for kind in KEEPER_KINDS[1:]
+    ]:
+        effect(
+            init,
+            "modify_attribute",
+            source_player=8,
+            object_list_unit_id=game.stock(kind),
+            object_attributes=attribute,
+            quantity=0,
+            operation=Operation.SET,
+        )
     endpoints = {game.stock("market"), game.stock("dock")}
     game.protect(
         init,
@@ -311,13 +329,6 @@ def settings(
     game.protect(init, [game.names.resolve("object", f"control.{c.key}") for c in CONTROLS])
 
 
-def keeper_point(anchors: dict[str, object], key: str) -> tuple[float, float]:
-    """A spot on the enemy's isolated islet, away from every siege spot: where its protected
-    King waits, or where its tower stands."""
-    x, y = numbers(object_value(anchors.get(key), key).get("point"), key, 2)
-    return x, y
-
-
 def add_logic(
     game: Game,
     balance: Balance,
@@ -325,6 +336,7 @@ def add_logic(
     shop: Shop,
     profiles: Profiles,
     anchors: dict[str, object],
+    keeper: Keeper,
 ) -> None:
     endless_deposits(game, balance)
     name_objects(game, lanes, shop, balance)
@@ -342,7 +354,7 @@ def add_logic(
     retire_controls(game)
     restrict_competitive(game)
     for lane in lanes:
-        lane_actions(game, lane, balance, shop, profiles)
+        lane_actions(game, lane, balance, shop, profiles, keeper)
     hide_on_stop(game)
     declare_results(game)
 
@@ -351,6 +363,7 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     balance = load_balance(root / "content/balance/game.json")
     anchors = object_value(read_object(map_path).get("anchors"), "anchors")
     lanes = load_lanes(anchors)
+    keeper = load_keeper(anchors)
     families = [name for name, _ in balance.towers.families]
     shop = load_shop(
         root / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
@@ -365,12 +378,15 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     game = Game(scenario)
     _, config = read_content(root)
     sizes = blocking_sizes(config)
-    settings(game, balance, lanes, shop, anchors, sizes)
-    scenario.xs_manager.add_script(xs_string=render_xs(balance, lanes, shop, profiles, stock))
-    prelude.write_text(
-        render_prelude(balance, lanes, shop, profiles, stock, extern=True), encoding="utf-8"
+    settings(game, balance, lanes, shop, anchors, sizes, keeper)
+    scenario.xs_manager.add_script(
+        xs_string=render_xs(balance, lanes, shop, profiles, stock, keeper)
     )
-    add_logic(game, balance, lanes, shop, profiles, anchors)
+    prelude.write_text(
+        render_prelude(balance, lanes, shop, profiles, stock, keeper, extern=True),
+        encoding="utf-8",
+    )
+    add_logic(game, balance, lanes, shop, profiles, anchors, keeper)
     scenario.message_manager.instructions = instructions(balance, shop, profiles).replace(
         "\n", "\r"
     )

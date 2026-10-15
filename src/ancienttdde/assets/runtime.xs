@@ -138,21 +138,37 @@ void ancientCleanupLane(int player = 1) {
         }
     }
     // One unit keeps the slot in the game: the engine defeats a player who owns nothing. It
-    // stands on the lane's spare siege islet, which no siege uses. A player who has left the
-    // game needs none. The enemy's slot keeps a tower on the islet as well: a lobby's Standard
-    // victory counts an opponent destroyed once it has no villagers, soldiers, ships or
-    // buildings, and a King is none of them.
+    // stands on the keeper islets, beyond every tower, trebuchet and raider: no player may lose
+    // to another killing a King, and a lane's spare siege islet lay within the next lane's
+    // Accursed Tower reach. A player who has left the game needs none.
     if (xsGetPlayerInGame(player) == false) return;
-    int spare = player * cSiegeSlots + cSpareSiegeSlot;
-    vector keep = xsVectorSet(0.1 * siegeX10(spare), 0.1 * siegeY10(spare), 0.0);
+    if (player == ancientEnemy()) {
+        // The enemy's King and tower take the islet above: a lobby's Standard victory counts
+        // the enemy destroyed once it has no villagers, soldiers, ships or buildings, which a
+        // King alone is.
+        vector throne = xsVectorSet(0.1 * cKeeperKingX10, 0.1 * cKeeperKingY10, 0.0);
+        vector watch = xsVectorSet(0.1 * cKeeperTowerX10, 0.1 * cKeeperTowerY10, 0.0);
+        if (xsCreateUnit(cKing, player, throne, false, false, false) < 0) {
+            xsChatData(ancientPlayer(player) + "'s slot could not keep its King, so DE may report the enemy defeated.");
+        }
+        if (xsCreateUnit(cKeeperBuilding, player, watch, false, false, false) < 0) {
+            xsChatData(ancientPlayer(player) + "'s slot could not keep its tower, so DE may count the enemy destroyed.");
+        }
+        // The King stays on its tile and the tower never fires, whatever type a free upgrade
+        // makes it, as slot 8's placed keepers do.
+        xsEffectAmount(cSetAttribute, cKing, cMovementSpeed, 0.0, player);
+        for (family = 0; < cFamilies) {
+            for (member = 0; < familyCount(family)) {
+                xsEffectAmount(cSetAttribute, familyUnit(familyStart(family) + member), cMaxRange, 0.0, player);
+            }
+        }
+        return;
+    }
+    vector keep = xsVectorSet(0.1 * keeperX10(player), 0.1 * keeperY10(player), 0.0);
     if (xsCreateUnit(cKing, player, keep, false, false, false) < 0) {
         xsChatData(ancientPlayer(player) + "'s cleared lane could not keep its slot, so DE may report it defeated.");
     }
-    if (player != ancientEnemy()) return;
-    vector corner = xsVectorSet(-1.0 + xsVectorGetX(keep), -1.0 + xsVectorGetY(keep), 0.0);
-    if (xsCreateUnit(cKeeperBuilding, player, corner, false, false, false) < 0) {
-        xsChatData(ancientPlayer(player) + "'s slot could not keep its tower, so DE may count the enemy destroyed.");
-    }
+    xsEffectAmount(cSetAttribute, cKing, cMovementSpeed, 0.0, player);
 }
 
 // What a King costs this lane: the difficulty's price, adjusted by its civilization profile.

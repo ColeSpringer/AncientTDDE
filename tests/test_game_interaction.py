@@ -8,6 +8,7 @@ from typing import Any
 import pytest
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
 from AoE2ScenarioParser.datasets.techs import TechInfo
+from AoE2ScenarioParser.datasets.trigger_lists.object_attribute import ObjectAttribute
 from AoE2ScenarioParser.datasets.units import UnitInfo
 from conftest import (
     ROOT,
@@ -33,6 +34,7 @@ HIT_POINTS, SPEED, ARMOR, MAX_RANGE = 0, 5, 8, 12
 TOTAL_MISSILES, MAX_TOTAL_MISSILES = 102, 107
 PIERCE, ENEMY, MOVE = 3, 3, 3
 OUTPOST, KING = 598, 434
+TOWERS = (79, 234, 235, 236)
 
 
 def snapshot(build: GameBuild) -> ScenarioSnapshot:
@@ -78,8 +80,8 @@ def tile(point: list[float]) -> tuple[int, int]:
 def test_the_xs_alone_configures_the_waves_enemies(game_build: GameBuild) -> None:
     """The enemy may hold any player number, so no native trigger sets a wave unit's hit points
     or armor for a fixed player: the XS sets them on the enemy's definitions (see the wave and
-    endless cases in test_game_script.py). The one native change to an enemy unit holds the
-    keeper King in place."""
+    endless cases in test_game_script.py). The only native changes to the enemy's units hold
+    slot 8's keeper King in place and keep its keeper tower from firing, whatever its type."""
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
@@ -94,7 +96,7 @@ def test_the_xs_alone_configures_the_waves_enemies(game_build: GameBuild) -> Non
             unit = attr_int(change, "object_list_unit_id")
             assert unit not in wave_units, trigger["name"]
             if change["source_player"] == 8:
-                assert (trigger["name"], unit) == ("game.initialize", KING)
+                assert trigger["name"] == "game.initialize" and unit in (KING, *TOWERS)
 
 
 def test_status_shows_the_wave_number_beyond_the_schedule(game_build: GameBuild) -> None:
@@ -466,6 +468,18 @@ def test_the_original_selectors_are_gone_and_the_keeper_holds_its_islet(
     for protection in ("disable_unit_attackable", "disable_object_deletion"):
         protected = [e for e in effects(init, protection) if e["source_player"] == 8]
         assert [sorted(e["selected_object_ids"]) for e in protected] == [held]
+    # The King cannot walk off its tile and the tower cannot shoot whatever type a free upgrade
+    # makes it: a human in slot 8 is an enemy of a lane slot's computer by the scenario's
+    # diplomacy, and the cleared lanes' Kings stand beside it.
+    frozen = [
+        (e["object_list_unit_id"], e["object_attributes"], e["quantity"], e["operation"])
+        for e in effects(init, "modify_attribute")
+        if e["source_player"] == 8
+    ]
+    assert sorted(frozen) == sorted(
+        [(KING, ObjectAttribute.MOVEMENT_SPEED, 0, SET)]
+        + [(tower, ObjectAttribute.MAXIMUM_RANGE, 0, SET) for tower in TOWERS]
+    )
 
 
 def test_pvp_makes_every_two_playing_lanes_enemies_at_the_first_wave(game_build: GameBuild) -> None:

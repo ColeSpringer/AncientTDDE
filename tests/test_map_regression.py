@@ -26,14 +26,14 @@ def test_versioned_stock_template_matches_current_migration(tmp_path: Path) -> N
     assert counts[1776] == 0
     assert counts[819] == 55
     assert counts[128] == 57
-    assert len(expected.get("anchors", {})) == 367
+    assert len(expected.get("anchors", {})) == 369
     migration = expected.get("migration")
     assert migration is not None and migration["terrain_patch_tiles"] == 243
     assert (migration["placement_additions"], migration["placement_removals"]) == (32, 3)
     built = read_manifest(build_map(ROOT, tmp_path / "regression-build") / "manifest.json")
     assert scenario_digest(snapshot) == built["normalized_sha256"]
     assert len(built["validation"]["routes"]) == 74
-    assert len(built["validation"]["isolation"]) == 57
+    assert len(built["validation"]["isolation"]) == 58
     assert not built["validation"]["in_game_verified"]
 
 

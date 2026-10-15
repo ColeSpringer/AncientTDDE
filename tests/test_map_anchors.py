@@ -5,6 +5,7 @@ import math
 from collections.abc import Iterable
 from functools import cache
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -404,35 +405,65 @@ def test_run_controls_stand_free_in_the_row_below_the_shop() -> None:
     assert all(math.dist(a, b) >= 3 for i, a in enumerate(spots) for b in spots[i + 1 :])
 
 
-def test_the_enemy_keeper_stands_alone_off_the_siege_islets() -> None:
-    keeper = tile(point("enemy.keeper"))
-    assert keeper in open_ground()
-    islet = reachable([keeper])
-    assert islet <= cells((141, 87, 143, 89))
-    for player in PLAYERS:
-        for index in (1, 2, 3):
-            assert keeper not in region(f"siege.p{player}.{index}")
-    # No lane's enemies are counted or removed there.
-    assert all(not 13 + 28 * (p - 1) <= keeper[1] <= 18 + 28 * (p - 1) for p in PLAYERS)
-
-
-@pytest.mark.parametrize("player", PLAYERS)
-def test_the_enemy_tower_fits_the_corner_of_every_spare_islet(player: int) -> None:
-    """The script puts an enemy's tower a tile west and north of the spare islet's centre."""
-    x1, y1, _, _ = rect(f"siege.p{player}.3")
-    centre = tile(point(f"siege.p{player}.3"))
-    assert (x1, y1) == (centre[0] - 1, centre[1] - 1)
-    assert (x1, y1) in buildable()
-
-
-def test_the_enemy_keeper_tower_stands_on_buildable_ground_of_the_islet() -> None:
-    """The original's selector Outpost on that tile leaves with the build."""
+@pytest.mark.parametrize(
+    ("king", "tower", "islet"),
+    [
+        ("enemy.keeper", "enemy.keeper.tower", (141, 87, 143, 89)),
+        ("enemy.keeper.lane", "enemy.keeper.lane.tower", (141, 83, 143, 85)),
+    ],
+)
+def test_the_keeper_islets_lie_beyond_every_tower_trebuchet_and_raider(
+    king: str, tower: str, islet: tuple[int, int, int, int]
+) -> None:
+    """Slot 8's placed keepers and the ones the script creates for an enemy in a lane slot
+    stand where nothing can shoot them: a lane's spare islet lies within the next lane's
+    Accursed Tower reach, which killed the keepers there. The original's selector Outposts on
+    the islets' buildable tiles leave with the build."""
     data, _ = content()
-    keeper = tile(point("enemy.keeper"))
-    tower = tile(point("enemy.keeper.tower"))
-    assert tower != keeper and tower in cells((141, 87, 143, 89))
+    throne, watch = tile(point(king)), tile(point(tower))
+    assert throne != watch and throne in cells(islet) and watch in cells(islet)
+    assert throne in open_ground()
+    # Nothing walks off the islet.
+    assert reachable([throne]) <= cells(islet)
     width = data["map"]["width"]
-    assert data["map"]["tiles"][tower[1] * width + tower[0]][0] in BUILDABLE_TERRAIN
+    assert data["map"]["tiles"][watch[1] * width + watch[0]][0] in BUILDABLE_TERRAIN
+    # An Accursed Tower reaches 13 tiles plus the three blacksmith ranges; a trebuchet 16.
+    for kx, ky in (point(king), point(tower)):
+        for key in data.get("anchors", {}):
+            if not any(
+                tag in key for tag in ("build.", "expansion", "special", "siege.", "raiders")
+            ):
+                continue
+            if anchor(key).get("region") is not None:
+                x1, y1, x2, y2 = rect(key)
+                nearest = (min(max(kx, x1), x2 + 1), min(max(ky, y1), y2 + 1))
+                assert math.dist((kx, ky), nearest) > 20, key
+            else:
+                for spot in points(key) or [point(key)]:
+                    assert math.dist((kx, ky), spot[:2]) > 20, key
+    # No lane's rows, where the script counts and removes enemies, hold either islet.
+    for player in PLAYERS:
+        _, y1, _, y2 = rect(f"lane.p{player}.path")
+        assert not any(y1 <= y <= y2 for _, y in (throne, watch)), player
+
+
+def test_every_cleared_lane_has_its_own_open_tile_beside_the_keepers() -> None:
+    """A cleared lane's King stands on one of the seven open tiles around slot 8's tower."""
+    from ancienttdde.game.config import load_keeper
+
+    data, _ = content()
+    spots = load_keeper(cast(dict[str, object], data.get("anchors", {})))
+    throne, watch = tile(point("enemy.keeper")), tile(point("enemy.keeper.tower"))
+    assert len(set(spots.lane_kings)) == 7 == len(PLAYERS)
+    for post in spots.lane_kings:
+        assert post in cells((141, 87, 143, 89)) and post not in (throne, watch)
+        assert post in open_ground()
+    # No raider's water comes within a fire galley's reach of the islet.
+    sailed: set[Cell] = set()
+    for player in PLAYERS:
+        for spot in points(f"lane.p{player}.raiders.naval"):
+            sailed |= reachable([tile(spot)], "water")
+    assert all(math.dist(cell, throne) > 4 for cell in sailed)
 
 
 @pytest.mark.parametrize("player", PLAYERS)

@@ -2,6 +2,7 @@
 
 import re
 import subprocess
+from functools import cache
 from pathlib import Path
 from typing import cast
 
@@ -11,7 +12,7 @@ from conftest import ROOT, WATCH_TOWER, compile_harness, stock
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.game.catalog import Shop
 from ancienttdde.game.civilizations import Civilization, Profile, Profiles
-from ancienttdde.game.config import Balance, EngineLane
+from ancienttdde.game.config import Balance, EngineLane, Keeper
 from ancienttdde.map.models import MapAnchor
 
 # Tiles a King walks in a game second in DE, as the harness's KING_SPEED.
@@ -56,6 +57,14 @@ def content() -> tuple[Balance, tuple[EngineLane, ...], Shop, Profiles]:
     return balance, load_lanes(anchors), shop, profiles
 
 
+@cache
+def keeper() -> Keeper:
+    from ancienttdde.game.config import load_keeper
+
+    anchors = object_value(read_object(ROOT / "content/maps/foundation.json")["anchors"], "anchors")
+    return load_keeper(anchors)
+
+
 def harness_profiles(profiles: Profiles) -> Profiles:
     return Profiles(
         profiles.default_identity,
@@ -69,7 +78,7 @@ def prelude() -> str:
     from ancienttdde.game.script import render_prelude
 
     balance, lanes, shop, profiles = content()
-    return render_prelude(balance, lanes, shop, profiles, stock())
+    return render_prelude(balance, lanes, shop, profiles, stock(), keeper())
 
 
 def filled(text: str, name: str) -> dict[int, int]:
@@ -106,7 +115,7 @@ def engine_runner(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
     balance, lanes, shop, profiles = content()
     script = harness_constants() + render_xs(
-        balance, lanes, shop, harness_profiles(profiles), stock()
+        balance, lanes, shop, harness_profiles(profiles), stock(), keeper()
     )
     # XS counted loops implicitly declare/increment their integer counter.
     script = re.sub(
@@ -224,8 +233,33 @@ def test_prelude_counts_shuffling_kings_that_keep_within_their_radius() -> None:
     assert SHUFFLE_RADIUS // KING_SPEED < SHUFFLE_SAMPLES
 
 
-def test_prelude_names_the_keeper_building() -> None:
-    assert f"const int cKeeperBuilding = {WATCH_TOWER};" in prelude()
+def test_prelude_names_the_keeper_building_and_its_spots() -> None:
+    """An enemy holding a lane slot keeps its King and tower on the islet above slot 8's, not
+    on its lane's spare islet, which the next lane's Accursed Tower reaches."""
+    text = prelude()
+    assert f"const int cKeeperBuilding = {WATCH_TOWER};" in text
+    spots = keeper()
+    assert (spots.lane_king_tile, spots.lane_tower_tile) == ((142, 83), (142, 84))
+    assert (spots.king_tile, spots.tower_tile) == ((142, 87), (142, 88))
+    # Every cleared lane's King stands around slot 8's tower, one tile each, in lane order.
+    assert spots.lane_kings == (
+        (141, 87),
+        (141, 88),
+        (141, 89),
+        (142, 89),
+        (143, 87),
+        (143, 88),
+        (143, 89),
+    )
+    for lane, (x, y) in enumerate(spots.lane_kings, 1):
+        assert (filled(text, "keeperX10")[lane], filled(text, "keeperY10")[lane]) == (
+            10 * x + 5,
+            10 * y + 5,
+        )
+    assert "cSpareSiegeSlot" not in text
+    assert "const int cKeeperKingX10 = 1425;" in text and "const int cKeeperKingY10 = 835;" in text
+    assert "const int cKeeperTowerX10 = 1425;" in text
+    assert "const int cKeeperTowerY10 = 845;" in text
 
 
 def test_prelude_declares_message_codes_and_ownership_masks() -> None:
@@ -320,7 +354,7 @@ def test_prelude_lists_granted_purchases_by_slot() -> None:
     from ancienttdde.game.script import grant_table, render_prelude
 
     balance, lanes, shop, profiles = content()
-    text = render_prelude(balance, lanes, shop, harness_profiles(profiles), stock())
+    text = render_prelude(balance, lanes, shop, harness_profiles(profiles), stock(), keeper())
     assert "const int cGrantSlots = 3;" in text and "const int cGrantSlots = 1;" in prelude()
     grants = text.split("int civGrant")[1].split("}")[0]
     castle_age, castle = shop.get("castle_age").index, shop.get("castle").index

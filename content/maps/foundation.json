@@ -6392,6 +6392,20 @@
         88.5
       ],
       "label": "The enemy's protected tower, on the islet's buildable tile"
+    },
+    "enemy.keeper.lane": {
+      "point": [
+        142.5,
+        83.5
+      ],
+      "label": "The King of an enemy holding a lane slot, on the islet above slot 8's"
+    },
+    "enemy.keeper.lane.tower": {
+      "point": [
+        142.5,
+        84.5
+      ],
+      "label": "That enemy's tower, on the islet's buildable tile"
     }
   },
   "placement_overrides": [
@@ -10697,6 +10711,17 @@
         87,
         143,
         89
+      ]
+    },
+    {
+      "key": "enemy.keeper.lane",
+      "start": "enemy.keeper.lane",
+      "medium": "land",
+      "region": [
+        141,
+        83,
+        143,
+        85
       ]
     },
     {

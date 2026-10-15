@@ -9,7 +9,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 
 from ancienttdde.game.catalog import Shop
 from ancienttdde.game.civilizations import Profiles
-from ancienttdde.game.config import Balance, EngineLane
+from ancienttdde.game.config import Balance, EngineLane, Keeper
 from ancienttdde.game.economy import (
     lane_bonuses,
     lane_gatherers,
@@ -23,15 +23,15 @@ from ancienttdde.game.interaction import protect_kings
 from ancienttdde.game.objectives import objective
 from ancienttdde.game.profiles import lane_profiles
 from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reach
+from ancienttdde.game.script import State
 from ancienttdde.game.selection import lane_controls
 from ancienttdde.game.shop import lane_purchases
-from ancienttdde.game.sites import SPARE_ISLET
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import STORAGE, area, condition, effect
 
 
 def lane_actions(
-    game: Game, lane: EngineLane, balance: Balance, shop: Shop, profiles: Profiles
+    game: Game, lane: EngineLane, balance: Balance, shop: Shop, profiles: Profiles, keeper: Keeper
 ) -> None:
     player = lane.player
     # Every lane starts with a mill beside its berries; a cleared lane loses it.
@@ -50,7 +50,8 @@ def lane_actions(
     protect_kings(game, player)
     restrict_ages(game, player)
     restrict_reach(game, player)
-    lane_keeper(game, lane)
+    lane_keeper(game, lane, keeper)
+    lane_guard(game, lane)
     # Last, so it can end every other trigger of the lane.
     lane_cleanup(game, lane)
 
@@ -124,10 +125,10 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
 
 def lane_cleanup(game: Game, lane: EngineLane) -> None:
     """Clear a computer-filled or eliminated lane, mill and walking enemies included. The XS
-    leaves one King on the lane's spare siege islet, and a tower beside it when the lane is the
-    enemy's; neither can be attacked or deleted, so DE neither defeats the slot nor counts the
-    enemy destroyed. Then end the lane's other triggers: they could never act again, and its
-    lives line leaves the objectives."""
+    leaves one King beside slot 8's keepers, or the enemy's King and tower on the islet above;
+    the keeper label triggers protect them once they stand there, since effects here never
+    reached objects the script call had just created. Then end the lane's other triggers: they
+    could never act again, and its lives line leaves the objectives."""
     player = lane.player
     prefix = f"lane.p{player}"
     cleanup = game.trigger(f"{prefix}.cleanup", looping=True)
@@ -137,29 +138,33 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
         "script_call",
         message=f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}",
     )
-    for protection in ("disable_unit_attackable", "disable_object_deletion"):
-        for kind in ("king", "watch-tower"):
-            effect(cleanup, protection, source_player=player, object_list_unit_id=game.stock(kind))
     game.set_value(cleanup, f"{prefix}.cleanup", 0)
     for identifier in game.names.registered("trigger", f"{prefix}."):
         if identifier != cleanup.trigger_id:
             effect(cleanup, "deactivate_trigger", trigger_id=identifier)
 
 
-def lane_keeper(game: Game, lane: EngineLane) -> None:
-    """Name the King a cleared lane keeps, so selecting it explains itself; the enemy's own
-    cleared lane says whose the waves are. The triggers are not among the lane's own, which
-    the cleanup ends as the King appears."""
+def lane_keeper(game: Game, lane: EngineLane, keeper: Keeper) -> None:
+    """Name the King a cleared lane keeps beside slot 8's keepers, so selecting it explains
+    itself; the enemy's own cleared lane keeps its King on the islet above instead and says
+    whose the waves are. The triggers are not among the lane's own, which the cleanup ends as
+    the King appears."""
     player = lane.player
-    tile = lane.sites.siege[SPARE_ISLET]
+    spare = keeper.lane_kings[player - 1]
+    throne = keeper.lane_king_tile
     enemy = game.names.resolve("variable", "game.enemy")
-    for role, message, inverted in (
-        ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
-        (".enemy", f"Enemy: P{player}'s units are the waves; its King and tower keep the slot", 0),
+    for role, message, inverted, tile in (
+        ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1, spare),
+        (
+            ".enemy",
+            f"Enemy: P{player}'s units are the waves; its King and tower keep the slot",
+            0,
+            throne,
+        ),
     ):
-        keeper = game.trigger(f"game.keeper{role}.p{player}", looping=False)
+        label = game.trigger(f"game.keeper{role}.p{player}", looping=False)
         condition(
-            keeper,
+            label,
             "variable_value",
             variable=enemy,
             quantity=player,
@@ -167,7 +172,7 @@ def lane_keeper(game: Game, lane: EngineLane) -> None:
             inverted=inverted,
         )
         condition(
-            keeper,
+            label,
             "objects_in_area",
             source_player=player,
             object_list=game.stock("king"),
@@ -175,13 +180,32 @@ def lane_keeper(game: Game, lane: EngineLane) -> None:
             **area((*tile, *tile)),
         )
         effect(
-            keeper,
+            label,
             "change_object_name",
             source_player=player,
             object_list_unit_id=game.stock("king"),
             message=message,
             **area((*tile, *tile)),
         )
+
+
+# The keeper tower's type, and what a free upgrade can make it.
+KEEPER_KINDS = ("king", "watch-tower", "guard-tower", "keep", "bombard-tower")
+
+
+def lane_guard(game: Game, lane: EngineLane) -> None:
+    """Every second a lane is cleared, its King and towers become unattackable and undeletable:
+    effects in the cleanup trigger never reached the keepers its script call had just created,
+    and a label that fires once could miss them. The trigger is not among the lane's own, which
+    the cleanup ends."""
+    player = lane.player
+    guard = game.trigger(f"game.keeper.protect.p{player}", looping=True)
+    condition(guard, "timer", timer=1)
+    game.value(guard, "game.phase", State.SETUP, Comparison.LARGER_OR_EQUAL)
+    game.value(guard, f"lane.p{player}.active", 0)
+    for protection in ("disable_unit_attackable", "disable_object_deletion"):
+        for kind in KEEPER_KINDS:
+            effect(guard, protection, source_player=player, object_list_unit_id=game.stock(kind))
 
 
 def lane_status(game: Game, lane: EngineLane, balance: Balance) -> None:

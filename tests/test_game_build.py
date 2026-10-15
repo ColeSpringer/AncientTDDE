@@ -13,7 +13,6 @@ from conftest import (
     DE_RULE_SIZE,
     KING,
     ROOT,
-    WATCH_TOWER,
     GameBuild,
     Rule,
     ai_rules,
@@ -31,6 +30,8 @@ from ancienttdde.cli import app
 from ancienttdde.common.data import asset_text
 from ancienttdde.map.geometry import Position
 from ancienttdde.scenario.xs import xs_checker
+
+TOWERS = (79, 234, 235, 236)
 
 
 def test_playable_map_is_self_contained_and_verifies_after_reload(game_build: GameBuild) -> None:
@@ -457,7 +458,7 @@ def walk_orders(
 def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: GameBuild) -> None:
     """Run as DE's AI runs them, the rules order every enemy standing before the exit in a lane
     to that lane's exit on its own row, and nothing else: not a walking unit, not one at the
-    exit, not the keeper King on its islet."""
+    exit, not a unit standing on a siege islet."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.config import load_lanes
     from ancienttdde.game.sites import SPARE_ISLET
@@ -487,6 +488,12 @@ def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: Ga
         units.append({"x": lane.exit_x - 0.5, "y": center + 0.5, "action": standing})
         islet_x, islet_y = lane.sites.siege[SPARE_ISLET]
         units.append({"x": islet_x + 0.5, "y": islet_y + 0.5, "action": standing})
+    # Nor the enemy's keepers on their islet.
+    from ancienttdde.game.config import load_keeper
+
+    keeper = load_keeper(anchors)
+    for tile_x, tile_y in (keeper.lane_king_tile, keeper.lane_tower_tile):
+        units.append({"x": tile_x + 0.5, "y": tile_y + 0.5, "action": standing})
     assert walk_orders(rules, constants, units) == expected
 
 
@@ -979,21 +986,30 @@ def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: Gam
 
 
 def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
-    """Selecting the King the XS leaves on a cleared lane's spare siege islet says why it is
-    there. Its trigger waits outside the lane's own, which the cleanup ends as it creates it."""
+    """Selecting the King the XS leaves for a cleared lane beside slot 8's keepers says why it is
+    there; the enemy's King, on the keeper islet above, says whose the waves are. The triggers
+    wait outside the lane's own, which the cleanup ends as it creates the King."""
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
     anchors = json.loads((output / "map.json").read_text())["anchors"]
     triggers = {t["name"]: t for t in snapshot["triggers"]}
     variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
+    from ancienttdde.game.config import load_keeper
+
+    spots = load_keeper(anchors)
     for player in range(1, 8):
-        x, y = (int(v) for v in anchors[f"siege.p{player}.3"]["point"])
-        for role, message, inverted in (
-            ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
+        for role, message, inverted, (x, y) in (
+            (
+                "",
+                f"Slot keeper: P{player}'s cleared lane stays in the game",
+                1,
+                spots.lane_kings[player - 1],
+            ),
             (
                 ".enemy",
                 f"Enemy: P{player}'s units are the waves; its King and tower keep the slot",
                 0,
+                spots.lane_king_tile,
             ),
         ):
             keeper = triggers[f"game.keeper{role}.p{player}"]
@@ -1036,7 +1052,47 @@ def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
             assert ended and keeper["id"] not in ended
 
 
-def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(
+def test_a_cleared_lanes_keepers_are_protected_every_second(game_build: GameBuild) -> None:
+    """A cleared lane's King, and the enemy's tower whatever type it becomes, cannot be attacked
+    or deleted: a looping trigger outside the lane's own applies that each second once the lane
+    is cleared, since effects in the cleanup trigger never reached objects its script call had
+    just created, and a label that fires once could miss them."""
+    output, _ = game_build
+    snapshot = json.loads((output / "scenario.json").read_text())
+    triggers = {t["name"]: t for t in snapshot["triggers"]}
+    variables = {v["name"]: v["variable_id"] for v in snapshot["variables"]}
+    for player in range(1, 8):
+        guard = triggers[f"game.keeper.protect.p{player}"]
+        assert guard["looping"] and guard["enabled"]
+        [clock, started, cleared] = guard["conditions"]
+        assert clock["type"] == "timer" and attr_int(clock["attributes"], "timer") == 1
+        assert started["type"] == cleared["type"] == "variable_value"
+        assert (started["attributes"]["variable"], started["attributes"]["quantity"]) == (
+            variables["game.phase"],
+            1,
+        )
+        assert attr_int(started["attributes"], "comparison") == 4
+        assert (cleared["attributes"]["variable"], cleared["attributes"]["quantity"]) == (
+            variables[f"lane.p{player}.active"],
+            0,
+        )
+        kept = [KING, *TOWERS]
+        for protection in ("disable_unit_attackable", "disable_object_deletion"):
+            protects = [e["attributes"] for e in guard["effects"] if e["type"] == protection]
+            assert [(p["source_player"], p["object_list_unit_id"]) for p in protects] == [
+                (player, kind) for kind in kept
+            ]
+        assert len(guard["effects"]) == 2 * len(kept)
+        cleanup = triggers[f"lane.p{player}.cleanup"]
+        ended = [
+            e["attributes"]["trigger_id"]
+            for e in cleanup["effects"]
+            if e["type"] == "deactivate_trigger"
+        ]
+        assert guard["id"] not in ended
+
+
+def test_lane_cleanup_clears_the_whole_lane_and_leaves_protection_to_the_keeper_guard(
     game_build: GameBuild,
 ) -> None:
     output, _ = game_build
@@ -1047,17 +1103,12 @@ def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(
         calls = [
             e["attributes"]["message"] for e in cleanup["effects"] if e["type"] == "script_call"
         ]
-        # The mill goes too: the XS leaves only one King on the lane's spare siege islet.
+        # The mill goes too: the XS leaves only one King, beside slot 8's keepers.
         assert calls == [f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}"]
         kinds = [e["type"] for e in cleanup["effects"]]
-        # The enemy's cleared lane also keeps a tower on the islet; both stay untouchable.
-        for protection in ("disable_unit_attackable", "disable_object_deletion"):
-            protects = [e["attributes"] for e in cleanup["effects"] if e["type"] == protection]
-            assert [(p["source_player"], p["object_list_unit_id"]) for p in protects] == [
-                (player, KING),
-                (player, WATCH_TOWER),
-            ]
-            assert kinds.index("script_call") < kinds.index(protection)
+        # Protection here never reached the keepers the script call creates: the keeper guard
+        # trigger applies it each second instead.
+        assert not any(kind.startswith("disable_") for kind in kinds)
         assert not any(
             e["type"] in ("remove_object", "change_ownership")
             and e["attributes"]["source_player"] == player

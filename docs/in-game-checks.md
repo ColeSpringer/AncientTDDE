@@ -27,9 +27,9 @@ player may use any defense lane. The lobby's Difficulty sets a solo
 run's level; run options are selected in game, in the row of Outposts below the shop.
 
 DE applies the lobby's Victory setting, Standard by default, on top of the scenario's own;
-the enemy's unattackable Watch Tower keeps Conquest from counting it destroyed. A victory the
-chat did not announce ("Ancient TD victory: P<n>") comes from DE: record the wave and the
-lobby layout.
+the enemy keeps a King and a Watch Tower on an islet no tower, trebuchet or raider reaches,
+so Conquest never counts it destroyed. A victory the chat did not announce ("Ancient TD
+victory: P<n>") comes from DE: record the wave and the lobby layout.
 
 ## Full game
 
@@ -54,9 +54,11 @@ lobby layout.
 - The resource villagers gather gold, berries, stone and wood from the first second
   without orders; the build-area villagers wait.
 - A player-owned mill beside the berries in every human lane. Computer-filled and
-  eliminated lanes are cleared completely, mills included; each keeps one King on its spare
-  siege islet so DE does not defeat the slot, and selecting that King shows "Slot keeper:
-  P<n>'s cleared lane stays in the game". The enemy's islet also holds its Watch Tower.
+  eliminated lanes are cleared completely, mills included; each keeps one King beside slot 8's
+  keepers on the islet below the life Outposts, frozen in place, so DE does not defeat the
+  slot, and selecting that King shows "Slot keeper: P<n>'s cleared lane stays in the game".
+  An enemy holding a lane slot keeps its King and Watch Tower on the islet above instead, and
+  selecting that King names the enemy.
 - Visible Hay Stack boundaries, blocked expansion rows and reserved tower pads.
 - New towers and age upgrades; bonuses persist without duplication.
 - Multiple enemies crossing exits together, and simultaneous final losses.
@@ -233,7 +235,9 @@ lobby layout.
 - A tower or tower foundation in the resource area disappears, and its player is told why.
 - Bought monks, castles, fire galleys and siege trebuchets still appear although their
   owners cannot train or build them.
-- The enemy's protected King stands alone on the islet below the life Outposts.
+- The enemy's King and Watch Tower stand on the islet below the life Outposts when the enemy
+  is slot 8, and on the islet above it when the enemy holds a lane slot; the King never moves
+  and the tower never fires.
 
 ## Map template
 
