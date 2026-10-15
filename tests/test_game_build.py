@@ -210,9 +210,9 @@ ENTERED_FROM_EAST = {
 FAR_END_FLAGS = {
     "third_row": column(162, range(47, 50)),
     "fourth_row": column(164, range(47, 50)),
-    "naval_raider": column(169, range(20, 23)),
+    "naval_raider": column(169, range(20, 22)),
     "siege": column(169, range(24, 34)) | column(168, range(24, 29)),
-    "land_raider": column(169, range(36, 39)),
+    "land_raider": column(169, range(36, 38)),
     "castle": {(150, 49)},
     "king_every_150": column(130, range(18, 23)) | column(129, range(18, 21)),
     "king_every_minute": column(130, range(24, 30))
@@ -223,7 +223,7 @@ FAR_END_FLAGS = {
     "gold_450": column(130, range(34, 36)),
     "stone_800": column(138, range(30, 33)) | column(139, range(30, 32)),
     "stone_375": column(138, range(34, 36)),
-    "attack_1_every_30": column(138, range(25, 29)),
+    "attack_1_every_30": column(138, range(25, 29)) | {(139, 26)},
 }
 
 

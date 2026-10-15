@@ -902,7 +902,7 @@ int main(int argc, char** argv) {
         start({1,7}); select(1, cControlPvpOn); tick();
         require(phase()==sPreparation && xsTriggerVariable(vPvp)==1 && xsTriggerVariable(vLocked)==1, "PvP on did not fix the options");
         require(mentions("are for sale.")==0 && mentions("go on sale when the first wave starts")==1, "The lock claimed raiders were already for sale");
-        kingsOn(1, cBuyLandRaider, 3);
+        kingsOn(1, cBuyLandRaider, 2);
         for(int n=0;n<4;++n) tick();
         require(bought[1].empty() && told(1, cMessagePvpOff)==1, "A raider was sold during preparation");
         advanceTo(sWave);
@@ -1329,9 +1329,9 @@ int main(int argc, char** argv) {
         advanceTo(sWave);
         require(xsTriggerVariable(vPvp)==0 && mentions("PvP is off: no raiders or siege in this game.")==1,
                 "PvP switched itself on by the first wave");
-        kingsOn(1, cBuyLandRaider, 3);
+        kingsOn(1, cBuyLandRaider, 2);
         for(int n=0;n<4;++n) tick(true);
-        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessagePvpOff)==1,
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==2 && told(1, cMessagePvpOff)==1,
                 "A raider was sold without opting into PvP");
     } else if(test=="difficulty_hard") {
         lobbyDifficulty=0;
@@ -1462,50 +1462,51 @@ int main(int argc, char** argv) {
                 "A defeat did not summarize the run");
     } else if(test=="raider_pvp_off") {
         competitive({1,7}, false);
-        kingsOn(1, cBuyLandRaider, 3);
+        kingsOn(1, cBuyLandRaider, 2);
         for(int n=0;n<4;++n) tick(true);
-        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessagePvpOff)==1,
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==2 && told(1, cMessagePvpOff)==1,
                 "A raider was sold with PvP off");
     } else if(test=="raider_before_first_wave") {
         start({1,7});
-        kingsOn(1, cBuyNavalRaider, 3);
+        kingsOn(1, cBuyNavalRaider, 2);
         for(int n=0;n<4;++n) tick();
         require(bought[1].empty() && told(1, cMessagePvpOff)==1, "A raider was sold before the first wave");
     } else if(test=="raider_solo") {
         start({1}); advanceTo(sWave);
-        kingsOn(1, cBuyLandRaider, 3);
+        kingsOn(1, cBuyLandRaider, 2);
         for(int n=0;n<4;++n) tick(true);
-        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==3, "A solo run bought a raider");
+        require(bought[1].empty() && kingsOnPad(1, cBuyLandRaider)==2, "A solo run bought a raider");
     } else if(test=="raider_buy") {
         competitive({1,7});
-        kingsOn(1, cBuyLandRaider, 3);
-        kingsOn(7, cBuyNavalRaider, 3);
+        kingsOn(1, cBuyLandRaider, 2);
+        kingsOn(7, cBuyNavalRaider, 2);
         for(int n=0;n<4;++n) tick(true);
         require(bought[1]==std::vector<int>{cBuyLandRaider} && unitsOf(1, 546)==1 && kingsOnPad(1, cBuyLandRaider)==0,
                 "The land raider was not bought for its price");
-        require(bought[7]==std::vector<int>{cBuyNavalRaider} && unitsOf(7, 1103)==1, "The naval raider was not bought");
+        require(bought[7]==std::vector<int>{cBuyNavalRaider} && unitsOf(7, 1103)==1 && kingsOnPad(7, cBuyNavalRaider)==0,
+                "The naval raider was not bought for its price");
     } else if(test=="raider_cap") {
         competitive({1,7});
-        for(int round=0; round<3; ++round) { kingsOn(1, cBuyLandRaider, 3); for(int n=0;n<4;++n) tick(true); }
-        require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==3 && told(1, cMessageRaiderCap)==1,
+        for(int round=0; round<3; ++round) { kingsOn(1, cBuyLandRaider, 2); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==2 && told(1, cMessageRaiderCap)==1,
                 "The land raider cap was not kept, or the refused Kings were taken");
         for(auto it=units.begin(); it!=units.end(); ++it) if(it->second.owner==1 && it->second.type==546) { units.erase(it); break; }
         for(int n=0;n<4;++n) tick(true);
         require(unitsOf(1, 546)==2 && kingsOnPad(1, cBuyLandRaider)==0, "A lost raider did not free its place");
     } else if(test=="raider_line") {
         competitive({1,7});
-        for(int round=0; round<2; ++round) { kingsOn(1, cBuyNavalRaider, 3); for(int n=0;n<4;++n) tick(true); }
+        for(int round=0; round<2; ++round) { kingsOn(1, cBuyNavalRaider, 2); for(int n=0;n<4;++n) tick(true); }
         for(auto &[id, u] : units) if(u.owner==1 && u.type==1103) u.type=529;
-        kingsOn(1, cBuyNavalRaider, 3);
+        kingsOn(1, cBuyNavalRaider, 2);
         for(int n=0;n<4;++n) tick(true);
-        require(unitsOf(1, 1103)==0 && kingsOnPad(1, cBuyNavalRaider)==3, "Upgrading raiders freed their places");
+        require(unitsOf(1, 1103)==0 && kingsOnPad(1, cBuyNavalRaider)==2, "Upgrading raiders freed their places");
     } else if(test=="raider_civilization") {
         civilizations[1]=100;
         competitive({1,7});
-        for(int round=0; round<4; ++round) { kingsOn(1, cBuyLandRaider, 3); for(int n=0;n<4;++n) tick(true); }
-        require(unitsOf(1, 546)==3 && kingsOnPad(1, cBuyLandRaider)==3, "The profile's extra land raider was not kept");
-        for(int round=0; round<3; ++round) { kingsOn(1, cBuyNavalRaider, 3); for(int n=0;n<4;++n) tick(true); }
-        require(unitsOf(1, 1103)==2 && kingsOnPad(1, cBuyNavalRaider)==3, "A land raider bonus reached the naval cap");
+        for(int round=0; round<4; ++round) { kingsOn(1, cBuyLandRaider, 2); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 546)==3 && kingsOnPad(1, cBuyLandRaider)==2, "The profile's extra land raider was not kept");
+        for(int round=0; round<3; ++round) { kingsOn(1, cBuyNavalRaider, 2); for(int n=0;n<4;++n) tick(true); }
+        require(unitsOf(1, 1103)==2 && kingsOnPad(1, cBuyNavalRaider)==2, "A land raider bonus reached the naval cap");
     } else if(test=="profile_default") {
         // A civilization no content describes plays the default profile.
         civilizations[3]=200;

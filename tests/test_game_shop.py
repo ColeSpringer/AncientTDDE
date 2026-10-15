@@ -60,8 +60,8 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
 
     catalog = shop()
     land, naval, siege = (catalog.get(k) for k in ("land_raider", "naval_raider", "siege"))
-    assert (land.effect, land.kings, land.legacy) == (Raider("land"), 3, None)
-    assert (naval.effect, naval.kings, naval.legacy) == (Raider("naval"), 3, None)
+    assert (land.effect, land.kings, land.legacy) == (Raider("land"), 2, None)
+    assert (naval.effect, naval.kings, naval.legacy) == (Raider("naval"), 2, None)
     assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(3), 15, None)
     assert not any(p.once for p in (land, naval, siege))
     assert [p.pad for p in (land, naval, siege)] == [
@@ -83,8 +83,8 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
             "bombard_attack_400",
             "Bombard Tower attack +400: 18 Kings, for civilizations with Bombard Towers",
         ),
-        ("land_raider", "Land raider (light cavalry): 3 Kings, when PvP is on"),
-        ("naval_raider", "Naval raider (fire galley): 3 Kings, when PvP is on"),
+        ("land_raider", "Land raider (light cavalry): 2 Kings, when PvP is on"),
+        ("naval_raider", "Naval raider (fire galley): 2 Kings, when PvP is on"),
         ("siege", "Siege power-up: 15 Kings plus 3 per surviving rival, when PvP is on"),
         ("castle", "Castle (+20 population, castle research): 1 King, once"),
     ],
@@ -110,7 +110,7 @@ def test_prices_are_written_once_for_captions_and_messages(key: str, price: str)
     ("key", "tag"),
     [
         ("tower_attack_4", "+4 attack: 1 King"),
-        ("attack_1_every_30", "+1 attack/30 s: 4 Kings"),
+        ("attack_1_every_30", "+1 attack/30 s: 5 Kings"),
         ("gold_1000", "1000 gold/2 min: 4 Kings"),
         ("left_accursed_tower", "Accursed Tower: 1 King"),
         ("siege", "Siege power-up: 15 Kings +3/rival"),

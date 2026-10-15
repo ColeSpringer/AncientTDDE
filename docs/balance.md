@@ -198,7 +198,7 @@ A King buys 1500 stone or 2000 wood, and 2000 gold makes one; the attack ladder 
 | 175 gold every 2 minutes | 1 | 175 gold every 120 s |
 | 800 stone every 2 minutes | 5 | 800 stone every 120 s |
 | 375 stone every 2 minutes | 2 | 375 stone every 120 s |
-| Tower attack +1 every 30 seconds | 4 | 1 attack every 30 s |
+| Tower attack +1 every 30 seconds | 5 | 1 attack every 30 s |
 | Tower attack +3 every 30 seconds | 10 | 3 attack every 30 s |
 | Tower attack +1 every 5 seconds | 15 | 1 attack every 5 s |
 | Castle Age and Guard Tower | 1 | - |
@@ -216,8 +216,8 @@ A King buys 1500 stone or 2000 wood, and 2000 gold makes one; the attack ladder 
 | Third row of towers | 3 | - |
 | Fourth row of towers | 3 | - |
 | Repair crew | 10 | - |
-| Land raider (light cavalry) | 3 | - |
-| Naval raider (fire galley) | 3 | - |
+| Land raider (light cavalry) | 2 | - |
+| Naval raider (fire galley) | 2 | - |
 | Siege power-up | 15 | plus 3 per rival |
 
 ## Investments
@@ -233,7 +233,7 @@ What each investment pays in Kings per minute, how long it takes to pay for itse
 | 175 gold every 2 minutes | 1 | 0.0 | 23 | 3.1 | 1.6 | 2.1 |
 | 800 stone every 2 minutes | 5 | 0.3 | 19 | 18.9 | 9.5 | 13.9 |
 | 375 stone every 2 minutes | 2 | 0.1 | 16 | 8.9 | 4.4 | 6.9 |
-| Tower attack +1 every 30 seconds | 4 | 0.2 | 22 | 12.9 | 6.5 | 8.9 |
+| Tower attack +1 every 30 seconds | 5 | 0.2 | 28 | 12.9 | 6.5 | 7.9 |
 | Tower attack +3 every 30 seconds | 10 | 0.5 | 18 | 38.8 | 19.4 | 28.8 |
 | Tower attack +1 every 5 seconds | 15 | 1.1 | 14 | 77.5 | 38.8 | 62.5 |
 
