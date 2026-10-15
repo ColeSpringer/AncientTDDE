@@ -25,7 +25,7 @@ KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
 HAY_STACK, SIGN, ACCURSED = 857, 819, 684
 TOWERS, BOMBARD = (79, 234, 235, 236), (236,)
 ATTACK, PIERCE, SET, ADD, SUBTRACT = 9, 3, 1, 2, 3
-EQUAL, LESS = 0, 1
+EQUAL = 0
 
 
 def snapshot(build: GameBuild) -> ScenarioSnapshot:
@@ -364,23 +364,40 @@ def test_shop_has_no_signs_and_keeps_its_named_units(game_build: GameBuild) -> N
 
 
 def test_waves_are_announced_with_a_countdown(game_build: GameBuild) -> None:
+    from ancienttdde.game.waves import CHOICE_TIMER, WAVE_TIMER
+
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
     waves = balance()["waves"]
+    [choice] = effects(triggers["game.choice.warning"], "display_timer")
+    assert choice["timer"] == CHOICE_TIMER != WAVE_TIMER
     for number, wave in enumerate(waves, 1):
         trigger = triggers[f"game.wave.{number}.warning"]
-        assert not trigger["looping"]
-        assert requested(trigger, variables["game.phase"]) == 2
-        # DE never fires a condition that compares a variable to -1, so the first wave is
-        # awaited as "no wave yet" instead.
-        expected = (LESS, 0) if number == 1 else (EQUAL, number - 2)
-        assert compared(trigger, variables["game.wave"]) == expected
+        if number == 1:
+            # The script asks for the first wave's countdown as preparation begins. A selection
+            # cuts the choice countdown short, and DE's Reset Timer keeps a running timer's
+            # text, so that timer is cleared first.
+            assert trigger["looping"]
+            assert requested(trigger, variables["game.wave_display"]) == 4
+            assert [attr_int(e, "timer") for e in effects(trigger, "clear_timer")] == [CHOICE_TIMER]
+            kinds = [e["type"] for e in trigger["effects"]]
+            assert kinds.index("clear_timer") < kinds.index("display_timer")
+            [reset] = effects(trigger, "change_variable")
+            assert (reset["variable"], reset["quantity"], reset["operation"]) == (
+                variables["game.wave_display"],
+                0,
+                SET,
+            )
+        else:
+            assert not trigger["looping"]
+            assert requested(trigger, variables["game.phase"]) == 2
+            assert compared(trigger, variables["game.wave"]) == (EQUAL, number - 2)
         [timer] = effects(trigger, "display_timer")
         seconds = (
             balance()["preparation_seconds"] if number == 1 else balance()["intermission_seconds"]
         )
-        assert timer["display_time"] == seconds
+        assert (timer["display_time"], timer["timer"]) == (seconds, WAVE_TIMER)
         assert wave["key"] in timer["message"] and "%d" in timer["message"]
 
 

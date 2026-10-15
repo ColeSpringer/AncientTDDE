@@ -13,6 +13,7 @@ from conftest import (
     DE_RULE_SIZE,
     KING,
     ROOT,
+    WATCH_TOWER,
     GameBuild,
     Rule,
     ai_rules,
@@ -989,7 +990,11 @@ def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
         x, y = (int(v) for v in anchors[f"siege.p{player}.3"]["point"])
         for role, message, inverted in (
             ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
-            (".enemy", f"Enemy: P{player}'s units are the waves; its King keeps the slot", 0),
+            (
+                ".enemy",
+                f"Enemy: P{player}'s units are the waves; its King and tower keep the slot",
+                0,
+            ),
         ):
             keeper = triggers[f"game.keeper{role}.p{player}"]
             assert not keeper["looping"] and keeper["enabled"]
@@ -1045,9 +1050,13 @@ def test_lane_cleanup_clears_the_whole_lane_and_protects_the_king_it_leaves(
         # The mill goes too: the XS leaves only one King on the lane's spare siege islet.
         assert calls == [f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}"]
         kinds = [e["type"] for e in cleanup["effects"]]
+        # The enemy's cleared lane also keeps a tower on the islet; both stay untouchable.
         for protection in ("disable_unit_attackable", "disable_object_deletion"):
-            [protect] = [e["attributes"] for e in cleanup["effects"] if e["type"] == protection]
-            assert (protect["source_player"], protect["object_list_unit_id"]) == (player, KING)
+            protects = [e["attributes"] for e in cleanup["effects"] if e["type"] == protection]
+            assert [(p["source_player"], p["object_list_unit_id"]) for p in protects] == [
+                (player, KING),
+                (player, WATCH_TOWER),
+            ]
             assert kinds.index("script_call") < kinds.index(protection)
         assert not any(
             e["type"] in ("remove_object", "change_ownership")

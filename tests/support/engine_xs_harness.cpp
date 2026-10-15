@@ -220,29 +220,45 @@ bool onSpareIslet(int owner, vector pos) {
     int key = owner * cSiegeSlots + cSpareSiegeSlot;
     return near(Unit{434, pos}, siegeX10(key), siegeY10(key));
 }
-// A cleared lane owns nothing but that King.
-bool onlySpareKing(int player) {
-    std::vector<Unit> owned;
-    for (auto &[id, u] : units) if (u.owner == player) owned.push_back(u);
-    return owned.size() == 1 && owned[0].type == 434 && onSpareIslet(player, owned[0].pos);
+// The spare islet's corner tile, a tile west and north of its centre.
+bool onKeeperCorner(int owner, vector pos) {
+    if (owner < 1 || owner > 7) return false;
+    int key = owner * cSiegeSlots + cSpareSiegeSlot;
+    return std::abs(pos[0] - (siegeX10(key) / 10.0f - 1.0f)) < 0.5f && std::abs(pos[1] - (siegeY10(key) / 10.0f - 1.0f)) < 0.5f;
 }
+// A cleared lane owns nothing but its spare King; the enemy's cleared lane keeps a tower on
+// the islet beside it, so a lobby's Standard victory never counts the enemy destroyed.
+bool onlyKeepers(int player, bool tower) {
+    int kings = 0, towers = 0, others = 0;
+    for (auto &[id, u] : units) {
+        if (u.owner != player) continue;
+        if (u.type == 434 && onSpareIslet(player, u.pos)) ++kings;
+        else if (u.type == cKeeperBuilding && onKeeperCorner(player, u.pos)) ++towers;
+        else ++others;
+    }
+    return others == 0 && kings == 1 && towers == (tower ? 1 : 0);
+}
+bool onlySpareKing(int player) { return onlyKeepers(player, false); }
 void resetXsBuffers() {
     arrays.clear(); floatArrays.clear();
     ancientUnitArray=-1; ancientPadCounts=-1; ancientRelicArray=-1; ancientBuildingArray=-1; ancientLeakCounts=-1;
     ancientKingIds=-1; ancientKingX=-1; ancientKingY=-1; ancientKingSampled=-1; ancientKingPad=-1;
     ancientKingStill=-1; ancientSampleX=-1; ancientSampleY=-1; ancientSampleStill=-1; ancientSamplePad=-1;
+    ancientKingAnchorX=-1; ancientKingAnchorY=-1; ancientKingWithin=-1; ancientSampleOver=-1;
+    ancientSampleAnchorX=-1; ancientSampleAnchorY=-1; ancientSampleWithin=-1;
     ancientLastNotice=-1; ancientSpawnArray=-1; ancientBossLast=-1; ancientBossQuarter=-1;
     ancientLaneRows=-1; ancientColumnCounts=-1; ancientStuckWave=-1;
     // The lookup tables live in the same arrays, so they are filled again on the next lookup.
     ancientTablesReady=false;
 }
 // Countdowns shown.
-int waveTimers = 0, timerClears = 0, choiceTimers = 0;
+int waveTimers = 0, timerClears = 0, choiceTimers = 0, firstWaveTimers = 0;
 // Native triggers acknowledge one request per lane each pass, as the generated ones do.
 void nativeEffects() {
     if (xsTriggerVariable(vWaveDisplay) == 1) ++waveTimers;
     if (xsTriggerVariable(vWaveDisplay) == 2) ++timerClears;
     if (xsTriggerVariable(vWaveDisplay) == 3) ++choiceTimers;
+    if (xsTriggerVariable(vWaveDisplay) == 4) ++firstWaveTimers;
     xsSetTriggerVariable(vWaveDisplay, 0);
     for (int p=1; p<=7; ++p) {
         if (lane(p, fActive) && !lane(p, fInitialized)) { ++grants[p]; setLane(p, fInitialized, 1); }
@@ -306,7 +322,7 @@ void restart(std::initializer_list<int> humans) {
     applied.clear(); techChanges.clear();
     for (auto &hp : typeHitpoints) hp.clear();
     refusedOwner = -1;
-    waveTimers = timerClears = choiceTimers = 0;
+    waveTimers = timerClears = choiceTimers = firstWaveTimers = 0;
     resetXsBuffers();
     start(humans);
 }
@@ -677,6 +693,7 @@ int main(int argc, char** argv) {
                 "The first wave was counted down at other times");
         reachWave(1);
         require(marks()==expected, "A later wave was counted down as the first");
+        require(firstWaveTimers==1, "The first wave's countdown was requested again");
     } else if(test=="choice_timeout") {
         // Without a selection the window runs out, Standard stands and preparation begins.
         start({7}); require(phase()==sSetup && choiceTimers==0, "The countdown ran before the window's first second");
@@ -687,6 +704,7 @@ int main(int argc, char** argv) {
                 "The window's end did not fix Standard and begin preparation");
         require(xsTriggerVariable(vSetupElapsed)==cChoice && xsTriggerVariable(vRemaining)==cPreparation,
                 "The window's seconds were not counted into the run");
+        require(firstWaveTimers==1, "The first wave's countdown was not requested as the window closed");
         require(mentions("Prepare your towers")==1 && mentions("Standard run on Normal.")==1, "Preparation was not announced");
         select(7, cControlEndless); tick(true);
         require(xsTriggerVariable(vMode)==cModeStandard && told(7, cMessageOptionsFixed)==1, "A late selection changed the options");
@@ -696,6 +714,7 @@ int main(int argc, char** argv) {
         select(3, cControlEndless); tick();
         require(phase()==sPreparation && xsTriggerVariable(vMode)==cModeEndless && xsTriggerVariable(vLocked)==1,
                 "The selection did not fix Endless and begin preparation");
+        require(firstWaveTimers==1, "The first wave's countdown was not requested with the selection");
         require(xsTriggerVariable(vSetupElapsed)==3 && xsTriggerVariable(vRemaining)==cPreparation,
                 "The selection's second was not counted as the window's");
         require(xsTriggerVariable(vEconomy)==0, "The economy clock ran during the window");
@@ -756,6 +775,39 @@ int main(int argc, char** argv) {
         for(int n=0;n<4;++n) { walk(king, -0.3f, 0.0f); ancientSampleKings(1); }
         require(units.at(king[0]).pos[0] < shopX1(pad) && xsArrayGetInt(ancientPadCounts, pad)==0,
                 "A King that drifted off the pad still counted");
+    } else if(test=="shop_shuffling_kings") {
+        // A crowd keeps some Kings shuffling for room, over a tile a sample: they count once they
+        // have stayed within cShuffleRadius tiles of a spot for cShuffleSamples samples, and the
+        // pad then sells.
+        start({1});
+        int pad = cBuyAttack3Every30;
+        int price = shopPrice(pad);
+        require(price >= 3, "The pad must take a crowd");
+        float x = shopX1(pad) + 0.5f, y = shopY1(pad) + 0.5f;
+        kingsAt(1, x, y, price - 2, 0);
+        auto shuffling = kingsAt(1, x + 1.0f, y + 1.0f, 2, 0);
+        for(int n=0; n<cShuffleSamples; ++n) {
+            walk(shuffling, n % 2 == 0 ? 1.2f : -1.2f, 0.0f);
+            tick();
+            require(bought[1].empty(), "Shuffling Kings paid before they had been over the pad long enough");
+        }
+        walk(shuffling, 1.2f, 0.0f); tick();
+        require(bought[1]==std::vector<int>{pad} && kingsOnPad(1, pad)==0, "A crowd with shuffling Kings did not buy the pad");
+    } else if(test=="shop_wanderer_recalled") {
+        // A King sent into a pad by mistake and called back is over it for seconds as it walks
+        // in and out again; it never settles, so it never completes the purchase.
+        start({1});
+        int pad = cBuyAttack3Every30;
+        int price = shopPrice(pad);
+        float x = shopX1(pad) + 0.5f, y = shopY1(pad) + 0.5f;
+        kingsAt(1, x, y, price - 1, 0);
+        auto wanderer = kingsAt(1, x + 1.0f, y - 1.0f, 1, 0);
+        int depth = shopY2(pad) - shopY1(pad) + 1;
+        int steps = int(depth / KING_SPEED);
+        for(int n=0; n<steps; ++n) { walk(wanderer, 0.0f, KING_SPEED); tick(); }
+        require(kingsOnPad(1, pad)==price && xsArrayGetInt(ancientPadCounts, pad)==price - 1, "The settled Kings did not count while the wanderer walked in");
+        for(int n=0; n<steps + 1; ++n) { walk(wanderer, 0.0f, -KING_SPEED); tick(); }
+        require(bought[1].empty() && kingsOnPad(1, pad)==price - 1, "A King walking in and out again completed a purchase");
     } else if(test=="collect_sweep") {
         // Each second counts the current wave's enemy type and one slice of the others, so
         // every type is counted once in cSweepTicks seconds and no second queries them all;
@@ -1731,7 +1783,7 @@ int main(int argc, char** argv) {
         lobby({1,2}, 3);
         require(enemy()==3 && xsTriggerVariable(vParticipants)==2, "The last computer was not made the enemy");
         require(mentions("Enemy: P3, the last computer player.")==1, "The enemy was not announced");
-        require(cleanups[3]==1 && onlySpareKing(3), "The enemy's own lane was not cleared");
+        require(cleanups[3]==1 && onlyKeepers(3, true), "The enemy's own lane was not cleared, keeping its King and tower");
         for(int p=4;p<=7;++p) require(cleanups[p]==1 && unitsOf(p, cKing)==0, "A closed slot was given a King");
         advanceTo(sWave); tick();
         require(spawns[1]>0 && spawns[1]==spawns[2] && spawns[3]==0, "The waves did not come to the human lanes alone");
@@ -1750,7 +1802,7 @@ int main(int argc, char** argv) {
         // The computer may hold a lower number than the humans; the lanes are then the others.
         lobby({2,3}, 3);
         require(enemy()==1 && lane(2,fActive)==1 && lane(3,fActive)==1 && lane(1,fActive)==0, "The computer in the first slot was not made the enemy");
-        require(cleanups[1]==1 && onlySpareKing(1) && grants[1]==0, "The enemy's lane was not cleared");
+        require(cleanups[1]==1 && onlyKeepers(1, true) && grants[1]==0, "The enemy's lane was not cleared, keeping its King and tower");
         advanceTo(sWave); tick();
         require(spawns[2]>0 && spawns[2]==spawns[3] && spawns[1]==0, "The waves did not come to the human lanes");
         for(auto &[id, u] : units) if(u.type==waveUnit(0)) require(u.owner==1, "An enemy belonged to another player");

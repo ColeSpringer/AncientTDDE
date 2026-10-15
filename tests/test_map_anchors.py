@@ -417,6 +417,25 @@ def test_the_enemy_keeper_stands_alone_off_the_siege_islets() -> None:
 
 
 @pytest.mark.parametrize("player", PLAYERS)
+def test_the_enemy_tower_fits_the_corner_of_every_spare_islet(player: int) -> None:
+    """The script puts an enemy's tower a tile west and north of the spare islet's centre."""
+    x1, y1, _, _ = rect(f"siege.p{player}.3")
+    centre = tile(point(f"siege.p{player}.3"))
+    assert (x1, y1) == (centre[0] - 1, centre[1] - 1)
+    assert (x1, y1) in buildable()
+
+
+def test_the_enemy_keeper_tower_stands_on_buildable_ground_of_the_islet() -> None:
+    """The original's selector Outpost on that tile leaves with the build."""
+    data, _ = content()
+    keeper = tile(point("enemy.keeper"))
+    tower = tile(point("enemy.keeper.tower"))
+    assert tower != keeper and tower in cells((141, 87, 143, 89))
+    width = data["map"]["width"]
+    assert data["map"]["tiles"][tower[1] * width + tower[0]][0] in BUILDABLE_TERRAIN
+
+
+@pytest.mark.parametrize("player", PLAYERS)
 def test_only_arrivals_every_lane_reaches_or_flags_mark_ignore_units_standing_there(
     player: int,
 ) -> None:

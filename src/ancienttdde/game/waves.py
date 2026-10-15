@@ -10,7 +10,6 @@ ignores native orders online.
 
 from collections.abc import Sequence
 
-from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
 from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
@@ -23,6 +22,11 @@ from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
 # The player numbers the enemy may hold.
 ENEMY_SLOTS = range(1, 9)
+# The on-screen timers: every wave countdown shares one; the siege stages and the choice
+# window, which can run beside it, have their own.
+WAVE_TIMER = 0
+SIEGE_TIMER = 1
+CHOICE_TIMER = 2
 # The player numbers that hold defense lanes.
 LANE_SLOTS = range(1, 8)
 # The AI goal pairs that hold the point a band is searched around and the point its standing
@@ -85,10 +89,25 @@ def show_status(game: Game, trigger: TriggerHandle, shown: str, hidden: str) -> 
     effect(trigger, "deactivate_trigger", trigger_id=game.names.resolve("trigger", hidden))
 
 
+def wave_countdown(game: Game, trigger: TriggerHandle, number: int, key: str, seconds: int) -> None:
+    """Show the countdown to a wave and the status line that waits for it."""
+    effect(
+        trigger,
+        "display_timer",
+        display_time=seconds,
+        time_unit=TimeUnit.SECONDS,
+        message=f"Wave {number}: {key} in %d",
+        reset_timer=1,
+        timer=WAVE_TIMER,
+    )
+    show_status(game, trigger, "game.status.next", "game.status.spawning")
+
+
 def wave_warnings(game: Game, balance: Balance) -> None:
     """Count down the choice window, then to each wave once its preparation or intermission
-    begins; the engine asks for the countdown before each wave after the schedule. The status
-    line follows: the wait while it counts down, the wave once it starts."""
+    begins; the script asks for the window's, the first wave's and each endless wave's
+    countdown as it starts. The status line follows: the wait while it counts down, the wave
+    once it starts."""
     # The engine asks for this countdown as it counts the window's first second off.
     choice = game.trigger("game.choice.warning", looping=True)
     game.value(choice, "game.wave_display", 3)
@@ -99,7 +118,7 @@ def wave_warnings(game: Game, balance: Balance) -> None:
         time_unit=TimeUnit.SECONDS,
         message="Run options close in %d",
         reset_timer=1,
-        timer=0,
+        timer=CHOICE_TIMER,
     )
     game.set_value(choice, "game.wave_display", 0)
     endless = game.trigger("game.wave.endless.warning", looping=True)
@@ -111,35 +130,28 @@ def wave_warnings(game: Game, balance: Balance) -> None:
         time_unit=TimeUnit.SECONDS,
         message="Next wave in %d",
         reset_timer=1,
-        timer=0,
+        timer=WAVE_TIMER,
     )
     show_status(game, endless, "game.status.next", "game.status.spawning")
     game.set_value(endless, "game.wave_display", 0)
     clear = game.trigger("game.wave.timer.clear", looping=True)
     game.value(clear, "game.wave_display", 2)
-    effect(clear, "clear_timer", timer=0)
+    effect(clear, "clear_timer", timer=WAVE_TIMER)
     show_status(game, clear, "game.status.spawning", "game.status.next")
     game.set_value(clear, "game.wave_display", 0)
-    for number, wave in enumerate(balance.waves, 1):
+    # A selection cuts the choice countdown short, and DE's Reset Timer keeps a running
+    # timer's text, so the window's timer is cleared before the first wave's shows.
+    first, *later = balance.waves
+    opening = game.trigger("game.wave.1.warning", looping=True)
+    game.value(opening, "game.wave_display", 4)
+    effect(opening, "clear_timer", timer=CHOICE_TIMER)
+    wave_countdown(game, opening, 1, first.key, balance.preparation_seconds)
+    game.set_value(opening, "game.wave_display", 0)
+    for number, wave in enumerate(later, 2):
         trigger = game.trigger(f"game.wave.{number}.warning", looping=False)
         game.value(trigger, "game.phase", State.PREPARATION)
-        # DE never fires a Variable Value condition whose quantity is -1, so before the first
-        # wave, the wave is awaited as any value below 0.
-        if number == 1:
-            game.value(trigger, "game.wave", 0, Comparison.LESS)
-        else:
-            game.value(trigger, "game.wave", number - 2)
-        seconds = balance.preparation_seconds if number == 1 else balance.intermission_seconds
-        effect(
-            trigger,
-            "display_timer",
-            display_time=seconds,
-            time_unit=TimeUnit.SECONDS,
-            message=f"Wave {number}: {wave.key} in %d",
-            reset_timer=1,
-            timer=0,
-        )
-        show_status(game, trigger, "game.status.next", "game.status.spawning")
+        game.value(trigger, "game.wave", number - 2)
+        wave_countdown(game, trigger, number, wave.key, balance.intermission_seconds)
 
 
 def game_status(game: Game, balance: Balance) -> None:

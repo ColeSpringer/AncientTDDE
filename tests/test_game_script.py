@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-from conftest import ROOT, compile_harness, stock
+from conftest import ROOT, WATCH_TOWER, compile_harness, stock
 
 from ancienttdde.common.data import object_value, read_object
 from ancienttdde.game.catalog import Shop
@@ -14,6 +14,8 @@ from ancienttdde.game.civilizations import Civilization, Profile, Profiles
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.map.models import MapAnchor
 
+# Tiles a King walks in a game second in DE, as the harness's KING_SPEED.
+KING_SPEED = 1.32
 # Civilizations the harness plays that no content defines, so every profile path runs
 # whatever the content says: one with every XS-applied adjustment, one neutral.
 TEST_CIVILIZATIONS = (
@@ -208,6 +210,22 @@ def test_prelude_counts_still_samples() -> None:
 
     text = prelude()
     assert f"const int cStillSamples = {STILL_SAMPLES};" in text and STILL_SAMPLES >= 2
+
+
+def test_prelude_counts_shuffling_kings_that_keep_within_their_radius() -> None:
+    """A King kept shuffling for room counts once it has stayed within cShuffleRadius tiles
+    of a spot for cShuffleSamples samples; a King walking at its own speed leaves the radius
+    first, whatever the pad's shape."""
+    from ancienttdde.game.script import SHUFFLE_RADIUS, SHUFFLE_SAMPLES
+
+    text = prelude()
+    assert f"const int cShuffleSamples = {SHUFFLE_SAMPLES};" in text
+    assert f"const int cShuffleRadius = {SHUFFLE_RADIUS};" in text
+    assert SHUFFLE_RADIUS // KING_SPEED < SHUFFLE_SAMPLES
+
+
+def test_prelude_names_the_keeper_building() -> None:
+    assert f"const int cKeeperBuilding = {WATCH_TOWER};" in prelude()
 
 
 def test_prelude_declares_message_codes_and_ownership_masks() -> None:
@@ -461,6 +479,8 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "spawn_silent",
         "walk_watchdog",
         "shop_cached_pad_moves",
+        "shop_shuffling_kings",
+        "shop_wanderer_recalled",
         "collect_sweep",
         "boss_hitpoints",
         "boss_leak",

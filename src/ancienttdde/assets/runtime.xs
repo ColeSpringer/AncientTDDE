@@ -12,11 +12,18 @@ int ancientKingX = -1;
 int ancientKingY = -1;
 int ancientKingStill = -1;
 int ancientKingPad = -1;
+int ancientKingAnchorX = -1;
+int ancientKingAnchorY = -1;
+int ancientKingWithin = -1;
 int ancientKingSampled = -1;
 int ancientSampleX = -1;
 int ancientSampleY = -1;
 int ancientSampleStill = -1;
 int ancientSamplePad = -1;
+int ancientSampleOver = -1;
+int ancientSampleAnchorX = -1;
+int ancientSampleAnchorY = -1;
+int ancientSampleWithin = -1;
 int ancientLastNotice = -1;
 // Each lane's boss as last seen: the hit points its unit was left with, and the quarter of
 // its reservoir it was in.
@@ -132,12 +139,19 @@ void ancientCleanupLane(int player = 1) {
     }
     // One unit keeps the slot in the game: the engine defeats a player who owns nothing. It
     // stands on the lane's spare siege islet, which no siege uses. A player who has left the
-    // game needs none.
+    // game needs none. The enemy's slot keeps a tower on the islet as well: a lobby's Standard
+    // victory counts an opponent destroyed once it has no villagers, soldiers, ships or
+    // buildings, and a King is none of them.
     if (xsGetPlayerInGame(player) == false) return;
     int spare = player * cSiegeSlots + cSpareSiegeSlot;
     vector keep = xsVectorSet(0.1 * siegeX10(spare), 0.1 * siegeY10(spare), 0.0);
     if (xsCreateUnit(cKing, player, keep, false, false, false) < 0) {
         xsChatData(ancientPlayer(player) + "'s cleared lane could not keep its slot, so DE may report it defeated.");
+    }
+    if (player != ancientEnemy()) return;
+    vector corner = xsVectorSet(-1.0 + xsVectorGetX(keep), -1.0 + xsVectorGetY(keep), 0.0);
+    if (xsCreateUnit(cKeeperBuilding, player, corner, false, false, false) < 0) {
+        xsChatData(ancientPlayer(player) + "'s slot could not keep its tower, so DE may count the enemy destroyed.");
     }
 }
 
@@ -400,6 +414,8 @@ void ancientBeginPreparation() {
     xsSetTriggerVariable(vPhase, sPreparation);
     xsSetTriggerVariable(vRemaining, cPreparation);
     xsSetTriggerVariable(vCountdown, cPreparation);
+    // The native triggers count down to the first wave on screen from here.
+    xsSetTriggerVariable(vWaveDisplay, 4);
     xsChatData("Prepare your towers. First wave in " + ancientText(cPreparation) + " game seconds: " + ancientWaveText(0) + ".");
     for (newcomer = 1; <= 7) {
         if (laneValue(newcomer, fActive) == 1) {
@@ -910,10 +926,16 @@ void ancientWaveCleared(int wave = 0) {
     xsChatData("Wave " + ancientText(wave + 1) + " cleared: " + reward + " for every surviving lane.");
 }
 
-// The pad a position lies on, or 0.
-int ancientPadAt(float x = 0.0, float y = 0.0) {
+bool ancientOnPad(float x = 0.0, float y = 0.0, int pad = 0) {
+    if (pad <= 0) return (false);
+    return ((x >= shopX1(pad)) && (x < shopX2(pad) + 1) && (y >= shopY1(pad)) && (y < shopY2(pad) + 1));
+}
+
+// The pad a position lies on, or 0; the pad it was last over is tried before the rest.
+int ancientPadAt(float x = 0.0, float y = 0.0, int last = 0) {
+    if (ancientOnPad(x, y, last)) return (last);
     for (pad = 1; <= cShopCount) {
-        if ((x >= shopX1(pad)) && (x < shopX2(pad) + 1) && (y >= shopY1(pad)) && (y < shopY2(pad) + 1)) return (pad);
+        if (ancientOnPad(x, y, pad)) return (pad);
     }
     return (0);
 }
@@ -1032,10 +1054,12 @@ int ancientKingSlot(int player = 1, int king = -1, int guess = 0) {
     return (-1);
 }
 
-// Count the Kings standing on each pad. Walking Kings move over a tile between samples, so a
-// King counts only once it has stayed within half a tile of where it was for cStillSamples
-// whole samples. A King that has not moved at all since it was counted stands on the pad it
-// stood on then, so idle Kings cost no pad search.
+// Count the Kings standing on each pad. A King counts once it has stayed within half a tile of
+// where it was for cStillSamples whole samples, or, when a crowd keeps it shuffling for room,
+// once it has stayed within cShuffleRadius tiles of a spot for cShuffleSamples whole samples;
+// a King walking at its own speed leaves that radius first, whether it crosses a pad or is
+// sent in and called back. A King that has not moved at all since the last sample is over the
+// pad it was over then, so idle Kings cost no pad search.
 void ancientSampleKings(int player = 1) {
     if (ancientKingIds < 0) {
         ancientKingIds = xsArrayCreateInt(8 * cKingSlots, -1, "ancientKingIds");
@@ -1043,11 +1067,18 @@ void ancientSampleKings(int player = 1) {
         ancientKingY = xsArrayCreateFloat(8 * cKingSlots, 0.0, "ancientKingY");
         ancientKingStill = xsArrayCreateInt(8 * cKingSlots, 0, "ancientKingStill");
         ancientKingPad = xsArrayCreateInt(8 * cKingSlots, 0, "ancientKingPad");
+        ancientKingAnchorX = xsArrayCreateFloat(8 * cKingSlots, 0.0, "ancientKingAnchorX");
+        ancientKingAnchorY = xsArrayCreateFloat(8 * cKingSlots, 0.0, "ancientKingAnchorY");
+        ancientKingWithin = xsArrayCreateInt(8 * cKingSlots, 0, "ancientKingWithin");
         ancientKingSampled = xsArrayCreateInt(8, 0, "ancientKingSampled");
         ancientSampleX = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleX");
         ancientSampleY = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleY");
         ancientSampleStill = xsArrayCreateInt(cKingSlots, 0, "ancientSampleStill");
         ancientSamplePad = xsArrayCreateInt(cKingSlots, 0, "ancientSamplePad");
+        ancientSampleOver = xsArrayCreateInt(cKingSlots, 0, "ancientSampleOver");
+        ancientSampleAnchorX = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleAnchorX");
+        ancientSampleAnchorY = xsArrayCreateFloat(cKingSlots, 0.0, "ancientSampleAnchorY");
+        ancientSampleWithin = xsArrayCreateInt(cKingSlots, 0, "ancientSampleWithin");
         ancientPadCounts = xsArrayCreateInt(cShopCount + 1, 0, "ancientPadCounts");
     }
     for (pad = 0; <= cShopCount) {
@@ -1064,24 +1095,39 @@ void ancientSampleKings(int player = 1) {
         float y = xsVectorGetY(position);
         int slot = ancientKingSlot(player, king, index);
         int still = 0;
-        bool moved = true;
+        int over = -1;
+        int last = 0;
+        // The spot the King has kept within the shuffle radius of, and for how many samples.
+        float anchorX = x;
+        float anchorY = y;
+        int within = 0;
         if (slot >= 0) {
             float dx = x - xsArrayGetFloat(ancientKingX, base + slot);
             float dy = y - xsArrayGetFloat(ancientKingY, base + slot);
             float distance = dx * dx + dy * dy;
             if (distance < 0.25) still = xsArrayGetInt(ancientKingStill, base + slot) + 1;
-            moved = (distance > 0.0);
+            last = xsArrayGetInt(ancientKingPad, base + slot);
+            if (distance == 0.0) over = last;
+            float ax = x - xsArrayGetFloat(ancientKingAnchorX, base + slot);
+            float ay = y - xsArrayGetFloat(ancientKingAnchorY, base + slot);
+            if (ax * ax + ay * ay <= 1.0 * (cShuffleRadius * cShuffleRadius)) {
+                anchorX = xsArrayGetFloat(ancientKingAnchorX, base + slot);
+                anchorY = xsArrayGetFloat(ancientKingAnchorY, base + slot);
+                within = xsArrayGetInt(ancientKingWithin, base + slot) + 1;
+            }
         }
+        if (over < 0) over = ancientPadAt(x, y, last);
         int standing = 0;
-        if ((still >= cStillSamples) && (xsGetUnitHitpoints(king) > 0) && (xsGetGarrisonedInUnitId(king) < 0)) {
-            if ((still > cStillSamples) && (moved == false)) standing = xsArrayGetInt(ancientKingPad, base + slot);
-            else standing = ancientPadAt(x, y);
-        }
+        if (((still >= cStillSamples) || (within >= cShuffleSamples)) && (xsGetUnitHitpoints(king) > 0) && (xsGetGarrisonedInUnitId(king) < 0)) standing = over;
         xsArraySetInt(ancientSamplePad, index, standing);
         xsArraySetInt(ancientPadCounts, standing, xsArrayGetInt(ancientPadCounts, standing) + 1);
         xsArraySetFloat(ancientSampleX, index, x);
         xsArraySetFloat(ancientSampleY, index, y);
         xsArraySetInt(ancientSampleStill, index, still);
+        xsArraySetInt(ancientSampleOver, index, over);
+        xsArraySetFloat(ancientSampleAnchorX, index, anchorX);
+        xsArraySetFloat(ancientSampleAnchorY, index, anchorY);
+        xsArraySetInt(ancientSampleWithin, index, within);
     }
     // This sample replaces the previous one only after every King has been compared with it.
     for (record = 0; < kings) {
@@ -1089,7 +1135,10 @@ void ancientSampleKings(int player = 1) {
         xsArraySetFloat(ancientKingX, base + record, xsArrayGetFloat(ancientSampleX, record));
         xsArraySetFloat(ancientKingY, base + record, xsArrayGetFloat(ancientSampleY, record));
         xsArraySetInt(ancientKingStill, base + record, xsArrayGetInt(ancientSampleStill, record));
-        xsArraySetInt(ancientKingPad, base + record, xsArrayGetInt(ancientSamplePad, record));
+        xsArraySetInt(ancientKingPad, base + record, xsArrayGetInt(ancientSampleOver, record));
+        xsArraySetFloat(ancientKingAnchorX, base + record, xsArrayGetFloat(ancientSampleAnchorX, record));
+        xsArraySetFloat(ancientKingAnchorY, base + record, xsArrayGetFloat(ancientSampleAnchorY, record));
+        xsArraySetInt(ancientKingWithin, base + record, xsArrayGetInt(ancientSampleWithin, record));
     }
     xsArraySetInt(ancientKingSampled, player, kings);
 }

@@ -124,9 +124,10 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
 
 def lane_cleanup(game: Game, lane: EngineLane) -> None:
     """Clear a computer-filled or eliminated lane, mill and walking enemies included. The XS
-    leaves one King on the lane's spare siege islet, which can be neither attacked nor deleted,
-    so DE does not defeat the slot. Then end the lane's other triggers: they could never act
-    again, and its lives line leaves the objectives."""
+    leaves one King on the lane's spare siege islet, and a tower beside it when the lane is the
+    enemy's; neither can be attacked or deleted, so DE neither defeats the slot nor counts the
+    enemy destroyed. Then end the lane's other triggers: they could never act again, and its
+    lives line leaves the objectives."""
     player = lane.player
     prefix = f"lane.p{player}"
     cleanup = game.trigger(f"{prefix}.cleanup", looping=True)
@@ -137,7 +138,8 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
         message=f"void ancientCleanupP{player}() {{ ancientCleanupLane({player}); }}",
     )
     for protection in ("disable_unit_attackable", "disable_object_deletion"):
-        effect(cleanup, protection, source_player=player, object_list_unit_id=game.stock("king"))
+        for kind in ("king", "watch-tower"):
+            effect(cleanup, protection, source_player=player, object_list_unit_id=game.stock(kind))
     game.set_value(cleanup, f"{prefix}.cleanup", 0)
     for identifier in game.names.registered("trigger", f"{prefix}."):
         if identifier != cleanup.trigger_id:
@@ -153,7 +155,7 @@ def lane_keeper(game: Game, lane: EngineLane) -> None:
     enemy = game.names.resolve("variable", "game.enemy")
     for role, message, inverted in (
         ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1),
-        (".enemy", f"Enemy: P{player}'s units are the waves; its King keeps the slot", 0),
+        (".enemy", f"Enemy: P{player}'s units are the waves; its King and tower keep the slot", 0),
     ):
         keeper = game.trigger(f"game.keeper{role}.p{player}", looping=False)
         condition(

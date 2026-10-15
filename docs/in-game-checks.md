@@ -26,6 +26,11 @@ slot plays the civilization the lobby gives it. Civilization choices stay unlock
 player may use any defense lane. The lobby's Difficulty sets a solo
 run's level; run options are selected in game, in the row of Outposts below the shop.
 
+DE applies the lobby's Victory setting, Standard by default, on top of the scenario's own;
+the enemy's unattackable Watch Tower keeps Conquest from counting it destroyed. A victory the
+chat did not announce ("Ancient TD victory: P<n>") comes from DE: record the wave and the
+lobby layout.
+
 ## Full game
 
 - Solo and online lobbies load with no AI Script Error dialog: the AI parses. Each batch
@@ -51,7 +56,7 @@ run's level; run options are selected in game, in the row of Outposts below the 
 - A player-owned mill beside the berries in every human lane. Computer-filled and
   eliminated lanes are cleared completely, mills included; each keeps one King on its spare
   siege islet so DE does not defeat the slot, and selecting that King shows "Slot keeper:
-  P<n>'s cleared lane stays in the game".
+  P<n>'s cleared lane stays in the game". The enemy's islet also holds its Watch Tower.
 - Visible Hay Stack boundaries, blocked expansion rows and reserved tower pads.
 - New towers and age upgrades; bonuses persist without duplication.
 - Multiple enemies crossing exits together, and simultaneous final losses.
@@ -59,7 +64,8 @@ run's level; run options are selected in game, in the row of Outposts below the 
 - Before the first wave the chat says "First wave in 240", 180, 120, 60, 30 and 10 game
   seconds, the objectives read "Wave 1 arrives in N s" (between waves "Wave N arrives in",
   during a wave "Wave N: N s of spawning left"), and the top timer counts down; record
-  which of the three shows on your HUD.
+  which of the three shows on your HUD. After a selection the top timer reads "Wave 1:
+  Villagers in N" at once, not "Run options close in".
 - A wave starts with "Wave N of 56: 30 Villagers" (a boss wave with its name alone); hit points
   and endless armor are told only in the "Next:" notice before it, the first wave's with
   "Prepare your towers".
@@ -89,8 +95,9 @@ run's level; run options are selected in game, in the row of Outposts below the 
 
 ## Economy and shop
 
-- Kings standing about three seconds on a pad buy it and lose exactly its price; Kings
-  walking across or pausing briefly on pads buy nothing; refusals keep the Kings and are
+- Kings standing about three seconds on a pad buy it and lose exactly its price, and Kings
+  kept shuffling for room on a crowded pad buy it after about five; Kings walking across or
+  pausing briefly on pads buy nothing; refusals keep the Kings and are
   explained to that player alone, including Bombard Tower attack for civilizations
   without Bombard Towers, and a different refusal is explained at once.
 - Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 4, each raider

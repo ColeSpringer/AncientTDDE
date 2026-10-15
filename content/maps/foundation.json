@@ -6385,6 +6385,13 @@
         87.5
       ],
       "label": "The enemy's protected King, alone on an islet"
+    },
+    "enemy.keeper.tower": {
+      "point": [
+        142.5,
+        88.5
+      ],
+      "label": "The enemy's protected tower, on the islet's buildable tile"
     }
   },
   "placement_overrides": [

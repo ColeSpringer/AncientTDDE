@@ -240,7 +240,8 @@ def settings(
     caption_displays(game, shop)
     caption_transfers(game, lanes)
     place_controls(game, anchors, balance)
-    keeper = keeper_point(anchors)
+    keeper = keeper_point(anchors, "enemy.keeper")
+    keeper_tower = keeper_point(anchors, "enemy.keeper.tower")
     scenario.player_manager.active_players = 8
     for player in scenario.player_manager.players[1:]:
         human = player.player_id != 8
@@ -269,13 +270,19 @@ def settings(
     for unit in scenario.unit_manager.units[0]:
         # Gaia trade endpoints and displays must not convert to a nearby player.
         unit.capture_flag = CaptureFlag.NEVER
-    # A protected counted unit keeps the scenario-controlled enemy alive between waves.
+    # A protected counted unit keeps the scenario-controlled enemy alive between waves, and a
+    # protected building keeps a lobby's Standard victory from counting it destroyed: Conquest
+    # needs an opponent's villagers, soldiers, ships and buildings gone, and a King is none.
     king = scenario.unit_manager.add_unit(
         player=8, unit_const=game.stock("king"), x=keeper[0], y=keeper[1]
     )
+    tower = scenario.unit_manager.add_unit(
+        player=8, unit_const=game.stock("watch-tower"), x=keeper_tower[0], y=keeper_tower[1]
+    )
     game.names.register("object", "enemy.keeper", king.reference_id)
+    game.names.register("object", "enemy.keeper.tower", tower.reference_id)
     init = game.trigger("game.initialize", looping=False)
-    game.protect(init, [king.reference_id])
+    game.protect(init, [king.reference_id, tower.reference_id])
     effect(
         init,
         "modify_attribute",
@@ -304,11 +311,10 @@ def settings(
     game.protect(init, [game.names.resolve("object", f"control.{c.key}") for c in CONTROLS])
 
 
-def keeper_point(anchors: dict[str, object]) -> tuple[float, float]:
-    """The isolated islet where the enemy's protected King waits, away from every siege spot."""
-    x, y = numbers(
-        object_value(anchors.get("enemy.keeper"), "enemy.keeper").get("point"), "enemy.keeper", 2
-    )
+def keeper_point(anchors: dict[str, object], key: str) -> tuple[float, float]:
+    """A spot on the enemy's isolated islet, away from every siege spot: where its protected
+    King waits, or where its tower stands."""
+    x, y = numbers(object_value(anchors.get(key), key).get("point"), key, 2)
     return x, y
 
 

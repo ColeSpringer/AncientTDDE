@@ -100,8 +100,8 @@ GLOBAL_VARIABLES = (
     "cleared",
     # After the schedule: the stage, the endless growth level applied, the pierce armor added,
     # and seconds until sudden death next costs lives. wave_display asks the native triggers to
-    # count down to the next endless wave (1), to clear the countdown when a wave starts (2) or
-    # to count down the choice window (3).
+    # count down to the next endless wave (1), to clear the countdown when a wave starts (2),
+    # to count down the choice window (3) or to count down to the first wave (4).
     "stage",
     "endless_level",
     "armor",
@@ -146,6 +146,11 @@ NOTICE_SECONDS = 10
 KING_SLOTS = 128
 # Consecutive one-second samples a King must stand still on a pad before it pays.
 STILL_SAMPLES = 2
+# A King kept shuffling for room by a crowd pays once it has stayed within this many tiles of
+# a spot for this many consecutive one-second samples; a King walking at its own speed leaves
+# the radius first.
+SHUFFLE_SAMPLES = 4
+SHUFFLE_RADIUS = 2
 # The technology a civilization tech tree disables to remove a tower family member.
 # Members without one, such as the Watch Tower the game enables everywhere, are always built.
 TOWER_TECHS = {"GUARD_TOWER": "GUARD_TOWER", "KEEP": "KEEP", "BOMBARD_TOWER": "BOMBARD_TOWER"}
@@ -461,7 +466,10 @@ def render_prelude(
         cNoticeSeconds=NOTICE_SECONDS,
         cKingSlots=KING_SLOTS,
         cStillSamples=STILL_SAMPLES,
+        cShuffleSamples=SHUFFLE_SAMPLES,
+        cShuffleRadius=SHUFFLE_RADIUS,
         cLifeObject=BuildingInfo["OUTPOST"].ID,
+        cKeeperBuilding=BuildingInfo["WATCH_TOWER"].ID,
         cShopCount=len(purchases),
         cInvestCount=len(investments),
         cRelicsPurchase=relics.index if relics else 0,

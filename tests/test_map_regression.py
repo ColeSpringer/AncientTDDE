@@ -26,7 +26,7 @@ def test_versioned_stock_template_matches_current_migration(tmp_path: Path) -> N
     assert counts[1776] == 0
     assert counts[819] == 55
     assert counts[128] == 57
-    assert len(expected.get("anchors", {})) == 366
+    assert len(expected.get("anchors", {})) == 367
     migration = expected.get("migration")
     assert migration is not None and migration["terrain_patch_tiles"] == 243
     assert (migration["placement_additions"], migration["placement_removals"]) == (32, 3)

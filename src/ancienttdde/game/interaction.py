@@ -8,7 +8,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance
 from ancienttdde.game.triggers import Game
-from ancienttdde.game.waves import LANE_SLOTS
+from ancienttdde.game.waves import LANE_SLOTS, SIEGE_TIMER
 from ancienttdde.scenario.triggers import condition, effect
 
 
@@ -67,7 +67,7 @@ def siege_countdowns(game: Game, balance: Balance) -> None:
             time_unit=TimeUnit.SECONDS,
             message=message,
             reset_timer=1,
-            timer=1,
+            timer=SIEGE_TIMER,
         )
         game.set_value(trigger, "game.siege_display", 0)
 

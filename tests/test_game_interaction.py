@@ -11,6 +11,7 @@ from AoE2ScenarioParser.datasets.techs import TechInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
 from conftest import (
     ROOT,
+    WATCH_TOWER,
     GameBuild,
     attr_int,
     attr_list,
@@ -433,9 +434,12 @@ def test_option_lines_name_the_lobby_controls_and_leave_once_locked(
     assert (attr_int(mode, "quantity"), attr_int(mode, "inverted")) == (MODES.index("practice"), 1)
 
 
-def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(
+def test_the_original_selectors_are_gone_and_the_keeper_holds_its_islet(
     game_build: GameBuild,
 ) -> None:
+    """The enemy's islet holds its King and a tower, both unattackable and undeletable from
+    the start: a lobby's Standard victory counts an opponent destroyed once it has no
+    villagers, soldiers, ships or buildings, and a King is none of them."""
     data = snapshot(game_build)
     spots = anchors(game_build)
     lives = {spots[f"lane.p{p}.life"]["reference_id"] for p in PLAYERS}
@@ -443,9 +447,25 @@ def test_the_original_selectors_are_gone_and_the_keeper_stands_alone(
         u["reference_id"] for u in data["units"] if u["unit_const"] == OUTPOST and u["player_id"]
     }
     assert outposts == lives
-    [keeper] = [u for u in data["units"] if u["player_id"] == 8]
-    assert keeper["unit_const"] == KING
-    assert [keeper["x"], keeper["y"]] == spots["enemy.keeper"]["point"]
+    held_by_enemy = [u for u in data["units"] if u["player_id"] == 8]
+    assert sorted(u["unit_const"] for u in held_by_enemy) == sorted([KING, WATCH_TOWER])
+    enemy = {u["unit_const"]: u for u in held_by_enemy}
+    assert [enemy[KING]["x"], enemy[KING]["y"]] == spots["enemy.keeper"]["point"]
+    assert [enemy[WATCH_TOWER]["x"], enemy[WATCH_TOWER]["y"]] == spots["enemy.keeper.tower"][
+        "point"
+    ]
+
+    def footprint(unit: MapUnit) -> tuple[int, int]:
+        return int(unit["x"] // 1), int(unit["y"] // 1)
+
+    assert [u for u in data["units"] if footprint(u) == footprint(enemy[WATCH_TOWER])] == [
+        enemy[WATCH_TOWER]
+    ]
+    init = triggers_by_name(data)["game.initialize"]
+    held = sorted(u["reference_id"] for u in enemy.values())
+    for protection in ("disable_unit_attackable", "disable_object_deletion"):
+        protected = [e for e in effects(init, protection) if e["source_player"] == 8]
+        assert [sorted(e["selected_object_ids"]) for e in protected] == [held]
 
 
 def test_pvp_makes_every_two_playing_lanes_enemies_at_the_first_wave(game_build: GameBuild) -> None:
@@ -608,6 +628,11 @@ def test_bought_raiders_walk_clear_of_their_arrival(game_build: GameBuild, playe
 
 
 def test_siege_and_endless_waves_are_counted_down(game_build: GameBuild) -> None:
+    from ancienttdde.game.waves import CHOICE_TIMER, SIEGE_TIMER, WAVE_TIMER
+
+    # Reset Timer keeps a running timer's text, so each countdown that may overlap another
+    # has its own timer.
+    assert len({WAVE_TIMER, SIEGE_TIMER, CHOICE_TIMER}) == 3
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
@@ -621,7 +646,8 @@ def test_siege_and_endless_waves_are_counted_down(game_build: GameBuild) -> None
         assert trigger["looping"]
         assert requested(trigger, variables["game.siege_display"]) == code
         [timer] = effects(trigger, "display_timer")
-        assert (timer["display_time"], timer["timer"]) == (seconds, 1) and "%d" in timer["message"]
+        assert (timer["display_time"], timer["timer"]) == (seconds, SIEGE_TIMER)
+        assert "%d" in timer["message"]
         assert sets(trigger, variables["game.siege_display"]) == [(0, SET)]
     clear = triggers["game.wave.timer.clear"]
     assert clear["looping"] and requested(clear, variables["game.wave_display"]) == 2

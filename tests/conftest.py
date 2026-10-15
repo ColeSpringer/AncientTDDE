@@ -82,6 +82,7 @@ def stock() -> Stock:
 
 # Stock object IDs the probe tests look for.
 KING = 434
+WATCH_TOWER = 79
 BARRACKS = 12
 
 type Attributes = Mapping[str, JSONValue]
