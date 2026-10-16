@@ -1351,7 +1351,8 @@ int main(int argc, char** argv) {
                 "Competition did not default to PvP off, chosen by the first lane");
         require(mentions("P2: PvP is off; select PvP on below the shop within " + ancientText(cChoice) + " game seconds")==1,
                 "The chooser was not invited to switch PvP on");
-        require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "Competition ignored its fixed difficulty");
+        require(xsTriggerVariable(vDifficulty)==lobbyLevel(5) && kingGold(xsTriggerVariable(vDifficulty))==1500,
+                "Competition did not play the lobby's Easiest setting as Easy");
     } else if(test=="pvp_opt_in") {
         start({1,7});
         advanceTo(sWave);
@@ -1368,10 +1369,31 @@ int main(int argc, char** argv) {
         attributes[4][cAttributeGold]=2*3000+100;
         tick(); tick();
         require(resource(4, cAttributeGold)==100 && kingsCreated[4]==2, "Hard did not convert 3000 gold per King");
+    } else if(test=="difficulty_competitive") {
+        // Rivals play the lobby's setting too: a Hardest lobby prices every lane's Kings at
+        // Hard and gives the waves Hard hit points.
+        lobbyDifficulty=0;
+        start({2,5});
+        int hard = xsTriggerVariable(vDifficulty);
+        require(kingGold(hard)==3000, "A Hardest lobby did not play Hard in competition");
+        attributes[2][cAttributeGold]=2*3000+100;
+        attributes[5][cAttributeGold]=2*3000+100;
+        tick(); tick();
+        require(resource(2, cAttributeGold)==100 && kingsCreated[2]==2 && resource(5, cAttributeGold)==100 && kingsCreated[5]==2,
+                "Rivals did not each convert 3000 gold per King");
+        advanceTo(sWave);
+        int normal = lobbyLevel(3 - cLobbyLow); // DE reports the Standard setting as 3.
+        require(waveHitPoints(hard * cWaveCount) > waveHitPoints(normal * cWaveCount), "The case needs Hard hit points above Normal's");
+        require(hitpointsSet(enemy(), waveUnit(0))==std::vector<float>{float(waveHitPoints(hard * cWaveCount))}, "The first wave did not carry Hard hit points in competition");
     } else if(test=="difficulty_unknown") {
+        // A lobby value outside DE's range plays Normal and says so, solo or in competition.
         lobbyDifficulty=9;
         start({4});
-        require(xsTriggerVariable(vDifficulty)==cCompetitiveLevel, "An unknown lobby setting did not play Normal");
+        require(xsTriggerVariable(vDifficulty)==cFallbackLevel && kingGold(cFallbackLevel)==2000, "An unknown lobby setting did not play Normal");
+        require(mentions("Lobby difficulty 9 is not recognized; playing Normal.")==1, "The unrecognized setting was not reported");
+        restart({2,5});
+        require(xsTriggerVariable(vDifficulty)==cFallbackLevel, "An unknown lobby setting did not play Normal in competition");
+        require(mentions("Lobby difficulty 9 is not recognized; playing Normal.")==1, "The unrecognized setting was not reported to the rivals");
     } else if(test=="options_choose") {
         start({3});
         select(3, cControlEndless); tick();

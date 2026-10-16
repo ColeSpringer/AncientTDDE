@@ -292,7 +292,9 @@ def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
     assert list(filled(text, "kingGold").values()) == [
         level.king_gold for level in balance.difficulty.levels
     ]
-    assert f"const int cCompetitiveLevel = {balance.difficulty.competitive};" in text
+    # The table's bounds, and the level a value outside them plays: the Standard setting's.
+    assert "const int cLobbyLow = -1;" in text and "const int cLobbyHigh = 4;" in text
+    assert f"const int cFallbackLevel = {balance.difficulty.fallback};" in text
     last = 2 * len(balance.waves) + len(balance.waves) - 1
     assert filled(text, "waveHitPoints")[last] == balance.hit_points(len(balance.waves) - 1, 2)
 
@@ -505,6 +507,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "options_competitive",
         "pvp_opt_in",
         "difficulty_hard",
+        "difficulty_competitive",
         "difficulty_unknown",
         "options_choose",
         "options_reload_held",

@@ -22,6 +22,7 @@ from ancienttdde.scenario.snapshot import MapUnit, ScenarioSnapshot, TriggerReco
 
 PLAYERS = range(1, 8)
 KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
+FEMALE_VILLAGER, GOLD_MINE, STONE_MINE = 293, 66, 102
 MONK_WITH_RELIC, POPULATION = 286, 110
 HAY_STACK, SIGN, ACCURSED = 857, 819, 684
 TOWERS, BOMBARD = (79, 234, 235, 236), (236,)
@@ -797,3 +798,30 @@ def test_population_starts_with_the_contents_room_for_every_lane(
     # Civilization bonuses that start with population are levelled to the same room; only
     # purchases and the profiles add more.
     assert headroom == [(SET, balance()["economy"]["starting_population"])]
+
+
+def test_the_model_assumes_the_gold_and_stone_miners_a_lane_starts_with(
+    game_build: GameBuild,
+) -> None:
+    """A lane's resource-area villagers start gathering the deposit beside them; the baseline
+    income counts exactly those on gold and on stone."""
+    from ancienttdde.game.balance import Assumptions, load_inputs
+    from ancienttdde.game.economy import GATHER_REACH
+
+    data = snapshot(game_build)
+    x1, y1, x2, y2 = load_inputs(ROOT).lanes[0].economy
+    deposits = [u for u in data["units"] if u["unit_const"] in (GOLD_MINE, STONE_MINE)]
+    miners = {GOLD_MINE: 0, STONE_MINE: 0}
+    for unit in data["units"]:
+        if unit["player_id"] != 1 or unit["unit_const"] not in (VILLAGER, FEMALE_VILLAGER):
+            continue
+        if not (x1 <= unit["x"] <= x2 + 1 and y1 <= unit["y"] <= y2 + 1):
+            continue
+        nearest = min(deposits, key=lambda d: math.dist((d["x"], d["y"]), (unit["x"], unit["y"])))
+        if math.dist((nearest["x"], nearest["y"]), (unit["x"], unit["y"])) <= GATHER_REACH:
+            miners[nearest["unit_const"]] += 1
+    assumptions = Assumptions()
+    assert miners == {
+        GOLD_MINE: assumptions.gold_villagers,
+        STONE_MINE: assumptions.stone_villagers,
+    }

@@ -1,6 +1,7 @@
 """The hosting instructions and sign texts follow the balance and the catalog."""
 
 import json
+import re
 from pathlib import Path
 from typing import Any, cast
 
@@ -124,10 +125,10 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
         "from the first wave and opens their pads; without it PvP stays off." in text
     )
     assert (
-        "Easiest plays Easy; Standard and Moderate play Normal; Hard, Hardest and Extreme "
-        "play Hard" in text
+        "The lobby's Difficulty sets the level, solo or competitive: Easiest plays Easy; "
+        "Standard and Moderate play Normal; Hard, Hardest and Extreme play Hard." in text
     )
-    assert "Competitive games always play Normal" in text
+    assert not re.search(r"[Cc]ompetitive games (always )?play (Easy|Normal|Hard)", text)
     assert "Set the lobby's Population to 200" in text
     assert "Lanes cannot train traders, ships, monks or castle units" in text
     assert "Every 1500 gold on Easy, 2000 on Normal or 3000 on Hard" in text
@@ -146,11 +147,11 @@ def test_instructions_scale_the_schedule_by_difficulty() -> None:
     assert "restored from its whole amount as it takes damage" in text
 
 
-def test_the_schedule_shows_hit_points_at_the_competitive_level(tmp_path: Path) -> None:
+def test_the_schedule_shows_hit_points_at_the_default_level(tmp_path: Path) -> None:
     from ancienttdde.game.instructions import instructions
 
     raw = json.loads((ROOT / "content/balance/game.json").read_text())
-    raw["difficulty"]["competitive"] = "hard"
+    raw["difficulty"]["default"] = "hard"
     path = tmp_path / "game.json"
     path.write_text(json.dumps(raw))
     text = instructions(balance(path), shop(), profiles())

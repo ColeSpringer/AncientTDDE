@@ -70,8 +70,8 @@ class Assumptions:
     trade_gold_per_trip: int = 110
     starting_carts: int = 8
     starting_cogs: int = 4
-    # Villagers a lane keeps on gold and on stone, and what each gathers in a minute.
-    gold_villagers: int = 4
+    # Villagers a lane starts with on gold and on stone, and what each gathers in a minute.
+    gold_villagers: int = 2
     stone_villagers: int = 4
     villager_gold_per_minute: int = 22
     villager_stone_per_minute: int = 20
@@ -117,8 +117,8 @@ class Inputs:
 
     @property
     def level(self) -> int:
-        """The difficulty level the model prices: the one every competitive game plays."""
-        return self.balance.difficulty.competitive
+        """The difficulty level the model prices: the balance's default level."""
+        return self.balance.difficulty.default
 
     @property
     def minutes(self) -> float:
@@ -270,7 +270,7 @@ class WaveNeed:
 
 def wave_needs(inputs: Inputs, level: int | None = None) -> tuple[WaveNeed, ...]:
     """What a lane must deal to stop every enemy of a wave before the exit, as a lower bound:
-    the wave's hit points at a difficulty level (the competitive one unless given) over the
+    the wave's hit points at a difficulty level (the default one unless given) over the
     time its last enemy takes to spawn and cross the lane at its own speed."""
     level = inputs.level if level is None else level
     needs: list[WaveNeed] = []
@@ -350,7 +350,7 @@ def lane_pressure(
     """Each scheduled wave against a lane that has earned the baseline income and every earlier
     wave's Kings and kill rewards, grown by its investments, put its attack share into the
     ladder, bought the attack investments at their minutes and built its Watch Towers, with
-    both Accursed Towers once their minute comes. A difficulty level (the competitive one
+    both Accursed Towers once their minute comes. A difficulty level (the default one
     unless given) sets the King price and hit points."""
     level = inputs.level if level is None else level
     balance, economy = inputs.balance, inputs.balance.economy

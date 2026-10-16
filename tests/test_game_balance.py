@@ -520,7 +520,7 @@ def test_a_king_discount_is_worth_the_extra_kings_the_same_gold_makes() -> None:
     assert premium.solo == pytest.approx(-income.gold_kings / 5)
 
 
-def test_the_report_names_the_competitive_level_and_copes_with_new_civilizations(
+def test_the_report_names_the_default_level_and_copes_with_new_civilizations(
     tmp_path: Path,
 ) -> None:
     import json
@@ -530,7 +530,7 @@ def test_the_report_names_the_competitive_level_and_copes_with_new_civilizations
 
     root = copy_content(tmp_path)
     game = json.loads((root / "content/balance/game.json").read_text())
-    game["difficulty"]["competitive"] = "hard"
+    game["difficulty"]["default"] = "hard"
     (root / "content/balance/game.json").write_text(json.dumps(game))
     civilizations = json.loads((root / "content/balance/civilizations.json").read_text())
     civilizations["civilizations"].append(
@@ -539,7 +539,11 @@ def test_the_report_names_the_competitive_level_and_copes_with_new_civilizations
     (root / "content/balance/civilizations.json").write_text(json.dumps(civilizations))
     text = render_report(load_inputs(root), Assumptions())
     assert "Hard hit points." in text and "on Hard without buying anything" in text
-    # Priced at the competitive level, apart from the pressure on the other levels.
+    assert (
+        "the Hard King price, the default level; on Easy and Normal, a bonus paid in gold is "
+        "worth a different number of Kings and a bonus in Kings the same." in text
+    )
+    # Priced at the default level, apart from the pressure on the other levels.
     pressure = text.split("## Pressure")[1].split("## Shop")[0]
     assert "The last columns are the pressure on Easy and Normal" in pressure
     assert "| Pressure | Easy | Normal |" in pressure

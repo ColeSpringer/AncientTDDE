@@ -89,11 +89,11 @@ def king_prices(balance: Balance) -> str:
 
 
 def hit_point_scales(balance: Balance) -> str:
-    normal = balance.difficulty.competitive
+    priced = balance.difficulty.default
     others = [
         f"{level.hit_points_percent}% on {level.name}"
         for index, level in enumerate(balance.difficulty.levels)
-        if index != normal
+        if index != priced
     ]
     return listed(others)
 
@@ -146,7 +146,7 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
     towers = balance.towers
     start = economy.starting_resources
     repair = next((p.effect for p in shop.purchases if isinstance(p.effect, Repair)), None)
-    level = balance.difficulty.competitive
+    level = balance.difficulty.default
     schedule = "\n".join(
         f"{i}. {w.key}: boss with {balance.hit_points(i - 1, level)} HP"
         if w.boss
@@ -178,10 +178,8 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "Use fixed start positions, locked teams and Fast (the highest lobby game speed). "
         "The host must select game speed in the lobby; the scenario cannot set that control. "
         "Civilizations remain selectable. Set Reveal Map to All Visible. Set the lobby's "
-        f"Population to {balance.population_cap}, the limit the shop sells room up to. For "
-        "solo runs, the "
-        f"lobby's Difficulty sets the level: {lobby_levels(balance)}. Competitive games always "
-        f"play {balance.difficulty.levels[balance.difficulty.competitive].name}.\n\n"
+        f"Population to {balance.population_cap}, the limit the shop sells room up to. The "
+        f"lobby's Difficulty sets the level, solo or competitive: {lobby_levels(balance)}.\n\n"
         "## Run options\n\n"
         f"The game opens with {balance.choice_seconds} game seconds for the first human lane "
         "to select a run option in the row of Outposts below the shop; the first selection is "
@@ -264,7 +262,7 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         f"There are {balance.intermission_seconds} game seconds between waves after the "
         "remaining enemies are cleared. The schedule lasts about "
         f"{balance.scheduled_seconds / 60:.1f} game minutes plus enemy cleanup. Hit points "
-        f"below are for {balance.difficulty.levels[balance.difficulty.competitive].name}: "
+        f"below are for {balance.difficulty.levels[level].name}: "
         f"{hit_point_scales(balance)}, up to 32767 for regular enemies. A boss shows at most "
         "32767 and is restored from its whole amount as it takes damage, so it falls only once "
         "that amount is spent; your boss tells you at each quarter.\n\n"

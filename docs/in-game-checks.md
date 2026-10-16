@@ -24,8 +24,8 @@ part: the game clears the other computer-filled lanes at
 the start and gives them no resources, enemies or say in victory. The enemy's civilization
 bonuses apply to its units: the build presets Britons for slot 8, and a computer in another
 slot plays the civilization the lobby gives it. Civilization choices stay unlocked, and a solo
-player may use any defense lane. The lobby's Difficulty sets a solo
-run's level; run options are selected in game, in the row of Outposts below the shop.
+player may use any defense lane. The lobby's Difficulty sets the level, solo or
+competitive; run options are selected in game, in the row of Outposts below the shop.
 
 DE applies the lobby's Victory setting, Standard by default, on top of the scenario's own;
 the enemy keeps a King and a Watch Tower on an islet no tower, trebuchet or raider reaches,
@@ -214,8 +214,9 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   the countdown ends. The run options then disappear, and the practice controls too unless
   the run is Practice; their two lines leave the objectives box (not struck through) while
   the wave and lives lines stay.
-- Solo: Easiest plays Easy and Hard plays Hard (the opening chat names the level and gold
-  per King); competitive games play Normal whatever the lobby says.
+- Easiest plays Easy and Hard plays Hard, solo and competitive alike (the opening chat names
+  the level and gold per King); a lobby value outside DE's range is named in the chat and
+  plays Normal, the Standard setting's level.
 - Practice: start next wave, Kings, resources and lives each work once per selection, and
   again after selecting something else; the Practice objective appears and the result says
   the run was assisted.

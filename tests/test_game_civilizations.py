@@ -340,7 +340,10 @@ def test_every_civilization_has_an_identity_line_and_some_adjustment() -> None:
         assert not civilization.profile.neutral, civilization.key
 
 
-def test_profile_worth_stays_within_the_agreed_bands() -> None:
+@pytest.mark.parametrize("level", ["easy", "normal", "hard"])
+def test_profile_worth_stays_within_the_agreed_bands(level: str) -> None:
+    from dataclasses import replace
+
     from ancienttdde.game.balance import (
         Assumptions,
         baseline_income,
@@ -349,7 +352,13 @@ def test_profile_worth_stays_within_the_agreed_bands() -> None:
         profile_value,
     )
 
-    inputs = load_inputs(ROOT)
+    # Any lobby can play any level, so the bands hold at each. A bonus paid in gold is worth
+    # more Kings on Easy and fewer on Hard, while the run's income, part of it paid in Kings,
+    # moves less; a bonus in Kings holds its worth at every level. A profile paid wholly in
+    # gold needs about two fifths more than Normal's floor to hold on Hard.
+    base = load_inputs(ROOT)
+    difficulty = replace(base.balance.difficulty, default=base.balance.difficulty.index(level))
+    inputs = replace(base, balance=replace(base.balance, difficulty=difficulty))
     # Slight uniqueness, measured against what a lane earns over the run without buying
     # anything: every profile is worth about 2.6 to 7.1 percent of that income (one to two
     # Kings of the thirty-one a shorter schedule once paid); with the civilization's own

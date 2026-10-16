@@ -319,9 +319,9 @@ void ancientStop(string reason = "") {
     xsChatData("Ancient TD stopped: " + reason);
 }
 
-// The first human lane chooses the run options. Solo runs play the lobby's difficulty;
-// competitive games play one fixed level and start with PvP off. A lobby without a computer
-// player has no enemy and cannot play.
+// The first human lane chooses the run options. Every game plays the lobby's difficulty, or
+// the Standard setting's level when the value is outside DE's range; competitive games start
+// with PvP off. A lobby without a computer player has no enemy and cannot play.
 void ancientInitialize() {
     int enemy = 0;
     for (candidate = 1; <= 8) {
@@ -359,16 +359,16 @@ void ancientInitialize() {
     xsSetTriggerVariable(vWave, -1);
     xsSetTriggerVariable(vChooser, chooser);
     xsSetTriggerVariable(vMode, cModeStandard);
-    int level = cCompetitiveLevel;
-    if (participants == 1) {
-        int lobby = xsGetDifficulty();
-        if ((lobby >= -1) && (lobby <= 4)) level = lobbyLevel(lobby + 1);
-    }
+    int lobby = xsGetDifficulty();
+    bool recognized = ((lobby >= cLobbyLow) && (lobby <= cLobbyHigh));
+    int level = cFallbackLevel;
+    if (recognized) level = lobbyLevel(lobby - cLobbyLow);
     xsSetTriggerVariable(vDifficulty, level);
     xsChatData("Ancient TD: human defense lanes = %d", participants);
     xsChatData("Enemy: " + ancientPlayer(enemy) + ", the last computer player.");
     if (participants == 0) return;
     xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
+    if (recognized == false) xsChatData("Lobby difficulty %d is not recognized; playing " + difficultyName(level) + ".", lobby);
     string window = " within " + ancientText(cChoice) + " game seconds";
     if (participants == 1) {
         xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop" + window + "; Standard is the default.");

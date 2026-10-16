@@ -24,7 +24,14 @@ from ancienttdde.game.catalog import (
     TowerAttack,
 )
 from ancienttdde.game.civilizations import Profile, Profiles, owned_mask
-from ancienttdde.game.config import MAX_HIT_POINTS, Balance, EngineLane, Keeper, Towers
+from ancienttdde.game.config import (
+    LOBBY_DIFFICULTIES,
+    MAX_HIT_POINTS,
+    Balance,
+    EngineLane,
+    Keeper,
+    Towers,
+)
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
 from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS
@@ -499,7 +506,9 @@ def render_prelude(
         cTowerKinds=len(access),
         cBombardTowerResearch=bombard_research(balance.towers),
         cRunOptions=len(controls("run")),
-        cCompetitiveLevel=difficulty.competitive,
+        cLobbyLow=min(LOBBY_DIFFICULTIES.values()),
+        cLobbyHigh=max(LOBBY_DIFFICULTIES.values()),
+        cFallbackLevel=difficulty.fallback,
         cPracticeKings=balance.practice.kings,
         cPracticeResources=balance.practice.resources,
         cEndlessTemplates=len(balance.endless.templates),
@@ -572,7 +581,8 @@ def render_prelude(
             for level in range(len(difficulty.levels))
             for wave in range(len(balance.waves))
         ],
-        # xsGetDifficulty reports -1 for Extreme to 4 for Easiest; the table starts at Extreme.
+        # xsGetDifficulty reports cLobbyLow for Extreme to cLobbyHigh for Easiest; the table
+        # starts at Extreme.
         "lobbyLevel": [level for _, level in sorted(difficulty.lobby)],
         "kingGold": [level.king_gold for level in difficulty.levels],
         # The medium a purchase buys raiders for: 0 for none, then land and naval.

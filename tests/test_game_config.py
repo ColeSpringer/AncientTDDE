@@ -219,7 +219,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("difficulty", "levels", "normal", "king_gold"), 0, "king_gold"),
         (("difficulty", "levels", "hard", "hit_points_percent"), 300, "hit_points_percent"),
         (("difficulty", "lobby", "moderate"), "brutal", "difficulty level"),
-        (("difficulty", "competitive"), "brutal", "difficulty level"),
+        (("difficulty", "default"), "brutal", "difficulty level"),
         (("endless", "templates"), ["Knights", "Dragons"], "Dragons"),
         (("endless", "templates"), [], "templates"),
         (("endless", "templates"), ["Villagers", "Villagers"], "twice"),
@@ -274,9 +274,18 @@ def test_reject_an_outdated_balance_schema(tmp_path: Path) -> None:
     from ancienttdde.game.config import load_balance
 
     raw = json.loads((ROOT / "content/balance/game.json").read_text())
-    assert raw["schema_version"] == 6
-    raw["schema_version"] = 5
+    assert raw["schema_version"] == 7
+    raw["schema_version"] = 6
     with pytest.raises(ValueError, match="Unsupported balance schema"):
+        load_balance(write_balance(tmp_path, raw))
+
+
+def test_difficulty_needs_a_default_level(tmp_path: Path) -> None:
+    from ancienttdde.game.config import load_balance
+
+    raw = json.loads((ROOT / "content/balance/game.json").read_text())
+    del raw["difficulty"]["default"]
+    with pytest.raises(ValueError, match="default must be a difficulty level"):
         load_balance(write_balance(tmp_path, raw))
 
 
@@ -333,7 +342,9 @@ def test_lobby_difficulty_chooses_gold_per_king_and_wave_strength() -> None:
         "easiest": 4,
     }
     assert dict(difficulty.lobby) == {-1: 2, 0: 2, 1: 2, 2: 1, 3: 1, 4: 0}
-    assert difficulty.levels[difficulty.competitive].key == "normal"
+    assert difficulty.levels[difficulty.default].key == "normal"
+    # A lobby value outside DE's range plays what the lobby's Standard setting plays.
+    assert difficulty.fallback == difficulty.index("normal")
 
 
 def test_difficulty_scales_wave_hit_points_within_the_engine_limit() -> None:

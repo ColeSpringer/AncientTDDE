@@ -44,7 +44,7 @@ def kings(value: float) -> str:
 
 
 def level_name(inputs: Inputs) -> str:
-    """The difficulty level the tables price: the one every competitive game plays."""
+    """The difficulty level the tables price: the balance's default level."""
     return inputs.balance.difficulty.levels[inputs.level].name
 
 
@@ -74,10 +74,13 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
         ["scheduled run (minutes)", f"{inputs.minutes:.1f}"],
         ["stock data", f"{stock.source.version}, {stock.source.file}, {stock.source.sha256[:12]}"],
     ]
+    levels = inputs.balance.difficulty.levels
+    others = " and ".join(level.name for i, level in enumerate(levels) if i != inputs.level)
     return (
         "The data files give the towers, enemies and technologies; these settings and constants "
         f"fill the gaps. Values in Kings use the shop's prices and the {level_name(inputs)} King "
-        "price, the level every competitive game plays. The trade gold per trip is the least "
+        f"price, the default level; on {others}, a bonus paid in gold is worth a different "
+        "number of Kings and a bonus in Kings the same. The trade gold per trip is the least "
         "seen in play; some civilizations bring more.\n\n" + table(["Setting", "Value"], rows)
     )
 

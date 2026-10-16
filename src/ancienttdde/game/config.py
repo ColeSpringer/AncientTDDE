@@ -1,6 +1,5 @@
 """Validate the finite wave schedule at the JSON input boundary."""
 
-from collections.abc import Collection
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
@@ -195,8 +194,8 @@ class Difficulty:
     levels: tuple[DifficultyLevel, ...]
     # Each lobby setting's xsGetDifficulty value and the level it plays.
     lobby: tuple[tuple[int, int], ...]
-    # The level every competitive game plays, whatever the lobby says.
-    competitive: int
+    # The level the tables and the schedule describe.
+    default: int
 
     def index(self, key: str) -> int:
         for index, level in enumerate(self.levels):
@@ -206,6 +205,11 @@ class Difficulty:
 
     def level(self, key: str) -> DifficultyLevel:
         return self.levels[self.index(key)]
+
+    @property
+    def fallback(self) -> int:
+        """The level a lobby value outside DE's range plays: the Standard setting's."""
+        return dict(self.lobby)[LOBBY_DIFFICULTIES["standard"]]
 
 
 @dataclass(frozen=True)
@@ -393,9 +397,9 @@ def load_towers(raw: dict[str, object]) -> Towers:
     )
 
 
-def level_key(value: object, levels: Collection[str]) -> str:
-    if not isinstance(value, str) or value not in levels:
-        raise ValueError(f"Unknown difficulty level: {value}")
+def level_key(value: object, label: str) -> str:
+    if not isinstance(value, str) or value not in DIFFICULTY_LEVELS:
+        raise ValueError(f"{label} must be a difficulty level: {', '.join(DIFFICULTY_LEVELS)}")
     return value
 
 
@@ -420,10 +424,10 @@ def load_difficulty(raw: dict[str, object]) -> Difficulty:
     return Difficulty(
         levels=tuple(levels),
         lobby=tuple(
-            (value, DIFFICULTY_LEVELS.index(level_key(lobby[name], DIFFICULTY_LEVELS)))
+            (value, DIFFICULTY_LEVELS.index(level_key(lobby[name], f"lobby {name}")))
             for name, value in LOBBY_DIFFICULTIES.items()
         ),
-        competitive=DIFFICULTY_LEVELS.index(level_key(raw.get("competitive"), DIFFICULTY_LEVELS)),
+        default=DIFFICULTY_LEVELS.index(level_key(raw.get("default"), "default")),
     )
 
 
@@ -490,7 +494,7 @@ def load_siege(raw: dict[str, object]) -> Siege:
 
 def load_balance(path: Path) -> Balance:
     raw = read_object(path)
-    if raw.get("schema_version") != 6:
+    if raw.get("schema_version") != 7:
         raise ValueError("Unsupported balance schema")
     waves: list[WaveDefinition] = []
     for row in rows(raw.get("waves"), "waves"):
