@@ -603,13 +603,6 @@ int ancientRivals(int player = 1) {
     return (rivals);
 }
 
-// The population room held for the siege's trebuchets until they appear: the shop counts
-// it as taken for the holder, while DE's own room and population stay untouched.
-int ancientReserved(int player = 1) {
-    if ((xsTriggerVariable(vSiegeOwner) == player) && (xsTriggerVariable(vSiegePhase) == 1)) return (xsTriggerVariable(vSiegeReserved));
-    return (0);
-}
-
 // Only one player holds the siege: a short warning, then trebuchets on every surviving rival's
 // islets for a while. A claim made earlier in the same second keeps the holder.
 void ancientClaimSiege(int player = 1, int price = 0) {
@@ -617,7 +610,6 @@ void ancientClaimSiege(int player = 1, int price = 0) {
     xsSetTriggerVariable(vSiegePhase, 1);
     xsSetTriggerVariable(vSiegeLeft, cSiegeWarning);
     xsSetTriggerVariable(vSiegeDisplay, 1);
-    xsSetTriggerVariable(vSiegeReserved, cSiegeTrebuchets * ancientRivals(player));
     xsChatData(ancientPlayer(player) + " bought the siege power-up for " + ancientCount(price, "King", "Kings") + ": trebuchets reach every rival in " + ancientText(cSiegeWarning) + " game seconds.");
 }
 
@@ -640,7 +632,6 @@ int ancientPlaceSiege(int owner = 1) {
 void ancientEndSiege(bool eliminated = false) {
     int owner = xsTriggerVariable(vSiegeOwner);
     if (owner == 0) return;
-    xsSetTriggerVariable(vSiegeReserved, 0);
     for (form = 0; < 2) {
         int kind = cTrebuchet;
         if (form == 1) kind = cPackedTrebuchet;
@@ -678,7 +669,6 @@ void ancientSiege() {
         return;
     }
     if (xsTriggerVariable(vSiegePhase) == 1) {
-        xsSetTriggerVariable(vSiegeReserved, 0);
         int made = ancientPlaceSiege(owner);
         xsSetTriggerVariable(vSiegePhase, 2);
         xsSetTriggerVariable(vSiegeLeft, cSiegeActive);
@@ -1049,24 +1039,15 @@ int ancientPrice(int player = 1, int purchase = 0) {
     return (shopPrice(purchase));
 }
 
-// The population a purchase's units take: the schedule's count, or the siege's trebuchets
-// for every surviving rival. Kings and monks take none: the lane's setup sets their
-// population cost to zero.
-int ancientPurchasePopulation(int player = 1, int purchase = 0) {
-    if (purchase == cSiegePurchase) return (cSiegeTrebuchets * ancientRivals(player));
-    return (shopPopulation(purchase));
-}
-
 // Why units taking this much population cannot be bought now: the limit, or no room for
-// them, the room held for the holder's siege counted as taken; 0 when they can. DE's
-// headroom runs negative once a lane is over.
+// them; 0 when they can, and for purchases whose units take none (Kings, monks and the
+// siege's trebuchets, whose population cost the lane's setup sets to zero). DE's headroom
+// runs negative once a lane is over.
 int ancientPopulationRefusal(int player = 1, int taken = 0) {
     if (taken <= 0) return (0);
-    int held = ancientReserved(player);
     float people = xsPlayerAttribute(player, cAttributePopulation);
-    if (people + held + taken > cPopulationCap) return (cMessagePopulationLimit);
-    float room = xsPlayerAttribute(player, cAttributePopulationCap);
-    if (room - held < taken) return (cMessagePopulation);
+    if (people + taken > cPopulationCap) return (cMessagePopulationLimit);
+    if (xsPlayerAttribute(player, cAttributePopulationCap) < taken) return (cMessagePopulation);
     return (0);
 }
 
@@ -1107,7 +1088,7 @@ int ancientRefusal(int player = 1, int purchase = 0) {
         if (people + xsPlayerAttribute(player, cAttributePopulationCap) >= cPopulationCap) return (cMessagePopulationFull);
         return (0);
     }
-    return (ancientPopulationRefusal(player, ancientPurchasePopulation(player, purchase)));
+    return (ancientPopulationRefusal(player, shopPopulation(purchase)));
 }
 
 // Explain a refusal once, again after a pause, and at once when the refusal changes.

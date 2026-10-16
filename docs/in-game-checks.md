@@ -118,7 +118,7 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   villagers appear on their flags; a camp or mill built over a resource-area spot refuses
   the purchase and keeps the Kings until it goes. A unit on another bought unit's spot in
   the lane's own areas delays that purchase without losing anything. Kings, traders and
-  raiders appear even with another lane's unit on their spot.
+  raiders appear even with another lane's unit, or an idle trained trader, on their spot.
 - Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
   leak and elimination messages reach everyone.
 - Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
@@ -139,6 +139,8 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
 - A trader's return adds at least 110 gold on the game's routes (the balance tables'
   assumption; one civilization brought 137); record a cart's and a cog's amount for other
   civilizations.
+- Record how many trade carts and cogs each lane trains and by which wave: the balance
+  tables' lane trains none beyond its starting traders.
 - Tower attack reaches existing, new and upgraded towers only and keeps rising past +255
   (+750 shows as +750, and the periodic +1 and +3 keep climbing); Accursed Towers appear on
   the reserved pads with 240 pierce attack.
@@ -177,16 +179,16 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   starting mines and bushes keep their normal amounts.
 - Starting relics produce gold; bought relics, monks, traders, villagers and the castle
   appear and work. A lane starts with room for 25 more units, the Huns included, and its
-  profile's population on top: villagers, traders, raiders and the siege are refused with
-  their Kings kept, and the refusal explained, once that room is used until +65 population
-  or the castle adds more, and again at the 200 limit; +65 population sells again until the
-  room reaches the limit (castle plus two purchases fill a standard lane); Kings and monks
-  take none, so the population reading (DE's current population, which the limit check
-  reads) does not rise as Kings arrive or relics are bought; a profile's starting traders or
-  villagers bring their own room; the siege holds its trebuchets' room from the purchase
-  until they appear, with the population reading unchanged meanwhile. The shop's limit is
-  the content's 200 whatever the lobby's Population setting; record whether a different
-  setting changes the lane's displayed limit.
+  profile's population on top: villagers, traders and raiders are refused with their Kings
+  kept, and the refusal explained, once that room is used until +65 population or the
+  castle adds more, and again at the 200 limit; +65 population sells again until the room
+  reaches the limit (castle plus two purchases fill a standard lane); Kings, monks and the
+  siege's trebuchets take none, so the population reading (DE's current population, which
+  the limit check reads) does not rise as Kings arrive, relics are bought or the trebuchets
+  appear, and the siege sells with no room at all; a profile's starting traders or villagers
+  bring their own room; traders trained at the market or dock take the same room, which the
+  shop then counts. The shop's limit is the content's 200 whatever the lobby's Population
+  setting; record whether a different setting changes the lane's displayed limit.
 - The relic pad keeps the Kings and says the monasteries have no room once the lane's two
   cannot take three more relics: after six purchases on top of the two starting relics,
   fewer when the profile grants relics or the relic purchase, or for the Armenians' free
@@ -245,12 +247,11 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   elimination ends it; save/load during the warning and the siege keeps both.
 - Villagers build only towers, mills, camps and farms: no houses, walls, gates, outposts,
   markets, blacksmiths, universities, barracks, docks, castles, monasteries or town
-  centers; markets and docks train nothing (traders come from the shop); a bought castle
-  trains nothing and fires no arrows;
-  monks cannot convert. All of this still holds after buying Castle Age and Imperial Age,
-  and the castle stays silent after Fletching, Bodkin Arrow and Bracer. Crenellations,
-  Greek Fire, Yasama and Stronghold cannot be researched; in competitive games neither can
-  Eupseong or Artillery.
+  centers; markets train trade carts and docks only trade cogs; a bought castle trains
+  nothing and fires no arrows; monks cannot convert. All of this still holds after buying
+  Castle Age and Imperial Age, and the castle stays silent after Fletching, Bodkin Arrow
+  and Bracer. Crenellations, Greek Fire, Yasama and Stronghold cannot be researched; in
+  competitive games neither can Eupseong or Artillery.
 - A tower or tower foundation in the resource area disappears, and its player is told why.
 - Bought monks, castles, fire galleys and siege trebuchets still appear although their
   owners cannot train or build them.

@@ -74,9 +74,9 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
             quantity=start[resource],
             operation=Operation.SET,
         )
-    # Kings, the shop's currency, and the relics' monks take no population, set before the
-    # lane's room so the Kings on the map never count against it; the units the shop sells
-    # need room, which it checks.
+    # Kings, the shop's currency, the relics' monks and the siege's trebuchets take no
+    # population, set before the lane's room so the Kings on the map never count against it;
+    # the other units the shop sells need room, which it checks.
     for unit in free_of_population():
         game.set_attribute(init, player, unit, ObjectAttribute.POPULATION, 0)
     # Every lane starts with the same population room, whatever its civilization; the shop

@@ -2,9 +2,10 @@
 
 Raiders, traders and siege are confined by terrain and walls, so nothing may carry them across
 (transport ships), outrange the walls (ranged castle units, warships, trebuchets, castle
-arrows), take units from others (monks) or add units outside the purchase caps (production
-buildings and their units). Villagers build towers and economy buildings only: population
-comes from the shop, and every lane has its market, blacksmith and university from the start.
+arrows), take units from others (monks) or add units outside the purchase caps (military
+buildings and their units). Markets and docks keep training traders, within the lane's
+population room. Villagers build towers and economy buildings only: population room comes
+from the shop, and every lane has its market, blacksmith and university from the start.
 Research that would change nothing a lane owns is withheld as well. The tables themselves
 live in restricted.py.
 """

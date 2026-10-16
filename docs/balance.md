@@ -240,7 +240,7 @@ What each investment pays in Kings per minute, how long it takes to pay for itse
 
 ## Income
 
-Kings one lane earns over the scheduled run on Normal without buying anything.
+Kings one lane earns over the scheduled run on Normal without buying anything. A trade cart trained at the market costs 0.08 Kings and a point of room and brings 0.9 Kings over the run on the lane's route, a trade cog 1.2; the lane the waves are tuned against trains none.
 
 | Source | Kings | Detail |
 | --- | --- | --- |
@@ -324,7 +324,7 @@ Each profile's adjustments and their worth in Kings over a run (Solo), the conte
 
 ## Rivals
 
-A light cavalry raider kills a trade cart in 20 seconds and a fire galley a trade cog in 10; a lost trader costs 0.33 Kings to replace. Each rival's trebuchets deal 5292 damage in the siege's 60 seconds if every shot lands: 6.3 Watch Towers or 2.4 Keeps, 0.6 Kings of stone and wood to rebuild.
+A light cavalry raider kills a trade cart in 20 seconds and a fire galley a trade cog in 10; a lost trader costs 0.08 Kings to replace. Each rival's trebuchets deal 5292 damage in the siege's 60 seconds if every shot lands: 6.3 Watch Towers or 2.4 Keeps, 0.6 Kings of stone and wood to rebuild.
 
 | Players | Siege price | Trebuchets |
 | --- | --- | --- |

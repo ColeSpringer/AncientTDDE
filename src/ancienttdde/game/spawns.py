@@ -60,9 +60,16 @@ def purchase_spawns(lane: EngineLane, purchase: Purchase, raiders: Raiders) -> t
 
 
 def free_of_population() -> tuple[int, ...]:
-    """The units a lane's setup frees of population: the Kings it pays with and the relics'
-    monks, with and without a relic."""
-    return (stock("king"), stock("monk"), UnitInfo["MONK_WITH_RELIC"].ID)
+    """The units a lane's setup frees of population: the Kings it pays with, the relics' monks,
+    with and without a relic, and the siege's trebuchets, packed and not, so those pads sell
+    whatever the lane's room."""
+    return (
+        stock("king"),
+        stock("monk"),
+        UnitInfo["MONK_WITH_RELIC"].ID,
+        stock("trebuchet"),
+        stock("packed-trebuchet"),
+    )
 
 
 def spawned_population(made: tuple[Spawned, ...]) -> int:

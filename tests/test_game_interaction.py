@@ -809,8 +809,8 @@ ALLOWED = [
         "PASTURE",
     )
 ] + [UnitInfo[name].ID for name in ("VILLAGER_MALE", "VILLAGER_FEMALE", "KING")]
-# Traders come from the shop alone, against the lane's population room.
-NOT_TRAINED = [UnitInfo[name].ID for name in ("TRADE_COG", "TRADE_CART_EMPTY")]
+# Markets and docks still train traders; DE itself refuses them at the population limit.
+TRAINED = [UnitInfo[name].ID for name in ("TRADE_COG", "TRADE_CART_EMPTY")]
 NOT_BUILT = [
     BuildingInfo[name].ID
     for name in (
@@ -847,7 +847,8 @@ def test_lane_setup_closes_ways_around_the_combat_areas(game_build: GameBuild, p
     toggles = effects(init, "enable_disable_object")
     disabled = {attr_int(e, "object_list_unit_id") for e in toggles if e["enabled"] == 0}
     assert all(e["source_player"] == player for e in toggles)
-    assert set(DISABLED + AGE_FORMS + NOT_BUILT + NOT_TRAINED) <= disabled
+    assert set(DISABLED + AGE_FORMS + NOT_BUILT) <= disabled
+    assert not set(TRAINED) & disabled
     assert not set(ALLOWED) & disabled
     techs = {
         attr_int(e, "technology")

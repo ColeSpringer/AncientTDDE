@@ -24,6 +24,7 @@ PLAYERS = range(1, 8)
 KING, VILLAGER, RELIC, MONK, CASTLE, MONASTERY = 434, 83, 285, 125, 82, 104
 FEMALE_VILLAGER, GOLD_MINE, STONE_MINE = 293, 66, 102
 MONK_WITH_RELIC, POPULATION = 286, 110
+TREBUCHET, TREBUCHET_PACKED = 42, 331
 HAY_STACK, SIGN, ACCURSED = 857, 819, 684
 TOWERS, BOMBARD = (79, 234, 235, 236), (236,)
 ATTACK, PIERCE, SET, ADD, SUBTRACT = 9, 3, 1, 2, 3
@@ -765,16 +766,22 @@ def test_the_status_line_switches_between_the_wait_and_the_wave(game_build: Game
 
 
 @pytest.mark.parametrize("player", PLAYERS)
-def test_kings_and_monks_take_no_population(game_build: GameBuild, player: int) -> None:
-    """The lane's setup sets the population cost of its Kings and monks to zero, so the shop's
-    currency and the relics' monks never hold a purchase back."""
+def test_kings_monks_and_trebuchets_take_no_population(game_build: GameBuild, player: int) -> None:
+    """The lane's setup sets the population cost of its Kings, monks and trebuchets to zero, so
+    the shop's currency, the relics' monks and the siege never hold a purchase back."""
     init = triggers_by_name(snapshot(game_build))[f"lane.p{player}.initialize"]
     freed = {
         e["object_list_unit_id"]: (e["operation"], e["quantity"])
         for e in effects(init, "modify_attribute")
         if e["object_attributes"] == POPULATION and e["source_player"] == player
     }
-    assert freed == {KING: (SET, 0), MONK: (SET, 0), MONK_WITH_RELIC: (SET, 0)}
+    assert freed == {
+        KING: (SET, 0),
+        MONK: (SET, 0),
+        MONK_WITH_RELIC: (SET, 0),
+        TREBUCHET: (SET, 0),
+        TREBUCHET_PACKED: (SET, 0),
+    }
     # Before the lane's room is set, so the Kings on the map never land on top of it.
     order = [
         (e["type"], e["attributes"].get("object_attributes"), e["attributes"].get("tribute_list"))
@@ -782,7 +789,7 @@ def test_kings_and_monks_take_no_population(game_build: GameBuild, player: int) 
     ]
     room = order.index(("modify_resource", None, 4))
     zeroed = [i for i, o in enumerate(order) if o == ("modify_attribute", POPULATION, None)]
-    assert len(zeroed) == 3 and max(zeroed) < room
+    assert len(zeroed) == 5 and max(zeroed) < room
 
 
 @pytest.mark.parametrize("player", PLAYERS)

@@ -17,6 +17,7 @@ from ancienttdde.game.balance import (
     rivalry,
     table_armor,
     tower_dps,
+    trader_kings,
     wave_needs,
 )
 from ancienttdde.game.catalog import Investment, Purchase, ResourceGrant, SiegePowerUp, TowerAttack
@@ -275,9 +276,16 @@ def income_section(inputs: Inputs, assumptions: Assumptions) -> str:
         ],
         ["Total", kings(income.total_kings), f"over {income.minutes:.1f} minutes"],
     ]
+    exchange = rates(inputs)
+    cost = exchange.cost_kings(inputs.stock.unit("TRADE_CART_EMPTY").cost)
+    cart = trader_kings("land", 1, inputs, assumptions, exchange)
+    cog = trader_kings("water", 1, inputs, assumptions, exchange)
     return (
         f"Kings one lane earns over the scheduled run on {level_name(inputs)} without buying "
-        "anything.\n\n" + table(["Source", "Kings", "Detail"], rows)
+        f"anything. A trade cart trained at the market costs {cost:.2f} Kings and a point of "
+        f"room and brings {cart:.1f} Kings over the run on the lane's route, a trade cog "
+        f"{cog:.1f}; the lane the waves are tuned against trains none.\n\n"
+        + table(["Source", "Kings", "Detail"], rows)
     )
 
 

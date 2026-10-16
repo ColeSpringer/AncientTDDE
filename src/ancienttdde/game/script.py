@@ -122,8 +122,6 @@ GLOBAL_VARIABLES = (
     "siege_left",
     "siege_cooldown",
     "siege_display",
-    # Population room held for the siege's trebuchets until they appear.
-    "siege_reserved",
 )
 # A lane's purchase, King and message fields are requests its native triggers acknowledge;
 # owned holds its once-only purchases as bits, kills the kill rewards already paid.
@@ -649,7 +647,7 @@ def render_prelude(
         "shopPrice": [0] + [p.kings for p in purchases],
         "shopMask": [0] + [p.mask for p in purchases],
         "shopRequires": [0] + [shop.get(p.requires).index if p.requires else 0 for p in purchases],
-        # The population each purchase's units take; the siege's is counted by rival.
+        # The population each purchase's units take; the siege's trebuchets take none.
         "shopPopulation": [0] + [taken[p.index] for p in purchases],
         "shopUpgrade": [0]
         + [TechInfo[p.effect.upgrade].ID if isinstance(p.effect, AgeUp) else 0 for p in purchases],

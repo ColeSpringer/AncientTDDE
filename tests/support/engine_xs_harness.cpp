@@ -214,11 +214,11 @@ int xsGetObjectCount(int player, int type) {
 }
 // EMBEDDED_XS
 void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n'; std::exit(1); } }
-// The units the shop sells each take one population; Kings and monks take none, as the
-// lane's setup makes them, and buildings and relics never did.
+// The units the shop sells each take one population; Kings, monks and trebuchets take none,
+// as the lane's setup makes them, and buildings and relics never did.
 int populationCost(int type) {
     switch (type) {
-        case 83: case 293: case 128: case 17: case 546: case 441: case 1103: case 529: case 42: case 331: return 1;
+        case 83: case 293: case 128: case 17: case 546: case 441: case 1103: case 529: return 1;
     }
     return 0;
 }
@@ -1965,18 +1965,26 @@ int main(int argc, char** argv) {
         start({3});
         buy(3, cBuyRelics);
         require(unitsOf(3, 125)==2 && resource(3, cAttributePopulationCap)==cStartingPopulation && resource(3, cAttributePopulation)==0, "Monks took population");
-    } else if(test=="siege_population") {
-        // The siege needs room for its trebuchets, two per surviving rival.
+    } else if(test=="siege_free") {
+        // The siege sells whatever the lane's room and population, like the relics' monks: its
+        // trebuchets take none, so nothing is held for them and nothing else is refused.
         competitive({1,3,7});
         int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
-        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets - 1;
+        attributes[1][cAttributePopulationCap] = 0;
+        attributes[1][cAttributePopulation] = cPopulationCap;
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<4;++n) tick(true);
-        require(bought[1].empty() && told(1, cMessagePopulation)==1 && kingsOnPad(1, cBuySiege)==price,
-                "The siege was sold without room for its trebuchets");
-        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets;
+        require(bought[1]==std::vector<int>{cBuySiege} && told(1, cMessagePopulation)==0 && told(1, cMessagePopulationLimit)==0,
+                "The siege was refused for population");
+        attributes[1][cAttributePopulationCap] = 2;
+        attributes[1][cAttributePopulation] = cPopulationCap - 2;
+        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
         for(int n=0;n<4;++n) tick(true);
-        require(bought[1]==std::vector<int>{cBuySiege}, "The siege was refused with room for its trebuchets");
+        require(bought[1]==std::vector<int>({cBuySiege, cBuyBuildingVillagers}) && resource(1, cAttributePopulationCap)==0
+                && resource(1, cAttributePopulation)==cPopulationCap, "Room was held for the siege");
+        for(int n=0;n<cSiegeWarning+2;++n) tick(true);
+        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, cTrebuchet)==2*cSiegeTrebuchets
+                && resource(1, cAttributePopulationCap)==0 && resource(1, cAttributePopulation)==cPopulationCap, "The trebuchets took population");
     } else if(test=="raider_population") {
         competitive({1,7});
         attributes[1][cAttributePopulationCap] = 0;
@@ -2012,38 +2020,6 @@ int main(int argc, char** argv) {
         tick();
         require(lane(1,fFallen)==1 && lane(7,fFallen)==0 && phase()!=sElimination && phase()!=sDefeat,
                 "The eliminated competitor was not marked fallen, or a survivor was");
-    } else if(test=="siege_reserved") {
-        // The siege holds its trebuchets' room through the warning: nothing else can take
-        // it, they take it as they appear, and the siege's end frees it.
-        competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
-        attributes[1][cAttributePopulationCap] = 2 * cSiegeTrebuchets;
-        kingsOn(1, cBuySiege, price);
-        for(int n=0;n<4;++n) tick(true);
-        require(bought[1]==std::vector<int>{cBuySiege} && resource(1, cAttributePopulationCap)==2*cSiegeTrebuchets
-                && xsTriggerVariable(vSiegeReserved)==2*cSiegeTrebuchets, "The siege did not hold its room, or took it early");
-        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
-        for(int n=0;n<4;++n) tick(true);
-        require(bought[1].size()==1 && told(1, cMessagePopulation)==1, "Held room was sold");
-        for(int n=0;n<cSiegeWarning+2;++n) tick(true);
-        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, cTrebuchet)==2*cSiegeTrebuchets
-                && resource(1, cAttributePopulationCap)==0 && resource(1, cAttributePopulation)==2*cSiegeTrebuchets, "The trebuchets did not take the held room");
-        for(int n=0;n<cSiegeActive+2;++n) tick(true);
-        // The siege's end frees the room, and the Kings still waiting on the villager pad buy.
-        require(unitsOf(1, cTrebuchet)==0 && bought[1]==std::vector<int>({cBuySiege, cBuyBuildingVillagers})
-                && resource(1, cAttributePopulationCap)==2*cSiegeTrebuchets-2 && resource(1, cAttributePopulation)==2, "The ended siege did not free its room");
-    } else if(test=="siege_reserved_cap") {
-        // The room held for the trebuchets counts against the limit too.
-        competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
-        attributes[1][cAttributePopulationCap] = 10;
-        attributes[1][cAttributePopulation] = cPopulationCap - 2 * cSiegeTrebuchets - 1;
-        kingsOn(1, cBuySiege, price);
-        for(int n=0;n<4;++n) tick(true);
-        require(bought[1]==std::vector<int>{cBuySiege}, "The siege within the limit was refused");
-        kingsOn(1, cBuyBuildingVillagers, shopPrice(cBuyBuildingVillagers));
-        for(int n=0;n<4;++n) tick(true);
-        require(bought[1].size()==1 && told(1, cMessagePopulationLimit)==1, "Units were sold past the limit over the held room");
     } else if(test=="population_limit_first") {
         // At the limit a purchase is refused for the limit, whatever the headroom says.
         start({1});

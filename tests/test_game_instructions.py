@@ -130,7 +130,11 @@ def test_instructions_explain_the_run_options_and_difficulty() -> None:
     )
     assert not re.search(r"[Cc]ompetitive games (always )?play (Easy|Normal|Hard)", text)
     assert "Set the lobby's Population to 200" in text
-    assert "Lanes cannot train traders, ships, monks or castle units" in text
+    assert (
+        "Markets train trade carts and docks trade cogs; lanes cannot train other ships, "
+        "monks or castle units" in text
+    )
+    assert "cannot train traders" not in text
     assert "Every 1500 gold on Easy, 2000 on Normal or 3000 on Hard" in text
     assert "Every 2000 gold you hold" not in text
 
@@ -261,10 +265,11 @@ def test_instructions_explain_what_villagers_build_and_where_population_comes_fr
         "markets, blacksmiths or universities" in text
     )
     assert (
-        "Bought villagers, traders, raiders and siege need population room: a lane starts with "
-        "room for 25 more, and only the shop's +65 population (again and again, up to the limit "
-        "of 200), the castle and the civilization profiles that add some below give more. "
-        "Houses cannot be built, and Kings and monks take none." in text
+        "Bought villagers, traders and raiders, and the traders markets and docks train, need "
+        "population room: a lane starts with room for 25 more, and only the shop's +65 "
+        "population (again and again, up to the limit of 200), the castle and the civilization "
+        "profiles that add some below give more. Houses cannot be built, and Kings, monks and "
+        "the siege's trebuchets take none." in text
     )
     assert "Every game rules out Yasama and Stronghold" in text
 

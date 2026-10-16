@@ -336,7 +336,8 @@ def test_prelude_declares_the_population_rule() -> None:
     from ancienttdde.game.script import GLOBAL_VARIABLES, LANE_VARIABLES
 
     assert f"const int fFallen = {LANE_VARIABLES.index('fallen')};" in text
-    assert f"const int vSiegeReserved = {GLOBAL_VARIABLES.index('siege_reserved')};" in text
+    # The siege holds no population room: its trebuchets take none.
+    assert "siege_reserved" not in GLOBAL_VARIABLES and "vSiegeReserved" not in text + runtime
     expected = {0: 0} | {p.index: 0 for p in shop.purchases}
     for key, taken in (
         ("building_villagers", 2),
@@ -582,13 +583,11 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "shop_population_limit",
         "population_repeat",
         "shop_relics_free",
-        "siege_population",
+        "siege_free",
         "raider_population",
         "grant_headroom",
         "fallen_after_result",
         "fallen_competitive",
-        "siege_reserved",
-        "siege_reserved_cap",
         "population_limit_first",
         "next_line_armor",
     ],

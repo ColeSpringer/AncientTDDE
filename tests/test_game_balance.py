@@ -305,6 +305,23 @@ def test_baseline_income_counts_every_source_of_kings() -> None:
     )
 
 
+def test_income_report_prices_a_trained_trader() -> None:
+    from ancienttdde.game.balance import Assumptions, rates, trader_kings
+    from ancienttdde.game.report import income_section
+
+    data = inputs()
+    exchange = rates(data)
+    text = income_section(data, Assumptions())
+    cost = exchange.cost_kings(data.stock.unit("TRADE_CART_EMPTY").cost)
+    cart = trader_kings("land", 1, data, Assumptions(), exchange)
+    cog = trader_kings("water", 1, data, Assumptions(), exchange)
+    assert (
+        f"A trade cart trained at the market costs {cost:.2f} Kings and a point of room and "
+        f"brings {cart:.1f} Kings over the run on the lane's route, a trade cog {cog:.1f}; the "
+        "lane the waves are tuned against trains none." in text
+    )
+
+
 def test_investments_report_their_payback_within_the_run() -> None:
     from ancienttdde.game.balance import investment_returns
 
@@ -373,7 +390,7 @@ def test_profile_values_score_solo_and_pvp_worth_in_kings() -> None:
 
 
 def test_rivalry_tables_scale_siege_and_raids_with_the_player_count() -> None:
-    from ancienttdde.game.balance import rivalry
+    from ancienttdde.game.balance import rates, rivalry
 
     rows = rivalry(inputs())
     assert [row.players for row in rows] == list(range(2, 8))
@@ -385,7 +402,12 @@ def test_rivalry_tables_scale_siege_and_raids_with_the_player_count() -> None:
     assert two.siege_damage_per_rival == pytest.approx(2 * 6 * (200 + 250 - 9))
     assert two.watch_towers_per_rival > 0 and two.rebuild_kings_per_rival > 0
     assert two.cart_seconds == pytest.approx(70 / (7 / 2))
-    assert two.cog_seconds > 0 and two.trader_replacement_kings == pytest.approx(1 / 3)
+    # A lost cart is retrained at the market for its stock cost, cheaper than the shop's third
+    # of a King.
+    cart = inputs().stock.unit("TRADE_CART_EMPTY")
+    market = rates(inputs()).cost_kings(cart.cost)
+    assert 0 < market < 1 / 3
+    assert two.cog_seconds > 0 and two.trader_replacement_kings == pytest.approx(market)
 
 
 def test_rivalry_names_a_missing_siege_or_trader_purchase(tmp_path: Path) -> None:
@@ -502,7 +524,7 @@ def test_flat_attack_is_worth_the_cheapest_rung_of_its_family() -> None:
     exchange = rates(data)
     fletching = data.stock.technology("FLETCHING")
     assert technology_kings("FLETCHING", data, exchange) == pytest.approx(
-        exchange.kings(**{r: float(a) for r, a in fletching.cost.items()})
+        exchange.cost_kings(fletching.cost)
         + fletching.towers.attack * four.kings / 4
         + fletching.towers.range * 0.25
     )
@@ -679,7 +701,8 @@ def test_a_starting_tower_is_worth_its_cost_and_its_base_damage() -> None:
     data = inputs()
     exchange = rates(data)
     watch = data.stock.unit("WATCH_TOWER")
-    cost = exchange.kings(**watch.cost)
+    cost = exchange.cost_kings(watch.cost)
+    assert cost == pytest.approx(125 / exchange.stone_per_king + 35 / exchange.wood_per_king)
     assert table_armor(data) == 2
     expected = cost + tower_dps(watch, 0, 2) * TOWER_DPS_KINGS
     assert tower_kings("WATCH_TOWER", data, exchange) == pytest.approx(expected)

@@ -77,7 +77,8 @@ class Assumptions:
     villager_stone_per_minute: int = 20
     # Towers a lane builds over a run, for pricing a stone discount.
     towers_per_run: int = 24
-    # PvP-only worth: a tower hit point against siege, a raider slot, and a point of population.
+    # A tower hit point against siege and a raider slot count with PvP on; a point of
+    # population room counts in every game, near the shop's price for one.
     tower_hit_point_kings: float = 0.0005
     raider_slot_kings: float = 0.5
     population_kings: float = 0.03
@@ -225,6 +226,10 @@ class Rates:
             + stone / self.stone_per_king
             + gold / self.gold_per_king
         )
+
+    def cost_kings(self, cost: Mapping[str, float]) -> float:
+        """What a unit's or technology's resource cost is worth."""
+        return self.kings(**cost)
 
 
 def rates(inputs: Inputs) -> Rates:
@@ -541,7 +546,7 @@ def technology_kings(name: str, inputs: Inputs, exchange: Rates) -> float:
     found = inputs.stock.technologies.get(name)
     if found is None:
         raise ValueError(f"{name} is not in the stock snapshot, so its worth is unknown")
-    saved = exchange.kings(**{resource: amount for resource, amount in found.cost.items()})
+    saved = exchange.cost_kings(found.cost)
     towers = found.towers
     return (
         saved
@@ -553,7 +558,9 @@ def technology_kings(name: str, inputs: Inputs, exchange: Rates) -> float:
 def tower_kings(name: str, inputs: Inputs, exchange: Rates) -> float:
     """What a tower standing from the start is worth: its cost and its base damage per second."""
     unit = inputs.stock.unit(name)
-    return exchange.kings(**unit.cost) + tower_dps(unit, 0, table_armor(inputs)) * TOWER_DPS_KINGS
+    return (
+        exchange.cost_kings(unit.cost) + tower_dps(unit, 0, table_armor(inputs)) * TOWER_DPS_KINGS
+    )
 
 
 def trader_kings(
@@ -667,6 +674,10 @@ def rivalry(inputs: Inputs) -> tuple[Rivalry, ...]:
     land, naval = raiders.kind("land").unit, raiders.kind("naval").unit
     shots = siege.active_seconds // int(trebuchet.reload)
     exchange = rates(inputs)
+    # A lost cart is retrained at the market for its stock cost, or bought from the shop when
+    # that is cheaper.
+    cart = stock.unit("TRADE_CART_EMPTY")
+    replacement = min(carts.kings / cart_spots, exchange.cost_kings(cart.cost))
     rows: list[Rivalry] = []
     for players in range(2, 8):
         rivals = players - 1
@@ -683,11 +694,10 @@ def rivalry(inputs: Inputs) -> tuple[Rivalry, ...]:
                 siege_damage_per_rival=keep_damage,
                 watch_towers_per_rival=watch_towers,
                 keeps_per_rival=keep_damage / keep.hit_points,
-                rebuild_kings_per_rival=watch_towers
-                * exchange.kings(**{r: float(a) for r, a in watch.cost.items()}),
-                cart_seconds=kill_seconds(stock.unit(land), stock.unit("TRADE_CART_EMPTY")),
+                rebuild_kings_per_rival=watch_towers * exchange.cost_kings(watch.cost),
+                cart_seconds=kill_seconds(stock.unit(land), cart),
                 cog_seconds=kill_seconds(stock.unit(naval), stock.unit("TRADE_COG")),
-                trader_replacement_kings=carts.kings / cart_spots,
+                trader_replacement_kings=replacement,
             )
         )
     return tuple(rows)
