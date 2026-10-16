@@ -59,16 +59,16 @@ def test_the_schedule_follows_the_originals_roster_and_cadence() -> None:
     bosses = waves[46:]
     assert all(w.enemies == 1 and w.duration == 1 for w in bosses)
     # Tiers 1-4 keep each unit's own pierce armor; from tier 5 the schedule adds a step per
-    # tier to it, 10-A the last tier's and the bosses the largest. The rams keep their own
-    # full armor.
-    steps = {5: 10, 6: 15, 7: 20, 8: 30, 9: 40}
+    # tier to it, a large one from tier 6, 10-A the last tier's and the bosses the largest.
+    # The rams keep their own full armor.
+    steps = {5: 10, 6: 115, 7: 120, 8: 140, 9: 170}
     for index, wave in enumerate(waves[:46]):
         step = steps.get(min(index // 5 + 1, 9))
         if wave.unit == "SIEGE_RAM" or step is None:
             assert wave.pierce_armor is None, wave.key
         else:
             assert wave.pierce_armor == stock().unit(wave.unit).armor(PIERCE) + step, wave.key
-    assert all(w.pierce_armor == stock().unit(w.unit).armor(PIERCE) + 50 for w in bosses)
+    assert all(w.pierce_armor == stock().unit(w.unit).armor(PIERCE) + 180 for w in bosses)
     assert len({w.unit for w in bosses}) == 10 and not {w.unit for w in bosses} & set(units)
 
 
@@ -223,7 +223,6 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("endless", "templates"), ["Knights", "Dragons"], "Dragons"),
         (("endless", "templates"), [], "templates"),
         (("endless", "templates"), ["Villagers", "Villagers"], "twice"),
-        (("endless", "hit_point_growth_percent"), 0, "hit_point_growth_percent"),
         (("endless", "armor_step"), -1, "armor_step"),
         (("interaction", "raiders", "land", "unit"), "ARCHER", "ARCHER"),
         (("interaction", "raiders", "naval", "unit"), "GALLEY", "GALLEY"),
@@ -367,8 +366,8 @@ def test_difficulty_scales_wave_hit_points_within_the_engine_limit() -> None:
     )
 
 
-def test_endless_waves_repeat_the_last_tier_and_grow_until_the_limit() -> None:
-    from ancienttdde.game.config import MAX_HIT_POINTS, load_balance
+def test_endless_waves_repeat_the_last_tier() -> None:
+    from ancienttdde.game.config import load_balance
 
     balance = load_balance(ROOT / "content/balance/game.json")
     endless = balance.endless
@@ -379,17 +378,7 @@ def test_endless_waves_repeat_the_last_tier_and_grow_until_the_limit() -> None:
         "Lancelot",
         "Henry V",
     ]
-    assert (endless.growth_percent, endless.armor_step) == (50, 25)
-    levels = balance.endless_levels
-    assert 1 <= levels <= 10
-    for difficulty in range(3):
-        for position, template in enumerate(endless.templates):
-            grown = [
-                balance.endless_hit_points(level, position, difficulty)
-                for level in range(1, levels + 1)
-            ]
-            assert grown == sorted(grown) and grown[-1] == MAX_HIT_POINTS
-            assert grown[0] > balance.hit_points(template, difficulty) or grown[0] == MAX_HIT_POINTS
+    assert endless.armor_step == 25
 
 
 def test_raiders_are_melee_or_short_range_and_capped() -> None:
@@ -421,21 +410,6 @@ def test_raider_kinds_reject_unknown_media() -> None:
     for medium in ("Land", "air"):
         with pytest.raises(ValueError, match=medium):
             raiders.kind(cast(RaiderMedium, medium))
-
-
-def test_endless_levels_are_worked_out_once(monkeypatch: pytest.MonkeyPatch) -> None:
-    from ancienttdde.game.config import Balance, load_balance
-
-    balance = load_balance(ROOT / "content/balance/game.json")
-    calls: list[int] = []
-    grow = Balance.endless_hit_points
-
-    def counted(self: Balance, level: int, position: int, difficulty: int) -> int:
-        calls.append(level)
-        return grow(self, level, position, difficulty)
-
-    monkeypatch.setattr(Balance, "endless_hit_points", counted)
-    assert balance.endless_levels >= 1 and not calls
 
 
 def test_siege_warns_holds_and_cools_down_for_its_configured_times() -> None:

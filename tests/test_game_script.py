@@ -579,7 +579,7 @@ def test_raider_table_gives_listed_civilizations_their_own_counts() -> None:
         "results_defeat",
         "sudden_survivor",
         "endless_continues",
-        "endless_growth",
+        "endless_waves",
         "endless_configures",
         "endless_armor_past_255",
         "endless_result",

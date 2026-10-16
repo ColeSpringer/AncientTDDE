@@ -1,6 +1,5 @@
 """Messages the engine sends one lane's player, by code, through that lane's native triggers."""
 
-from ancienttdde.game.catalog import Shop, population_name
 from ancienttdde.game.config import Balance
 
 # In code order; the XS requests a message by setting the lane's message field to its code.
@@ -8,10 +7,7 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("owned", "That purchase is already yours; move your Kings off its pad."),
     ("requires", "That purchase needs another one first; its sign names it."),
     ("relics", "Monks must collect the last relics before more can be bought."),
-    (
-        "monasteries",
-        "Your monasteries have no room for another relic purchase; your Kings stay.",
-    ),
+    ("monasteries", "Your monasteries have no room for another relic purchase."),
     ("civilization", "Your civilization lacks the towers that purchase improves."),
     ("no_room", "No room for the purchase to appear; move units off its arrival spots."),
     ("gold", "Gold converted into Kings; they arrive at your stall."),
@@ -21,12 +17,9 @@ MESSAGES: tuple[tuple[str, str], ...] = (
         "Raiders and siege are sold only with PvP on, from the first wave of a competitive game.",
     ),
     ("no_rival", "No rival survives to raid or besiege."),
-    ("raider_cap", "You already keep as many raiders of that kind as you may; your Kings stay."),
-    ("siege_held", "Another player holds the siege power-up; your Kings stay."),
-    (
-        "siege_cooldown",
-        "The siege power-up is cooling down, longer for its last buyer; your Kings stay.",
-    ),
+    ("raider_cap", "You already keep as many raiders of that kind as you may."),
+    ("siege_held", "Another player holds the siege power-up."),
+    ("siege_cooldown", "The siege power-up is cooling down, longer for its last buyer."),
     ("chooser_only", "Only the first human lane chooses the run options."),
     (
         "options_fixed",
@@ -36,7 +29,7 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("needs_rivals", "PvP needs rivals: it applies only to competitive games."),
     ("practice_only", "Practice controls work only in Practice runs."),
     ("practice_wave", "Practice: the next wave can start once the current one ends."),
-    ("siege_yours", "You hold the siege power-up already; your Kings stay."),
+    ("siege_yours", "You hold the siege power-up already."),
     (
         "economy_tower",
         "Towers belong in your build rows: one built in your resource area was removed.",
@@ -44,18 +37,9 @@ MESSAGES: tuple[tuple[str, str], ...] = (
     ("boss_three_quarters", "Your boss has three quarters of its hit points left."),
     ("boss_half", "Your boss has half of its hit points left."),
     ("boss_quarter", "Your boss has a quarter of its hit points left."),
-    (
-        "population",
-        "No population room for that purchase: {population} adds some. Your Kings stay.",
-    ),
-    (
-        "population_limit",
-        "That purchase would take your lane past its population limit of {cap}; your Kings stay.",
-    ),
-    (
-        "population_full",
-        "Your lane's room already reaches its population limit of {cap}; your Kings stay.",
-    ),
+    ("population", "No population room for that purchase."),
+    ("population_limit", "That purchase would take your lane past its population limit of {cap}."),
+    ("population_full", "Your lane's room already reaches its population limit of {cap}."),
 )
 
 
@@ -63,11 +47,10 @@ def message_code(key: str) -> int:
     return [name for name, _ in MESSAGES].index(key) + 1
 
 
-def message_texts(balance: Balance, shop: Shop) -> dict[str, str]:
+def message_texts(balance: Balance) -> dict[str, str]:
     economy = balance.economy
     values = {
         "kills": economy.kills_per_reward * economy.rewards_per_king,
-        "population": population_name(shop),
         "cap": balance.population_cap,
     }
     return {key: text.format(**values) for key, text in MESSAGES}

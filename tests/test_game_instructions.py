@@ -172,7 +172,7 @@ def test_instructions_explain_endless_practice_and_sudden_death() -> None:
         "Elite Conquistadors, Attila the Hun, Master of the Templar, Lancelot and Henry V repeat"
         in text
     )
-    assert "50% more hit points each round" in text and "+25 pierce armor" in text
+    assert "repeat in turn at 32767 hit points" in text and "+25 pierce armor" in text
     assert "5 more Kings" in text and "5000 more of each resource" in text
     assert "assisted" in text
     assert "every 30 game seconds" in text and "the waves keep growing" in text
@@ -258,7 +258,7 @@ def test_civilizations_are_listed_alphabetically_with_the_default_last() -> None
 def test_the_kill_king_message_counts_wave_kills() -> None:
     from ancienttdde.game.messages import message_texts
 
-    text = message_texts(balance(), shop())["kill_king"]
+    text = message_texts(balance())["kill_king"]
     assert text == "Kill reward: every 100 wave kills earn a King; one arrives at your stall."
 
 

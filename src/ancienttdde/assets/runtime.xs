@@ -384,13 +384,6 @@ int ancientTemplate(int wave = 0) {
     return (endlessTemplate((wave - cWaveCount) % cEndlessTemplates));
 }
 
-// Endless enemies grow each time the templates come round again, up to the last level.
-int ancientEndlessLevel(int endless = 0) {
-    int level = endless / cEndlessTemplates + 1;
-    if (level > cEndlessLevels) level = cEndlessLevels;
-    return (level);
-}
-
 // Every endless wave adds pierce armor, until the next step would pass the limit.
 int ancientEndlessArmor(int endless = 0) {
     if (cArmorStep <= 0) return (0);
@@ -399,17 +392,12 @@ int ancientEndlessArmor(int endless = 0) {
     return (steps * cArmorStep);
 }
 
-// The hit points an endless template's enemies carry at a growth level.
-int ancientEndlessHitPoints(int position = 0, int level = 1) {
-    return (endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates + position) * cEndlessLevels + level - 1));
-}
-
 // The hit points a wave's enemies carry: a boss's can exceed the attribute's limit, which the
-// wave's configuration applied, so the rest is set on the unit itself.
+// wave's configuration applied, so the rest is set on the unit itself; endless enemies carry
+// the most the attribute holds.
 int ancientWaveHitPoints(int wave = 0) {
     if (wave < cWaveCount) return (waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + wave));
-    int endless = wave - cWaveCount;
-    return (ancientEndlessHitPoints(endless % cEndlessTemplates, ancientEndlessLevel(endless)));
+    return (cHitPointCap);
 }
 
 // The enemies a wave brings: their number and kind, or the boss's name.
@@ -419,13 +407,16 @@ string ancientWaveEnemies(int wave = 0) {
     return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern));
 }
 
-// The enemies with their hit points and the armor the schedule gives them, or past the
-// finale the armor added.
+// The enemies with their hit points and the armor the schedule gives them; past the finale
+// the armor added is counted in, or shown alone for a template with no armor of its own.
 string ancientWaveText(int wave = 0) {
     int pattern = ancientTemplate(wave);
     string armor = "";
-    if (wave >= cWaveCount) armor = ", +" + ancientText(ancientEndlessArmor(wave - cWaveCount)) + " pierce armor";
-    else if (wavePierceArmor(pattern) >= 0) armor = ", " + ancientText(wavePierceArmor(pattern)) + " pierce armor";
+    if (wave >= cWaveCount) {
+        int added = ancientEndlessArmor(wave - cWaveCount);
+        if (wavePierceArmor(pattern) >= 0) armor = ", " + ancientText(wavePierceArmor(pattern) + added) + " pierce armor";
+        else armor = ", +" + ancientText(added) + " pierce armor";
+    } else if (wavePierceArmor(pattern) >= 0) armor = ", " + ancientText(wavePierceArmor(pattern)) + " pierce armor";
     if (waveBoss(pattern) == 1) return (ancientWaveEnemies(wave) + ", a boss with " + ancientText(ancientWaveHitPoints(wave)) + " HP" + armor);
     return (ancientWaveEnemies(wave) + ", " + ancientText(ancientWaveHitPoints(wave)) + " HP each" + armor);
 }
@@ -466,15 +457,13 @@ void ancientConfigureWave(int wave = 0) {
     if (armor >= 0) ancientSetEnemyAttribute(waveUnit(pattern), cArmor, 256 * cPierceClass + armor);
 }
 
-// Each new round of the templates sets the endless enemies' hit points for its level, and every
-// endless wave adds an armor step, past the 255 a native effect stops at.
+// The first endless wave gives every template's enemies the most hit points the attribute
+// holds, and every endless wave adds an armor step, past the 255 a native effect stops at.
 void ancientConfigureEndless(int wave = 0) {
     int endless = wave - cWaveCount;
-    int level = ancientEndlessLevel(endless);
-    if (level > xsTriggerVariable(vEndlessLevel)) {
-        xsSetTriggerVariable(vEndlessLevel, level);
+    if (endless == 0) {
         for (position = 0; < cEndlessTemplates) {
-            ancientSetEnemyAttribute(waveUnit(endlessTemplate(position)), cHitpoints, ancientEndlessHitPoints(position, level));
+            ancientSetEnemyAttribute(waveUnit(endlessTemplate(position)), cHitpoints, cHitPointCap);
         }
     }
     int armor = xsTriggerVariable(vArmor);

@@ -45,7 +45,7 @@ def lane_actions(
     lane_status(game, lane, balance)
     lane_kings(game, lane)
     lane_transfers(game, lane)
-    lane_messages(game, lane, balance, shop)
+    lane_messages(game, lane, balance)
     lane_bonuses(game, lane, balance)
     lane_purchases(game, lane, shop, balance)
     lane_controls(game, player)

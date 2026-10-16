@@ -601,33 +601,30 @@ int main(int argc, char** argv) {
         require(spawns[4] > 0 && created[enemy()][waveUnit(second)] > 0, "Endless waves did not spawn their template");
         require(first != second, "Endless waves did not move through their templates");
         require(waveTimers >= 2, "Endless waves were not counted down");
-    } else if(test=="endless_growth") {
-        // Each round of the templates sets every template enemy's grown hit points on the
-        // enemy's definition once, as its first wave starts; every endless wave adds an armor step.
+    } else if(test=="endless_waves") {
+        // The first endless wave sets every template enemy's hit points to the attribute's limit
+        // on the enemy's definition, once; every endless wave adds an armor step, and the notice
+        // before it names the hit points and the total armor.
         start({4});
         select(4, cControlEndless); tick();
         reachWave(cWaveCount - 1);
         size_t mark = applied.size();
         reachWave(cWaveCount);
-        int difficulty = xsTriggerVariable(vDifficulty);
-        auto grown = [&](int level, int t) { return float(endlessHitPoints((difficulty * cEndlessTemplates + t) * cEndlessLevels + level - 1)); };
         for(int t=0;t<cEndlessTemplates;++t) {
-            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark)==std::vector<float>{grown(1, t)}, "The first endless wave did not set each template's hit points once");
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark)==std::vector<float>{float(cHitPointCap)}, "The first endless wave did not set each template's hit points to the limit once");
             require(armorAdded(waveUnit(endlessTemplate(t)))==cArmorStep, "The first endless wave did not add one armor step");
         }
-        mark = applied.size();
-        reachWave(cWaveCount + cEndlessTemplates - 1);
-        for(int t=0;t<cEndlessTemplates;++t)
-            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark).empty(), "A wave within a round of templates set hit points again");
+        require(mentions(ancientText(cHitPointCap) + " HP each")>=1, "The endless hit points were not announced");
+        int scheduled = wavePierceArmor(endlessTemplate(0));
+        require(scheduled>=0, "The case needs a first template with armor of its own");
+        require(mentions(ancientText(scheduled + cArmorStep) + " pierce armor")>=1, "The endless notice did not name the total armor");
         mark = applied.size();
         reachWave(cWaveCount + cEndlessTemplates);
         for(int t=0;t<cEndlessTemplates;++t) {
-            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark)==std::vector<float>{grown(2, t)}, "A new round of templates did not grow");
+            require(hitpointsSet(enemy(), waveUnit(endlessTemplate(t)), mark).empty(), "A later endless wave set hit points again");
             require(armorAdded(waveUnit(endlessTemplate(t)))==(cEndlessTemplates + 1) * cArmorStep, "Armor did not rise every wave");
         }
         require(xsTriggerVariable(vArmor)==(cEndlessTemplates + 1) * cArmorStep, "Armor total was not kept");
-        int hitpoints = endlessHitPoints((xsTriggerVariable(vDifficulty) * cEndlessTemplates) * cEndlessLevels + 1);
-        require(mentions(ancientText(hitpoints) + " HP each")>=1, "The grown hit points were not announced");
     } else if(test=="endless_armor_past_255") {
         // Endless armor keeps rising past the 255 a native effect stops at, on the enemy alone.
         start({4});
@@ -678,7 +675,7 @@ int main(int argc, char** argv) {
         resetXsBuffers();
         for(int n=0;n<400;++n) tick(true);
         require(variables==expected && spawns==expectedSpawns, "Reload changed endless progress or spawns");
-        require(applied==expectedApplied && !applied.empty(), "Reload repeated or lost endless growth");
+        require(applied==expectedApplied && !applied.empty(), "Reload repeated or lost the endless hit points");
     } else if(test=="resume") {
         start({2,7});
         setLane(2, fOwned, own({cBuyGold1000, cBuyKingEveryMinute, cBuyAttack1Every5}));
@@ -1922,7 +1919,7 @@ int main(int argc, char** argv) {
         require(hitpointsSet(enemy(), waveUnit(cWaveCount - 1)).back()==float(cHitPointCap), "A boss's definition was not capped at the attribute's limit");
     } else if(test=="shop_population") {
         // Bought villagers need population room: once a lane's starting room is used up, the
-        // refusal keeps the Kings and says what adds some; room for one is not room for two.
+        // refusal keeps the Kings; room for one is not room for two.
         start({1});
         attributes[1][cAttributePopulationCap] = 0;
         int price = shopPrice(cBuyBuildingVillagers);

@@ -90,8 +90,9 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   waves 2–5 press a little harder than the villagers, the rams keep their full armor, the
   bosses fall only to a strong attack ladder and grow through the finale, and Hard is
   clearly above Normal (the Pressure table in `docs/balance.md` shows the model for each
-  level). The notice before a wave names the pierce armor the schedule gives it. On
-  Hardest, record which of waves 2–15 leak and how many lives each costs.
+  level). The notice before a wave names the pierce armor the schedule gives it, and a
+  selected Hrolf the Ganger shows 119 pierce armor, not a negative number. On Hardest,
+  record which of waves 2–15 and 26–56 leak and how many lives each costs.
 - A boss is refilled from its total once a second, so a lane dealing more than 32,767 in one
   second kills it with the total unspent; record a boss that falls within a second or two of
   reaching the towers.
@@ -224,8 +225,9 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   again after selecting something else; the Practice objective appears and the result says
   the run was assisted.
 - The Endless, sudden death, siege and result objectives stay hidden until they apply.
-- Endless continues past the finale with the announced hit points and armor (the armor keeps
-  rising past +255), counts down each wave, and ends with a result when the lane falls.
+- Endless continues past the finale with 32767 hit points and the announced total armor
+  (it keeps rising past 255), counts down each wave, and ends with a result when the lane
+  falls.
 - Sudden death keeps the waves coming for every survivor, announced as sudden death waves,
   and costs lives every 30 seconds.
 - Competitive games start with PvP off and say so; PvP on, the only PvP option, makes the

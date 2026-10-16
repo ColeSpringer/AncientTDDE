@@ -183,7 +183,8 @@ def pressure_section(inputs: Inputs, assumptions: Assumptions) -> str:
         f"it has, the tower attack {assumptions.attack_share * 100:.0f} percent of them buy and "
         "the attack investments it has bought, its Watch Towers and, from minute "
         f"{assumptions.accursed_from_minute:g}, both Accursed Towers. Pressure is the damage per "
-        "second the wave needs over what those towers deal; above 1 the wave leaks. The last "
+        "second the wave needs over what those towers deal: above 1 that lane leaks, and from "
+        "tier 6 the schedule runs past it, a played lane having outgrown it by then. The last "
         f"columns are the pressure on {names}, with their own King price and hit points.\n\n"
         + table(
             [

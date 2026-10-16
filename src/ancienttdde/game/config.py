@@ -1,7 +1,6 @@
 """Validate the finite wave schedule at the JSON input boundary."""
 
 from dataclasses import dataclass
-from functools import cached_property
 from pathlib import Path
 from typing import cast
 
@@ -104,9 +103,6 @@ LOBBY_DIFFICULTIES = {
     "easiest": 4,
 }
 DIFFICULTY_LEVELS = ("easy", "normal", "hard")
-# Endless waves stop growing once every one has reached the hit point limit; the hit point
-# table holds a row per level and difficulty, and more levels than this would add little.
-MAX_ENDLESS_LEVELS = 30
 # Raiders cannot reach across a one-tile wall: land raiders fight in melee, naval raiders at
 # the fire ships' short range.
 RAIDERS: dict[RaiderMedium, frozenset[str]] = {
@@ -218,8 +214,6 @@ class Difficulty:
 class Endless:
     # Positions in the wave schedule that endless waves repeat in turn.
     templates: tuple[int, ...]
-    # Hit points grow by this percentage each time the templates repeat.
-    growth_percent: int
     # Pierce armor every endless wave adds to the template enemies.
     armor_step: int
 
@@ -314,24 +308,6 @@ class Balance:
         percent = self.difficulty.levels[difficulty].hit_points_percent
         limit = BOSS_HIT_POINTS if self.waves[wave].boss else MAX_HIT_POINTS
         return min(limit, (self.waves[wave].hit_points * percent + 50) // 100)
-
-    def endless_hit_points(self, level: int, position: int, difficulty: int) -> int:
-        """Hit points of an endless template's enemies after `level` rounds of growth."""
-        base = self.hit_points(self.endless.templates[position], difficulty)
-        growth = 100 + self.endless.growth_percent
-        return min(MAX_HIT_POINTS, base * growth**level // 100**level)
-
-    @cached_property
-    def endless_levels(self) -> int:
-        """Growth levels until every endless enemy has reached the limit at every difficulty."""
-        level = 1
-        while any(
-            self.endless_hit_points(level, position, difficulty) < MAX_HIT_POINTS
-            for position in range(len(self.endless.templates))
-            for difficulty in range(len(self.difficulty.levels))
-        ):
-            level += 1
-        return level
 
 
 def tower(name: object) -> str:
@@ -453,7 +429,6 @@ def load_endless(raw: dict[str, object], waves: tuple[WaveDefinition, ...]) -> E
         templates.append(keys.index(name))
     return Endless(
         templates=tuple(templates),
-        growth_percent=integer(raw, "hit_point_growth_percent", 10, 200),
         armor_step=integer(raw, "armor_step", 0, 1000),
     )
 
@@ -559,8 +534,6 @@ def load_balance(path: Path) -> Balance:
         towers=load_towers(object_value(raw.get("towers"), "towers")),
         waves=tuple(waves),
     )
-    if balance.endless_levels > MAX_ENDLESS_LEVELS:
-        raise ValueError("hit_point_growth_percent is too small for the endless wave levels")
     # A regular wave's hit points must fit the attribute on every level, or the highest
     # level plays the same wave as the one below it.
     for wave in balance.waves:

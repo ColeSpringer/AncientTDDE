@@ -1,4 +1,4 @@
-"""The built game's run options, difficulty, endless growth, PvP, siege and restrictions."""
+"""The built game's run options, difficulty, endless armor, PvP, siege and restrictions."""
 
 import json
 import math

@@ -109,12 +109,11 @@ GLOBAL_VARIABLES = (
     "assists",
     # Waves cleared, for the result.
     "cleared",
-    # After the schedule: the stage, the endless growth level applied, the pierce armor added,
-    # and seconds until sudden death next costs lives. wave_display asks the native triggers to
-    # count down to the next endless wave (1), to clear the countdown when a wave starts (2),
-    # to count down the choice window (3) or to count down to the first wave (4).
+    # After the schedule: the stage, the pierce armor added, and seconds until sudden death
+    # next costs lives. wave_display asks the native triggers to count down to the next
+    # endless wave (1), to clear the countdown when a wave starts (2), to count down the
+    # choice window (3) or to count down to the first wave (4).
     "stage",
-    "endless_level",
     "armor",
     "drain",
     "wave_display",
@@ -516,7 +515,6 @@ def render_prelude(
         cPracticeKings=balance.practice.kings,
         cPracticeResources=balance.practice.resources,
         cEndlessTemplates=len(balance.endless.templates),
-        cEndlessLevels=balance.endless_levels,
         cArmorStep=balance.endless.armor_step,
         cArmorLimit=ARMOR_LIMIT,
         cRaiderLineSize=line_size,
@@ -610,13 +608,6 @@ def render_prelude(
         "endlessUnit": list(
             dict.fromkeys(balance.waves[t].object_id for t in balance.endless.templates)
         ),
-        # Indexed by (level * cEndlessTemplates + template) * cEndlessLevels + growth - 1.
-        "endlessHitPoints": [
-            balance.endless_hit_points(growth, position, level)
-            for level in range(len(difficulty.levels))
-            for position in range(len(balance.endless.templates))
-            for growth in range(1, balance.endless_levels + 1)
-        ],
         "laneSpawnX": [0] + [lane.spawn_x for lane in lanes],
         "laneExitX": [0] + [lane.exit_x for lane in lanes],
         "laneY": [0] + [lane.center_y for lane in lanes],

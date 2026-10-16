@@ -309,7 +309,6 @@ def test_resource_bonuses_pay_once_and_open_endless_deposits(
 
 @pytest.mark.parametrize("player", PLAYERS)
 def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: int) -> None:
-    from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance
     from ancienttdde.game.messages import MESSAGES, message_code, message_texts
 
@@ -317,20 +316,16 @@ def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: i
     triggers = triggers_by_name(data)
     variables = variables_by_name(data)
     balance = load_balance(ROOT / "content/balance/game.json")
-    families = [name for name, _ in balance.towers.families]
-    shop = load_shop(ROOT / "content/balance/shop.json", anchors(game_build), families)
-    texts = message_texts(balance, shop)
+    texts = message_texts(balance)
     # The gold per King depends on the difficulty, which the game announces when it starts.
     assert texts["gold"] == "Gold converted into Kings; they arrive at your stall."
-    # The population refusal names the purchase that adds room, as the shop sells it.
-    assert texts["population"] == (
-        "No population room for that purchase: +65 population adds some. Your Kings stay."
-    )
+    # The population refusal names no purchase: the instructions say what adds room.
+    assert texts["population"] == "No population room for that purchase."
     assert texts["population_limit"] == (
-        "That purchase would take your lane past its population limit of 200; your Kings stay."
+        "That purchase would take your lane past its population limit of 200."
     )
     assert texts["population_full"] == (
-        "Your lane's room already reaches its population limit of 200; your Kings stay."
+        "Your lane's room already reaches its population limit of 200."
     )
     # The objectives show only the shared siege cooldown; the last buyer waits longer.
     assert "longer for its last buyer" in texts["siege_cooldown"]
