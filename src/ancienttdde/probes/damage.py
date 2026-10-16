@@ -21,9 +21,9 @@ TOWERS = (
 ACCURSED_PIERCE = 232
 # Enemies at the scheduled waves' Normal hit points: Militia, Knights and War Elephants.
 ENEMIES = (
-    ("militia", "militia", 110),
+    ("militia", "militia", 100),
     ("knight", "knight", 3200),
-    ("elephant", "war-elephant", 600),
+    ("elephant", "war-elephant", 550),
 )
 MILITIA, KNIGHT, ELEPHANT = (hit_points for _, _, hit_points in ENEMIES)
 ATTACK_BONUS = 100

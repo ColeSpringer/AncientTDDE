@@ -206,6 +206,12 @@ BANDS = (
     (41, 46, 1.0, 1.3),
     (47, 56, 1.05, 1.45),
 )
+# Ceilings on Hard for the first two tiers, from playtests on Hardest: a lane with few Kings
+# is pressed, not smothered.
+HARD_CEILINGS = (
+    (2, 5, 0.75),
+    (6, 10, 1.15),
+)
 
 
 def test_each_wave_presses_the_expected_lane_within_its_tiers_band() -> None:
@@ -236,7 +242,8 @@ def test_each_tier_opens_harder_than_the_last_one_ended() -> None:
 def test_hard_presses_harder_than_normal_on_every_wave() -> None:
     """Hard has dearer Kings and more hit points: every wave presses at least a tenth harder
     than on Normal and no more than a strong lane can hold, the opening stays an opening,
-    and the bosses need more than the expected lane has."""
+    the first two tiers stay under their playtested ceilings, and the bosses need more than
+    the expected lane has."""
     from ancienttdde.game.balance import Assumptions, lane_pressure
 
     data = inputs()
@@ -244,6 +251,9 @@ def test_hard_presses_harder_than_normal_on_every_wave() -> None:
     hard = lane_pressure(data, Assumptions(), data.balance.difficulty.index("hard"))
     assert all(h.ratio >= 1.1 * n.ratio for h, n in zip(hard, normal, strict=True))
     assert hard[0].ratio <= 0.45
+    for first, last, high in HARD_CEILINGS:
+        for wave in hard[first - 1 : last]:
+            assert wave.ratio <= high, (wave.key, wave.ratio)
     assert all(wave.ratio <= 1.4 for wave in hard[:46])
     assert all(1.0 < wave.ratio <= 1.5 for wave in hard[46:])
 

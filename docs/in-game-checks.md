@@ -90,7 +90,8 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   waves 2–5 press a little harder than the villagers, the rams keep their full armor, the
   bosses fall only to a strong attack ladder and grow through the finale, and Hard is
   clearly above Normal (the Pressure table in `docs/balance.md` shows the model for each
-  level). The notice before a wave names the pierce armor the schedule gives it.
+  level). The notice before a wave names the pierce armor the schedule gives it. On
+  Hardest, record which of waves 2–15 leak and how many lives each costs.
 - A boss is refilled from its total once a second, so a lane dealing more than 32,767 in one
   second kills it with the total unspent; record a boss that falls within a second or two of
   reaching the towers.
