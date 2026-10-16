@@ -1677,17 +1677,17 @@ int main(int argc, char** argv) {
                 "The other grants did not go through");
     } else if(test=="siege_price") {
         competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price - 1);
         for(int n=0;n<4;++n) tick(true);
         require(bought[1].empty() && xsTriggerVariable(vSiegeOwner)==0, "Siege sold below its price");
         kingsOn(1, cBuySiege, 1);
         for(int n=0;n<4;++n) tick(true);
         require(bought[1]==std::vector<int>{cBuySiege} && kingsOnPad(1, cBuySiege)==0 && xsTriggerVariable(vSiegeOwner)==1,
-                "Siege did not cost its base price plus each surviving rival's share");
+                "Siege did not sell at its price");
     } else if(test=="siege_exclusive") {
         competitive({1,7});
-        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         kingsOn(7, cBuySiege, price);
         for(int n=0;n<4;++n) tick(true);
@@ -1696,15 +1696,16 @@ int main(int argc, char** argv) {
         require(kingsOnPad(loser, cBuySiege)==price && told(loser, cMessageSiegeHeld)==1, "The competing purchase lost its Kings");
     } else if(test=="siege_timeline") {
         competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<3;++n) tick(true);
         require(xsTriggerVariable(vSiegeOwner)==1 && xsTriggerVariable(vSiegePhase)==1, "The siege warning did not start");
         for(int n=0;n<cSiegeWarning;++n) tick(true);
-        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, 42)==2 * cSiegeTrebuchets, "Trebuchets did not arrive near every rival");
+        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, 42)==cSiegeRows * cSiegeTrebuchets, "Trebuchets did not arrive on every islet row");
         for(auto &[id, u] : units) if(u.owner==1 && u.type==42) {
-            bool near3 = std::abs(u.pos[1] - siegeY10(3 * 3) / 10.0f) < 0.6f, near7 = std::abs(u.pos[1] - siegeY10(7 * 3) / 10.0f) < 0.6f;
-            require(near3 || near7, "A trebuchet was placed away from the rivals' islets");
+            bool onRow = false;
+            for(int row=1;row<=cSiegeRows;++row) if(std::abs(u.pos[1] - siegeY10(row * cSiegeSlots) / 10.0f) < 0.6f) onRow = true;
+            require(onRow, "A trebuchet was placed away from the islet rows");
         }
         for(auto &[id, u] : units) if(u.owner==1 && u.type==42) { u.type=331; break; }
         for(int n=0;n<cSiegeActive;++n) tick(true);
@@ -1718,7 +1719,7 @@ int main(int argc, char** argv) {
         require(bought[7]==std::vector<int>{cBuySiege}, "Another player could not buy after the shared cooldown");
     } else if(test=="siege_buyer_waits") {
         competitive({1,7});
-        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<4+cSiegeWarning+cSiegeActive+cSiegeSharedCooldown;++n) tick(true);
         require(xsTriggerVariable(vSiegeCooldown)==0 && lane(1, fSiegeCooldown)>0, "The buyer's cooldown is not longer");
@@ -1727,7 +1728,7 @@ int main(int argc, char** argv) {
         require(bought[1].size()==1 && kingsOnPad(1, cBuySiege)==price, "The buyer skipped its own cooldown");
     } else if(test=="siege_owner_eliminated") {
         competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<3;++n) tick(true);
         setLane(1, fLives, 0);
@@ -1736,7 +1737,7 @@ int main(int argc, char** argv) {
         require(xsTriggerVariable(vSiegeCooldown)>0, "Ending the siege did not start the cooldown");
     } else if(test=="siege_resume") {
         competitive({1,7});
-        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<3+cSiegeWarning+5;++n) tick(true);
         auto saved=variables; auto savedUnits=units; auto savedBought=bought;
@@ -1750,7 +1751,7 @@ int main(int argc, char** argv) {
         // Claims made in the same second go to the lane the rotating order reaches first,
         // never always to the lower slot.
         competitive({1,7});
-        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         // The purchase lands on the third clock after the Kings arrive; make that clock put P7 first.
         auto before=[](int clock){
             for(int turn=0;turn<7;++turn) {
@@ -1776,7 +1777,7 @@ int main(int argc, char** argv) {
                 "Wave kills did not pay their killer alone");
     } else if(test=="siege_holder_again") {
         competitive({1,7});
-        int price = shopPrice(cBuySiege) + cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         kingsOn(1, cBuySiege, price);
         for(int n=0;n<4;++n) tick(true);
         require(xsTriggerVariable(vSiegeOwner)==1, "The siege was not bought");
@@ -1969,7 +1970,7 @@ int main(int argc, char** argv) {
         // The siege sells whatever the lane's room and population, like the relics' monks: its
         // trebuchets take none, so nothing is held for them and nothing else is refused.
         competitive({1,3,7});
-        int price = shopPrice(cBuySiege) + 2 * cSiegeRivalKings;
+        int price = shopPrice(cBuySiege);
         attributes[1][cAttributePopulationCap] = 0;
         attributes[1][cAttributePopulation] = cPopulationCap;
         kingsOn(1, cBuySiege, price);
@@ -1983,7 +1984,7 @@ int main(int argc, char** argv) {
         require(bought[1]==std::vector<int>({cBuySiege, cBuyBuildingVillagers}) && resource(1, cAttributePopulationCap)==0
                 && resource(1, cAttributePopulation)==cPopulationCap, "Room was held for the siege");
         for(int n=0;n<cSiegeWarning+2;++n) tick(true);
-        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, cTrebuchet)==2*cSiegeTrebuchets
+        require(xsTriggerVariable(vSiegePhase)==2 && unitsOf(1, cTrebuchet)==cSiegeRows*cSiegeTrebuchets
                 && resource(1, cAttributePopulationCap)==0 && resource(1, cAttributePopulation)==cPopulationCap, "The trebuchets took population");
     } else if(test=="raider_population") {
         competitive({1,7});

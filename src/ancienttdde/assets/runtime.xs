@@ -95,8 +95,8 @@ int ancientWhole(float value = 0.0) {
     return (whole);
 }
 
-// Kills of the enemy's units alone: rival traders, raiders and siege a lane kills count for
-// nothing.
+// Kills of the enemy's units alone, in whichever lane they fall: rival traders and raiders a
+// lane kills count for nothing.
 int ancientWaveKills(int player = 1) {
     return (ancientWhole(xsPlayerAttribute(ancientEnemy(), cAttributeKillsByPlayer1 + player - 1)));
 }
@@ -139,8 +139,8 @@ void ancientCleanupLane(int player = 1) {
     }
     // One unit keeps the slot in the game: the engine defeats a player who owns nothing. It
     // stands on the keeper islets, beyond every tower, trebuchet and raider: no player may lose
-    // to another killing a King, and a lane's spare siege islet lay within the next lane's
-    // Accursed Tower reach. A player who has left the game needs none.
+    // to another killing a King, and a siege row's spare islet lies within an Accursed Tower's
+    // reach. A player who has left the game needs none.
     if (xsGetPlayerInGame(player) == false) return;
     if (player == ancientEnemy()) {
         // The enemy's King and tower take the islet above: a lobby's Standard victory counts
@@ -603,25 +603,24 @@ int ancientRivals(int player = 1) {
     return (rivals);
 }
 
-// Only one player holds the siege: a short warning, then trebuchets on every surviving rival's
-// islets for a while. A claim made earlier in the same second keeps the holder.
-void ancientClaimSiege(int player = 1, int price = 0) {
+// Only one player holds the siege: a short warning, then trebuchets on every islet row, both
+// sides of every lane, for a while; they fire at whatever the holder's enemies hold in reach. A
+// claim made earlier in the same second keeps the holder.
+void ancientClaimSiege(int player = 1) {
     xsSetTriggerVariable(vSiegeOwner, player);
-    xsSetTriggerVariable(vSiegePhase, 1);
+    xsSetTriggerVariable(vSiegePhase, cSiegePhaseWarning);
     xsSetTriggerVariable(vSiegeLeft, cSiegeWarning);
     xsSetTriggerVariable(vSiegeDisplay, 1);
-    xsChatData(ancientPlayer(player) + " bought the siege power-up for " + ancientCount(price, "King", "Kings") + ": trebuchets reach every rival in " + ancientText(cSiegeWarning) + " game seconds.");
+    xsChatData(ancientPlayer(player) + " bought the siege power-up: trebuchets land on every islet row in " + ancientText(cSiegeWarning) + " game seconds.");
 }
 
 int ancientPlaceSiege(int owner = 1) {
     int made = 0;
-    for (rival = 1; <= 7) {
-        if ((rival != owner) && (laneValue(rival, fActive) == 1)) {
-            for (spot = 0; < cSiegeTrebuchets) {
-                int key = rival * cSiegeSlots + spot;
-                vector place = xsVectorSet(0.1 * siegeX10(key), 0.1 * siegeY10(key), 0.0);
-                if (xsCreateUnit(cTrebuchet, owner, place, false, true, true) >= 0) made = made + 1;
-            }
+    for (row = 1; <= cSiegeRows) {
+        for (spot = 0; < cSiegeTrebuchets) {
+            int key = row * cSiegeSlots + spot;
+            vector place = xsVectorSet(0.1 * siegeX10(key), 0.1 * siegeY10(key), 0.0);
+            if (xsCreateUnit(cTrebuchet, owner, place, false, true, true) >= 0) made = made + 1;
         }
     }
     return (made);
@@ -668,9 +667,9 @@ void ancientSiege() {
         xsSetTriggerVariable(vSiegeLeft, left);
         return;
     }
-    if (xsTriggerVariable(vSiegePhase) == 1) {
+    if (xsTriggerVariable(vSiegePhase) == cSiegePhaseWarning) {
         int made = ancientPlaceSiege(owner);
-        xsSetTriggerVariable(vSiegePhase, 2);
+        xsSetTriggerVariable(vSiegePhase, cSiegePhaseActive);
         xsSetTriggerVariable(vSiegeLeft, cSiegeActive);
         xsSetTriggerVariable(vSiegeDisplay, 2);
         xsChatData(ancientPlayer(owner) + "'s siege is active: " + ancientCount(made, "trebuchet", "trebuchets") + " for " + ancientText(cSiegeActive) + " game seconds.");
@@ -1033,12 +1032,6 @@ bool ancientRaidersFull(int player = 1, int medium = 1) {
     return (living >= cap);
 }
 
-// The siege costs more for every surviving rival it reaches.
-int ancientPrice(int player = 1, int purchase = 0) {
-    if (purchase == cSiegePurchase) return (shopPrice(purchase) + cSiegeRivalKings * ancientRivals(player));
-    return (shopPrice(purchase));
-}
-
 // Why units taking this much population cannot be bought now: the limit, or no room for
 // them; 0 when they can, and for purchases whose units take none (Kings, monks and the
 // siege's trebuchets, whose population cost the lane's setup sets to zero). DE's headroom
@@ -1211,7 +1204,7 @@ void ancientShop(int player = 1) {
     int refused = 0;
     int reason = 0;
     for (candidate = 1; <= cShopCount) {
-        if (xsArrayGetInt(ancientPadCounts, candidate) >= ancientPrice(player, candidate)) {
+        if (xsArrayGetInt(ancientPadCounts, candidate) >= shopPrice(candidate)) {
             int code = ancientRefusal(player, candidate);
             if (code == 0) {
                 if (ready == 0) ready = candidate;
@@ -1228,7 +1221,7 @@ void ancientShop(int player = 1) {
     }
     if (reason > 0) ancientNotice(player, refused, reason);
     if (ready == 0) return;
-    int price = ancientPrice(player, ready);
+    int price = shopPrice(ready);
     int paid = 0;
     int kings = xsArrayGetSize(ancientUnitArray);
     if (kings > cKingSlots) kings = cKingSlots;
@@ -1240,7 +1233,7 @@ void ancientShop(int player = 1) {
     }
     if (shopMask(ready) > 0) laneSet(player, fOwned, laneValue(player, fOwned) + shopMask(ready));
     if (shopAttack(ready) > 0) ancientAddAttack(player, shopAttackFamily(ready), shopAttack(ready));
-    if (ready == cSiegePurchase) ancientClaimSiege(player, price);
+    if (ready == cSiegePurchase) ancientClaimSiege(player);
     laneSet(player, fPurchase, ready);
 }
 

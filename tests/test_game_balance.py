@@ -384,6 +384,15 @@ def test_profile_values_score_solo_and_pvp_worth_in_kings() -> None:
     assert raiders.solo == 0.0 and raiders.pvp > 0
     hit_points = profile_value(Profile(tower_hit_points=300), data, Assumptions())
     assert hit_points.solo == 0.0 and hit_points.pvp > 0
+    # More hit points on every tower spare that share of the typical siege, one row's
+    # trebuchets for the siege against a Keep, at the hit point rate.
+    from ancienttdde.game.balance import siege_kings
+
+    keep = data.stock.unit("KEEP").hit_points
+    assert siege_kings(data, Assumptions()) == pytest.approx(2 * 6 * (200 + 250 - 9) * 0.0005)
+    assert hit_points.pvp == pytest.approx(
+        (1 - keep / (keep + 300)) * siege_kings(data, Assumptions())
+    )
     discount = profile_value(Profile(king_gold_percent=80), data, Assumptions())
     assert discount.solo > 0 and discount.pvp == discount.solo
     # A granted purchase is worth its price, an investment what it pays over the run, and a
@@ -399,25 +408,26 @@ def test_profile_values_score_solo_and_pvp_worth_in_kings() -> None:
     assert castle.solo == pytest.approx(1.0 + 20 * Assumptions().population_kings)
 
 
-def test_rivalry_tables_scale_siege_and_raids_with_the_player_count() -> None:
+def test_rivalry_prices_the_siege_flat_and_counts_every_islet_row() -> None:
     from ancienttdde.game.balance import rates, rivalry
 
-    rows = rivalry(inputs())
-    assert [row.players for row in rows] == list(range(2, 8))
+    model = rivalry(inputs())
     siege = inputs().shop.get("siege")
-    two, seven = rows[0], rows[-1]
-    assert two.siege_price == siege.kings + 3 and seven.siege_price == siege.kings + 18
-    assert two.trebuchets == 2 and seven.trebuchets == 12
-    # Two trebuchets for a minute at a ten-second reload, 450 against buildings.
-    assert two.siege_damage_per_rival == pytest.approx(2 * 6 * (200 + 250 - 9))
-    assert two.watch_towers_per_rival > 0 and two.rebuild_kings_per_rival > 0
-    assert two.cart_seconds == pytest.approx(70 / (7 / 2))
+    assert model.siege_price == siege.kings == 20
+    # Two trebuchets on each of the eight islet rows, whoever plays.
+    assert model.trebuchets == 16
+    # A lane can take fire from the rows on both sides: four trebuchets for a minute at a
+    # ten-second reload, six shots each, 450 against buildings, when all fire at it.
+    assert model.flanking == 4
+    assert model.siege_damage_per_lane == pytest.approx(model.flanking * 6 * (200 + 250 - 9))
+    assert model.watch_towers_per_lane > 0 and model.rebuild_kings_per_lane > 0
+    assert model.cart_seconds == pytest.approx(70 / (7 / 2))
     # A lost cart is retrained at the market for its stock cost, cheaper than the shop's third
     # of a King.
     cart = inputs().stock.unit("TRADE_CART_EMPTY")
     market = rates(inputs()).cost_kings(cart.cost)
     assert 0 < market < 1 / 3
-    assert two.cog_seconds > 0 and two.trader_replacement_kings == pytest.approx(market)
+    assert model.cog_seconds > 0 and model.trader_replacement_kings == pytest.approx(market)
 
 
 def test_rivalry_names_a_missing_siege_or_trader_purchase(tmp_path: Path) -> None:
@@ -459,7 +469,11 @@ def test_the_report_has_every_section_and_the_versioned_copy_is_current() -> Non
         assert heading in text
     assert "| Koreans |" in text and "| Any other civilization |" in text
     assert "| Civilization | Lacks | Profile | Solo | Native | Total | PvP |" in text
-    assert "| Teutons | - | " in text and "| 1.0 +0.1 | " in text
+    assert "| Teutons | - | " in text and "| 0.2 +0.9 | " in text
+    from ancienttdde.game.balance import siege_kings
+
+    assert f"{siege_kings(inputs(), Assumptions()):.2f} Kings of towers" in text
+    assert "stone and wood alone" in text
     assert (
         "| attack investments | +1 attack/30 s at minute 15, +3 attack/30 s at minute 24, "
         "+1 attack/5 s at minute 32 |"
@@ -677,7 +691,7 @@ def test_unwatched_profile_technologies_are_not_priced_silently() -> None:
 def test_the_rivals_table_prices_the_configured_raiders(tmp_path: Path) -> None:
     import json
 
-    from ancienttdde.game.balance import load_inputs, rivalry
+    from ancienttdde.game.balance import Assumptions, load_inputs, rivalry
     from ancienttdde.game.report import rivals_section
 
     root = copy_content(tmp_path)
@@ -686,14 +700,16 @@ def test_the_rivals_table_prices_the_configured_raiders(tmp_path: Path) -> None:
     (root / "content/balance/game.json").write_text(json.dumps(game))
     data = load_inputs(root)
     stock = data.stock
-    first = rivalry(data)[0]
-    assert first.land_raider == "HUSSAR" and first.naval_raider == "FIRE_GALLEY"
+    model = rivalry(data)
+    assert model.land_raider == "HUSSAR" and model.naval_raider == "FIRE_GALLEY"
     expected = stock.unit("TRADE_CART_EMPTY").hit_points / (
         (stock.unit("HUSSAR").attack(4) - stock.unit("TRADE_CART_EMPTY").armor(4))
         / stock.unit("HUSSAR").reload
     )
-    assert first.cart_seconds == pytest.approx(expected)
-    assert "A hussar raider kills a trade cart" in rivals_section(data)
+    assert model.cart_seconds == pytest.approx(expected)
+    text = rivals_section(data, Assumptions())
+    assert "A hussar raider kills a trade cart" in text
+    assert "can deal up to" in text and "splits its fire" in text
 
 
 def test_a_starting_tower_is_worth_its_cost_and_its_base_damage() -> None:

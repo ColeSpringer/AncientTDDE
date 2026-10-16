@@ -1,5 +1,5 @@
-"""Native triggers for competition: PvP diplomacy and pads, siege countdowns and protected
-Kings."""
+"""Native triggers for competition: PvP diplomacy and pads, siege countdowns, and protected
+Kings and trebuchets."""
 
 from AoE2ScenarioParser.datasets.trigger_lists.comparison import Comparison
 from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyState
@@ -7,9 +7,10 @@ from AoE2ScenarioParser.datasets.trigger_lists.time_unit import TimeUnit
 
 from ancienttdde.game.catalog import Shop
 from ancienttdde.game.config import Balance
+from ancienttdde.game.script import SIEGE_PHASE_ACTIVE
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import LANE_SLOTS, SIEGE_TIMER
-from ancienttdde.scenario.triggers import condition, effect
+from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
 
 def pvp_diplomacy(game: Game) -> None:
@@ -72,14 +73,29 @@ def siege_countdowns(game: Game, balance: Balance) -> None:
         game.set_value(trigger, "game.siege_display", 0)
 
 
+def unattackable(game: Game, trigger: TriggerHandle, player: int, units: tuple[str, ...]) -> None:
+    """Make a lane's units of these kinds unattackable whenever the trigger fires."""
+    for unit in units:
+        effect(
+            trigger,
+            "disable_unit_attackable",
+            source_player=player,
+            object_list_unit_id=game.stock(unit),
+        )
+
+
 def protect_kings(game: Game, player: int) -> None:
     """Kings are currency, not targets: every second, a lane's Kings become unattackable."""
     trigger = game.trigger(f"lane.p{player}.kings.protect", looping=True)
     condition(trigger, "timer", timer=1)
     game.value(trigger, f"lane.p{player}.active", 1)
-    effect(
-        trigger,
-        "disable_unit_attackable",
-        source_player=player,
-        object_list_unit_id=game.stock("king"),
-    )
+    unattackable(game, trigger, player, ("king",))
+
+
+def protect_siege(game: Game, player: int) -> None:
+    """While a lane's siege is active, every trigger pass makes its trebuchets, packed or not,
+    unattackable."""
+    trigger = game.trigger(f"lane.p{player}.siege.protect", looping=True)
+    game.value(trigger, "game.siege_owner", player)
+    game.value(trigger, "game.siege_phase", SIEGE_PHASE_ACTIVE)
+    unattackable(game, trigger, player, ("trebuchet", "packed-trebuchet"))

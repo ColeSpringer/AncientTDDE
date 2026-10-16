@@ -20,7 +20,7 @@ from ancienttdde.game.economy import (
     lane_transfers,
     starting_relics,
 )
-from ancienttdde.game.interaction import protect_kings
+from ancienttdde.game.interaction import protect_kings, protect_siege
 from ancienttdde.game.objectives import objective
 from ancienttdde.game.profiles import lane_profiles
 from ancienttdde.game.restrictions import restrict, restrict_ages, restrict_reach
@@ -50,6 +50,7 @@ def lane_actions(
     lane_purchases(game, lane, shop, balance)
     lane_controls(game, player)
     protect_kings(game, player)
+    protect_siege(game, player)
     restrict_ages(game, player)
     restrict_reach(game, player)
     lane_keeper(game, lane, keeper)

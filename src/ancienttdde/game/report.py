@@ -15,12 +15,13 @@ from ancienttdde.game.balance import (
     profile_table,
     rates,
     rivalry,
+    siege_kings,
     table_armor,
     tower_dps,
     trader_kings,
     wave_needs,
 )
-from ancienttdde.game.catalog import Investment, Purchase, ResourceGrant, SiegePowerUp, TowerAttack
+from ancienttdde.game.catalog import Investment, Purchase, ResourceGrant, TowerAttack
 from ancienttdde.game.civilizations import DEFAULT_NAME, adjustments
 from ancienttdde.game.stock import PIERCE_CLASS
 from ancienttdde.scenario.objects import display_name
@@ -208,8 +209,6 @@ def purchase_worth(purchase: Purchase) -> str:
         return f"{effect.amount / purchase.kings:.1f} attack per King"
     if isinstance(effect, ResourceGrant):
         return f"{effect.amount / purchase.kings:.0f} {effect.resource} per King"
-    if isinstance(effect, SiegePowerUp):
-        return f"plus {effect.kings_per_rival} per rival"
     if isinstance(effect, Investment):
         return f"{effect.amount} {effect.pays} every {effect.period} s"
     return "-"
@@ -337,25 +336,38 @@ def civilizations_section(inputs: Inputs, assumptions: Assumptions) -> str:
         "extra with PvP on after a plus), and the two together solo and with PvP on. The "
         "towers column lists the towers the civilization's own technology tree lacks; a flat "
         "attack bonus is priced at the smallest rung of its family's attack ladder, and a "
-        "starting tower at its cost plus its base damage per second.\n\n"
+        "starting tower at its cost plus its base damage per second. Native siege bonuses are "
+        "priced from the typical siege on a lane, one row's trebuchets for the siege, "
+        f"{siege_kings(inputs, assumptions):.2f} Kings of towers at the tower hit point rate: a "
+        "bonus adding a share to that output, or sparing a share of it, is worth that share, "
+        "and a unique technology half of it, since it needs the castle and Imperial Age first. "
+        "Accuracy counts for nothing against towers: a trebuchet's shots scatter a fifth of a "
+        "tile, inside a tower's footprint.\n\n"
         + table(["Civilization", "Lacks", "Profile", "Solo", "Native", "Total", "PvP"], rows)
     )
 
 
-def rivals_section(inputs: Inputs) -> str:
-    rivals = rivalry(inputs)
-    rows = [[str(row.players), str(row.siege_price), str(row.trebuchets)] for row in rivals]
-    first = rivals[0]
-    land, naval = display_name(first.land_raider).lower(), display_name(first.naval_raider).lower()
+def rivals_section(inputs: Inputs, assumptions: Assumptions) -> str:
+    model = rivalry(inputs)
+    siege = inputs.balance.interaction.siege
+    land, naval = (
+        display_name(model.land_raider).lower(),
+        display_name(model.naval_raider).lower(),
+    )
     return (
-        f"A {land} raider kills a trade cart in {first.cart_seconds:.0f} seconds and a "
-        f"{naval} a trade cog in {first.cog_seconds:.0f}; a lost trader costs "
-        f"{first.trader_replacement_kings:.2f} Kings to replace. Each rival's trebuchets deal "
-        f"{first.siege_damage_per_rival:.0f} damage in the siege's "
-        f"{inputs.balance.interaction.siege.active_seconds} seconds if every shot lands: "
-        f"{first.watch_towers_per_rival:.1f} Watch Towers or {first.keeps_per_rival:.1f} Keeps, "
-        f"{kings(first.rebuild_kings_per_rival)} Kings of stone and wood to rebuild.\n\n"
-        + table(["Players", "Siege price", "Trebuchets"], rows)
+        f"A {land} raider kills a trade cart in {model.cart_seconds:.0f} seconds and a "
+        f"{naval} a trade cog in {model.cog_seconds:.0f}; a lost trader costs "
+        f"{model.trader_replacement_kings:.2f} Kings to replace. The siege costs "
+        f"{model.siege_price} Kings whatever the player count and puts {model.trebuchets} "
+        f"trebuchets on the islet rows, {siege.trebuchets_per_row} per row; the "
+        f"{model.flanking} flanking a lane can deal up to {model.siege_damage_per_lane:.0f} "
+        f"damage in the siege's {siege.active_seconds} seconds if every shot lands on it: "
+        f"{model.watch_towers_per_lane:.1f} Watch Towers or {model.keeps_per_lane:.1f} Keeps, "
+        f"{kings(model.rebuild_kings_per_lane)} Kings of stone and wood to rebuild. A row "
+        "between two lanes splits its fire between them. The rebuild figure is stone and wood "
+        "alone; the civilization tables price a standing tower's hit points at "
+        f"{assumptions.tower_hit_point_kings:g} Kings a point instead, for the fire and the "
+        "lives they keep."
     )
 
 
@@ -369,7 +381,7 @@ def render_report(inputs: Inputs, assumptions: Assumptions) -> str:
         ("Investments", investments_section(inputs)),
         ("Income", income_section(inputs, assumptions)),
         ("Civilizations", civilizations_section(inputs, assumptions)),
-        ("Rivals", rivals_section(inputs)),
+        ("Rivals", rivals_section(inputs, assumptions)),
     ]
     body = "\n\n".join(f"## {title}\n\n{text}" for title, text in sections)
     return (

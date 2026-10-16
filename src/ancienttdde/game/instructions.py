@@ -4,6 +4,7 @@ from ancienttdde.game.catalog import Repair, ResourceGrant, Shop, population_nam
 from ancienttdde.game.civilizations import DEFAULT_NAME, Profiles
 from ancienttdde.game.config import LOBBY_DIFFICULTIES, Balance
 from ancienttdde.game.script import STILL_SAMPLES
+from ancienttdde.game.sites import SIEGE_ROWS
 from ancienttdde.scenario.objects import display_name
 
 CREDIT = "Based on Ancient TD v5.3 by DRAX6869 / DRAX"
@@ -121,12 +122,14 @@ def interaction(balance: Balance, profiles: Profiles) -> str:
         "below your dock in the trade channel; they fight every rival's traders and raiders and "
         f"cannot leave those areas. Each player keeps at most {raiders.land.cap} land and "
         f"{raiders.naval.cap} naval raiders alive; {raider_bonuses(profiles)}"
-        f"The siege power-up puts {siege.trebuchets_per_rival} trebuchets beside every "
-        f"surviving rival's towers {siege.warning_seconds} game seconds after purchase, for "
-        f"{siege.active_seconds} game seconds. One player holds it at a time, and it is for "
+        f"The siege power-up puts {siege.trebuchets_per_row} trebuchets on each of the "
+        f"{SIEGE_ROWS} islet rows flanking the lanes {siege.warning_seconds} game seconds after "
+        f"purchase, for {siege.active_seconds} game seconds; they fire at every enemy tower and "
+        "unit in reach. One player holds it at a time, and it is for "
         f"sale again after {siege.shared_cooldown} game seconds for everyone and "
-        f"{siege.buyer_cooldown} for its buyer. Markets, docks, Kings, life Outposts and yurts "
-        "cannot be attacked; traders can. Villagers build towers and economy buildings only: "
+        f"{siege.buyer_cooldown} for its buyer. Markets, docks, Kings, life Outposts, yurts and "
+        "the siege's trebuchets cannot be attacked; traders can. Villagers build towers and "
+        "economy buildings only: "
         "no houses, walls, gates, outposts, markets, blacksmiths or universities, and no "
         "military buildings, docks, monasteries or town centers. Markets train trade carts and "
         "docks trade cogs; lanes cannot train other ships, monks or castle units, or convert "
@@ -249,7 +252,8 @@ def instructions(balance: Balance, shop: Shop, profiles: Profiles) -> str:
         "in your build rows: one built in the resource area is removed. A profile's starting "
         "towers stand in mirrored pairs on the build rows beside "
         "the path. Every game rules out Yasama and Stronghold, which would multiply every "
-        "tower's volley, and towers fire one arrow of their own whatever the civilization. "
+        "tower's volley, and Siege Engineers, which would let one trebuchet fell a fully "
+        "upgraded Keep; towers fire one arrow of their own whatever the civilization. "
         "Competitive games rule out Eupseong and Artillery, whose range would reach the next "
         "lane.\n\n"
         "Each enemy reaching the exit flags at the right-hand end of a lane costs one life, a "

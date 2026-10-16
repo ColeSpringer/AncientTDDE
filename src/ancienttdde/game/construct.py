@@ -49,8 +49,8 @@ from ancienttdde.game.shop import (
     place_gates,
     remove_shop_signs,
 )
-from ancienttdde.game.sites import Tile
-from ancienttdde.game.spawns import creation_tiles, marked_tiles
+from ancienttdde.game.sites import SiegeRows, Tile, load_siege_rows
+from ancienttdde.game.spawns import creation_tiles, marked_tiles, reserved_tiles, siege_tiles
 from ancienttdde.game.stock import load_stock
 from ancienttdde.game.triggers import Game
 from ancienttdde.game.waves import (
@@ -78,7 +78,11 @@ from ancienttdde.scenario.xs import check_xs, xs_checker
 
 
 def clear_sites(
-    game: Game, lanes: tuple[EngineLane, ...], shop: Shop, interaction: Interaction
+    game: Game,
+    lanes: tuple[EngineLane, ...],
+    shop: Shop,
+    interaction: Interaction,
+    islets: SiegeRows,
 ) -> None:
     """Take the map's marker flags off the tiles units are created on, the King stall, the
     siege islets and the starting tower sites among them; the transfer arrivals and bought
@@ -86,9 +90,9 @@ def clear_sites(
     error.
     """
     flags = marker_flags()
-    for lane in lanes:
-        tiles = creation_tiles(lane, shop, interaction)
-        marked = marked_tiles(lane)
+    sites = [(creation_tiles(lane, shop, interaction), marked_tiles(lane)) for lane in lanes]
+    sites.append((siege_tiles(islets, interaction), set()))
+    for tiles, marked in sites:
         for placed in game.scenario.unit_manager.units:
             for unit in list(placed):
                 tile = (int(unit.x), int(unit.y))
@@ -169,11 +173,12 @@ def reconcile_pad_flags(
     shop: Shop,
     interaction: Interaction,
     sizes: Mapping[int, int],
+    islets: SiegeRows,
 ) -> dict[str, list[list[Tile]]]:
-    """Give each pad one Gaia flag per King of its price, the siege's base price: the map's
-    flags were placed for the original's prices. As in the original, the flags fill whole
-    rows from the end farthest from the pad's entrance; a pad whose flags already do keeps
-    them. A tile keeps one flag. Returns each pad's rows, the farthest first."""
+    """Give each pad one Gaia flag per King of its price: the map's flags were placed for the
+    original's prices. As in the original, the flags fill whole rows from the end farthest
+    from the pad's entrance; a pad whose flags already do keeps them. A tile keeps one flag.
+    Returns each pad's rows, the farthest first."""
     flags = marker_flags()
     placed = game.scenario.unit_manager.units
     # Every marker flag's reference ID, by tile.
@@ -182,7 +187,7 @@ def reconcile_pad_flags(
         for unit in owned:
             if unit.unit_const in flags:
                 marked.setdefault((int(unit.x), int(unit.y)), []).append(unit.reference_id)
-    reserved = {tile for lane in lanes for tile in creation_tiles(lane, shop, interaction)}
+    reserved = reserved_tiles(lanes, shop, interaction, islets)
     blocked = {
         cell
         for owned in placed
@@ -237,13 +242,14 @@ def settings(
     anchors: dict[str, object],
     sizes: Mapping[int, int],
     keeper: Keeper,
+    islets: SiegeRows,
 ) -> None:
     scenario = game.scenario
-    clear_sites(game, lanes, shop, balance.interaction)
+    clear_sites(game, lanes, shop, balance.interaction, islets)
     # Before the pad flags, whose layout reads each pad's open entrance.
     remove_shop_signs(game, shop)
     remove_selectors(game, lanes)
-    rows = reconcile_pad_flags(game, lanes, shop, balance.interaction, sizes)
+    rows = reconcile_pad_flags(game, lanes, shop, balance.interaction, sizes, islets)
     place_displays(game, shop)
     place_gates(game, shop, rows)
     caption_displays(game, shop)
@@ -365,6 +371,7 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     anchors = object_value(read_object(map_path).get("anchors"), "anchors")
     lanes = load_lanes(anchors)
     keeper = load_keeper(anchors)
+    islets = load_siege_rows(anchors)
     families = [name for name, _ in balance.towers.families]
     shop = load_shop(
         root / "content/balance/shop.json", cast(dict[str, MapAnchor], anchors), families
@@ -379,12 +386,12 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
     game = Game(scenario)
     _, config = read_content(root)
     sizes = blocking_sizes(config)
-    settings(game, balance, lanes, shop, anchors, sizes, keeper)
+    settings(game, balance, lanes, shop, anchors, sizes, keeper, islets)
     scenario.xs_manager.add_script(
-        xs_string=render_xs(balance, lanes, shop, profiles, stock, keeper)
+        xs_string=render_xs(balance, lanes, shop, profiles, stock, keeper, islets)
     )
     prelude.write_text(
-        render_prelude(balance, lanes, shop, profiles, stock, keeper, extern=True),
+        render_prelude(balance, lanes, shop, profiles, stock, keeper, islets, extern=True),
         encoding="utf-8",
     )
     add_logic(game, balance, lanes, shop, profiles, anchors, keeper)

@@ -229,7 +229,7 @@ def test_reject_invalid_settings(tmp_path: Path, field: str, value: object) -> N
         (("interaction", "raiders", "naval", "unit"), "GALLEY", "GALLEY"),
         (("interaction", "raiders", "land", "line"), ["HUSSAR"], "LIGHT_CAVALRY"),
         (("interaction", "raiders", "land", "cap"), 0, "cap"),
-        (("interaction", "siege", "trebuchets_per_rival"), 3, "trebuchets_per_rival"),
+        (("interaction", "siege", "trebuchets_per_row"), 3, "trebuchets_per_row"),
         (("interaction", "siege", "warning_seconds"), 0, "warning_seconds"),
         (("interaction", "siege", "buyer_cooldown"), 30, "buyer_cooldown"),
         (("practice", "kings"), 0, "kings"),
@@ -442,8 +442,9 @@ def test_siege_warns_holds_and_cools_down_for_its_configured_times() -> None:
     from ancienttdde.game.config import load_balance
 
     siege = load_balance(ROOT / "content/balance/game.json").interaction.siege
-    assert (siege.trebuchets_per_rival, siege.warning_seconds, siege.active_seconds) == (2, 10, 60)
-    assert (siege.shared_cooldown, siege.buyer_cooldown) == (60, 120)
+    assert (siege.trebuchets_per_row, siege.warning_seconds, siege.active_seconds) == (2, 10, 60)
+    # Three game minutes between sieges, so a lane can rebuild; the buyer waits a fourth.
+    assert (siege.shared_cooldown, siege.buyer_cooldown) == (180, 240)
 
 
 def test_practice_grants_and_sudden_death_pace() -> None:

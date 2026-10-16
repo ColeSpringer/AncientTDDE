@@ -86,11 +86,13 @@ CONVERSIONS = ("ATONEMENT", "REDEMPTION", "BLOCK_PRINTING")
 WALL_RANGE = ("CRENELLATIONS", "GREEK_FIRE")
 # castle technologies that would multiply every tower's volley, far beyond any profile:
 TOWER_MULTIPLIERS = ("YASAMA", "STRONGHOLD")
+# and the university's siege upgrade, which would let one trebuchet kill a fully upgraded Keep:
+SIEGE_UPGRADES = ("SIEGE_ENGINEERS",)
 # and, in competitive games only, two more tiles of tower range: with Fletching, Bodkin Arrow
 # and Bracer, towers reach 11 tiles, and the nearest tiles of the next lane are 12 away.
 TOWER_RANGE = ("EUPSEONG", "ARTILLERY")
 # What every game rules out, and what no lane may research or be granted.
-RULED_OUT = CONVERSIONS + WALL_RANGE + TOWER_MULTIPLIERS
+RULED_OUT = CONVERSIONS + WALL_RANGE + TOWER_MULTIPLIERS + SIEGE_UPGRADES
 UNRESEARCHABLE = frozenset(RULED_OUT + TOWER_RANGE)
 # DE's lobby difficulty settings, as xsGetDifficulty reports them.
 LOBBY_DIFFICULTIES = {
@@ -255,8 +257,8 @@ class Raiders:
 
 @dataclass(frozen=True)
 class Siege:
-    # Trebuchets created near each surviving rival.
-    trebuchets_per_rival: int
+    # Trebuchets created on each islet row.
+    trebuchets_per_row: int
     warning_seconds: int
     active_seconds: int
     shared_cooldown: int
@@ -482,8 +484,8 @@ def load_raiders(raw: dict[str, object]) -> Raiders:
 def load_siege(raw: dict[str, object]) -> Siege:
     shared = integer(raw, "shared_cooldown", 0, 600)
     return Siege(
-        # The last of each rival's siege islets stays free.
-        trebuchets_per_rival=integer(raw, "trebuchets_per_rival", 1, SPARE_ISLET),
+        # The last islet of every row stays free.
+        trebuchets_per_row=integer(raw, "trebuchets_per_row", 1, SPARE_ISLET),
         warning_seconds=integer(raw, "warning_seconds", 1, 60),
         active_seconds=integer(raw, "active_seconds", 10, 300),
         shared_cooldown=shared,

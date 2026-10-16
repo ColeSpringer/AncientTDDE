@@ -34,7 +34,7 @@ from ancienttdde.game.civilizations import (
     load_profiles,
 )
 from ancienttdde.game.config import Balance, EngineLane, load_balance, load_lanes
-from ancienttdde.game.sites import anchor, numbers
+from ancienttdde.game.sites import SIEGE_ROWS, anchor, numbers
 from ancienttdde.game.stock import (
     BUILDING_CLASS,
     MELEE_CLASS,
@@ -77,7 +77,7 @@ class Assumptions:
     villager_stone_per_minute: int = 20
     # Towers a lane builds over a run, for pricing a stone discount.
     towers_per_run: int = 24
-    # A tower hit point against siege and a raider slot count with PvP on; a point of
+    # A tower hit point the siege destroys and a raider slot count with PvP on; a point of
     # population room counts in every game, near the shop's price for one.
     tower_hit_point_kings: float = 0.0005
     raider_slot_kings: float = 0.5
@@ -625,24 +625,43 @@ def profile_value(profile: Profile, inputs: Inputs, assumptions: Assumptions) ->
     solo += profile.population * assumptions.population_kings
     for key in profile.purchases:
         solo += purchase_kings(key, inputs, assumptions, exchange)
-    pvp = solo + profile.tower_hit_points * assumptions.tower_hit_point_kings
+    pvp = solo + tower_hit_point_worth(profile.tower_hit_points, inputs, assumptions)
     pvp += sum(extra for _, extra in profile.raiders) * assumptions.raider_slot_kings
     return ProfileValue(solo=solo, pvp=pvp)
 
 
+def siege_kings(inputs: Inputs, assumptions: Assumptions) -> float:
+    """The typical siege on a lane in Kings: one row's trebuchets firing at it for the siege,
+    every shot on a Keep, at the hit point rate."""
+    model = rivalry(inputs)
+    per_row = inputs.balance.interaction.siege.trebuchets_per_row
+    return (
+        model.siege_damage_per_lane * per_row / model.flanking * assumptions.tower_hit_point_kings
+    )
+
+
+def tower_hit_point_worth(extra: int, inputs: Inputs, assumptions: Assumptions) -> float:
+    """What more hit points on every tower are worth: the share of the typical siege a Keep
+    with them survives."""
+    keep = inputs.stock.unit("KEEP").hit_points
+    return (1 - keep / (keep + extra)) * siege_kings(inputs, assumptions)
+
+
 @dataclass(frozen=True)
 class Rivalry:
-    """What raids and sieges cost and do with this many players in the game."""
+    """What raids and sieges cost and do, whatever the player count."""
 
-    players: int
     land_raider: str
     naval_raider: str
     siege_price: int
+    # The trebuchets a siege creates, how many of them flank one lane, and what those do to
+    # it when every one fires at it.
     trebuchets: int
-    siege_damage_per_rival: float
-    watch_towers_per_rival: float
-    keeps_per_rival: float
-    rebuild_kings_per_rival: float
+    flanking: int
+    siege_damage_per_lane: float
+    watch_towers_per_lane: float
+    keeps_per_lane: float
+    rebuild_kings_per_lane: float
     cart_seconds: float
     cog_seconds: float
     trader_replacement_kings: float
@@ -659,7 +678,7 @@ def kill_seconds(attacker: StockUnit, victim: StockUnit) -> float:
     return victim.hit_points / (per_hit / attacker.reload)
 
 
-def rivalry(inputs: Inputs) -> tuple[Rivalry, ...]:
+def rivalry(inputs: Inputs) -> Rivalry:
     shop, stock = inputs.shop, inputs.stock
     siege, raiders = inputs.balance.interaction.siege, inputs.balance.interaction.raiders
     purchase = shop.first(SiegePowerUp)
@@ -668,7 +687,6 @@ def rivalry(inputs: Inputs) -> tuple[Rivalry, ...]:
         raise ValueError("The rivalry tables need a siege purchase in the shop")
     if carts is None:
         raise ValueError("The rivalry tables need a trade cart purchase in the shop")
-    per_rival = purchase.effect.kings_per_rival
     cart_spots = len(inputs.lanes[0].sites.carts)
     trebuchet, keep, watch = stock.unit("TREBUCHET"), stock.unit("KEEP"), stock.unit("WATCH_TOWER")
     land, naval = raiders.kind("land").unit, raiders.kind("naval").unit
@@ -678,29 +696,25 @@ def rivalry(inputs: Inputs) -> tuple[Rivalry, ...]:
     # that is cheaper.
     cart = stock.unit("TRADE_CART_EMPTY")
     replacement = min(carts.kings / cart_spots, exchange.cost_kings(cart.cost))
-    rows: list[Rivalry] = []
-    for players in range(2, 8):
-        rivals = players - 1
-        keep_damage = siege.trebuchets_per_rival * shots * damage_per_hit_on(trebuchet, keep)
-        watch_damage = siege.trebuchets_per_rival * shots * damage_per_hit_on(trebuchet, watch)
-        watch_towers = watch_damage / watch.hit_points
-        rows.append(
-            Rivalry(
-                players=players,
-                land_raider=land,
-                naval_raider=naval,
-                siege_price=purchase.kings + per_rival * rivals,
-                trebuchets=siege.trebuchets_per_rival * rivals,
-                siege_damage_per_rival=keep_damage,
-                watch_towers_per_rival=watch_towers,
-                keeps_per_rival=keep_damage / keep.hit_points,
-                rebuild_kings_per_rival=watch_towers * exchange.cost_kings(watch.cost),
-                cart_seconds=kill_seconds(stock.unit(land), cart),
-                cog_seconds=kill_seconds(stock.unit(naval), stock.unit("TRADE_COG")),
-                trader_replacement_kings=replacement,
-            )
-        )
-    return tuple(rows)
+    # A lane lies between two islet rows, so twice a row's trebuchets fire at it.
+    flanking = 2 * siege.trebuchets_per_row
+    keep_damage = flanking * shots * damage_per_hit_on(trebuchet, keep)
+    watch_damage = flanking * shots * damage_per_hit_on(trebuchet, watch)
+    watch_towers = watch_damage / watch.hit_points
+    return Rivalry(
+        land_raider=land,
+        naval_raider=naval,
+        siege_price=purchase.kings,
+        trebuchets=SIEGE_ROWS * siege.trebuchets_per_row,
+        flanking=flanking,
+        siege_damage_per_lane=keep_damage,
+        watch_towers_per_lane=watch_towers,
+        keeps_per_lane=keep_damage / keep.hit_points,
+        rebuild_kings_per_lane=watch_towers * exchange.cost_kings(watch.cost),
+        cart_seconds=kill_seconds(stock.unit(land), cart),
+        cog_seconds=kill_seconds(stock.unit(naval), stock.unit("TRADE_COG")),
+        trader_replacement_kings=replacement,
+    )
 
 
 @dataclass(frozen=True)

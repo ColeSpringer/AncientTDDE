@@ -13,6 +13,7 @@ from ancienttdde.common.data import object_value, read_object
 from ancienttdde.game.catalog import Population, Shop
 from ancienttdde.game.civilizations import Civilization, Profile, Profiles
 from ancienttdde.game.config import Balance, EngineLane, Keeper
+from ancienttdde.game.sites import SiegeRows
 from ancienttdde.map.models import MapAnchor
 
 # Tiles a King walks in a game second in DE, as the harness's KING_SPEED.
@@ -66,6 +67,13 @@ def keeper() -> Keeper:
     return load_keeper(anchors)
 
 
+def siege_rows() -> SiegeRows:
+    from ancienttdde.game.sites import load_siege_rows
+
+    anchors = object_value(read_object(ROOT / "content/maps/foundation.json")["anchors"], "anchors")
+    return load_siege_rows(anchors)
+
+
 def harness_profiles(profiles: Profiles) -> Profiles:
     return Profiles(
         profiles.default_identity,
@@ -79,7 +87,7 @@ def prelude() -> str:
     from ancienttdde.game.script import render_prelude
 
     balance, lanes, shop, profiles = content()
-    return render_prelude(balance, lanes, shop, profiles, stock(), keeper())
+    return render_prelude(balance, lanes, shop, profiles, stock(), keeper(), siege_rows())
 
 
 def filled(text: str, name: str) -> dict[int, int]:
@@ -121,7 +129,7 @@ def engine_runner(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
     balance, lanes, shop, profiles = content()
     script = harness_constants() + render_xs(
-        balance, lanes, shop, harness_profiles(profiles), stock(), keeper()
+        balance, lanes, shop, harness_profiles(profiles), stock(), keeper(), siege_rows()
     )
     # XS counted loops implicitly declare/increment their integer counter.
     script = re.sub(
@@ -239,9 +247,37 @@ def test_prelude_counts_shuffling_kings_that_keep_within_their_radius() -> None:
     assert SHUFFLE_RADIUS // KING_SPEED < SHUFFLE_SAMPLES
 
 
+def test_prelude_lists_every_siege_islet_row() -> None:
+    """Trebuchets stand on the first islets of every row, so the prelude indexes all eight rows
+    by row and position and prices the siege without a per-rival share."""
+    from ancienttdde.game.sites import SIEGE_ISLETS, SIEGE_ROWS
+
+    text = prelude()
+    assert f"const int cSiegeRows = {SIEGE_ROWS};" in text
+    assert f"const int cSiegeSlots = {SIEGE_ISLETS};" in text
+    assert "const int cSiegeTrebuchets = 2;" in text and "cSiegeRivalKings" not in text
+    xs, ys = filled(text, "siegeX10"), filled(text, "siegeY10")
+    assert len(xs) == len(ys) == (SIEGE_ROWS + 1) * SIEGE_ISLETS
+    for row, islets in enumerate(siege_rows(), 1):
+        for position, (x, y) in enumerate(islets):
+            index = row * SIEGE_ISLETS + position
+            assert (xs[index], ys[index]) == (10 * x + 5, 10 * y + 5)
+
+
+def test_prelude_refuses_islet_rows_that_do_not_fit_its_constants() -> None:
+    """The XS loops over cSiegeRows rows of cSiegeSlots islets, so the tables must hold them."""
+    from ancienttdde.game.script import render_prelude
+
+    balance, lanes, shop, profiles = content()
+    rows = siege_rows()
+    for broken in (rows[:-1], (*rows[:-1], rows[-1][:2])):
+        with pytest.raises(ValueError, match="islet rows"):
+            render_prelude(balance, lanes, shop, profiles, stock(), keeper(), broken)
+
+
 def test_prelude_names_the_keeper_building_and_its_spots() -> None:
     """An enemy holding a lane slot keeps its King and tower on the islet above slot 8's, not
-    on its lane's spare islet, which the next lane's Accursed Tower reaches."""
+    on a siege row's spare islet, which an Accursed Tower reaches."""
     text = prelude()
     assert f"const int cKeeperBuilding = {WATCH_TOWER};" in text
     spots = keeper()
@@ -332,6 +368,19 @@ def test_prelude_declares_the_population_rule() -> None:
 
     runtime = asset_text("runtime.xs")
     assert "cAttributePopulationCap" in runtime and "cAttributePopulation)" in runtime
+    # The siege phases are named once, for the prelude, the XS and the protection trigger.
+    from ancienttdde.game.script import SIEGE_PHASE_ACTIVE, SIEGE_PHASE_WARNING
+
+    assert (SIEGE_PHASE_WARNING, SIEGE_PHASE_ACTIVE) == (1, 2)
+    assert (
+        "const int cSiegePhaseWarning = 1;" in text and "const int cSiegePhaseActive = 2;" in text
+    )
+    assert "cSiegePhaseActive" in runtime and "vSiegePhase, 2)" not in runtime
+    assert (
+        "vSiegePhase, 1)" not in runtime
+        and "== 1) {"
+        not in runtime.split("void ancientSiege()")[1].split("ancientEndSiege(false)")[0]
+    )
     assert "cAttrHeadroom" not in text + runtime and "cAttrPopulation" not in text + runtime
     from ancienttdde.game.script import GLOBAL_VARIABLES, LANE_VARIABLES
 
@@ -359,7 +408,9 @@ def test_prelude_refuses_lanes_whose_purchases_take_different_population() -> No
     balance, lanes, shop, profiles = content()
     fewer = replace(lanes[1], sites=replace(lanes[1].sites, carts=lanes[1].sites.carts[:2]))
     with pytest.raises(ValueError, match="population"):
-        render_prelude(balance, (lanes[0], fewer, *lanes[2:]), shop, profiles, stock(), keeper())
+        render_prelude(
+            balance, (lanes[0], fewer, *lanes[2:]), shop, profiles, stock(), keeper(), siege_rows()
+        )
 
 
 def test_prelude_holds_no_test_only_names() -> None:
@@ -407,7 +458,9 @@ def test_prelude_lists_granted_purchases_by_slot() -> None:
     from ancienttdde.game.script import grant_table, render_prelude
 
     balance, lanes, shop, profiles = content()
-    text = render_prelude(balance, lanes, shop, harness_profiles(profiles), stock(), keeper())
+    text = render_prelude(
+        balance, lanes, shop, harness_profiles(profiles), stock(), keeper(), siege_rows()
+    )
     assert "const int cGrantSlots = 3;" in text and "const int cGrantSlots = 1;" in prelude()
     grants = text.split("int civGrant")[1].split("}")[0]
     castle_age, castle = shop.get("castle_age").index, shop.get("castle").index

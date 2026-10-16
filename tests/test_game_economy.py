@@ -662,7 +662,8 @@ def test_creation_tiles_hold_only_the_originals_arrival_flags(
     from ancienttdde.common.data import object_value
     from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance, load_lanes
-    from ancienttdde.game.spawns import creation_tiles
+    from ancienttdde.game.sites import load_siege_rows
+    from ancienttdde.game.spawns import creation_tiles, reserved_tiles, siege_tiles
     from ancienttdde.scenario.objects import marker_flags
 
     output, _ = game_build
@@ -671,12 +672,19 @@ def test_creation_tiles_hold_only_the_originals_arrival_flags(
         name for name, _ in load_balance(ROOT / "content/balance/game.json").towers.families
     ]
     shop = load_shop(ROOT / "content/balance/shop.json", sites, families)
-    lane = load_lanes(object_value(sites, "anchors"))[player - 1]
+    lanes = load_lanes(object_value(sites, "anchors"))
+    lane = lanes[player - 1]
     balance = load_balance(ROOT / "content/balance/game.json")
     tiles = creation_tiles(lane, shop, balance.interaction)
     assert lane.sites.king_spawn in tiles and len(tiles) >= 18
-    # Trebuchets arrive on this lane's islets for whoever holds the siege.
-    assert set(lane.sites.siege[: balance.interaction.siege.trebuchets_per_rival]) <= tiles
+    # Trebuchets arrive on two islets of every row for whoever holds the siege; the build
+    # reserves those tiles with every lane's own.
+    rows = load_siege_rows(object_value(sites, "anchors"))
+    islets = siege_tiles(rows, balance.interaction)
+    assert len(islets) == 16 and islets.isdisjoint(tiles)
+    reserved = reserved_tiles(lanes, shop, balance.interaction, rows)
+    assert tiles | islets <= reserved
+    tiles |= islets
     assert {spawn.tiles[0] for spawn in lane.sites.raiders.values()} <= tiles
     assert {tile for pair in lane.sites.towers for tile in pair} <= tiles
     marked = {transfer.arrival for transfer in lane.sites.transfers.values()}

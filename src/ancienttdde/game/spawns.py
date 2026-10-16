@@ -1,12 +1,13 @@
 """The units each purchase places for a lane, which XS creates before it takes any Kings."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from AoE2ScenarioParser.datasets.units import UnitInfo
 
 from ancienttdde.game.catalog import Castle, Purchase, Raider, Relics, Shop, Traders, Villagers
 from ancienttdde.game.config import EngineLane, Interaction, Raiders
-from ancienttdde.game.sites import Tile
+from ancienttdde.game.sites import SiegeRows, Tile
 from ancienttdde.scenario.objects import stock
 
 
@@ -81,14 +82,13 @@ def spawned_population(made: tuple[Spawned, ...]) -> int:
 
 def creation_tiles(lane: EngineLane, shop: Shop, interaction: Interaction) -> set[Tile]:
     """Every tile a unit of the lane's appears on: the King stall, the transfer arrivals
-    villagers are teleported to, the spots of bought units, the sites of a profile's starting
-    towers and the islets where a rival's trebuchets arrive. Only the marked tiles may hold
-    anything, their marker flags: a checked spot would stay blocked, and a teleport or an
-    unchecked spot would put the unit inside whatever stands there. Enemies appear on the
-    lane's spawn column without collision checks."""
+    villagers are teleported to, the spots of bought units and the sites of a profile's
+    starting towers. Only the marked tiles may hold anything, their marker flags: a checked
+    spot would stay blocked, and a teleport or an unchecked spot would put the unit inside
+    whatever stands there. Enemies appear on the lane's spawn column without collision
+    checks."""
     tiles = {lane.sites.king_spawn}
     tiles.update(transfer.arrival for transfer in lane.sites.transfers.values())
-    tiles.update(lane.sites.siege[: interaction.siege.trebuchets_per_rival])
     tiles.update(tile for pair in lane.sites.towers for tile in pair)
     for purchase in shop.purchases:
         for spawned in purchase_spawns(lane, purchase, interaction.raiders):
@@ -102,3 +102,18 @@ def marked_tiles(lane: EngineLane) -> set[Tile]:
     tiles = {transfer.arrival for transfer in lane.sites.transfers.values()}
     tiles.update(spot for spawn in lane.sites.villagers.values() for spot in spawn.tiles)
     return tiles
+
+
+def siege_tiles(rows: SiegeRows, interaction: Interaction) -> set[Tile]:
+    """The islets the siege's trebuchets appear on: the first ones of every row, checked like
+    the lanes' own creation tiles."""
+    return {tile for row in rows for tile in row[: interaction.siege.trebuchets_per_row]}
+
+
+def reserved_tiles(
+    lanes: Sequence[EngineLane], shop: Shop, interaction: Interaction, rows: SiegeRows
+) -> set[Tile]:
+    """Every tile the build keeps clear for created units: each lane's creation tiles and the
+    siege islets."""
+    tiles = {tile for lane in lanes for tile in creation_tiles(lane, shop, interaction)}
+    return tiles | siege_tiles(rows, interaction)

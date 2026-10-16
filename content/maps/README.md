@@ -14,7 +14,7 @@ parser dataset, stock name and ID, original civilization contexts, review status
 and conservative blocking footprint. Placement overrides neutralize the legacy
 display/endpoint objects and provide readable captions. Point, points and region anchors
 identify lanes, economy areas, life instances, expansion rows, purchase pads, trade
-endpoints, 21 siege positions, the run controls, the enemy keeper's islet, and each lane's
+endpoints, 24 siege positions, the run controls, the enemy keeper's islet, and each lane's
 transfer pads, resource bonuses and the sites where bought units and raiders appear. Regions
 use inclusive `[x1, y1, x2, y2]` bounds.
 The original Hay Stack barriers retain their visible stock identity and one-tile

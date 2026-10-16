@@ -17,10 +17,12 @@ type RaiderMedium = Literal["land", "naval"]
 RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
 type TradeMedium = Literal["land", "water"]
 TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
-# The islets beside each lane's towers: a rival's trebuchets take the first ones, and the last
-# stays free.
+# The islet rows: one north of each of the seven lanes and one south of the last, three islets
+# each. The siege's trebuchets take the first islets of every row; the last stays free.
+SIEGE_ROWS = 8
 SIEGE_ISLETS = 3
 SPARE_ISLET = SIEGE_ISLETS - 1
+type SiegeRows = tuple[tuple[Tile, ...], ...]
 # Where a profile's starting towers stand: the build row nearest the path on each side of the
 # lane, in these columns relative to the Accursed Tower pads, a mirrored pair per column.
 TOWER_OFFSETS = (-7, 7, -3, 3)
@@ -68,8 +70,6 @@ class LaneSites:
     towers: tuple[tuple[Tile, Tile], ...]
     # Where bought raiders appear in the land and water trade areas, by medium.
     raiders: Mapping[str, Spawn]
-    # The islets where a rival's trebuchets stand near this lane's towers, in order.
-    siege: tuple[Tile, ...]
 
 
 def within(region: Rect, x: float, y: float) -> bool:
@@ -188,7 +188,15 @@ def load_sites(anchors: Mapping[str, object], player: int) -> LaneSites:
             special,
         ),
         raiders={medium: spawn(anchors, f"{prefix}.raiders.{medium}") for medium in RAIDER_MEDIA},
-        siege=tuple(
-            point_tile(anchors, f"siege.p{player}.{index}") for index in range(1, SIEGE_ISLETS + 1)
-        ),
+    )
+
+
+def load_siege_rows(anchors: Mapping[str, object]) -> SiegeRows:
+    """Each row's islets in order: row 1 lies north of lane 1, the last south of lane 7, and
+    every other row midway between the two lanes it is numbered after and before."""
+    return tuple(
+        tuple(
+            point_tile(anchors, f"siege.row{row}.{index}") for index in range(1, SIEGE_ISLETS + 1)
+        )
+        for row in range(1, SIEGE_ROWS + 1)
     )

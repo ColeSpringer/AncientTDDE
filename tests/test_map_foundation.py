@@ -50,18 +50,18 @@ def test_isolation_can_start_from_every_point_of_an_anchor(
 
     legacy, config = foundation_inputs
     # An arrival and its walk target on the siege islet; the second point lies off it.
-    config["anchors"]["siege.p1.arrivals"] = {"points": [[12.5, 2.5], [11.5, 1.5]]}
+    config["anchors"]["siege.row1.arrivals"] = {"points": [[12.5, 2.5], [11.5, 1.5]]}
     config["isolation"].append(
         {
             "key": "arrivals",
-            "start": "siege.p1.arrivals",
+            "start": "siege.row1.arrivals",
             "medium": "land",
             "region": [11, 1, 13, 3],
         }
     )
     report = validate_map(migrate_map(legacy, config), config)
     assert report["isolation"][-1] == {"key": "arrivals", "contained": True, "reachable_tiles": 9}
-    config["anchors"]["siege.p1.arrivals"]["points"].append([2.5, 3.5])
+    config["anchors"]["siege.row1.arrivals"]["points"].append([2.5, 3.5])
     with pytest.raises(ValueError, match="arrivals: failed land isolation"):
         validate_map(migrate_map(legacy, config), config)
 
@@ -103,7 +103,7 @@ def test_connected_siege_islets_fail_validation(foundation_inputs: FoundationInp
     legacy, config = foundation_inputs
     result = migrate_map(legacy, config)
     result["map"]["tiles"][2 * 16 + 10] = [0, 0, -1]
-    with pytest.raises(ValueError, match="siege.p1.1.*isolation"):
+    with pytest.raises(ValueError, match="siege.row1.1.*isolation"):
         validate_map(result, config)
 
 

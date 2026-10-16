@@ -191,9 +191,12 @@ def test_instructions_explain_raiders_and_the_siege() -> None:
         ]
         listed = ", ".join(names[:-1]) + " and " + names[-1]
         assert f"{listed} keep one more {medium} raider" in text
-    assert "2 trebuchets beside every surviving rival's towers" in text
+    assert "2 trebuchets on each of the 8 islet rows flanking the lanes" in text
+    assert "between the lanes" not in text and "on both sides" not in text
+    assert "fire at every enemy tower and unit in reach" in text
+    assert "surviving rival" not in text
     assert "10 game seconds" in text and "for 60 game seconds" in text
-    assert "60 game seconds for everyone and 120 for its buyer" in text
+    assert "180 game seconds for everyone and 240 for its buyer" in text
     assert "no military buildings, docks, monasteries or town centers" in text
 
 
@@ -205,8 +208,12 @@ def test_instructions_explain_what_keeps_lanes_apart() -> None:
     assert "every 100 wave kills earn a King" in text
     assert "Towers stand only in your build rows" in text
     assert "Competitive games rule out Eupseong and Artillery" in text
-    assert "Markets, docks, Kings, life Outposts and yurts cannot be attacked" in text
+    assert (
+        "Markets, docks, Kings, life Outposts, yurts and the siege's trebuchets cannot be "
+        "attacked" in text
+    )
     assert "a bought castle never fires" in text
+    assert "puts 2 trebuchets on each of the 8 islet rows flanking the lanes" in text
     assert "Each selection of a practice control acts once" in text
     assert "the run options leave the row" in text
 
@@ -272,6 +279,7 @@ def test_instructions_explain_what_villagers_build_and_where_population_comes_fr
         "the siege's trebuchets take none." in text
     )
     assert "Every game rules out Yasama and Stronghold" in text
+    assert "and Siege Engineers, which would let one trebuchet fell a fully upgraded Keep" in text
 
 
 def test_instructions_place_the_starting_towers() -> None:

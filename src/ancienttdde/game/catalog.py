@@ -108,9 +108,7 @@ class Raider:
 
 @dataclass(frozen=True)
 class SiegePowerUp:
-    """Exclusive temporary siege near every rival; the price rises with each surviving rival."""
-
-    kings_per_rival: int
+    """Exclusive temporary siege on every islet row, at one price whatever the player count."""
 
 
 type Effect = (
@@ -159,23 +157,15 @@ class Purchase:
     # A technology the buyer's civilization must not have disabled, and what it provides.
     only_with: tuple[str, str] | None = None
 
-    def surcharge(self, wording: str) -> str:
-        """The siege power-up's extra Kings per surviving rival, in the given wording."""
-        if isinstance(self.effect, SiegePowerUp):
-            return wording.format(self.effect.kings_per_rival)
-        return ""
-
     @property
     def price(self) -> str:
-        kings = f"{self.kings} King" + ("" if self.kings == 1 else "s")
-        return kings + self.surcharge(" plus {} per surviving rival")
+        return f"{self.kings} King" + ("" if self.kings == 1 else "s")
 
     @property
     def tag(self) -> str:
         """The caption DE draws above the exhibit, kept short: the font does not shrink with
         the view, so long lines run into each other once the view is zoomed out."""
-        kings = f"{self.kings} King" + ("" if self.kings == 1 else "s")
-        return f"{self.label}: {kings}" + self.surcharge(" +{}/rival")
+        return f"{self.label}: {self.price}"
 
     @property
     def pvp(self) -> bool:
@@ -284,7 +274,7 @@ def effect(row: dict[str, object], families: Collection[str]) -> Effect:
         case "raider":
             return Raider(choice(row, "medium", RAIDER_MEDIA))
         case "siege":
-            return SiegePowerUp(integer(row, "kings_per_rival", 1, 20))
+            return SiegePowerUp()
         case kind:
             raise ValueError(f"Unknown purchase effect: {kind}")
 
@@ -377,7 +367,7 @@ def check_requirements(keys: dict[str, dict[str, object]]) -> None:
 def load_shop(path: Path, anchors: Mapping[str, MapAnchor], families: Collection[str]) -> Shop:
     """Read and check the catalog against the map's shop pads and the tower families."""
     raw = read_object(path)
-    if raw.get("schema_version") != 4:
+    if raw.get("schema_version") != 5:
         raise ValueError("Unsupported shop schema")
     entries = rows(raw.get("purchases"), "purchases")
     keys: dict[str, dict[str, object]] = {}

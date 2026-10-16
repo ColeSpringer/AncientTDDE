@@ -111,7 +111,7 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   explained to that player alone, including Bombard Tower attack for civilizations
   without Bombard Towers, and a different refusal is explained at once.
 - Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 5, each raider
-  2, +65 population 2, siege 15, each tower-row half 3), in whole rows from the end farthest from the pad's
+  2, +65 population 2, siege 20, each tower-row half 3), in whole rows from the end farthest from the pad's
   entrance. A Hay Stack divider splits the tower-row pad: the left half opens the 3rd row,
   the right half the 4th.
 - New Kings and bought units appear on their spots. The original's flags stay on the
@@ -241,18 +241,20 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   the listed civilizations) and upgraded fire ships still count.
 - Kings, markets, docks, life Outposts and yurts cannot be attacked, including from the
   channel edge by fire galleys.
-- Siege: 15 Kings plus 3 per surviving rival (2 players pay 18, 7 pay 33); after the
-  countdown two trebuchets stand on each rival's islets, attack chosen towers and cannot
-  move, packed or not; expiry removes both forms; competing or cooling-down purchases keep
-  their Kings, and the holder buying again is told it holds the siege already; the holder's
-  elimination ends it; save/load during the warning and the siege keeps both.
+- Siege: 20 Kings whatever the player count; after the countdown two unpacked trebuchets
+  stand on every islet row, the first north of lane 1, the last south of lane 7 and the rest
+  midway between two lanes, fire at the enemy towers and units they reach, and cannot be
+  attacked from the moment they appear or moved, packed or not; expiry removes both forms;
+  competing or cooling-down purchases keep their Kings, and the holder buying again is told it
+  holds the siege already; the holder's elimination ends it; save/load during the warning and
+  the siege keeps both.
 - Villagers build only towers, mills, camps and farms: no houses, walls, gates, outposts,
   markets, blacksmiths, universities, barracks, docks, castles, monasteries or town
   centers; markets train trade carts and docks only trade cogs; a bought castle trains
   nothing and fires no arrows; monks cannot convert. All of this still holds after buying
   Castle Age and Imperial Age, and the castle stays silent after Fletching, Bodkin Arrow
-  and Bracer. Crenellations, Greek Fire, Yasama and Stronghold cannot be researched; in
-  competitive games neither can Eupseong or Artillery.
+  and Bracer. Crenellations, Greek Fire, Yasama, Stronghold and Siege Engineers cannot be
+  researched; in competitive games neither can Eupseong or Artillery.
 - A tower or tower foundation in the resource area disappears, and its player is told why.
 - Bought monks, castles, fire galleys and siege trebuchets still appear although their
   owners cannot train or build them.

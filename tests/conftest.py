@@ -311,13 +311,13 @@ def foundation_inputs() -> FoundationInputs:
             "lane.p1.exit": {"point": [12.5, 8.5]},
             "lane.p1.life": {"point": [12.5, 11.5], "reference_id": 10},
             "trade.home": {"point": [7.5, 12.5], "reference_id": 13},
-            "siege.p1.1": {"point": [12.5, 2.5], "region": [11, 1, 13, 3]},
+            "siege.row1.1": {"point": [12.5, 2.5], "region": [11, 1, 13, 3]},
             "shop.attack": {"region": [2, 9, 4, 10]},
         },
         "placement_overrides": [{"reference_id": 12, "owner": 0, "caption": "+4 attack: 1 King"}],
         "terrain_patches": [
             {
-                "key": "siege.p1.1",
+                "key": "siege.row1.1",
                 "region": [11, 1, 13, 3],
                 "terrain_id": 0,
                 "allowed_source_terrain": [1],
@@ -333,7 +333,12 @@ def foundation_inputs() -> FoundationInputs:
             }
         ],
         "isolation": [
-            {"key": "siege.p1.1", "start": "siege.p1.1", "medium": "land", "region": [11, 1, 13, 3]}
+            {
+                "key": "siege.row1.1",
+                "start": "siege.row1.1",
+                "medium": "land",
+                "region": [11, 1, 13, 3],
+            }
         ],
         "land_terrain": [0, 4],
         "water_terrain": [1, 4],

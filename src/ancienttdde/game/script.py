@@ -34,11 +34,14 @@ from ancienttdde.game.config import (
 )
 from ancienttdde.game.controls import CONTROLS, MODES, controls
 from ancienttdde.game.messages import MESSAGES
-from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS
+from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ISLETS, SIEGE_ROWS, SiegeRows
 from ancienttdde.game.spawns import Spawned, center, purchase_spawns, spawned_population
 from ancienttdde.game.stock import Stock
 from ancienttdde.scenario.objects import display_name
 from ancienttdde.scenario.triggers import PIERCE
+
+# The siege's stages in game.siege_phase: 0 is none.
+SIEGE_PHASE_WARNING, SIEGE_PHASE_ACTIVE = 1, 2
 
 
 class State(IntEnum):
@@ -425,6 +428,7 @@ def render_prelude(
     profiles: Profiles,
     stock: Stock,
     keeper: Keeper,
+    islets: SiegeRows,
     *,
     extern: bool = False,
 ) -> str:
@@ -433,6 +437,8 @@ def render_prelude(
     The parser's xs-check 0.2.30 sees constants declared in another file only when they are
     extern, so the build's prelude sidecar sets extern for checking runtime.xs on its own.
     """
+    if len(islets) != SIEGE_ROWS or any(len(row) != SIEGE_ISLETS for row in islets):
+        raise ValueError(f"The siege needs {SIEGE_ROWS} islet rows of {SIEGE_ISLETS}")
     economy = balance.economy
     difficulty = balance.difficulty
     purchases = shop.purchases
@@ -515,10 +521,10 @@ def render_prelude(
         cArmorLimit=ARMOR_LIMIT,
         cRaiderLineSize=line_size,
         cSiegePurchase=siege.index if siege else 0,
-        cSiegeRivalKings=siege.effect.kings_per_rival
-        if siege and isinstance(siege.effect, SiegePowerUp)
-        else 0,
-        cSiegeTrebuchets=interaction.siege.trebuchets_per_rival,
+        cSiegeRows=SIEGE_ROWS,
+        cSiegePhaseWarning=SIEGE_PHASE_WARNING,
+        cSiegePhaseActive=SIEGE_PHASE_ACTIVE,
+        cSiegeTrebuchets=interaction.siege.trebuchets_per_row,
         cSiegeWarning=interaction.siege.warning_seconds,
         cSiegeActive=interaction.siege.active_seconds,
         cSiegeSharedCooldown=interaction.siege.shared_cooldown,
@@ -596,11 +602,9 @@ def render_prelude(
         # Indexed by lane, in tenths of a tile: where a cleared lane's King stands.
         "keeperX10": [0] + [center(tile)[0] for tile in keeper.lane_kings],
         "keeperY10": [0] + [center(tile)[1] for tile in keeper.lane_kings],
-        # Indexed by lane * cSiegeSlots + position, in tenths of a tile at the islet centers.
-        "siegeX10": [0] * SIEGE_ISLETS
-        + [center(tile)[0] for lane in lanes for tile in lane.sites.siege],
-        "siegeY10": [0] * SIEGE_ISLETS
-        + [center(tile)[1] for lane in lanes for tile in lane.sites.siege],
+        # Indexed by row * cSiegeSlots + position, in tenths of a tile at the islet centers.
+        "siegeX10": [0] * SIEGE_ISLETS + [center(tile)[0] for row in islets for tile in row],
+        "siegeY10": [0] * SIEGE_ISLETS + [center(tile)[1] for row in islets for tile in row],
         "endlessTemplate": list(balance.endless.templates),
         # The enemies endless waves bring, once each: they take every armor step.
         "endlessUnit": list(
@@ -710,6 +714,7 @@ def render_xs(
     profiles: Profiles,
     stock: Stock,
     keeper: Keeper,
+    islets: SiegeRows,
 ) -> str:
     """Prefix the shared runtime with this build's constants and lookup tables.
 
@@ -719,4 +724,6 @@ def render_xs(
     the game as the enemy rather than player 8. assets/runtime.xs is embedded verbatim in the
     game scenario, so notes about it live here rather than in its comments.
     """
-    return render_prelude(balance, lanes, shop, profiles, stock, keeper) + asset_text("runtime.xs")
+    return render_prelude(balance, lanes, shop, profiles, stock, keeper, islets) + asset_text(
+        "runtime.xs"
+    )

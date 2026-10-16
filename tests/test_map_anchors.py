@@ -9,7 +9,7 @@ from typing import cast
 
 import pytest
 
-from ancienttdde.game.sites import RAIDER_MEDIA
+from ancienttdde.game.sites import RAIDER_MEDIA, SIEGE_ROWS
 from ancienttdde.map.foundation import migrate_map
 from ancienttdde.map.geometry import Cell, cells, flood, footprint, neighbors
 from ancienttdde.map.models import FoundationConfig, MapAnchor, MapDocument
@@ -416,8 +416,8 @@ def test_the_keeper_islets_lie_beyond_every_tower_trebuchet_and_raider(
     king: str, tower: str, islet: tuple[int, int, int, int]
 ) -> None:
     """Slot 8's placed keepers and the ones the script creates for an enemy in a lane slot
-    stand where nothing can shoot them: a lane's spare islet lies within the next lane's
-    Accursed Tower reach, which killed the keepers there. The original's selector Outposts on
+    stand where nothing can shoot them: a siege row's spare islet lies within an Accursed
+    Tower's reach, which killed the keepers there. The original's selector Outposts on
     the islets' buildable tiles leave with the build."""
     data, _ = content()
     throne, watch = tile(point(king)), tile(point(tower))
@@ -538,13 +538,55 @@ def test_lane_sites_read_the_raider_arrivals(player: int) -> None:
         assert sites.raiders[kind].tiles == (spawn,) and sites.raiders[kind].walk == walk
 
 
-@pytest.mark.parametrize("player", PLAYERS)
-def test_lane_sites_read_the_siege_positions_near_the_lane(player: int) -> None:
-    from ancienttdde.game.sites import load_sites
+ISLET_ROWS = range(1, SIEGE_ROWS + 1)
+ISLET_COLUMNS = ((24, 26), (32, 34), (40, 42))
+
+
+def outer_row(lane: int, side: str) -> int:
+    """The centre line of a lane's outermost tower row on one side."""
+    _, y1, _, y2 = rect(f"lane.p{lane}.expansion.fourth.{side}")
+    return y1 if side == "north" else y2
+
+
+@pytest.mark.parametrize("row", ISLET_ROWS)
+def test_siege_islet_rows_flank_every_lane(row: int) -> None:
+    """Row 1 lies north of lane 1 and the last row south of lane 7, six tiles from that lane's
+    outer tower row; every other row lies between two lanes, seven tiles from both, so neither
+    side is nearer to its trebuchets. Water rings every islet, so nothing walks on or off."""
+    _, config = content()
+    if row == 1:
+        centre = outer_row(1, "north") - 6
+    elif row == SIEGE_ROWS:
+        centre = outer_row(7, "south") + 6
+    else:
+        north, south = outer_row(row - 1, "south"), outer_row(row, "north")
+        assert south - north == 14
+        centre = north + 7
+    y1, y2 = centre - 1, centre + 1
+    for index, (x1, x2) in enumerate(ISLET_COLUMNS, 1):
+        key = f"siege.row{row}.{index}"
+        assert rect(key) == (x1, y1, x2, y2)
+        assert tile(point(key)) == ((x1 + x2) // 2, centre)
+        assert region(key) <= terrain("land") and region(key).isdisjoint(blocked())
+        [patch] = [p for p in config["terrain_patches"] if p["key"] == key]
+        assert tuple(patch["region"]) == rect(key)
+        [isolated] = [c for c in config["isolation"] if c["key"] == key]
+        assert isolated["start"] == key and tuple(isolated["region"]) == rect(key)
+        ring = cells((x1 - 1, y1 - 1, x2 + 1, y2 + 1)) - region(key)
+        assert ring <= terrain("water")
+
+
+def test_siege_rows_are_read_from_the_islet_anchors() -> None:
+    from ancienttdde.game.sites import load_siege_rows, load_sites
 
     data, _ = content()
-    sites = load_sites(data.get("anchors", {}), player)
-    assert sites.siege == tuple(tile(point(f"siege.p{player}.{i}")) for i in (1, 2, 3))
+    anchors = data.get("anchors", {})
+    rows = load_siege_rows(anchors)
+    assert len(rows) == SIEGE_ROWS == 8
+    for row, islets in enumerate(rows, 1):
+        assert islets == tuple(tile(point(f"siege.row{row}.{i}")) for i in (1, 2, 3))
+    # The islets belong to the map, not to a lane.
+    assert not hasattr(load_sites(anchors, 1), "siege")
 
 
 @pytest.mark.parametrize("player", PLAYERS)

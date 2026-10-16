@@ -27,6 +27,10 @@ from ancienttdde.game.restricted import (
 from ancienttdde.game.triggers import Game
 from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
+# Outlasts a tower row's volley, and stays under DE's 16-bit hit point ceiling after the
+# Celts' Furor Celtica multiplies it by 1.4.
+TREBUCHET_HIT_POINTS = 20000
+
 
 def disable_objects(trigger: TriggerHandle, player: int, objects: tuple[int, ...]) -> None:
     for unit in objects:
@@ -57,9 +61,13 @@ def restrict(game: Game, trigger: TriggerHandle, player: int) -> None:
             enabled=0,
         )
     silence(game, trigger, player)
-    # Siege power-up trebuchets stay on their islets, packed or not.
+    # Siege power-up trebuchets stay on their islets, packed or not, and outlast the volley a
+    # tower row can land before the protection trigger reaches them.
     for unit in ("TREBUCHET", "TREBUCHET_PACKED"):
         game.set_attribute(trigger, player, UnitInfo[unit].ID, ObjectAttribute.MOVEMENT_SPEED, 0)
+        game.set_attribute(
+            trigger, player, UnitInfo[unit].ID, ObjectAttribute.HIT_POINTS, TREBUCHET_HIT_POINTS
+        )
 
 
 def silence(game: Game, trigger: TriggerHandle, player: int) -> None:

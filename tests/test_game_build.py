@@ -220,7 +220,8 @@ FAR_END_FLAGS = {
     "third_row": column(162, range(47, 50)),
     "fourth_row": column(164, range(47, 50)),
     "naval_raider": column(169, range(20, 22)),
-    "siege": column(169, range(24, 34)) | column(168, range(24, 29)),
+    # Twenty flags for the flat price: two full columns at the far end.
+    "siege": column(169, range(24, 34)) | column(168, range(24, 34)),
     "land_raider": column(169, range(36, 38)),
     "castle": {(150, 49)},
     "population": {(145, 49), (146, 49)},
@@ -471,7 +472,7 @@ def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: Ga
     exit, not a unit standing on a siege islet."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.config import load_lanes
-    from ancienttdde.game.sites import SPARE_ISLET
+    from ancienttdde.game.sites import SPARE_ISLET, load_siege_rows
     from ancienttdde.game.waves import WALK_CONSTANTS
 
     output, _ = game_build
@@ -496,9 +497,10 @@ def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: Ga
                 units.append({"x": x, "y": y, "action": standing})
         units.append({"x": spot + 10, "y": center + 0.5, "action": walking})
         units.append({"x": lane.exit_x - 0.5, "y": center + 0.5, "action": standing})
-        islet_x, islet_y = lane.sites.siege[SPARE_ISLET]
+    # Nothing standing on a siege islet moves either, nor the enemy's keepers on theirs.
+    for row in load_siege_rows(object_value(anchors, "anchors")):
+        islet_x, islet_y = row[SPARE_ISLET]
         units.append({"x": islet_x + 0.5, "y": islet_y + 0.5, "action": standing})
-    # Nor the enemy's keepers on their islet.
     from ancienttdde.game.config import load_keeper
 
     keeper = load_keeper(anchors)

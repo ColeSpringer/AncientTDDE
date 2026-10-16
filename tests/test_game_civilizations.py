@@ -378,9 +378,9 @@ def test_native_worth_is_read_from_the_content_and_defaults_to_nothing(tmp_path:
     from ancienttdde.game.civilizations import NativeWorth
 
     profiles = load()
-    teutons, thracians = profiles.by_id(4), profiles.by_id(55)
-    assert teutons is not None and thracians is not None
-    assert teutons.native == NativeWorth(solo=1.0, pvp=0.1)
+    celts, thracians = profiles.by_id(13), profiles.by_id(55)
+    assert celts is not None and thracians is not None
+    assert celts.native == NativeWorth(solo=0.2, pvp=0.9)
     assert thracians.native == NativeWorth() and NativeWorth().solo == 0.0
     data = raw()
     data["civilizations"][0]["native"] = {"pvp": 0.5}

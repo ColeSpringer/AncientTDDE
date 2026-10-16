@@ -101,11 +101,11 @@
       }
     },
     "siege": {
-      "trebuchets_per_rival": 2,
+      "trebuchets_per_row": 2,
       "warning_seconds": 10,
       "active_seconds": 60,
-      "shared_cooldown": 60,
-      "buyer_cooldown": 120
+      "shared_cooldown": 180,
+      "buyer_cooldown": 240
     }
   },
   "practice": {

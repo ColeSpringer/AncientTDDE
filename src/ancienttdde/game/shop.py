@@ -182,8 +182,12 @@ def lane_purchases(game: Game, lane: EngineLane, shop: Shop, balance: Balance) -
         game.value(trigger, f"{prefix}.active", 1)
         game.value(trigger, f"{prefix}.purchase", purchase.index)
         apply(game, trigger, lane, purchase, balance)
-        paid = "" if isinstance(purchase.effect, SiegePowerUp) else f" for {purchase.price}"
-        effect(trigger, "send_chat", source_player=player, message=f"Bought {purchase.name}{paid}.")
+        effect(
+            trigger,
+            "send_chat",
+            source_player=player,
+            message=f"Bought {purchase.name} for {purchase.price}.",
+        )
         game.set_value(trigger, f"{prefix}.purchase", 0)
 
 

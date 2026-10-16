@@ -62,7 +62,8 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
     land, naval, siege = (catalog.get(k) for k in ("land_raider", "naval_raider", "siege"))
     assert (land.effect, land.kings, land.legacy) == (Raider("land"), 2, None)
     assert (naval.effect, naval.kings, naval.legacy) == (Raider("naval"), 2, None)
-    assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(3), 15, None)
+    assert (siege.effect, siege.kings, siege.legacy) == (SiegePowerUp(), 20, None)
+    assert (siege.price, siege.tag) == ("20 Kings", "Siege power-up: 20 Kings")
     assert not any(p.once for p in (land, naval, siege))
     assert [p.pad for p in (land, naval, siege)] == [
         "shop.land_raider",
@@ -85,7 +86,7 @@ def test_raiders_and_the_siege_power_up_are_sold_beside_the_land_trade_wall() ->
         ),
         ("land_raider", "Land raider (light cavalry): 2 Kings, when PvP is on"),
         ("naval_raider", "Naval raider (fire galley): 2 Kings, when PvP is on"),
-        ("siege", "Siege power-up: 15 Kings plus 3 per surviving rival, when PvP is on"),
+        ("siege", "Siege power-up: 20 Kings, when PvP is on"),
         ("castle", "Castle (+20 population, castle research): 1 King, once"),
         ("population", "+65 population: 2 Kings"),
     ],
@@ -107,7 +108,7 @@ def test_population_sells_again_and_the_castle_once() -> None:
     [
         ("tower_attack_4", "1 King"),
         ("tower_attack_50", "7 Kings"),
-        ("siege", "15 Kings plus 3 per surviving rival"),
+        ("siege", "20 Kings"),
     ],
 )
 def test_prices_are_written_once_for_captions_and_messages(key: str, price: str) -> None:
@@ -122,7 +123,7 @@ def test_prices_are_written_once_for_captions_and_messages(key: str, price: str)
         ("attack_1_every_30", "+1 attack/30 s: 5 Kings"),
         ("gold_1000", "1000 gold/2 min: 4 Kings"),
         ("left_accursed_tower", "Accursed Tower: 1 King"),
-        ("siege", "Siege power-up: 15 Kings +3/rival"),
+        ("siege", "Siege power-up: 20 Kings"),
         ("castle", "Castle: 1 King"),
     ],
 )
@@ -409,9 +410,9 @@ def test_pads_hold_their_price_in_open_tiles_without_sharing_any() -> None:
     for purchase in shop().purchases:
         tiles = cells(purchase.pad_region) & walkable
         assert len(tiles) >= min(purchase.kings, 4), purchase.key
-        # The siege's price grows with the rivals: six of them in a full game.
+        # The siege pad shows every flag of its flat price.
         if isinstance(purchase.effect, SiegePowerUp):
-            assert len(tiles) >= purchase.kings + 6 * purchase.effect.kings_per_rival
+            assert len(tiles) >= purchase.kings
         for cell in tiles:
             assert claimed.setdefault(cell, purchase.pad) == purchase.pad, (cell, purchase.key)
 
@@ -459,7 +460,6 @@ def test_every_pad_is_reachable_from_each_kings_entrance(player: int) -> None:
         ("second_siege", "At most one siege purchase"),
         ("second_population", "At most one population purchase"),
         ("second_land_raider", "At most one land raider purchase"),
-        ("siege_kings_per_rival", "kings_per_rival"),
         ("unknown_medium", "medium"),
         ("blank_legacy", "legacy"),
         ("blank_label", "label"),
@@ -505,15 +505,13 @@ def test_invalid_catalogs_are_rejected(defect: str, message: str, tmp_path: Path
     elif defect == "old_schema":
         raw["schema_version"] = 1
     elif defect == "previous_schema":
-        raw["schema_version"] = 3
+        raw["schema_version"] = 4
     elif defect == "second_siege":
-        first["effect"] = {"kind": "siege", "kings_per_rival": 5}
+        first["effect"] = {"kind": "siege"}
     elif defect == "second_population":
         first["effect"] = {"kind": "population", "amount": 65}
     elif defect == "second_land_raider":
         first["effect"] = {"kind": "raider", "medium": "land"}
-    elif defect == "siege_kings_per_rival":
-        next(p for p in purchases if p["key"] == "siege")["effect"]["kings_per_rival"] = 0
     elif defect == "unknown_medium":
         first["effect"] = {"kind": "raider", "medium": "air"}
     elif defect == "blank_legacy":

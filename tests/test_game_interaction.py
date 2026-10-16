@@ -34,6 +34,7 @@ HIT_POINTS, SPEED, ARMOR, MAX_RANGE = 0, 5, 8, 12
 TOTAL_MISSILES, MAX_TOTAL_MISSILES = 102, 107
 PIERCE, ENEMY, MOVE = 3, 3, 3
 OUTPOST, KING = 598, 434
+TREBUCHET, PACKED_TREBUCHET = 42, 331
 TOWERS = (79, 234, 235, 236)
 
 
@@ -638,7 +639,7 @@ def test_bought_raiders_walk_clear_of_their_arrival(game_build: GameBuild, playe
     siege = triggers[f"lane.p{player}.buy.siege"]
     assert not effects(siege, "create_object") and not effects(siege, "task_object")
     [chat] = effects(siege, "send_chat")
-    assert chat["message"] == "Bought Siege power-up."
+    assert chat["message"] == "Bought Siege power-up for 20 Kings."
 
 
 def test_siege_and_endless_waves_are_counted_down(game_build: GameBuild) -> None:
@@ -684,6 +685,30 @@ def test_kings_cannot_be_attacked(game_build: GameBuild, player: int) -> None:
     [protect] = effects(trigger, "disable_unit_attackable")
     assert (protect["source_player"], protect["object_list_unit_id"]) == (player, KING)
     assert protect["area_x1"] == -1 and not attr_list(protect, "selected_object_ids")
+
+
+@pytest.mark.parametrize("player", PLAYERS)
+def test_siege_trebuchets_cannot_be_attacked(game_build: GameBuild, player: int) -> None:
+    """The towers of both lanes beside the islets reach the trebuchets, so while a lane holds
+    the siege its trebuchets, packed or not, are made unattackable on every pass of the
+    triggers, with no timer: the pass that creates them protects them."""
+    data = snapshot(game_build)
+    variables = variables_by_name(data)
+    trigger = triggers_by_name(data)[f"lane.p{player}.siege.protect"]
+    assert trigger["looping"]
+    assert not conditions(trigger, "timer")
+    assert requested(trigger, variables["game.siege_owner"]) == player
+    # Not during the warning, when no trebuchet exists yet.
+    from ancienttdde.game.script import SIEGE_PHASE_ACTIVE
+
+    assert requested(trigger, variables["game.siege_phase"]) == SIEGE_PHASE_ACTIVE
+    assert len(trigger["conditions"]) == 2
+    protected = effects(trigger, "disable_unit_attackable")
+    assert sorted((e["source_player"], e["object_list_unit_id"]) for e in protected) == sorted(
+        [(player, TREBUCHET), (player, PACKED_TREBUCHET)]
+    )
+    for protect in protected:
+        assert protect["area_x1"] == -1 and not attr_list(protect, "selected_object_ids")
 
 
 def raider_ground(build: GameBuild) -> dict[str, set[tuple[int, int]]]:
@@ -857,7 +882,14 @@ def test_lane_setup_closes_ways_around_the_combat_areas(game_build: GameBuild, p
     }
     assert techs >= {
         TechInfo[name].ID
-        for name in ("ATONEMENT", "REDEMPTION", "BLOCK_PRINTING", "CRENELLATIONS", "GREEK_FIRE")
+        for name in (
+            "ATONEMENT",
+            "REDEMPTION",
+            "BLOCK_PRINTING",
+            "CRENELLATIONS",
+            "GREEK_FIRE",
+            "SIEGE_ENGINEERS",
+        )
     }
     assert set(DISABLED_TECHNOLOGIES + TOWER_MULTIPLIERS + RETURNING) <= techs
     assert {2705, 2569, 2101, 2703, 2565, 2417} <= disabled
@@ -879,6 +911,13 @@ def test_lane_setup_closes_ways_around_the_combat_areas(game_build: GameBuild, p
     assert settings[(castle, TOTAL_MISSILES)] == settings[(castle, MAX_TOTAL_MISSILES)] == 0
     assert settings[(monk, MAX_RANGE)] == 0
     assert all(settings[(unit, SPEED)] == 0 for unit in trebuchets)
+    # Enough to outlast the volley a tower row can land before the protection reaches them,
+    # and under the 16-bit ceiling after the Celts' Furor Celtica multiplies it by 1.4.
+    from ancienttdde.game.config import MAX_HIT_POINTS
+    from ancienttdde.game.restrictions import TREBUCHET_HIT_POINTS
+
+    assert all(settings[(unit, HIT_POINTS)] == TREBUCHET_HIT_POINTS for unit in trebuchets)
+    assert 11000 < TREBUCHET_HIT_POINTS and TREBUCHET_HIT_POINTS * 1.4 <= MAX_HIT_POINTS
 
 
 @pytest.mark.parametrize("player", PLAYERS)

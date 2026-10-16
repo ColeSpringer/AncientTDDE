@@ -2807,7 +2807,7 @@
       ],
       "reference_id": 20559
     },
-    "siege.p1.1": {
+    "siege.row1.1": {
       "point": [
         25.5,
         2.5
@@ -2818,9 +2818,9 @@
         26,
         3
       ],
-      "label": "Siege position 1 near player 1"
+      "label": "Siege row 1 position 1, north of lane 1"
     },
-    "siege.p1.2": {
+    "siege.row1.2": {
       "point": [
         33.5,
         2.5
@@ -2831,9 +2831,9 @@
         34,
         3
       ],
-      "label": "Siege position 2 near player 1"
+      "label": "Siege row 1 position 2, north of lane 1"
     },
-    "siege.p1.3": {
+    "siege.row1.3": {
       "point": [
         41.5,
         2.5
@@ -2844,7 +2844,7 @@
         42,
         3
       ],
-      "label": "Siege position 3 near player 1"
+      "label": "Siege row 1 position 3, north of lane 1"
     },
     "lane.p2.spawn": {
       "point": [
@@ -3328,44 +3328,44 @@
       ],
       "reference_id": 20564
     },
-    "siege.p2.1": {
+    "siege.row2.1": {
       "point": [
         25.5,
-        30.5
+        29.5
       ],
       "region": [
         24,
-        29,
+        28,
         26,
-        31
+        30
       ],
-      "label": "Siege position 1 near player 2"
+      "label": "Siege row 2 position 1, between lanes 1 and 2"
     },
-    "siege.p2.2": {
+    "siege.row2.2": {
       "point": [
         33.5,
-        30.5
+        29.5
       ],
       "region": [
         32,
-        29,
+        28,
         34,
-        31
+        30
       ],
-      "label": "Siege position 2 near player 2"
+      "label": "Siege row 2 position 2, between lanes 1 and 2"
     },
-    "siege.p2.3": {
+    "siege.row2.3": {
       "point": [
         41.5,
-        30.5
+        29.5
       ],
       "region": [
         40,
-        29,
+        28,
         42,
-        31
+        30
       ],
-      "label": "Siege position 3 near player 2"
+      "label": "Siege row 2 position 3, between lanes 1 and 2"
     },
     "lane.p3.spawn": {
       "point": [
@@ -3849,44 +3849,44 @@
       ],
       "reference_id": 20578
     },
-    "siege.p3.1": {
+    "siege.row3.1": {
       "point": [
         25.5,
-        58.5
+        57.5
       ],
       "region": [
         24,
-        57,
+        56,
         26,
-        59
+        58
       ],
-      "label": "Siege position 1 near player 3"
+      "label": "Siege row 3 position 1, between lanes 2 and 3"
     },
-    "siege.p3.2": {
+    "siege.row3.2": {
       "point": [
         33.5,
-        58.5
+        57.5
       ],
       "region": [
         32,
-        57,
+        56,
         34,
-        59
+        58
       ],
-      "label": "Siege position 2 near player 3"
+      "label": "Siege row 3 position 2, between lanes 2 and 3"
     },
-    "siege.p3.3": {
+    "siege.row3.3": {
       "point": [
         41.5,
-        58.5
+        57.5
       ],
       "region": [
         40,
-        57,
+        56,
         42,
-        59
+        58
       ],
-      "label": "Siege position 3 near player 3"
+      "label": "Siege row 3 position 3, between lanes 2 and 3"
     },
     "lane.p4.spawn": {
       "point": [
@@ -4370,44 +4370,44 @@
       ],
       "reference_id": 20591
     },
-    "siege.p4.1": {
+    "siege.row4.1": {
       "point": [
         25.5,
-        86.5
+        85.5
       ],
       "region": [
         24,
-        85,
+        84,
         26,
-        87
+        86
       ],
-      "label": "Siege position 1 near player 4"
+      "label": "Siege row 4 position 1, between lanes 3 and 4"
     },
-    "siege.p4.2": {
+    "siege.row4.2": {
       "point": [
         33.5,
-        86.5
+        85.5
       ],
       "region": [
         32,
-        85,
+        84,
         34,
-        87
+        86
       ],
-      "label": "Siege position 2 near player 4"
+      "label": "Siege row 4 position 2, between lanes 3 and 4"
     },
-    "siege.p4.3": {
+    "siege.row4.3": {
       "point": [
         41.5,
-        86.5
+        85.5
       ],
       "region": [
         40,
-        85,
+        84,
         42,
-        87
+        86
       ],
-      "label": "Siege position 3 near player 4"
+      "label": "Siege row 4 position 3, between lanes 3 and 4"
     },
     "lane.p5.spawn": {
       "point": [
@@ -4891,44 +4891,44 @@
       ],
       "reference_id": 20600
     },
-    "siege.p5.1": {
+    "siege.row5.1": {
       "point": [
         25.5,
-        114.5
+        113.5
       ],
       "region": [
         24,
-        113,
+        112,
         26,
-        115
+        114
       ],
-      "label": "Siege position 1 near player 5"
+      "label": "Siege row 5 position 1, between lanes 4 and 5"
     },
-    "siege.p5.2": {
+    "siege.row5.2": {
       "point": [
         33.5,
-        114.5
+        113.5
       ],
       "region": [
         32,
-        113,
+        112,
         34,
-        115
+        114
       ],
-      "label": "Siege position 2 near player 5"
+      "label": "Siege row 5 position 2, between lanes 4 and 5"
     },
-    "siege.p5.3": {
+    "siege.row5.3": {
       "point": [
         41.5,
-        114.5
+        113.5
       ],
       "region": [
         40,
-        113,
+        112,
         42,
-        115
+        114
       ],
-      "label": "Siege position 3 near player 5"
+      "label": "Siege row 5 position 3, between lanes 4 and 5"
     },
     "lane.p6.spawn": {
       "point": [
@@ -5412,44 +5412,44 @@
       ],
       "reference_id": 20613
     },
-    "siege.p6.1": {
+    "siege.row6.1": {
       "point": [
         25.5,
-        142.5
+        141.5
       ],
       "region": [
         24,
-        141,
+        140,
         26,
-        143
+        142
       ],
-      "label": "Siege position 1 near player 6"
+      "label": "Siege row 6 position 1, between lanes 5 and 6"
     },
-    "siege.p6.2": {
+    "siege.row6.2": {
       "point": [
         33.5,
-        142.5
+        141.5
       ],
       "region": [
         32,
-        141,
+        140,
         34,
-        143
+        142
       ],
-      "label": "Siege position 2 near player 6"
+      "label": "Siege row 6 position 2, between lanes 5 and 6"
     },
-    "siege.p6.3": {
+    "siege.row6.3": {
       "point": [
         41.5,
-        142.5
+        141.5
       ],
       "region": [
         40,
-        141,
+        140,
         42,
-        143
+        142
       ],
-      "label": "Siege position 3 near player 6"
+      "label": "Siege row 6 position 3, between lanes 5 and 6"
     },
     "lane.p7.spawn": {
       "point": [
@@ -5933,44 +5933,83 @@
       ],
       "reference_id": 20623
     },
-    "siege.p7.1": {
+    "siege.row7.1": {
       "point": [
         25.5,
-        170.5
+        169.5
       ],
       "region": [
         24,
-        169,
+        168,
         26,
-        171
+        170
       ],
-      "label": "Siege position 1 near player 7"
+      "label": "Siege row 7 position 1, between lanes 6 and 7"
     },
-    "siege.p7.2": {
+    "siege.row7.2": {
       "point": [
         33.5,
-        170.5
+        169.5
       ],
       "region": [
         32,
-        169,
+        168,
         34,
-        171
+        170
       ],
-      "label": "Siege position 2 near player 7"
+      "label": "Siege row 7 position 2, between lanes 6 and 7"
     },
-    "siege.p7.3": {
+    "siege.row7.3": {
       "point": [
         41.5,
-        170.5
+        169.5
       ],
       "region": [
         40,
-        169,
+        168,
         42,
-        171
+        170
       ],
-      "label": "Siege position 3 near player 7"
+      "label": "Siege row 7 position 3, between lanes 6 and 7"
+    },
+    "siege.row8.1": {
+      "point": [
+        25.5,
+        196.5
+      ],
+      "region": [
+        24,
+        195,
+        26,
+        197
+      ],
+      "label": "Siege row 8 position 1, south of lane 7"
+    },
+    "siege.row8.2": {
+      "point": [
+        33.5,
+        196.5
+      ],
+      "region": [
+        32,
+        195,
+        34,
+        197
+      ],
+      "label": "Siege row 8 position 2, south of lane 7"
+    },
+    "siege.row8.3": {
+      "point": [
+        41.5,
+        196.5
+      ],
+      "region": [
+        40,
+        195,
+        42,
+        197
+      ],
+      "label": "Siege row 8 position 3, south of lane 7"
     },
     "shop.entry": {
       "point": [
@@ -6335,7 +6374,7 @@
         169,
         33
       ],
-      "label": "Siege power-up (15 Kings plus 3 per rival)"
+      "label": "Siege power-up (20 Kings)"
     },
     "controls.run": {
       "points": [
@@ -9037,7 +9076,7 @@
   ],
   "terrain_patches": [
     {
-      "key": "siege.p1.1",
+      "key": "siege.row1.1",
       "region": [
         24,
         1,
@@ -9050,7 +9089,7 @@
       ]
     },
     {
-      "key": "siege.p1.2",
+      "key": "siege.row1.2",
       "region": [
         32,
         1,
@@ -9063,7 +9102,7 @@
       ]
     },
     {
-      "key": "siege.p1.3",
+      "key": "siege.row1.3",
       "region": [
         40,
         1,
@@ -9076,12 +9115,12 @@
       ]
     },
     {
-      "key": "siege.p2.1",
+      "key": "siege.row2.1",
       "region": [
         24,
-        29,
+        28,
         26,
-        31
+        30
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9089,12 +9128,12 @@
       ]
     },
     {
-      "key": "siege.p2.2",
+      "key": "siege.row2.2",
       "region": [
         32,
-        29,
+        28,
         34,
-        31
+        30
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9102,12 +9141,12 @@
       ]
     },
     {
-      "key": "siege.p2.3",
+      "key": "siege.row2.3",
       "region": [
         40,
-        29,
+        28,
         42,
-        31
+        30
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9115,12 +9154,12 @@
       ]
     },
     {
-      "key": "siege.p3.1",
+      "key": "siege.row3.1",
       "region": [
         24,
-        57,
+        56,
         26,
-        59
+        58
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9128,12 +9167,12 @@
       ]
     },
     {
-      "key": "siege.p3.2",
+      "key": "siege.row3.2",
       "region": [
         32,
-        57,
+        56,
         34,
-        59
+        58
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9141,12 +9180,12 @@
       ]
     },
     {
-      "key": "siege.p3.3",
+      "key": "siege.row3.3",
       "region": [
         40,
-        57,
+        56,
         42,
-        59
+        58
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9154,12 +9193,12 @@
       ]
     },
     {
-      "key": "siege.p4.1",
+      "key": "siege.row4.1",
       "region": [
         24,
-        85,
+        84,
         26,
-        87
+        86
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9167,12 +9206,12 @@
       ]
     },
     {
-      "key": "siege.p4.2",
+      "key": "siege.row4.2",
       "region": [
         32,
-        85,
+        84,
         34,
-        87
+        86
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9180,12 +9219,12 @@
       ]
     },
     {
-      "key": "siege.p4.3",
+      "key": "siege.row4.3",
       "region": [
         40,
-        85,
+        84,
         42,
-        87
+        86
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9193,12 +9232,12 @@
       ]
     },
     {
-      "key": "siege.p5.1",
+      "key": "siege.row5.1",
       "region": [
         24,
-        113,
+        112,
         26,
-        115
+        114
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9206,12 +9245,12 @@
       ]
     },
     {
-      "key": "siege.p5.2",
+      "key": "siege.row5.2",
       "region": [
         32,
-        113,
+        112,
         34,
-        115
+        114
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9219,12 +9258,12 @@
       ]
     },
     {
-      "key": "siege.p5.3",
+      "key": "siege.row5.3",
       "region": [
         40,
-        113,
+        112,
         42,
-        115
+        114
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9232,12 +9271,12 @@
       ]
     },
     {
-      "key": "siege.p6.1",
+      "key": "siege.row6.1",
       "region": [
         24,
-        141,
+        140,
         26,
-        143
+        142
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9245,12 +9284,12 @@
       ]
     },
     {
-      "key": "siege.p6.2",
+      "key": "siege.row6.2",
       "region": [
         32,
-        141,
+        140,
         34,
-        143
+        142
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9258,12 +9297,12 @@
       ]
     },
     {
-      "key": "siege.p6.3",
+      "key": "siege.row6.3",
       "region": [
         40,
-        141,
+        140,
         42,
-        143
+        142
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9271,12 +9310,12 @@
       ]
     },
     {
-      "key": "siege.p7.1",
+      "key": "siege.row7.1",
       "region": [
         24,
-        169,
+        168,
         26,
-        171
+        170
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9284,12 +9323,12 @@
       ]
     },
     {
-      "key": "siege.p7.2",
+      "key": "siege.row7.2",
       "region": [
         32,
-        169,
+        168,
         34,
-        171
+        170
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -9297,12 +9336,51 @@
       ]
     },
     {
-      "key": "siege.p7.3",
+      "key": "siege.row7.3",
       "region": [
         40,
-        169,
+        168,
         42,
-        171
+        170
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.row8.1",
+      "region": [
+        24,
+        195,
+        26,
+        197
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.row8.2",
+      "region": [
+        32,
+        195,
+        34,
+        197
+      ],
+      "terrain_id": 0,
+      "allowed_source_terrain": [
+        1
+      ]
+    },
+    {
+      "key": "siege.row8.3",
+      "region": [
+        40,
+        195,
+        42,
+        197
       ],
       "terrain_id": 0,
       "allowed_source_terrain": [
@@ -10252,8 +10330,8 @@
       ]
     },
     {
-      "key": "siege.p1.1",
-      "start": "siege.p1.1",
+      "key": "siege.row1.1",
+      "start": "siege.row1.1",
       "medium": "land",
       "region": [
         24,
@@ -10263,8 +10341,8 @@
       ]
     },
     {
-      "key": "siege.p1.2",
-      "start": "siege.p1.2",
+      "key": "siege.row1.2",
+      "start": "siege.row1.2",
       "medium": "land",
       "region": [
         32,
@@ -10274,8 +10352,8 @@
       ]
     },
     {
-      "key": "siege.p1.3",
-      "start": "siege.p1.3",
+      "key": "siege.row1.3",
+      "start": "siege.row1.3",
       "medium": "land",
       "region": [
         40,
@@ -10296,36 +10374,36 @@
       ]
     },
     {
-      "key": "siege.p2.1",
-      "start": "siege.p2.1",
+      "key": "siege.row2.1",
+      "start": "siege.row2.1",
       "medium": "land",
       "region": [
         24,
-        29,
+        28,
         26,
-        31
+        30
       ]
     },
     {
-      "key": "siege.p2.2",
-      "start": "siege.p2.2",
+      "key": "siege.row2.2",
+      "start": "siege.row2.2",
       "medium": "land",
       "region": [
         32,
-        29,
+        28,
         34,
-        31
+        30
       ]
     },
     {
-      "key": "siege.p2.3",
-      "start": "siege.p2.3",
+      "key": "siege.row2.3",
+      "start": "siege.row2.3",
       "medium": "land",
       "region": [
         40,
-        29,
+        28,
         42,
-        31
+        30
       ]
     },
     {
@@ -10340,36 +10418,36 @@
       ]
     },
     {
-      "key": "siege.p3.1",
-      "start": "siege.p3.1",
+      "key": "siege.row3.1",
+      "start": "siege.row3.1",
       "medium": "land",
       "region": [
         24,
-        57,
+        56,
         26,
-        59
+        58
       ]
     },
     {
-      "key": "siege.p3.2",
-      "start": "siege.p3.2",
+      "key": "siege.row3.2",
+      "start": "siege.row3.2",
       "medium": "land",
       "region": [
         32,
-        57,
+        56,
         34,
-        59
+        58
       ]
     },
     {
-      "key": "siege.p3.3",
-      "start": "siege.p3.3",
+      "key": "siege.row3.3",
+      "start": "siege.row3.3",
       "medium": "land",
       "region": [
         40,
-        57,
+        56,
         42,
-        59
+        58
       ]
     },
     {
@@ -10384,36 +10462,36 @@
       ]
     },
     {
-      "key": "siege.p4.1",
-      "start": "siege.p4.1",
+      "key": "siege.row4.1",
+      "start": "siege.row4.1",
       "medium": "land",
       "region": [
         24,
-        85,
+        84,
         26,
-        87
+        86
       ]
     },
     {
-      "key": "siege.p4.2",
-      "start": "siege.p4.2",
+      "key": "siege.row4.2",
+      "start": "siege.row4.2",
       "medium": "land",
       "region": [
         32,
-        85,
+        84,
         34,
-        87
+        86
       ]
     },
     {
-      "key": "siege.p4.3",
-      "start": "siege.p4.3",
+      "key": "siege.row4.3",
+      "start": "siege.row4.3",
       "medium": "land",
       "region": [
         40,
-        85,
+        84,
         42,
-        87
+        86
       ]
     },
     {
@@ -10428,36 +10506,36 @@
       ]
     },
     {
-      "key": "siege.p5.1",
-      "start": "siege.p5.1",
+      "key": "siege.row5.1",
+      "start": "siege.row5.1",
       "medium": "land",
       "region": [
         24,
-        113,
+        112,
         26,
-        115
+        114
       ]
     },
     {
-      "key": "siege.p5.2",
-      "start": "siege.p5.2",
+      "key": "siege.row5.2",
+      "start": "siege.row5.2",
       "medium": "land",
       "region": [
         32,
-        113,
+        112,
         34,
-        115
+        114
       ]
     },
     {
-      "key": "siege.p5.3",
-      "start": "siege.p5.3",
+      "key": "siege.row5.3",
+      "start": "siege.row5.3",
       "medium": "land",
       "region": [
         40,
-        113,
+        112,
         42,
-        115
+        114
       ]
     },
     {
@@ -10472,36 +10550,36 @@
       ]
     },
     {
-      "key": "siege.p6.1",
-      "start": "siege.p6.1",
+      "key": "siege.row6.1",
+      "start": "siege.row6.1",
       "medium": "land",
       "region": [
         24,
-        141,
+        140,
         26,
-        143
+        142
       ]
     },
     {
-      "key": "siege.p6.2",
-      "start": "siege.p6.2",
+      "key": "siege.row6.2",
+      "start": "siege.row6.2",
       "medium": "land",
       "region": [
         32,
-        141,
+        140,
         34,
-        143
+        142
       ]
     },
     {
-      "key": "siege.p6.3",
-      "start": "siege.p6.3",
+      "key": "siege.row6.3",
+      "start": "siege.row6.3",
       "medium": "land",
       "region": [
         40,
-        141,
+        140,
         42,
-        143
+        142
       ]
     },
     {
@@ -10516,36 +10594,69 @@
       ]
     },
     {
-      "key": "siege.p7.1",
-      "start": "siege.p7.1",
+      "key": "siege.row7.1",
+      "start": "siege.row7.1",
       "medium": "land",
       "region": [
         24,
-        169,
+        168,
         26,
-        171
+        170
       ]
     },
     {
-      "key": "siege.p7.2",
-      "start": "siege.p7.2",
+      "key": "siege.row7.2",
+      "start": "siege.row7.2",
       "medium": "land",
       "region": [
         32,
-        169,
+        168,
         34,
-        171
+        170
       ]
     },
     {
-      "key": "siege.p7.3",
-      "start": "siege.p7.3",
+      "key": "siege.row7.3",
+      "start": "siege.row7.3",
       "medium": "land",
       "region": [
         40,
-        169,
+        168,
         42,
-        171
+        170
+      ]
+    },
+    {
+      "key": "siege.row8.1",
+      "start": "siege.row8.1",
+      "medium": "land",
+      "region": [
+        24,
+        195,
+        26,
+        197
+      ]
+    },
+    {
+      "key": "siege.row8.2",
+      "start": "siege.row8.2",
+      "medium": "land",
+      "region": [
+        32,
+        195,
+        34,
+        197
+      ]
+    },
+    {
+      "key": "siege.row8.3",
+      "start": "siege.row8.3",
+      "medium": "land",
+      "region": [
+        40,
+        195,
+        42,
+        197
       ]
     },
     {
