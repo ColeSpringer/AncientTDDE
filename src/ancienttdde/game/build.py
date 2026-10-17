@@ -24,6 +24,7 @@ from ancienttdde.game.catalog import check_displays, check_pads, load_shop
 from ancienttdde.game.civilizations import load_profiles
 from ancienttdde.game.config import load_balance, load_lanes
 from ancienttdde.game.instructions import document
+from ancienttdde.game.mod import game_facts, load_description, load_thumbnail, mod_info
 from ancienttdde.game.sites import load_siege_rows
 from ancienttdde.game.spawns import reserved_tiles
 from ancienttdde.game.stock import load_stock
@@ -43,11 +44,17 @@ SCENARIO_NAME = "ancient-td-de.aoe2scenario"
 # The scenario again, laid out as a local DE mod: copy the folder into mods/local to publish it.
 MOD_FOLDER = NAME
 MOD_SCENARIO = f"{MOD_FOLDER}/resources/_common/scenario/{SCENARIO_NAME}"
+# The two files DE itself writes beside a published mod's scenario, supplied with the build
+# so the mod page text and image travel with it.
+MOD_INFO = f"{MOD_FOLDER}/info.json"
+MOD_THUMBNAIL = f"{MOD_FOLDER}/thumbnail.png"
 # The declarations the scenario embeds before assets/runtime.xs, for checking that file alone.
 PRELUDE = "runtime-prelude.xs"
 ARTIFACTS = (
     SCENARIO_NAME,
     MOD_SCENARIO,
+    MOD_INFO,
+    MOD_THUMBNAIL,
     "map.json",
     "scenario.json",
     "instructions.md",
@@ -60,6 +67,8 @@ CONTENT_INPUTS = (
     "content/balance/shop.json",
     "content/balance/civilizations.json",
     "content/balance/stock.json",
+    "content/mod/description.txt",
+    "content/mod/thumbnail.png",
 )
 
 
@@ -138,6 +147,8 @@ def build_game(root: Path, output: Path | None = None) -> Path:
     check_pads(shop, data, config)
     anchors = object_value(data.get("anchors"), "anchors")
     lanes = load_lanes(anchors)
+    description = load_description(root / "content/mod/description.txt", game_facts(balance, lanes))
+    thumbnail = load_thumbnail(root / "content/mod/thumbnail.png")
     check_displays(
         shop,
         data,
@@ -154,6 +165,8 @@ def build_game(root: Path, output: Path | None = None) -> Path:
         snapshot = inspect_game(staging / SCENARIO_NAME)
         (staging / MOD_SCENARIO).parent.mkdir(parents=True)
         shutil.copyfile(staging / SCENARIO_NAME, staging / MOD_SCENARIO)
+        (staging / MOD_INFO).write_text(mod_info(description), encoding="utf-8")
+        (staging / MOD_THUMBNAIL).write_bytes(thumbnail)
         write_json(staging / "scenario.json", snapshot)
         (staging / "instructions.md").write_text(
             document(balance, shop, profiles), encoding="utf-8"
@@ -213,7 +226,14 @@ def compare_game(directory: Path, expected: Path) -> None:
     current = read_manifest(project_path(expected, "manifest.json"))
     if current["normalized_sha256"] != manifest["normalized_sha256"]:
         raise ValueError("Game logic differs from current definitions")
-    for name in ("map.json", "validation.json", "instructions.md", PRELUDE):
+    for name in (
+        "map.json",
+        "validation.json",
+        "instructions.md",
+        PRELUDE,
+        MOD_INFO,
+        MOD_THUMBNAIL,
+    ):
         if (directory / name).read_bytes() != (expected / name).read_bytes():
             raise ValueError(f"Game sidecar differs from current definitions: {name}")
 

@@ -77,6 +77,35 @@ def test_the_mod_folder_holds_the_same_scenario(game_build: GameBuild, tmp_path:
         read_manifest(edited / "manifest.json")
 
 
+def test_the_mod_folder_carries_the_info_de_reads(game_build: GameBuild) -> None:
+    from ancienttdde.game.build import MOD_INFO
+    from ancienttdde.game.config import load_balance, load_lanes
+    from ancienttdde.game.mod import game_facts, load_description, mod_info
+
+    output, manifest = game_build
+    assert MOD_INFO == "Ancient TD DE/info.json"
+    balance = load_balance(ROOT / "content/balance/game.json")
+    anchors = json.loads((output / "map.json").read_text(encoding="utf-8"))["anchors"]
+    facts = game_facts(balance, load_lanes(anchors))
+    assert facts == {"lanes": 7, "waves": 56, "bosses": 10, "population": 200}
+    description = load_description(ROOT / "content/mod/description.txt", facts)
+    assert (output / MOD_INFO).read_text(encoding="utf-8") == mod_info(description)
+    assert MOD_INFO in {r["path"] for r in manifest["artifacts"]}
+    assert "content/mod/description.txt" in {r["path"] for r in manifest["inputs"]}
+
+
+def test_the_mod_folder_carries_the_thumbnail(game_build: GameBuild) -> None:
+    from ancienttdde.game.build import MOD_THUMBNAIL
+
+    output, manifest = game_build
+    assert MOD_THUMBNAIL == "Ancient TD DE/thumbnail.png"
+    image = (output / MOD_THUMBNAIL).read_bytes()
+    assert image == (ROOT / "content/mod/thumbnail.png").read_bytes()
+    assert image.startswith(b"\x89PNG\r\n\x1a\n")
+    assert MOD_THUMBNAIL in {r["path"] for r in manifest["artifacts"]}
+    assert "content/mod/thumbnail.png" in {r["path"] for r in manifest["inputs"]}
+
+
 def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuild) -> None:
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -800,20 +829,23 @@ def test_validation_compares_the_build_with_a_build_of_current_definitions(
         build.validate_game(edited, ROOT)
 
 
-def test_validation_rejects_a_prelude_that_differs_from_current_definitions(
-    game_build: GameBuild, tmp_path: Path
+@pytest.mark.parametrize(
+    "name", ["runtime-prelude.xs", "Ancient TD DE/info.json", "Ancient TD DE/thumbnail.png"]
+)
+def test_validation_rejects_a_sidecar_that_differs_from_current_definitions(
+    game_build: GameBuild, tmp_path: Path, name: str
 ) -> None:
     import shutil
 
-    from ancienttdde.game.build import PRELUDE, compare_game
+    from ancienttdde.game.build import compare_game
 
     output, _ = game_build
     edited = tmp_path / "edited"
     shutil.copytree(output, edited)
-    prelude = edited / PRELUDE
-    prelude.write_text(prelude.read_text(encoding="utf-8") + "\n", encoding="utf-8")
-    rehash_artifacts(edited, PRELUDE)
-    message = f"Game sidecar differs from current definitions: {PRELUDE}"
+    sidecar = edited / name
+    sidecar.write_bytes(sidecar.read_bytes() + b"\n")
+    rehash_artifacts(edited, name)
+    message = f"Game sidecar differs from current definitions: {name}"
     with pytest.raises(ValueError, match=re.escape(message)):
         compare_game(edited, output)
 
