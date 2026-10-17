@@ -15,9 +15,9 @@ WORKER_SLOTS = threading.BoundedSemaphore(os.process_cpu_count() or 1)
 
 
 def run_module(module: str, *args: str, label: str, timeout: int = 120) -> str:
-    """Run `python -m module` in a fresh interpreter; parser state never leaks between runs.
+    """Run `python -m module` in a fresh interpreter. Parser state never leaks between runs.
 
-    The run waits for a free worker slot; its timeout starts once the process does.
+    The run waits for a free worker slot. Its timeout starts once the process does.
     """
     try:
         with WORKER_SLOTS:
@@ -43,7 +43,7 @@ def run_parallel[T](tasks: Iterable[Callable[[], T]]) -> tuple[T, ...]: ...
 def run_parallel(tasks: Iterable[Callable[[], object]]) -> tuple[object, ...]:
     """Run independent tasks concurrently and return their results in task order.
 
-    Every task gets a thread; the worker processes they start share WORKER_SLOTS. Every
+    Every task gets a thread. The worker processes they start share WORKER_SLOTS. Every
     task finishes before the first failure, in task order, is raised.
     """
     pending = list(tasks)

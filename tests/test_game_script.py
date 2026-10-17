@@ -106,7 +106,7 @@ def fallback(text: str, name: str) -> int:
 
 
 def harness_constants() -> str:
-    """Purchase and tower technology names the harness cases use; the game needs none."""
+    """Purchase and tower technology names the harness cases use. The game needs none."""
     from ancienttdde.game.script import camel, tower_access
 
     balance, _, shop, _ = content()
@@ -176,7 +176,7 @@ def test_prelude_names_the_bombard_tower_research() -> None:
 
 def test_prelude_tables_are_arrays_filled_once() -> None:
     text = prelude()
-    # Integer tables are arrays; only the setup and message tables stay if-chains.
+    # Integer tables are arrays. Only the setup and message tables stay if-chains.
     assert not re.search(r"if \(index == \d+\) return \(-?\d+\);", text)
     assert "int shopX1Table = -1;" in text
     assert "void ancientTables()" in text and 'xsArrayCreateInt(40, 0, "shopX1")' in text
@@ -237,7 +237,7 @@ def test_prelude_counts_still_samples() -> None:
 
 def test_prelude_counts_shuffling_kings_that_keep_within_their_radius() -> None:
     """A King kept shuffling for room counts once it has stayed within cShuffleRadius tiles
-    of a spot for cShuffleSamples samples; a King walking at its own speed leaves the radius
+    of a spot for cShuffleSamples samples. A King walking at its own speed leaves the radius
     first, whatever the pad's shape."""
     from ancienttdde.game.script import SHUFFLE_RADIUS, SHUFFLE_SAMPLES
 
@@ -323,7 +323,7 @@ def test_prelude_declares_message_codes_and_ownership_masks() -> None:
 def test_prelude_maps_lobby_settings_to_difficulty_levels() -> None:
     balance, _, _, _ = content()
     text = prelude()
-    # xsGetDifficulty runs from Extreme (-1) to Easiest (4); the table starts at Extreme.
+    # xsGetDifficulty runs from Extreme (-1) to Easiest (4). The table starts at Extreme.
     assert list(filled(text, "lobbyLevel").values()) == [2, 2, 2, 1, 1, 0]
     assert list(filled(text, "kingGold").values()) == [
         level.king_gold for level in balance.difficulty.levels
@@ -348,7 +348,7 @@ def test_prelude_lists_the_armor_a_wave_sets_and_the_enemy_variable() -> None:
         for index, wave in enumerate(balance.waves)
     }
     keys = [wave.key for wave in balance.waves]
-    # The rams keep their own full armor; a tier wave reads its own plus the tier's step.
+    # The rams keep their own full armor. A tier wave reads its own plus the tier's step.
     assert armor[keys.index("Siege Rams")] == -1
     assert armor[keys.index("Nobunaga")] == stock().unit("NOBUNAGA").armor(3) + 10
     assert f"const int vEnemy = {GLOBAL_VARIABLES.index('enemy')};" in text
@@ -358,12 +358,12 @@ def test_prelude_lists_the_armor_a_wave_sets_and_the_enemy_variable() -> None:
 
 def test_prelude_declares_the_population_rule() -> None:
     """The shop refuses units the lane has no population room for, against DE's headroom and
-    population attributes and the game's own limit; relics' monks and the castle take none."""
+    population attributes and the game's own limit. Relics' monks and the castle take none."""
     balance, _, shop, _ = content()
     text = prelude()
     assert f"const int cPopulationCap = {balance.population_cap};" in text
     assert f"const int cPopulationPurchase = {shop.get('population').index};" in text
-    # The runtime reads DE's own attribute constants; the prelude declares no copies.
+    # The runtime reads DE's own attribute constants. The prelude declares no copies.
     from ancienttdde.common.data import asset_text
 
     runtime = asset_text("runtime.xs")

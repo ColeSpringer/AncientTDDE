@@ -94,7 +94,7 @@ def test_players_are_reset_to_an_empty_controlled_start(scenario: AoE2DEScenario
     assert player.population_cap == 250
 
 
-# The strategic numbers DE's own AI scripts name; DE rejects a script naming any other.
+# The strategic numbers DE's own AI scripts name. DE rejects a script naming any other.
 DE_NAMES = Path(__file__).parent / "support/de-strategic-numbers.txt"
 DE_STRATEGIC_NUMBERS = frozenset(
     line.strip() for line in DE_NAMES.read_text().splitlines() if line.strip()[:1] not in ("", "#")

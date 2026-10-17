@@ -34,7 +34,7 @@ def test_a_worker_that_runs_too_long_reports_its_label() -> None:
 def test_worker_processes_stay_within_their_slots_however_tasks_nest(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Each worker logs when it ran; the overlap of those intervals is the concurrency.
+    # Each worker logs when it ran. The overlap of those intervals is the concurrency.
     (tmp_path / "interval_worker.py").write_text(
         "import sys, time\n"
         "start = time.monotonic()\n"

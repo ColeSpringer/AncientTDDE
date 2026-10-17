@@ -53,7 +53,7 @@ def audit(
     root: Root = Path("."),
     output: Annotated[Path | None, typer.Option(help="Generated report directory.")] = None,
 ) -> None:
-    """Inventory original behavior and DAT dependencies; generate JSON and Markdown."""
+    """Inventory original behavior and DAT dependencies. Generate JSON and Markdown."""
     with reported("Audit"):
         directory = run_audit(root, output)
         summary = read_audit_manifest(directory / "manifest.json")["summary"]
@@ -149,7 +149,7 @@ def balance(
                 or not report.read_text(encoding="utf-8").startswith(REPORT_TITLE)
             )
         ):
-            raise ValueError("Output cannot overwrite unrelated artifacts; choose another output")
+            raise ValueError("Output cannot overwrite unrelated artifacts. Choose another output")
         text = render_report(load_inputs(root.resolve()), Assumptions())
         directory.mkdir(parents=True, exist_ok=True)
         staged = report.with_name("balance.md.part")
@@ -164,7 +164,7 @@ def probe(
     root: Root = Path("."),
     output: Annotated[Path | None, typer.Option(help="Generated probe suite directory.")] = None,
     only: Annotated[
-        list[ProbeId] | None, typer.Option(help="Generate only these probes; repeatable.")
+        list[ProbeId] | None, typer.Option(help="Generate only these probes. Repeatable.")
     ] = None,
 ) -> None:
     """Generate self-contained scenarios, instructions and an observation ledger."""

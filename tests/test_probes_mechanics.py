@@ -508,7 +508,7 @@ def test_tower_damage_lines_up_one_tower_of_each_kind_with_its_own_target_spot(
     directory, _ = probe_suite
     snapshot = probe_snapshot(directory, "tower-damage")
     triggers = triggers_by_name(snapshot)
-    # The siege Keep stands far south; the measured towers share one row.
+    # The siege Keep stands far south. The measured towers share one row.
     towers = {
         u["unit_const"]: u
         for u in snapshot["units"]

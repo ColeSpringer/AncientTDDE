@@ -63,7 +63,7 @@ def stock(key: str, objects: ObjectTable = OBJECTS) -> int:
 
 
 def technology(name: str) -> int:
-    """The technology ID for a dataset name; an unknown name is a content error."""
+    """The technology ID for a dataset name. An unknown name is a content error."""
     try:
         return TechInfo[name].ID
     except KeyError as error:

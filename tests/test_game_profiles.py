@@ -127,7 +127,7 @@ def test_each_native_effect_set_gets_one_gated_trigger_per_lane(
         0,
     ]
     # The XS sets the profile field only for an active lane whose setup has run, so the set
-    # number is the one condition; the sets the lane does not play cost one check a pass.
+    # number is the one condition. The sets the lane does not play cost one check a pass.
     trigger = triggers["lane.p1.profile.1"]
     assert not trigger["looping"] and trigger["enabled"]
     assert requested(trigger, variables["lane.p1.profile"]) == 1
@@ -249,7 +249,7 @@ def test_granted_purchases_apply_their_effects_to_the_units_the_xs_places(
     walks = [e for e in effects(trigger, "task_object") if e["object_list_unit_id"] == 83]
     assert len(walks) == 1 and walks[0]["action_type"] == 1
     assert (walks[0]["location_x"], walks[0]["location_y"]) == villagers[2]
-    # The age arrives natively; the XS asks for its tower upgrade as after a payment.
+    # The age arrives natively. The XS asks for its tower upgrade as after a payment.
     researched = {attr_int(e, "technology") for e in effects(trigger, "research_technology")}
     assert TechInfo["CASTLE_AGE"].ID in researched
 

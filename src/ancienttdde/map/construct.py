@@ -8,6 +8,7 @@ from itertools import count
 from pathlib import Path
 from typing import cast
 
+from ancienttdde.common.credits import CREDIT, NAME
 from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.map.models import MapDocument
 
@@ -59,16 +60,14 @@ def construct_scenario(seed: Path, data_path: Path, destination: Path) -> None:
                 player.initial_camera_y = int(spawn["point"][1])
                 player.initial_player_view_x = int(spawn["point"][0])
                 player.initial_player_view_y = int(spawn["point"][1])
-        scenario.sections[
-            "FileHeader"
-        ].creator_name = "Ancient TD DE; based on Ancient TD v5.3 by DRAX"
+        scenario.sections["FileHeader"].creator_name = f"{NAME}. {CREDIT}"
         scenario.message_manager.instructions = (
-            "Ancient TD DE map foundation\r"
+            f"{NAME} map foundation\r"
             "Editor template: seven defense lanes, economy, shops and trade.\r"
             "This map has no waves, purchases or victory logic.\r"
             "Open with the standard DE data set. In-game route verification is pending."
         )
-        scenario.message_manager.history = "Based on Ancient TD v5.3 by DRAX6869 / DRAX."
+        scenario.message_manager.history = f"{CREDIT}."
         scenario.write_to_file(str(destination))
 
 

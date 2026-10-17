@@ -244,7 +244,7 @@ def test_each_new_selection_of_a_control_is_recorded_once(
             assert requested(trigger, variables["game.locked"]) == 0
         else:
             assert requested(trigger, variables["game.mode"]) == MODES.index("practice")
-        # Holding a control selected records it once; selecting it again records it again.
+        # Holding a control selected records it once. Selecting it again records it again.
         [holding] = [c for c in conditions(trigger, "variable_value") if c["variable"] == held]
         assert (attr_int(holding, "quantity"), bool(holding["inverted"])) == (code, True)
         [selected] = conditions(trigger, "object_selected_multiplayer")
@@ -264,7 +264,7 @@ def test_each_new_selection_of_a_control_is_recorded_once(
     assert {c["unit_object"] for c in unselected} == {u["reference_id"] for u in units.values()}
     assert all(c["inverted"] and c["source_player"] == player for c in unselected)
     assert len(unselected) == len(CONTROLS)
-    # Letting go forgets the held control; a selection waiting for the XS stays recorded.
+    # Letting go forgets the held control. A selection waiting for the XS stays recorded.
     assert sets(none, held) == [(0, SET)] and not sets(none, control)
 
 
@@ -315,7 +315,7 @@ def test_each_control_applies_to_its_lobby() -> None:
 
 
 def test_controls_the_lobby_rules_out_leave_the_row_at_once(game_build: GameBuild) -> None:
-    """The script counts the human lanes in the first second; a solo run then loses PvP on,
+    """The script counts the human lanes in the first second. A solo run then loses PvP on,
     a competitive game the solo modes and the practice controls."""
     from ancienttdde.game.controls import LOBBIES, ruled_out
 
@@ -379,7 +379,7 @@ def test_option_lines_name_the_lobby_controls_and_leave_once_locked(
     game_build: GameBuild,
 ) -> None:
     """A line appears once the script has counted the human lanes and never completes. DE
-    keeps a fired objective listed, struck through; a deactivated one leaves the box."""
+    keeps a fired objective listed, struck through. A deactivated one leaves the box."""
     from ancienttdde.game.controls import MODES, control_labels
 
     data = snapshot(game_build)
@@ -425,10 +425,10 @@ def test_option_lines_name_the_lobby_controls_and_leave_once_locked(
         assert requested(hider, variables["game.locked"]) == 1
         assert line["id"] in [e["trigger_id"] for e in effects(hider, "deactivate_trigger")]
     assert triggers["game.objective.options.solo"]["description"] == (
-        "The first human lane selects one; Standard is taken after 60 game seconds."
+        "The first human lane selects one. Standard is taken after 60 game seconds."
     )
     assert triggers["game.objective.options.competitive"]["description"] == (
-        "The first human lane selects one; Standard with PvP off is taken after 60 game seconds."
+        "The first human lane selects one. Standard with PvP off is taken after 60 game seconds."
     )
     assert len(effects(triggers["game.hide.options"], "deactivate_trigger")) == 2
     assert len(conditions(triggers["game.hide.options"], "variable_value")) == 1
@@ -533,7 +533,7 @@ def test_pvp_pads_stay_sealed_with_hay_until_pvp_is_switched_on(game_build: Game
             assert spot not in hay, spot
             hay[spot] = u
     assert hay.keys() == gates
-    # The build adds the gates; the map has none.
+    # The build adds the gates. The map has none.
     original = {u["reference_id"] for u in cached_json(output / "map.json")["units"]}
     assert not original & {u["reference_id"] for u in hay.values()}
     opened = triggers_by_name(data)["game.pvp.open"]
@@ -746,7 +746,7 @@ def test_raiders_reach_nothing_of_a_lane_but_its_traders(game_build: GameBuild) 
     traders = {UnitInfo["TRADE_CART_EMPTY"].ID, UnitInfo["TRADE_COG"].ID}
     # Flags, which nobody can select or attack.
     markers = {600, 601, 602, 720, 837}
-    # Land raiders strike only what touches their field; fire galleys reach 2.5 tiles.
+    # Land raiders strike only what touches their field. Fire galleys reach 2.5 tiles.
     margins = {"land": 1.0, "naval": 3.0}
     for medium, ground in raider_ground(game_build).items():
         for unit in data["units"]:
@@ -818,7 +818,7 @@ AGE_FORMS = [
     19,
     210,
 ]
-# Villagers build towers and economy buildings; population comes from the shop.
+# Villagers build towers and economy buildings. Population comes from the shop.
 ALLOWED = [
     BuildingInfo[name].ID
     for name in (
@@ -834,7 +834,7 @@ ALLOWED = [
         "PASTURE",
     )
 ] + [UnitInfo[name].ID for name in ("VILLAGER_MALE", "VILLAGER_FEMALE", "KING")]
-# Markets and docks still train traders; DE itself refuses them at the population limit.
+# Markets and docks still train traders. DE itself refuses them at the population limit.
 TRAINED = [UnitInfo[name].ID for name in ("TRADE_COG", "TRADE_CART_EMPTY")]
 NOT_BUILT = [
     BuildingInfo[name].ID
@@ -936,7 +936,7 @@ def test_castles_and_monks_stay_out_of_reach_whatever_is_researched(
         for e in effects(trigger, "modify_attribute")
         if e["source_player"] == player and e["operation"] == SET
     }
-    # Technologies add range and arrows back; every second takes them away again.
+    # Technologies add range and arrows back. Every second takes them away again.
     assert settings == {
         (castle, MAX_RANGE): 0,
         (castle, TOTAL_MISSILES): 0,

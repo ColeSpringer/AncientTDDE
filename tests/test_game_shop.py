@@ -140,14 +140,14 @@ def test_overhead_tags_are_the_short_label_and_price(key: str, tag: str) -> None
     assert "label" not in next(p for p in raw_catalog()["purchases"] if p["key"] == "gold_1000")
     assert max(len(p.tag) for p in catalog.purchases) <= 33
     # The Accursed Tower pads share one exhibit, and so do the two halves of the tower-row
-    # pad; their identical tags are written once.
+    # pad. Their identical tags are written once.
     overhead = display_captions(catalog, overhead=True)
     assert overhead[catalog.get("left_accursed_tower").display or 0] == "Accursed Tower: 1 King"
     assert overhead[catalog.get("third_row").display or 0] == "Tower row: 3 Kings"
 
 
 def test_every_purchase_names_a_display_object_beside_its_pad() -> None:
-    """The original labels each pad with a placed unit it renames; those units stay where the
+    """The original labels each pad with a placed unit it renames. Those units stay where the
     map puts them. The raider and siege pads are new, so the build places a King for each."""
     from ancienttdde.game.catalog import check_displays, display_captions
 
@@ -211,7 +211,7 @@ def caption_box(
 
 
 def test_captions_the_build_adds_keep_clear_of_every_other() -> None:
-    """The original's exhibits keep their own spots, wherever that puts their tags; the Kings
+    """The original's exhibits keep their own spots, wherever that puts their tags. The Kings
     placed for the new pads and the run controls are placed so their captions run into none."""
     from ancienttdde.game.catalog import display_captions
     from ancienttdde.game.config import load_balance
@@ -329,7 +329,7 @@ def test_displays_must_stand_free_beside_their_pads(
 
 def test_pvp_pads_are_gated_across_the_row_nearest_their_entrance() -> None:
     """The gate follows the rows the pad flags were laid out in, whatever stands beside the
-    pad; only raider and siege pads get one, and nothing may stand where it goes."""
+    pad. Only raider and siege pads get one, and nothing may stand where it goes."""
     from conftest import new_scenario
 
     from ancienttdde.game.shop import place_gates

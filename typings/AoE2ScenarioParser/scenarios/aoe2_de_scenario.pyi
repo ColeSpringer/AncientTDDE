@@ -130,6 +130,7 @@ class _PlayerManager(Protocol):
 class _MessageManager(Protocol):
     instructions: str
     hints: str
+    scouts: str
     history: str
 
 class _XsManager(Protocol):

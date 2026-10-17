@@ -63,7 +63,7 @@ STAGES = ("scheduled", "endless", "sudden")
 # The object classes a defense lane's units belong to, as DE numbers them: trade cogs, buildings,
 # villagers, used-up pastures and the like, raiders, torches, monks, trade carts, fire ships,
 # flags, monks carrying relics, farms and pastures, packed and unpacked trebuchets, towers and
-# Kings. Clearing a lane queries these classes only; the DAT check compares them with what a
+# Kings. Clearing a lane queries these classes only. The DAT check compares them with what a
 # lane can own.
 LANE_CLASSES = (2, 3, 4, 11, 12, 14, 18, 19, 22, 30, 43, 49, 51, 52, 54, 59)
 # The pierce armor endless waves may add stays within the engine's 16-bit armor values.
@@ -74,7 +74,7 @@ CLASS_CHUNK = 255
 # wave's.
 SWEEP_TICKS = 5
 # Seconds after a batch by which its enemies have left the spawn column when the enemy's AI
-# walks them; one still there later is reported.
+# walks them. One still there later is reported.
 WALK_WAIT = 8
 
 
@@ -90,7 +90,7 @@ GLOBAL_VARIABLES = (
     "remaining",
     "batches",
     "spawn_clock",
-    # Seconds since preparation began; investments and repairs pay on its multiples.
+    # Seconds since preparation began. Investments and repairs pay on its multiples.
     "economy",
     # Seconds the run options were open before preparation began.
     "setup_elapsed",
@@ -160,7 +160,7 @@ KING_SLOTS = 128
 # Consecutive one-second samples a King must stand still on a pad before it pays.
 STILL_SAMPLES = 2
 # A King kept shuffling for room by a crowd pays once it has stayed within this many tiles of
-# a spot for this many consecutive one-second samples; a King walking at its own speed leaves
+# a spot for this many consecutive one-second samples. A King walking at its own speed leaves
 # the radius first.
 SHUFFLE_SAMPLES = 4
 SHUFFLE_RADIUS = 2
@@ -241,7 +241,7 @@ def table(name: str, values: list[int]) -> ArrayTable:
 
 
 def sparse(name: str, values: Mapping[int, int], fallback: int = 0) -> ArrayTable:
-    """A table over scattered indexes; any index it does not list reads the fallback."""
+    """A table over scattered indexes. Any index it does not list reads the fallback."""
     return ArrayTable(name, max(values, default=0) + 1, fallback, values)
 
 
@@ -269,7 +269,7 @@ def array_tables(tables: Sequence[ArrayTable]) -> str:
 
 
 def sparse_strings(name: str, values: Mapping[int, str], fallback: str) -> str:
-    """A string table over scattered indexes; any index it does not list reads the fallback."""
+    """A string table over scattered indexes. Any index it does not list reads the fallback."""
     for value in (*values.values(), fallback):
         xs_text(value, name)
     cases = "\n".join(
@@ -304,7 +304,7 @@ def granted_indexes(profile: Profile, shop: Shop) -> list[int]:
 
 
 def grant_slots(profiles: Profiles, shop: Shop) -> int:
-    """How many purchases the longest grant list holds; the XS loops over this many slots."""
+    """How many purchases the longest grant list holds. The XS loops over this many slots."""
     lists = [profiles.default, *(c.profile for c in profiles.civilizations)]
     return max(1, *(len(granted_indexes(profile, shop)) for profile in lists))
 
@@ -333,7 +333,7 @@ def grant_table(profiles: Profiles, shop: Shop) -> str:
 
 
 def civilization_arrays(profiles: Profiles, shop: Shop) -> list[ArrayTable]:
-    """Per-civilization profile values the XS applies; unlisted civilizations read the default."""
+    """Per-civilization profile values the XS applies. Unlisted civilizations read the default."""
     default = profiles.default
     tables = {
         "civOwned": (
@@ -583,7 +583,7 @@ def render_prelude(
             for level in range(len(difficulty.levels))
             for wave in range(len(balance.waves))
         ],
-        # xsGetDifficulty reports cLobbyLow for Extreme to cLobbyHigh for Easiest; the table
+        # xsGetDifficulty reports cLobbyLow for Extreme to cLobbyHigh for Easiest. The table
         # starts at Extreme.
         "lobbyLevel": [level for _, level in sorted(difficulty.lobby)],
         "kingGold": [level.king_gold for level in difficulty.levels],
@@ -594,7 +594,7 @@ def render_prelude(
             for p in purchases
         ],
         "raiderCap": [0] + [interaction.raiders.kind(medium).cap for medium in RAIDER_MEDIA],
-        # Indexed by medium * cRaiderLineSize + member; a shorter line ends in zeros.
+        # Indexed by medium * cRaiderLineSize + member. A shorter line ends in zeros.
         "raiderLine": [0] * line_size
         + [unit for line in lines for unit in line + (0,) * (line_size - len(line))],
         # Indexed by lane, in tenths of a tile: where a cleared lane's King stands.
@@ -642,7 +642,7 @@ def render_prelude(
         "shopPrice": [0] + [p.kings for p in purchases],
         "shopMask": [0] + [p.mask for p in purchases],
         "shopRequires": [0] + [shop.get(p.requires).index if p.requires else 0 for p in purchases],
-        # The population each purchase's units take; the siege's trebuchets take none.
+        # The population each purchase's units take. The siege's trebuchets take none.
         "shopPopulation": [0] + [taken[p.index] for p in purchases],
         "shopUpgrade": [0]
         + [TechInfo[p.effect.upgrade].ID if isinstance(p.effect, AgeUp) else 0 for p in purchases],
@@ -680,7 +680,7 @@ def render_prelude(
         "modeText": [
             "the scheduled waves, then victory",
             "waves keep coming and growing after the finale until the lane falls",
-            "practice controls below the shop; the result counts the help used",
+            "practice controls below the shop. The result counts the help used",
         ],
     }
     constants["cEnemyTypes"] = len(tables["enemyType"])

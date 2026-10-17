@@ -7,6 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Literal
 
+from ancienttdde.common.credits import NAME
 from ancienttdde.common.data import HashRecord, digest, object_value, read_object, write_json
 from ancienttdde.common.hashing import hash_inputs, hash_records, verify_hashes, verify_inputs
 from ancienttdde.common.manifest import (
@@ -22,7 +23,7 @@ from ancienttdde.common.worker import run_module, run_parallel
 from ancienttdde.game.catalog import check_displays, check_pads, load_shop
 from ancienttdde.game.civilizations import load_profiles
 from ancienttdde.game.config import load_balance, load_lanes
-from ancienttdde.game.instructions import instructions
+from ancienttdde.game.instructions import document
 from ancienttdde.game.sites import load_siege_rows
 from ancienttdde.game.spawns import reserved_tiles
 from ancienttdde.game.stock import load_stock
@@ -40,7 +41,7 @@ from ancienttdde.scenario.snapshot import ScenarioSnapshot, content_digest, vali
 
 SCENARIO_NAME = "ancient-td-de.aoe2scenario"
 # The scenario again, laid out as a local DE mod: copy the folder into mods/local to publish it.
-MOD_FOLDER = "Ancient TD DE"
+MOD_FOLDER = NAME
 MOD_SCENARIO = f"{MOD_FOLDER}/resources/_common/scenario/{SCENARIO_NAME}"
 # The declarations the scenario embeds before assets/runtime.xs, for checking that file alone.
 PRELUDE = "runtime-prelude.xs"
@@ -76,8 +77,8 @@ def read_manifest(path: Path) -> GameManifest:
         raise ValueError("Game manifest must distinguish static validation from game observations")
     if {r["path"] for r in base["artifacts"]} != set(ARTIFACTS):
         raise ValueError(
-            "Game manifest must record every artifact this version builds; "
-            f"rebuild with {rebuild(path.parent)}"
+            "Game manifest must record every artifact this version builds. "
+            f"Rebuild with {rebuild(path.parent)}"
         )
     hashes = {r["path"]: r["sha256"] for r in base["artifacts"]}
     if hashes[MOD_SCENARIO] != hashes[SCENARIO_NAME]:
@@ -155,7 +156,7 @@ def build_game(root: Path, output: Path | None = None) -> Path:
         shutil.copyfile(staging / SCENARIO_NAME, staging / MOD_SCENARIO)
         write_json(staging / "scenario.json", snapshot)
         (staging / "instructions.md").write_text(
-            instructions(balance, shop, profiles), encoding="utf-8"
+            document(balance, shop, profiles), encoding="utf-8"
         )
         manifest = GameManifest(
             schema_version=SCHEMA_VERSION,
@@ -173,7 +174,7 @@ def build_game(root: Path, output: Path | None = None) -> Path:
 
 
 def verify_manifest(directory: Path, root: Path) -> GameManifest:
-    """Check the recorded tools, inputs and artifact hashes; none of this runs the parser."""
+    """Check the recorded tools, inputs and artifact hashes. None of this runs the parser."""
     manifest = read_manifest(project_path(directory, "manifest.json"))
     require_current_versions(manifest, kind="ancient-td-game", rebuild=rebuild(directory))
     verify_inputs(manifest["inputs"], current_inputs(root), "game")

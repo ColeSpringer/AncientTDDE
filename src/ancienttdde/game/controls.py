@@ -5,7 +5,7 @@ from typing import Literal
 
 from ancienttdde.game.config import Balance
 
-# Run modes in code order; only solo runs choose a mode other than Standard.
+# Run modes in code order. Only solo runs choose a mode other than Standard.
 MODES = ("standard", "endless", "practice")
 type ControlGroup = Literal["run", "practice"]
 # The kinds of lobby: one human lane, or rivals.

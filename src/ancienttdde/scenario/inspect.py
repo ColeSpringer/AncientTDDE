@@ -55,7 +55,7 @@ def stored_float_quantity(stored: EffectRecordQuantity | None) -> float | None:
     """Return the float quantity an effect record holds, or None when the field is unused.
 
     Effects store float attribute values, such as movement speed, in a separate field that
-    exists since scenario version 1.55; an unused field holds NaN. The parser raises KeyError
+    exists since scenario version 1.55. An unused field holds NaN. The parser raises KeyError
     for a field the scenario version does not define.
     """
     if stored is None:
@@ -93,7 +93,7 @@ def component(
         if "quantity_float" in fields:
             attributes["quantity_float"] = float_quantity
         # The parser reads a float-valued quantity back as `float or int`, which turns a
-        # stored 0.0 into the unused marker -1; the stored field is authoritative.
+        # stored 0.0 into the unused marker -1. The stored field is authoritative.
         if float_quantity is not None and not isinstance(obj._quantity_float, bytes):
             attributes["quantity"] = float_quantity
     return {"type": name, "type_id": int(identifier), "attributes": attributes, "raw": raw}
@@ -114,7 +114,7 @@ def load_scenario(
     with Path(os.devnull).open("w") as quiet, contextlib.redirect_stdout(quiet):
         scenario = AoE2DEScenario.from_file(str(path))
         triggers: list[dict[str, Any]] = []
-        # Trigger and effect objects mirror the stored records in order; the records keep
+        # Trigger and effect objects mirror the stored records in order. The records keep
         # field values the object layer merges away.
         stored_triggers = scenario.sections["Triggers"].trigger_data
         for trigger, stored in zip(scenario.trigger_manager.triggers, stored_triggers, strict=True):

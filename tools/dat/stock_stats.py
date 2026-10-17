@@ -3,7 +3,7 @@
 Usage: uv run python tools/dat/stock_stats.py <empires2_x2_p1.dat> content/balance/stock.json
 
 The data file's Gaia table supplies every unit the model needs, the wave schedule's enemies in
-game.json beside the output included; each civilization's technology tree says which of the
+game.json beside the output included. Each civilization's technology tree says which of the
 watched technologies it can never research. Pass the game's CivTechTrees directory as a third
 argument to cross-check tower availability against the game's own trees.
 """
@@ -186,7 +186,7 @@ def tree_lacks(trees: Path, civilization: str) -> set[str] | None:
     marked unavailable, and towers the screen does not list at all."""
     path = trees / f"{tree_file(civilization)}.json"
     if not path.is_file():
-        print(f"{civilization}: no tree file {path.name}; tree screen not checked")
+        print(f"{civilization}: no tree file {path.name}. Tree screen not checked")
         return None
     status = {
         str(node.get("Name")): node.get("Node Status")
@@ -228,7 +228,7 @@ def snapshot(dat_path: Path, trees: Path | None, wanted: set[str]) -> dict[str, 
         if trees is not None:
             expected = tree_lacks(trees, civilization.name)
             if expected is not None and expected != {n for n in lacks if n in TREE_NAMES}:
-                # The data file decides what the game researches; the tree screen may omit it.
+                # The data file decides what the game researches. The tree screen may omit it.
                 withheld = sorted(expected)
                 print(f"{civilization.name}: tree screen withholds {withheld}, data says {lacks}")
         civilizations.append({"id": identifier, "name": civilization.name, "lacks": lacks})
@@ -249,10 +249,10 @@ def snapshot(dat_path: Path, trees: Path | None, wanted: set[str]) -> dict[str, 
 
 
 def wave_units(output: Path) -> set[str]:
-    """The enemies the wave schedule beside the output names; the output belongs beside it."""
+    """The enemies the wave schedule beside the output names. The output belongs beside it."""
     schedule = output.with_name("game.json")
     if not schedule.is_file():
-        raise ValueError(f"The snapshot belongs beside the wave schedule; no {schedule}")
+        raise ValueError(f"The snapshot belongs beside the wave schedule. No {schedule}")
     return {wave.unit for wave in load_balance(schedule).waves}
 
 

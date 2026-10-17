@@ -2,16 +2,16 @@
 
 from ancienttdde.game.config import Balance
 
-# In code order; the XS requests a message by setting the lane's message field to its code.
+# In code order. The XS requests a message by setting the lane's message field to its code.
 MESSAGES: tuple[tuple[str, str], ...] = (
-    ("owned", "That purchase is already yours; move your Kings off its pad."),
-    ("requires", "That purchase needs another one first; its sign names it."),
+    ("owned", "That purchase is already yours. Move your Kings off its pad."),
+    ("requires", "That purchase needs another one first. Its sign names it."),
     ("relics", "Monks must collect the last relics before more can be bought."),
     ("monasteries", "Your monasteries have no room for another relic purchase."),
     ("civilization", "Your civilization lacks the towers that purchase improves."),
-    ("no_room", "No room for the purchase to appear; move units off its arrival spots."),
-    ("gold", "Gold converted into Kings; they arrive at your stall."),
-    ("kill_king", "Kill reward: every {kills} wave kills earn a King; one arrives at your stall."),
+    ("no_room", "No room for the purchase to appear. Move units off its arrival spots."),
+    ("gold", "Gold converted into Kings. They arrive at your stall."),
+    ("kill_king", "Kill reward: every {kills} wave kills earn a King. One arrives at your stall."),
     (
         "pvp_off",
         "Raiders and siege are sold only with PvP on, from the first wave of a competitive game.",
@@ -25,7 +25,7 @@ MESSAGES: tuple[tuple[str, str], ...] = (
         "options_fixed",
         "The run options were fixed by the first selection, or when the choice window closed.",
     ),
-    ("solo_modes", "Endless and Practice are solo modes; competitive games play Standard."),
+    ("solo_modes", "Endless and Practice are solo modes. Competitive games play Standard."),
     ("needs_rivals", "PvP needs rivals: it applies only to competitive games."),
     ("practice_only", "Practice controls work only in Practice runs."),
     ("practice_wave", "Practice: the next wave can start once the current one ends."),

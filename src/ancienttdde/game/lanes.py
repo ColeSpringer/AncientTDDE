@@ -36,7 +36,7 @@ def lane_actions(
     game: Game, lane: EngineLane, balance: Balance, shop: Shop, profiles: Profiles, keeper: Keeper
 ) -> None:
     player = lane.player
-    # Every lane starts with a mill beside its berries; a cleared lane loses it.
+    # Every lane starts with a mill beside its berries. A cleared lane loses it.
     game.scenario.unit_manager.add_unit(
         player=player, unit_const=game.stock("mill"), x=84, y=lane.center_y
     )
@@ -80,7 +80,7 @@ def lane_initialize(game: Game, lane: EngineLane, balance: Balance) -> None:
     # the other units the shop sells need room, which it checks.
     for unit in free_of_population():
         game.set_attribute(init, player, unit, ObjectAttribute.POPULATION, 0)
-    # Every lane starts with the same population room, whatever its civilization; the shop
+    # Every lane starts with the same population room, whatever its civilization. The shop
     # and the profiles add more.
     effect(
         init,
@@ -155,7 +155,7 @@ def lane_cleanup(game: Game, lane: EngineLane) -> None:
 
 def lane_keeper(game: Game, lane: EngineLane, keeper: Keeper) -> None:
     """Name the King a cleared lane keeps beside slot 8's keepers, so selecting it explains
-    itself; the enemy's own cleared lane keeps its King on the islet above instead and says
+    itself. The enemy's own cleared lane keeps its King on the islet above instead and says
     whose the waves are. The triggers are not among the lane's own, which the cleanup ends as
     the King appears."""
     player = lane.player
@@ -166,7 +166,7 @@ def lane_keeper(game: Game, lane: EngineLane, keeper: Keeper) -> None:
         ("", f"Slot keeper: P{player}'s cleared lane stays in the game", 1, spare),
         (
             ".enemy",
-            f"Enemy: P{player}'s units are the waves; its King and tower keep the slot",
+            f"Enemy: P{player}'s units are the waves. Its King and tower keep the slot",
             0,
             throne,
         ),

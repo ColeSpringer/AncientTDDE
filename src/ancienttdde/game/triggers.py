@@ -7,7 +7,7 @@ from ancienttdde.game.controls import Lobby
 from ancienttdde.game.script import variable_names
 from ancienttdde.scenario.triggers import Builder, TriggerHandle
 
-# The human lanes each kind of lobby has; the script counts them in the first second.
+# The human lanes each kind of lobby has. The script counts them in the first second.
 LOBBY_LANES: dict[Lobby, tuple[int, int]] = {
     "solo": (1, Comparison.EQUAL),
     "competitive": (2, Comparison.LARGER_OR_EQUAL),

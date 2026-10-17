@@ -6,7 +6,7 @@ from pathlib import Path
 
 from ancienttdde.common.manifest import ManifestKind, read_kind
 
-# Sources, immutable inputs and tool state; generated output never goes inside them.
+# Sources, immutable inputs and tool state. Generated output never goes inside them.
 PROTECTED = (
     "content",
     "legacy",
@@ -67,7 +67,7 @@ def prepare_output(
     """Resolve a directory the pipeline may write, without creating it.
 
     An existing directory belongs to the pipeline whose kind its manifest declares,
-    whatever the manifest's schema; validation parses the complete manifest.
+    whatever the manifest's schema. Validation parses the complete manifest.
     """
     directory = resolve_output(root, output, default)
     owned = (*names, "manifest.json")
@@ -82,7 +82,7 @@ def prepare_output(
         except ValueError:
             owner = None
         if owner != kind:
-            raise ValueError("Output contains an unrelated manifest; choose another output")
+            raise ValueError("Output contains an unrelated manifest. Choose another output")
     elif any((directory / name).exists() for name in owned):
         raise ValueError("Output cannot overwrite unrelated artifacts")
     return directory

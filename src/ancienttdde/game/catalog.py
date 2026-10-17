@@ -138,7 +138,7 @@ class Purchase:
     # The short form of the name DE draws above the exhibit, with the price: written in the
     # catalog, or taken from the effect's own numbers where those say it all.
     label: str
-    # The original purchase this one restores; purchases the original lacked have none.
+    # The original purchase this one restores. Purchases the original lacked have none.
     legacy: str | None
     kings: int
     pad: str
@@ -174,7 +174,7 @@ class Purchase:
 
     @property
     def mask(self) -> int:
-        """The ownership bit as the value XS divides by; repeatable purchases have none."""
+        """The ownership bit as the value XS divides by. Repeatable purchases have none."""
         return 2**self.bit if self.bit >= 0 else 0
 
     @property
@@ -487,8 +487,8 @@ def check_displays(
     entrances: Collection[Cell] = (),
 ) -> None:
     """Every exhibit stands beside its own pad and off every pad: a placed one is a Gaia
-    object, and a King the build places stands on land that nothing else holds; no two
-    exhibits share a tile; and with the exhibits in place a King can still walk from every
+    object, and a King the build places stands on land that nothing else holds. No two
+    exhibits share a tile. And with the exhibits in place a King can still walk from every
     entrance to every pad."""
     units = {u["reference_id"]: u for u in data["units"]}
     sizes = blocking_sizes(config)
@@ -498,7 +498,7 @@ def check_displays(
         if (identity := r.get("map_identity")) is not None and identity["name"] == "SIGN"
     }
     blocked = {c for u in data["units"] for c in footprint(u, sizes.get(u["unit_const"], 0))}
-    # Tiles other objects hold; the signs beside the pads go.
+    # Tiles other objects hold. The signs beside the pads go.
     held = {
         (math.floor(u["x"]), math.floor(u["y"]))
         for u in data["units"]

@@ -85,9 +85,9 @@ def run_objectives(game: Game) -> None:
         game,
         "game.objective.siege",
         f"Siege power-up: holder P{variable('game.siege_owner')} (P0: none), "
-        f"{variable('game.siege_left')} s left; for sale again in "
+        f"{variable('game.siege_left')} s left, for sale again in "
         f"{variable('game.siege_cooldown')} s",
-        "One player at a time holds the siege; its buyer waits longer than everyone else.",
+        "One player at a time holds the siege. Its buyer waits longer than everyone else.",
     )
     # The siege is for sale from the first wave of a competitive game with PvP on.
     reveal(game, "game.reveal.siege", siege, {"game.pvp": 1}, at_least={"game.wave": 0})

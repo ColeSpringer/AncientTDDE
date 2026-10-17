@@ -105,7 +105,7 @@ def test_native_actions_acknowledge_only_live_lane_requests(game_build: GameBuil
             and e["attributes"]["variable"] == variables[f"lane.p{player}.initialized"]
             for e in init["effects"]
         )
-    # Logic triggers stay enabled and are gated by variables; only display-only objectives
+    # Logic triggers stay enabled and are gated by variables. Only display-only objectives
     # are revealed by activation. A cleared lane's cleanup deactivates that lane's other
     # triggers, the game.hide triggers deactivate display-only objectives, and the wave
     # triggers switch the status line between the wait and the wave.
@@ -186,7 +186,7 @@ def column(x: int, rows: range) -> set[tuple[int, int]]:
     return {(x, y) for y in rows}
 
 
-# The side each pad is entered from, read off the map; every other pad opens to the north.
+# The side each pad is entered from, read off the map. Every other pad opens to the north.
 ENTERED_FROM_WEST = {
     "tower_attack_255",
     "tower_attack_750",
@@ -240,7 +240,7 @@ FAR_END_FLAGS = {
 
 def test_pad_flags_fill_from_the_end_farthest_from_the_entrance(game_build: GameBuild) -> None:
     """Like the original's, a pad's flags fill whole rows from its far end towards the
-    entrance; a pad whose map flags already do keeps them."""
+    entrance. A pad whose map flags already do keeps them."""
     from ancienttdde.game.catalog import load_shop
     from ancienttdde.game.config import load_balance
     from ancienttdde.map.geometry import cells, footprint
@@ -299,7 +299,7 @@ def test_a_pad_needs_one_entrance_and_its_flags_fill_whole_rows_from_the_far_end
 
 
 def test_only_what_stands_in_the_way_closes_a_pads_side() -> None:
-    """Marker flags have no collision, so they close no pad's side; a unit standing there or
+    """Marker flags have no collision, so they close no pad's side. A unit standing there or
     a blocking footprint does."""
     from ancienttdde.game.construct import entrance_obstacles
     from ancienttdde.game.triggers import Game
@@ -392,7 +392,7 @@ def test_the_enemy_ai_walks_every_lane_band_to_its_exit_row(game_build: GameBuil
             # The tile before the exit is the exit to the XS, which removes the unit there.
             expected[middle, row] = (radius, y1, y2, lane.exit_x - 2, lane.exit_x, row)
             # The radius reaches every position in the band before the exit, far row edges
-            # included; another lane's path begins a radius away, so a search holds one lane's
+            # included. Another lane's path begins a radius away, so a search holds one lane's
             # enemies and at most a sliver of the next, which the row bounds drop.
             corners = [(x, y) for x in (x1, lane.exit_x - 1) for y in (y1, y2 + 1)]
             assert all(((x - middle) ** 2 + (y - row) ** 2) ** 0.5 <= radius for x, y in corners)
@@ -419,7 +419,7 @@ def walk_orders(
     rules: list[Rule], constants: dict[str, int], units: list[dict[str, float]]
 ) -> dict[int, tuple[int, int, str]]:
     """Run the walk rules as DE's AI does over the enemy's units, each a dict with x, y and
-    action; a found unit's tile and action feed the removals. Returns each ordered unit's
+    action. A found unit's tile and action feed the removals. Returns each ordered unit's
     point and stance by its index."""
     goals: dict[str, int] = {}
     orders: dict[int, tuple[int, int, str]] = {}
@@ -491,7 +491,7 @@ def test_the_walk_rules_send_standing_enemies_down_their_own_band(game_build: Ga
             (center + 0.5, center),
             (center + 1.5, center + 1),
         ):
-            # A new batch stands on the spawn column; a straggler stands halfway along.
+            # A new batch stands on the spawn column. A straggler stands halfway along.
             for x in (spot, spot + 20):
                 expected[len(units)] = (lane.exit_x, row, "stance-no-attack")
                 units.append({"x": x, "y": y, "action": standing})
@@ -571,7 +571,7 @@ def test_initial_traders_receive_orders_to_their_own_partner(game_build: GameBui
 
 
 def test_lanes_own_no_towers_until_their_profile_applies(game_build: GameBuild) -> None:
-    """The original's lanes own no tower at the start; a civilization profile's starting
+    """The original's lanes own no tower at the start. A civilization profile's starting
     towers arrive by its native trigger, and each lane may build Watch Towers for the rest."""
     from ancienttdde.game.config import load_balance
 
@@ -603,7 +603,7 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
 ) -> None:
     """The original's one-way alliance: the enemy's units attack nothing while every lane's
     towers fire at them, and they walk at their stock speed. The map presets it for the enemy
-    in slot 8; a trigger per number the enemy may hold sets it once the XS has chosen."""
+    in slot 8. A trigger per number the enemy may hold sets it once the XS has chosen."""
 
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -643,7 +643,7 @@ def test_the_enemy_treats_lanes_as_allies_and_lanes_treat_it_as_an_enemy(
                 (enemy, lane_number): DiplomacyState.ALLY,
             }
             assert len(trigger["effects"]) == 2
-    # The enemy's own AI gives its units their stance and their walk; no trigger orders them.
+    # The enemy's own AI gives its units their stance and their walk. No trigger orders them.
     for trigger in snapshot["triggers"]:
         for change in trigger["effects"]:
             attributes = change["attributes"]
@@ -712,7 +712,7 @@ def test_results_go_to_the_winning_lane_or_to_whichever_number_the_enemy_holds(
             phase = 6 if name.startswith("game.result.p") else 8
             assert requested == {variables["game.winner"]: player, variables["game.phase"]: phase}
             assert victory["enabled"] == 1
-    # The lane's cleanup ends the lane's own triggers; the defeat is not among them.
+    # The lane's cleanup ends the lane's own triggers. The defeat is not among them.
     for player in range(1, 8):
         ended = [
             e["attributes"]["trigger_id"]
@@ -753,7 +753,7 @@ def test_validation_rejects_tampered_logic_even_with_updated_hashes(
     manifest["normalized_sha256"] = content_digest(snapshot)
     (edited / "manifest.json").write_text(json.dumps(manifest))
     rehash_artifacts(edited, *ARTIFACTS)
-    # The edited copy is internally consistent; only a build of the current definitions
+    # The edited copy is internally consistent. Only a build of the current definitions
     # exposes the change.
     with pytest.raises(ValueError, match="current definitions"):
         compare_game(edited, output)
@@ -788,7 +788,7 @@ def test_validation_compares_the_build_with_a_build_of_current_definitions(
     rehash_artifacts(edited, "ancient-td-de.aoe2scenario", build.MOD_SCENARIO, "scenario.json")
 
     def rebuild(root: Path, expected: Path | None = None) -> Path:
-        # The session build is a build of the current definitions; copying it saves a rebuild.
+        # The session build is a build of the current definitions. Copying it saves a rebuild.
         assert expected is not None
         shutil.copytree(output, expected, dirs_exist_ok=True)
         return expected
@@ -813,16 +813,16 @@ def test_validation_rejects_a_prelude_that_differs_from_current_definitions(
     prelude = edited / PRELUDE
     prelude.write_text(prelude.read_text(encoding="utf-8") + "\n", encoding="utf-8")
     rehash_artifacts(edited, PRELUDE)
-    message = f"Game sidecar differs from current definitions: {re.escape(PRELUDE)}"
-    with pytest.raises(ValueError, match=message):
+    message = f"Game sidecar differs from current definitions: {PRELUDE}"
+    with pytest.raises(ValueError, match=re.escape(message)):
         compare_game(edited, output)
 
 
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        ("schema", "schema 1; expected 2, rebuild with ancienttdde build --output "),
-        ("artifacts", "every artifact this version builds; rebuild with ancienttdde build "),
+        ("schema", "schema 1. Expected 2. Rebuild with ancienttdde build --output "),
+        ("artifacts", "every artifact this version builds. Rebuild with ancienttdde build "),
         ("parser", "ancient-td-game was built with AoE2ScenarioParser 0.0.1"),
         ("input", "Game input SHA-256 mismatch: content/balance/game.json"),
         ("artifact", "Game artifact SHA-256 mismatch: map.json"),
@@ -863,7 +863,7 @@ def test_a_stale_or_edited_game_fails_before_any_rebuild(
         raise AssertionError("validation rebuilt the game before its cheap checks failed")
 
     monkeypatch.setattr(build, "build_game", rebuild)
-    with pytest.raises(ValueError, match=message):
+    with pytest.raises(ValueError, match=re.escape(message)):
         build.validate_game(edited, ROOT)
     assert rebuilds == []
 
@@ -1018,7 +1018,7 @@ def test_all_seven_players_have_a_preplaced_reachable_berry_mill(game_build: Gam
 
 def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
     """Selecting the King the XS leaves for a cleared lane beside slot 8's keepers says why it is
-    there; the enemy's King, on the keeper islet above, says whose the waves are. The triggers
+    there. The enemy's King, on the keeper islet above, says whose the waves are. The triggers
     wait outside the lane's own, which the cleanup ends as it creates the King."""
     output, _ = game_build
     snapshot = json.loads((output / "scenario.json").read_text())
@@ -1038,7 +1038,7 @@ def test_the_king_a_cleared_lane_keeps_is_named(game_build: GameBuild) -> None:
             ),
             (
                 ".enemy",
-                f"Enemy: P{player}'s units are the waves; its King and tower keep the slot",
+                f"Enemy: P{player}'s units are the waves. Its King and tower keep the slot",
                 0,
                 spots.lane_king_tile,
             ),

@@ -1,7 +1,7 @@
 """Civilization profiles: what each civilization gets on top of its own technology tree.
 
 A profile is a small set of adjustments, neutral unless the content says otherwise. The XS
-applies Kings, King prices, kill rewards and raider caps; native triggers apply the rest once a
+applies Kings, King prices, kill rewards and raider caps. Native triggers apply the rest once a
 lane is initialized. A civilization without an explicit profile plays the default one.
 """
 
@@ -31,7 +31,7 @@ from ancienttdde.scenario.objects import display_name, technology
 # How the instructions and tables name the profile of a civilization the content does not list.
 DEFAULT_NAME = "Any other civilization"
 # Civilization IDs as xsGetPlayerCivilization reports them. The pinned dataset names the first
-# of them; later civilizations are listed by the index DE gives them.
+# of them. Later civilizations are listed by the index DE gives them.
 MAX_CIVILIZATION = 255
 KNOWN_CIVILIZATIONS: dict[str, int] = {
     member.name: member.value for member in CivilizationOld if 0 < member.value <= MAX_CIVILIZATION
@@ -107,7 +107,7 @@ class NativeWorth:
 class Civilization:
     key: str
     id: int
-    # One sentence part about the civilization's own bonuses that matter here; may be empty.
+    # One sentence part about the civilization's own bonuses that matter here. May be empty.
     identity: str
     profile: Profile
     native: NativeWorth = NativeWorth()
@@ -142,7 +142,7 @@ class Profiles:
         )
 
     def text(self, civilization: Civilization | None) -> str:
-        """The instructions' line about a civilization; None describes the default."""
+        """The Hints line about a civilization. None describes the default."""
         if civilization is None:
             return profile_text(self.default_identity, self.default, self.purchase_names)
         return profile_text(civilization.identity, civilization.profile, self.purchase_names)
@@ -230,12 +230,12 @@ def summary(profile: Profile, names: Mapping[str, str]) -> str:
 
 def profile_text(identity: str, profile: Profile, names: Mapping[str, str]) -> str:
     changes = adjustments(profile, names)
-    listed = f"adjustments: {', '.join(changes)}" if changes else "no adjustments"
-    return f"{identity}; {listed}" if identity else listed
+    listed = f"Adjustments: {', '.join(changes)}" if changes else "No adjustments"
+    return f"{identity}. {listed}" if identity else listed
 
 
 def civilization_text(value: object, label: str) -> str:
-    """Text the XS chats or the instructions print; it may be empty."""
+    """Text the XS chats or the instructions print. It may be empty."""
     if not isinstance(value, str):
         raise ValueError(f"{label} must be text")
     if any(character in value for character in '"\\%'):
@@ -252,7 +252,7 @@ def bounded(row: dict[str, object], key: str, low: int, high: int) -> int:
 def media[T: str](
     raw: dict[str, object], key: str, allowed: tuple[T, ...], high: int = 3
 ) -> tuple[tuple[T, int], ...]:
-    """Counts by medium, in the media's order; a missing or zero count is left out."""
+    """Counts by medium, in the media's order. A missing or zero count is left out."""
     if key not in raw:
         return ()
     counts = object_value(raw.get(key), key)
@@ -305,7 +305,7 @@ PROFILE_SETTINGS = frozenset(
 
 
 def starting_towers(raw: dict[str, object], balance: Balance) -> tuple[tuple[str, int], ...]:
-    """Towers by definition and count, in the families' order; the counts are even."""
+    """Towers by definition and count, in the families' order. The counts are even."""
     towers = media(raw, "towers", balance.towers.members, MAX_STARTING_TOWERS)
     for name, amount in towers:
         if amount % 2:
@@ -415,10 +415,10 @@ def check_tree(
     key: str, identifier: int, profile: Profile, shop: Shop, balance: Balance, stock: Stock
 ) -> None:
     """A profile may not grant what the civilization's own technology tree rules out, as the
-    stock data snapshot records it; a civilization the snapshot predates is not checked."""
+    stock data snapshot records it. A civilization the snapshot predates is not checked."""
     for name in profile.technologies:
         if name not in stock.technologies:
-            raise ValueError(f"{name} is not in the stock snapshot; add it to the watched ones")
+            raise ValueError(f"{name} is not in the stock snapshot. Add it to the watched ones")
     record = stock.find(identifier)
     if record is None:
         return
@@ -440,7 +440,7 @@ def check_tree(
 
 
 def load_profiles(path: Path, balance: Balance, shop: Shop, stock: Stock | None = None) -> Profiles:
-    """Read the profiles; with the stock data snapshot, every profile is also checked against
+    """Read the profiles. With the stock data snapshot, every profile is also checked against
     its civilization's technology tree."""
     raw = read_object(path)
     if raw.get("schema_version") != 1:

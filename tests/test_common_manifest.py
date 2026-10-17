@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 from typing import Literal
 
@@ -48,10 +49,12 @@ def test_older_manifest_schemas_name_the_command_that_rebuilds_them(
 ) -> None:
     with pytest.raises(
         ValueError,
-        match=(
-            f"^Unsupported {kind} manifest schema 1; expected 2, "
-            f"rebuild with {command} --output /builds/suite$"
-        ),
+        match="^"
+        + re.escape(
+            f"Unsupported {kind} manifest schema 1. Expected 2. "
+            f"Rebuild with {command} --output /builds/suite"
+        )
+        + "$",
     ):
         parse_manifest(manifest(kind, schema=1), kind=kind, rebuild=rebuild_command(kind, BUILD))
 
@@ -79,10 +82,12 @@ def test_a_build_made_with_other_tools_must_be_rebuilt(
     built[field] = "0.0.1"
     with pytest.raises(
         ValueError,
-        match=(
-            f"^stock-de-map was built with {tool} 0.0.1, but this environment has {current}; "
-            f"rebuild with ancienttdde build --map-only --output /builds/suite$"
-        ),
+        match="^"
+        + re.escape(
+            f"stock-de-map was built with {tool} 0.0.1, but this environment has {current}. "
+            "Rebuild with ancienttdde build --map-only --output /builds/suite"
+        )
+        + "$",
     ):
         require_current_versions(built, kind="stock-de-map", rebuild=rebuild)
 
@@ -118,8 +123,8 @@ def test_older_audit_manifests_without_a_kind_name_the_rebuild_command() -> None
     del raw["kind"]
     raw["summary"] = {}
     expected = (
-        "Unsupported legacy-audit manifest schema 1; expected 2, "
-        "rebuild with ancienttdde audit --output /builds/suite"
+        "Unsupported legacy-audit manifest schema 1. Expected 2. "
+        "Rebuild with ancienttdde audit --output /builds/suite"
     )
-    with pytest.raises(ValueError, match=f"^{expected}$"):
+    with pytest.raises(ValueError, match=f"^{re.escape(expected)}$"):
         parse_manifest(raw, kind="legacy-audit", rebuild=rebuild_command("legacy-audit", BUILD))

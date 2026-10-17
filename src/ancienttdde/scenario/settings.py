@@ -33,7 +33,7 @@ def disable_automatic_victory(scenario: AoE2DEScenario) -> None:
     scenario.option_manager.victory_condition = VictoryCondition.CUSTOM
     scenario.option_manager.victory_custom_conditions_required = False
     victory = scenario.sections["GlobalVictory"]
-    # Custom victory does not clear the seed's Conquest checkbox; left on, it ends the game
+    # Custom victory does not clear the seed's Conquest checkbox. Left on, it ends the game
     # as soon as every enemy is defeated, including players defeated at the start.
     victory.conquest_required = victory.ruins = victory.artifacts_required = 0
     victory.discovery = victory.explored_percent_of_map_required = victory.gold_required = 0

@@ -61,7 +61,7 @@ def test_each_wave_states_the_damage_a_lane_must_deal() -> None:
         first.total_hit_points / (first.spawn_seconds + first.crossing_seconds)
     )
     assert needs[-1].required_dps > needs[0].required_dps * 20
-    # The schedule's own armor replaces the unit's in the demand table; the rams keep theirs.
+    # The schedule's own armor replaces the unit's in the demand table. The rams keep theirs.
     nobunaga = next(need for need in needs if need.unit == "NOBUNAGA")
     assert nobunaga.pierce_armor == inputs().stock.unit("NOBUNAGA").armor(PIERCE) + 10
     rams = next(need for need in needs if need.unit == "SIEGE_RAM")
@@ -121,7 +121,7 @@ def test_lane_pressure_follows_the_schedule_the_income_and_the_ladder() -> None:
     pressure = lane_pressure(data, assumptions)
     needs = wave_needs(data)
     assert [p.key for p in pressure] == [w.key for w in balance.waves]
-    # The first wave starts after the choice window and the preparation; each next one after
+    # The first wave starts after the choice window and the preparation. Each next one after
     # the wave before it and an intermission.
     first = pressure[0]
     assert first.minutes == pytest.approx(
@@ -191,7 +191,7 @@ TIERS = (
     (41, 46),
     (47, 56),
 )
-# Target pressure per tier on Normal; the DE run, not this test, calibrates the curve. The
+# Target pressure per tier on Normal. The DE run, not this test, calibrates the curve. The
 # opening villager wave is tuned by playtest, and the rams sit below their tier's band with
 # their full armor. From tier 6 the targets run above 1 on every level: a played lane
 # outgrows the lane the assumptions expect by then.
@@ -332,7 +332,7 @@ def test_income_report_prices_a_trained_trader() -> None:
     cog = trader_kings("water", 1, data, Assumptions(), exchange)
     assert (
         f"A trade cart trained at the market costs {cost:.2f} Kings and a point of room and "
-        f"brings {cart:.1f} Kings over the run on the lane's route, a trade cog {cog:.1f}; the "
+        f"brings {cart:.1f} Kings over the run on the lane's route, a trade cog {cog:.1f}. The "
         "lane the waves are tuned against trains none." in text
     )
 
@@ -362,7 +362,7 @@ def test_every_investment_pays_for_itself_within_most_of_the_run() -> None:
     returns = investment_returns(inputs())
     run = inputs().minutes
     for investment in returns:
-        # Bought at the start, every investment returns at least half as much again; bought
+        # Bought at the start, every investment returns at least half as much again. Bought
         # halfway, none of them is a plain loss by more than a King.
         assert investment.payback_minutes <= run * 0.6, investment.key
         assert investment.run_value >= investment.kings * 1.5, investment.key
@@ -591,7 +591,7 @@ def test_the_report_names_the_default_level_and_copes_with_new_civilizations(
     text = render_report(load_inputs(root), Assumptions())
     assert "Hard hit points." in text and "on Hard without buying anything" in text
     assert (
-        "the Hard King price, the default level; on Easy and Normal, a bonus paid in gold is "
+        "the Hard King price, the default level. On Easy and Normal, a bonus paid in gold is "
         "worth a different number of Kings and a bonus in Kings the same." in text
     )
     # Priced at the default level, apart from the pressure on the other levels.

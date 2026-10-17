@@ -44,7 +44,7 @@ def around(tiles: tuple[Tile, ...]) -> dict[str, FieldValue]:
 
 def lane_gatherers(game: Game, trigger: TriggerHandle, lane: EngineLane) -> None:
     """Each villager placed in the resource area starts gathering the deposit or tree beside
-    it; the build-area villagers wait for orders."""
+    it. The build-area villagers wait for orders."""
     kinds = {game.stock(kind) for kind in GATHERED}
     resources = [
         (u.reference_id, u.x, u.y)

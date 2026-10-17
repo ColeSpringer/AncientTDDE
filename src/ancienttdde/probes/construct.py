@@ -10,6 +10,7 @@ from AoE2ScenarioParser.datasets.trigger_lists.diplomacy_state import DiplomacyS
 from AoE2ScenarioParser.datasets.trigger_lists.operation import Operation
 from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
+from ancienttdde.common.credits import CREDIT, NAME
 from ancienttdde.common.data import asset_text
 from ancienttdde.common.worker import capture_stdout_for_errors
 from ancienttdde.probes import (
@@ -146,7 +147,7 @@ def construct_probe(root: Path, definition: ProbeDefinition, destination: Path) 
     if definition.id == ProbeId.SCRIPTS_ENEMY:
         scenario.xs_manager.add_script(xs_string=asset_text("probe-heartbeat.xs"))
     arena.objective(definition.title, definition.setup)
-    scenario.sections["FileHeader"].creator_name = "Ancient TD DE mechanic probes"
+    scenario.sections["FileHeader"].creator_name = f"{NAME} mechanic probes"
     scenario.message_manager.instructions = (
         definition.title
         + "\r"
@@ -156,7 +157,7 @@ def construct_probe(root: Path, definition: ProbeDefinition, destination: Path) 
         + "\r"
         + "\r".join(f"{c.id}: {c.action} Expected: {c.expected}" for c in definition.cases)
     )
-    scenario.message_manager.history = "Based on Ancient TD v5.3 by DRAX6869 / DRAX."
+    scenario.message_manager.history = f"{CREDIT}."
     with xs_checker(scenario):
         scenario.xs_manager.validate_scenario_xs()
         scenario.write_to_file(str(destination))

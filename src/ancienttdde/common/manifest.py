@@ -68,7 +68,7 @@ def require_current_versions(manifest: Versions, *, kind: ManifestKind, rebuild:
         if recorded != installed:
             raise ValueError(
                 f"{kind} was built with {tool} {recorded}, but this environment has "
-                f"{installed}; rebuild with {rebuild}"
+                f"{installed}. Rebuild with {rebuild}"
             )
 
 
@@ -84,14 +84,14 @@ def manifest_kind(raw: dict[str, object]) -> str | None:
 
 
 def parse_manifest(raw: dict[str, object], *, kind: ManifestKind, rebuild: str) -> ManifestBase:
-    """Check the fields every pipeline shares; `rebuild` names the command for older schemas."""
+    """Check the fields every pipeline shares. `rebuild` names the command for older schemas."""
     if manifest_kind(raw) != kind:
         raise ValueError(f"Not a {kind} manifest")
     schema = raw.get("schema_version")
     if type(schema) is not int or schema != SCHEMA_VERSION:
         raise ValueError(
-            f"Unsupported {kind} manifest schema {schema}; expected {SCHEMA_VERSION}, "
-            f"rebuild with {rebuild}"
+            f"Unsupported {kind} manifest schema {schema}. Expected {SCHEMA_VERSION}. "
+            f"Rebuild with {rebuild}"
         )
     return ManifestBase(
         schema_version=SCHEMA_VERSION,

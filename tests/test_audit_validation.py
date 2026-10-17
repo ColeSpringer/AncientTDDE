@@ -1,4 +1,5 @@
 import json
+import re
 from collections.abc import Callable
 from pathlib import Path
 from typing import cast
@@ -172,7 +173,9 @@ def test_report_validation_rejects_older_manifest_schemas(project_report: Projec
     manifest["schema_version"] = 1
     del manifest["kind"]
     manifest_path.write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="schema 1; expected 2, rebuild with ancienttdde audit"):
+    with pytest.raises(
+        ValueError, match=re.escape("schema 1. Expected 2. Rebuild with ancienttdde audit")
+    ):
         validate_report(report, root)
 
 
@@ -209,7 +212,7 @@ def test_a_report_made_with_other_tools_must_be_rerun(project_report: ProjectRep
     manifest = read_object(manifest_path)
     manifest["python_version"] = "3.0.0"
     manifest_path.write_text(json.dumps(manifest))
-    expected = "legacy-audit was built with Python 3.0.0, .+ rebuild with ancienttdde audit"
+    expected = "legacy-audit was built with Python 3.0.0, .+ Rebuild with ancienttdde audit"
     with pytest.raises(ValueError, match=expected):
         validate_report(report, root)
 

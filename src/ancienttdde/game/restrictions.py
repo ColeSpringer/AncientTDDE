@@ -84,7 +84,7 @@ def silence(game: Game, trigger: TriggerHandle, player: int) -> None:
 
 
 def restrict_reach(game: Game, player: int) -> None:
-    """Blacksmith and unique technologies add castle and monk range back; every second, the
+    """Blacksmith and unique technologies add castle and monk range back. Every second, the
     lane's castle and monks lose it again."""
     trigger = game.trigger(f"lane.p{player}.restrict.reach", looping=True)
     condition(trigger, "timer", timer=1)

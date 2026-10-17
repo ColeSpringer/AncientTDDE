@@ -221,7 +221,7 @@ def test_villagers_on_a_transfer_pad_are_teleported_to_its_arrival(
     game_build: GameBuild, player: int
 ) -> None:
     """Every villager standing on the pad moves to the arrival as it is, with its type and
-    what it carries; nothing is removed or created, so the arrival flag stays. Each is first
+    what it carries. Nothing is removed or created, so the arrival flag stays. Each is first
     sent on to the arrival's walk tile, so none keeps walking back towards the pad."""
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
@@ -318,7 +318,7 @@ def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: i
     balance = load_balance(ROOT / "content/balance/game.json")
     texts = message_texts(balance)
     # The gold per King depends on the difficulty, which the game announces when it starts.
-    assert texts["gold"] == "Gold converted into Kings; they arrive at your stall."
+    assert texts["gold"] == "Gold converted into Kings. They arrive at your stall."
     # The population refusal names no purchase: the instructions say what adds room.
     assert texts["population"] == "No population room for that purchase."
     assert texts["population_limit"] == (
@@ -327,7 +327,7 @@ def test_messages_reach_only_their_lanes_player(game_build: GameBuild, player: i
     assert texts["population_full"] == (
         "Your lane's room already reaches its population limit of 200."
     )
-    # The objectives show only the shared siege cooldown; the last buyer waits longer.
+    # The objectives show only the shared siege cooldown. The last buyer waits longer.
     assert "longer for its last buyer" in texts["siege_cooldown"]
     for key, _ in MESSAGES:
         trigger = triggers[f"lane.p{player}.message.{key}"]
@@ -353,7 +353,7 @@ def test_new_deposits_hold_more_than_a_run_uses(game_build: GameBuild) -> None:
 
 
 def test_shop_has_no_signs_and_keeps_its_named_units(game_build: GameBuild) -> None:
-    """DE cannot rename Sign objects, so the shop's signs are removed; the named units stay."""
+    """DE cannot rename Sign objects, so the shop's signs are removed. The named units stay."""
     data = snapshot(game_build)
     x1, y1, x2, y2 = anchors(game_build)["shop.bounds"]["region"]
     inside = [u for u in data["units"] if x1 <= u["x"] <= x2 + 1 and y1 <= u["y"] <= y2 + 1]
@@ -560,7 +560,7 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
             ),
             "economy": (
                 "Villager on the flag: moves to the resource area",
-                "Arrivals from the build area; bought villagers nearby",
+                "Arrivals from the build area. Bought villagers nearby",
             ),
             "north": (
                 "Villager on the flag: moves to the north build rows",
@@ -580,7 +580,7 @@ def test_objects_are_named_when_the_game_starts(game_build: GameBuild) -> None:
 def test_transfer_flags_name_their_destination_and_their_relics_point_at_them(
     game_build: GameBuild, player: int
 ) -> None:
-    """The relic beside a transfer pad stands in a sealed pocket; the flag on the pad's one
+    """The relic beside a transfer pad stands in a sealed pocket. The flag on the pad's one
     tile is where a villager goes. Compass words would mislead in DE's isometric view."""
     from ancienttdde.common.data import object_value
     from ancienttdde.game.config import load_lanes
@@ -616,7 +616,7 @@ def test_pad_exhibits_stay_where_the_map_puts_them_with_their_captions(
     game_build: GameBuild,
 ) -> None:
     """The original's exhibits stay on their map spots and a King is created beside each new
-    pad; each carries its purchases' tags as the caption DE draws above it."""
+    pad. Each carries its purchases' tags as the caption DE draws above it."""
     from ancienttdde.game.catalog import display_captions, load_shop
     from ancienttdde.game.config import load_balance
 
@@ -672,7 +672,7 @@ def test_creation_tiles_hold_only_the_originals_arrival_flags(
     balance = load_balance(ROOT / "content/balance/game.json")
     tiles = creation_tiles(lane, shop, balance.interaction)
     assert lane.sites.king_spawn in tiles and len(tiles) >= 18
-    # Trebuchets arrive on two islets of every row for whoever holds the siege; the build
+    # Trebuchets arrive on two islets of every row for whoever holds the siege. The build
     # reserves those tiles with every lane's own.
     rows = load_siege_rows(object_value(sites, "anchors"))
     islets = siege_tiles(rows, balance.interaction)
@@ -737,7 +737,7 @@ def test_objectives_show_the_wave_countdown_and_every_lane(game_build: GameBuild
         lives = variables[f"lane.p{player}.lives"]
         assert f"<Variable {lives}>/{balance()['lives']}" in lane["short_description"]
     # Never fired: they only display their variables. The countdown to the next wave and the
-    # lives show from the start; the wave's spawning line waits for its first wave.
+    # lives show from the start. The wave's spawning line waits for its first wave.
     for shown in [waiting, spawning] + [triggers[f"lane.p{p}.status"] for p in PLAYERS]:
         assert shown["display_on_screen"] and not shown["effects"]
         assert shown["enabled"] == (shown is not spawning)
@@ -747,7 +747,7 @@ def test_objectives_show_the_wave_countdown_and_every_lane(game_build: GameBuild
 
 
 def test_the_status_line_switches_between_the_wait_and_the_wave(game_build: GameBuild) -> None:
-    """Before a wave the status counts down to it; while a wave spawns, it counts down the
+    """Before a wave the status counts down to it. While a wave spawns, it counts down the
     spawning. The triggers that start each wait and each wave switch the lines."""
     data = snapshot(game_build)
     triggers = triggers_by_name(data)
@@ -805,7 +805,7 @@ def test_population_starts_with_the_contents_room_for_every_lane(
         for e in effects(init, "modify_resource")
         if e["tribute_list"] == 4 and e["source_player"] == player
     ]
-    # Civilization bonuses that start with population are levelled to the same room; only
+    # Civilization bonuses that start with population are levelled to the same room. Only
     # purchases and the profiles add more.
     assert headroom == [(SET, balance()["economy"]["starting_population"])]
 
@@ -813,7 +813,7 @@ def test_population_starts_with_the_contents_room_for_every_lane(
 def test_the_model_assumes_the_gold_and_stone_miners_a_lane_starts_with(
     game_build: GameBuild,
 ) -> None:
-    """A lane's resource-area villagers start gathering the deposit beside them; the baseline
+    """A lane's resource-area villagers start gathering the deposit beside them. The baseline
     income counts exactly those on gold and on stone."""
     from ancienttdde.game.balance import Assumptions, load_inputs
     from ancienttdde.game.economy import GATHER_REACH

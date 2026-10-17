@@ -30,12 +30,12 @@ def read_json(path: Path) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except (UnicodeError, json.JSONDecodeError) as error:
         raise ValueError(
-            f"Invalid JSON reference {path}; regenerate it from the original DAT"
+            f"Invalid JSON reference {path}. Regenerate it from the original DAT"
         ) from error
 
 
 def write_json(path: Path, data: object, *, compact: bool = False) -> None:
-    """Write sorted, indented JSON; compact output keeps key order on one line."""
+    """Write sorted, indented JSON. Compact output keeps key order on one line."""
     if compact:
         path.write_text(json.dumps(data, ensure_ascii=False, allow_nan=False), encoding="utf-8")
         return

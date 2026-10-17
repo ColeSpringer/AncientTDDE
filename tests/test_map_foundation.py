@@ -49,7 +49,7 @@ def test_isolation_can_start_from_every_point_of_an_anchor(
     from ancienttdde.map.foundation import migrate_map, validate_map
 
     legacy, config = foundation_inputs
-    # An arrival and its walk target on the siege islet; the second point lies off it.
+    # An arrival and its walk target on the siege islet. The second point lies off it.
     config["anchors"]["siege.row1.arrivals"] = {"points": [[12.5, 2.5], [11.5, 1.5]]}
     config["isolation"].append(
         {

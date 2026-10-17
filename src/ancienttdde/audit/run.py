@@ -57,7 +57,7 @@ def run_audit(root: Path, output: Path | None = None) -> Path:
         "timer_chain_fire_seconds": {str(k): v for k, v in sorted(fires.items())},
         "reference_findings": dangling,
         "timing_note": (
-            "Static timer chains in game-seconds; engine tick ordering requires playtests."
+            "Static timer chains in game-seconds. Engine tick ordering requires playtests."
         ),
         "instructions_note": (
             "Messages are evidence of displayed claims, not authoritative behavior."

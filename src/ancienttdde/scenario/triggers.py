@@ -107,7 +107,7 @@ class Builder:
         return stock(kind, self.objects)
 
     def trigger(self, key: str, *, looping: bool, enabled: bool = True) -> TriggerHandle:
-        """Add a named trigger; every caller states whether it repeats."""
+        """Add a named trigger. Every caller states whether it repeats."""
         trigger = self.scenario.trigger_manager.add_trigger(
             key,
             enabled=enabled,
@@ -176,7 +176,7 @@ class Builder:
         *,
         owners: Mapping[int, int] | None = None,
     ) -> None:
-        """Name a placed object when the trigger fires; DE shows the name on selection.
+        """Name a placed object when the trigger fires. DE shows the name on selection.
 
         Pass `owners` from one owners() call when naming many objects.
         """

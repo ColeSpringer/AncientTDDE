@@ -58,7 +58,7 @@ def test_the_schedule_follows_the_originals_roster_and_cadence() -> None:
         assert wave.enemies == expected, wave.key
     bosses = waves[46:]
     assert all(w.enemies == 1 and w.duration == 1 for w in bosses)
-    # Tiers 1-4 keep each unit's own pierce armor; from tier 5 the schedule adds a step per
+    # Tiers 1-4 keep each unit's own pierce armor. From tier 5 the schedule adds a step per
     # tier to it, a large one from tier 6, 10-A the last tier's and the bosses the largest.
     # The rams keep their own full armor.
     steps = {5: 10, 6: 115, 7: 120, 8: 140, 9: 170}
@@ -171,7 +171,7 @@ def test_wave_hit_points_fit_the_engine_attribute_except_for_bosses() -> None:
     from ancienttdde.game.config import BOSS_HIT_POINTS, MAX_HIT_POINTS, load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
-    # DE stores unit hit points in 16 bits; a boss carries more as its current hit points.
+    # DE stores unit hit points in 16 bits. A boss carries more as its current hit points.
     assert all(w.hit_points <= MAX_HIT_POINTS for w in waves if not w.boss)
     assert all(MAX_HIT_POINTS < w.hit_points <= BOSS_HIT_POINTS for w in waves if w.boss)
 
@@ -180,7 +180,7 @@ def test_every_boss_outclasses_every_regular_wave() -> None:
     from ancienttdde.game.config import load_balance
 
     waves = load_balance(ROOT / "content/balance/game.json").waves
-    # Each boss needs more damage per second than the last (test_game_balance.py); its hit
+    # Each boss needs more damage per second than the last (test_game_balance.py). Its hit
     # points follow its speed.
     bosses = [w.hit_points for w in waves if w.boss]
     assert min(bosses) > 10 * max(w.hit_points for w in waves if not w.boss)
@@ -417,7 +417,7 @@ def test_siege_warns_holds_and_cools_down_for_its_configured_times() -> None:
 
     siege = load_balance(ROOT / "content/balance/game.json").interaction.siege
     assert (siege.trebuchets_per_row, siege.warning_seconds, siege.active_seconds) == (2, 10, 60)
-    # Three game minutes between sieges, so a lane can rebuild; the buyer waits a fourth.
+    # Three game minutes between sieges, so a lane can rebuild. The buyer waits a fourth.
     assert (siege.shared_cooldown, siege.buyer_cooldown) == (180, 240)
 
 

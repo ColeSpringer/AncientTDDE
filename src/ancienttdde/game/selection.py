@@ -59,7 +59,7 @@ def control_points(anchors: Mapping[str, object]) -> tuple[tuple[float, float], 
 
 
 def place_controls(game: Game, anchors: Mapping[str, object], balance: Balance) -> None:
-    """Gaia Outposts below the shop stand for the controls; players select them. Each carries
+    """Gaia Outposts below the shop stand for the controls. Players select them. Each carries
     its short label as a caption, which goes with the Outpost."""
     labels = control_labels(balance)
     for control, (x, y) in zip(CONTROLS, control_points(anchors), strict=True):
@@ -100,7 +100,7 @@ def options_objectives(game: Game, balance: Balance) -> None:
             game,
             f"game.objective.options.{lobby}",
             f"Run options below the shop, left to right: {run}",
-            f"The first human lane selects one; {defaults[lobby]} is taken after "
+            f"The first human lane selects one. {defaults[lobby]} is taken after "
             f"{balance.choice_seconds} game seconds.",
         )
         reveal_in_lobby(game, f"game.reveal.options.{lobby}", options, lobby)

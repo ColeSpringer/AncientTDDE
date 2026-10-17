@@ -13,7 +13,7 @@ from ancienttdde.scenario.objects import stock
 
 @dataclass(frozen=True)
 class Spawned:
-    """A unit to create; XS positions use tenths of a tile to stay integers in tables."""
+    """A unit to create. XS positions use tenths of a tile to stay integers in tables."""
 
     unit: int
     gaia: bool

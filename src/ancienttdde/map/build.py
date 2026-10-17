@@ -53,7 +53,7 @@ def current_inputs(root: Path) -> list[HashRecord]:
 
 
 def read_content(root: Path) -> tuple[MapDocument, FoundationConfig]:
-    """Read the map definitions; hashing the current inputs first proves they exist."""
+    """Read the map definitions. Hashing the current inputs first proves they exist."""
     config = cast(
         FoundationConfig, json.loads((root / CONTENT_INPUTS[0]).read_text(encoding="utf-8"))
     )

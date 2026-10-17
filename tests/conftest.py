@@ -58,7 +58,7 @@ def ai_rules(script: str) -> list[Rule]:
             depth -= 1
         elif depth == 1:
             if not head:
-                # A constant definition is no rule; any other top-level form is one.
+                # A constant definition is no rule. Any other top-level form is one.
                 head = token
                 assert head in ("defconst", "defrule"), head
                 in_rule = head == "defrule"
@@ -112,7 +112,7 @@ def save_scenario(scenario: AoE2DEScenario, path: Path) -> None:
 def snapshot(path: Path) -> ScenarioSnapshot:
     """Return the inspection sidecar a build wrote beside a generated scenario.
 
-    Probe suites store `<name>.json` beside `<name>.aoe2scenario`; a game build stores
+    Probe suites store `<name>.json` beside `<name>.aoe2scenario`. A game build stores
     `scenario.json`. Validation proves each sidecar equals a fresh inspection.
     """
     sidecar = path.with_suffix(".json")
@@ -139,7 +139,7 @@ def effects(trigger: TriggerRecord, kind: str) -> list[dict[str, Any]]:
 
 @cache
 def cached_json(path: Path) -> Any:
-    """A build artifact parsed once per session; callers never mutate it."""
+    """A build artifact parsed once per session. Callers never mutate it."""
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -170,7 +170,7 @@ def attr_text(attributes: Attributes, key: str) -> str:
 
 
 def attr_list(attributes: Attributes, key: str) -> list[int]:
-    """Return an attribute's integers; an absent or null attribute is an empty list."""
+    """Return an attribute's integers. An absent or null attribute is an empty list."""
     value = attributes.get(key) or []
     assert isinstance(value, list), f"{key} is not a list: {value!r}"
     numbers = [item for item in value if type(item) is int]

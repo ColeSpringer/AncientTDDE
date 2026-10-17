@@ -25,7 +25,7 @@ def region(attributes: dict[str, Any]) -> Region | None:
 def activation_times(
     triggers: Sequence[Mapping[str, Any]],
 ) -> tuple[dict[int, int], dict[int, int]]:
-    """Earliest timer-chain times; guarded activations remain unknown.
+    """Earliest timer-chain times. Guarded activations remain unknown.
 
     These are scheduled game-seconds, excluding engine tick granularity. This
     is not a simulation of looping triggers or object/research conditions.

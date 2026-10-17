@@ -39,7 +39,7 @@ int laneVariable(int player = 1, int field = 0) {
 
 // DE numbers a multiplayer game's players by their lobby colors and skips closed slots, so the
 // computer the host left in the last slot may hold any number. The highest-numbered player in the
-// game that no human controls is the enemy whose units the waves are; the humans in slots 1-7
+// game that no human controls is the enemy whose units the waves are. The humans in slots 1-7
 // hold the lanes, and the other computers' lanes are cleared.
 int ancientEnemy() {
     return (xsTriggerVariable(vEnemy));
@@ -118,7 +118,7 @@ void ancientMessage(int player = 1, int code = 0) {
     if (laneValue(player, fMessage) == 0) laneSet(player, fMessage, code);
 }
 
-// The life Outpost's hit points show the share of lives left; the objectives show the number.
+// The life Outpost's hit points show the share of lives left. The objectives show the number.
 void ancientShowLives(int player = 1) {
     int lives = laneValue(player, fLives);
     if (lives < 0) lives = 0;
@@ -128,7 +128,7 @@ void ancientShowLives(int player = 1) {
 }
 
 // Clear a computer-filled or eliminated lane. Query the object classes a lane's units belong
-// to; DE documents no all-objects wildcard, and class N is addressed as cArcherClass + N.
+// to. DE documents no all-objects wildcard, and class N is addressed as cArcherClass + N.
 // Enemies still walking the lane go as the sweep comes to their type.
 void ancientCleanupLane(int player = 1) {
     for (kind = 0; < cLaneClasses) {
@@ -186,7 +186,7 @@ string ancientCivilization(int player = 1) {
     string name = civName(civilization);
     if (name != "") line = line + " " + name;
     line = line + ": " + civText(civilization);
-    if (civGoldPercent(civilization) != 100) line = line + "; a King per " + ancientText(ancientKingPrice(player)) + " gold";
+    if (civGoldPercent(civilization) != 100) line = line + ". A King per " + ancientText(ancientKingPrice(player)) + " gold";
     return (line + ".");
 }
 
@@ -202,12 +202,12 @@ string ancientTowerAccess(int player = 1) {
         }
     }
     string text = ancientPlayer(player) + " towers: " + available;
-    if (missing != "") text = text + "; unavailable: " + missing;
-    return (text);
+    if (missing != "") text = text + ". Unavailable: " + missing;
+    return (text + ".");
 }
 
 // Add pierce attack or armor to a player's object definition, for existing, new and upgraded
-// objects. A native Modify Attribute cannot raise a class past 255; a technology-style effect
+// objects. A native Modify Attribute cannot raise a class past 255. A technology-style effect
 // can, but its value packs the class with the amount (class * 256 + amount), so the amount
 // goes in steps.
 void ancientAddPierce(int player = 1, int unit = -1, int attribute = 0, int amount = 0) {
@@ -215,7 +215,7 @@ void ancientAddPierce(int player = 1, int unit = -1, int attribute = 0, int amou
     while (left > 0) {
         int step = left;
         if (step > cClassChunk) step = cClassChunk;
-        // The value parameter is a float; DE does not promote an int argument.
+        // The value parameter is a float. DE does not promote an int argument.
         float value = 1.0 * (256 * cPierceClass + step);
         xsEffectAmount(cAddAttribute, unit, attribute, value, player);
         left = left - step;
@@ -245,7 +245,7 @@ bool ancientBuiltOver(int player = 1, float x = 0.0, float y = 0.0) {
 
 // Create every unit a purchase places, or none: a blocked spot keeps the Kings. Spots in the
 // shared trade areas and the bought villagers' flagged spots are not checked, so no rival unit
-// or marker flag can hold a purchase back; a building of the lane's own over one still does.
+// or marker flag can hold a purchase back. A building of the lane's own over one still does.
 bool ancientSpawn(int player = 1, int purchase = 0) {
     int key = player * cSpawnStride + purchase;
     int first = spawnStart(key);
@@ -320,7 +320,7 @@ void ancientStop(string reason = "") {
 }
 
 // The first human lane chooses the run options. Every game plays the lobby's difficulty, or
-// the Standard setting's level when the value is outside DE's range; competitive games start
+// the Standard setting's level when the value is outside DE's range. Competitive games start
 // with PvP off. A lobby without a computer player has no enemy and cannot play.
 void ancientInitialize() {
     int enemy = 0;
@@ -329,7 +329,7 @@ void ancientInitialize() {
     }
     xsSetTriggerVariable(vEnemy, enemy);
     if (enemy == 0) {
-        ancientStop("no computer player is in the game. The last computer player is the enemy; add one in the lobby and start again.");
+        ancientStop("no computer player is in the game. The last computer player is the enemy. Add one in the lobby and start again.");
         return;
     }
     // The map has lanes for players 1-7 only.
@@ -368,12 +368,12 @@ void ancientInitialize() {
     xsChatData("Enemy: " + ancientPlayer(enemy) + ", the last computer player.");
     if (participants == 0) return;
     xsChatData("Difficulty: " + difficultyName(level) + ", a King per " + ancientText(kingGold(level)) + " gold.");
-    if (recognized == false) xsChatData("Lobby difficulty %d is not recognized; playing " + difficultyName(level) + ".", lobby);
+    if (recognized == false) xsChatData("Lobby difficulty %d is not recognized. Playing " + difficultyName(level) + ".", lobby);
     string window = " within " + ancientText(cChoice) + " game seconds";
     if (participants == 1) {
-        xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop" + window + "; Standard is the default.");
+        xsChatData(ancientPlayer(chooser) + ": select Standard, Endless or Practice below the shop" + window + ". Standard is the default.");
     } else {
-        xsChatData(ancientPlayer(chooser) + ": PvP is off; select PvP on below the shop" + window + " to put raiders and the siege power-up on sale.");
+        xsChatData(ancientPlayer(chooser) + ": PvP is off. Select PvP on below the shop" + window + " to put raiders and the siege power-up on sale.");
     }
 }
 
@@ -393,7 +393,7 @@ int ancientEndlessArmor(int endless = 0) {
 }
 
 // The hit points a wave's enemies carry: a boss's can exceed the attribute's limit, which the
-// wave's configuration applied, so the rest is set on the unit itself; endless enemies carry
+// wave's configuration applied, so the rest is set on the unit itself. Endless enemies carry
 // the most the attribute holds.
 int ancientWaveHitPoints(int wave = 0) {
     if (wave < cWaveCount) return (waveHitPoints(xsTriggerVariable(vDifficulty) * cWaveCount + wave));
@@ -407,7 +407,7 @@ string ancientWaveEnemies(int wave = 0) {
     return (ancientText(waveEnemies(pattern)) + " " + waveKey(pattern));
 }
 
-// The enemies with their hit points and the armor the schedule gives them; past the finale
+// The enemies with their hit points and the armor the schedule gives them. Past the finale
 // the armor added is counted in, or shown alone for a template with no armor of its own.
 string ancientWaveText(int wave = 0) {
     int pattern = ancientTemplate(wave);
@@ -440,7 +440,7 @@ void ancientBeginPreparation() {
 // Set an attribute of the enemy's definition of a wave unit, for the enemies created from then
 // on, as a native Modify Attribute would for a fixed player.
 void ancientSetEnemyAttribute(int unit = -1, int attribute = 0, int amount = 0) {
-    // The value parameter is a float; DE does not promote an int argument.
+    // The value parameter is a float. DE does not promote an int argument.
     float value = 1.0 * amount;
     xsEffectAmount(cSetAttribute, unit, attribute, value, ancientEnemy());
 }
@@ -513,7 +513,7 @@ void ancientChoose(int player = 1, int code = 0) {
             ancientMessage(player, cMessageNeedsRivals);
             return;
         }
-        // Standard leaves PvP off; only this option switches it on.
+        // Standard leaves PvP off. Only this option switches it on.
         xsSetTriggerVariable(vPvp, 1);
         xsChatData(ancientPlayer(player) + " switched PvP on: raiders and the siege power-up go on sale when the first wave starts.");
     } else return;
@@ -552,7 +552,7 @@ void ancientPractice(int player = 1, int code = 0) {
     xsSetTriggerVariable(vAssists, xsTriggerVariable(vAssists) + 1);
 }
 
-// The lane's native triggers record each new selection of a control; it acts once and is
+// The lane's native triggers record each new selection of a control. It acts once and is
 // cleared here, so holding it, or reloading while it is held, does nothing more.
 void ancientControl(int player = 1) {
     int code = laneValue(player, fControl);
@@ -593,7 +593,7 @@ int ancientRivals(int player = 1) {
 }
 
 // Only one player holds the siege: a short warning, then trebuchets on every islet row, both
-// sides of every lane, for a while; they fire at whatever the holder's enemies hold in reach. A
+// sides of every lane, for a while. They fire at whatever the holder's enemies hold in reach. A
 // claim made earlier in the same second keeps the holder.
 void ancientClaimSiege(int player = 1) {
     xsSetTriggerVariable(vSiegeOwner, player);
@@ -764,7 +764,7 @@ int ancientCollect(int live = -1, int slice = -1) {
             int left = laneValue(leaker, fLives);
             if (left < 0) left = 0;
             string lost = ancientPlayer(leaker) + " lost " + ancientCount(leaks, "life", "lives");
-            xsChatData(lost + "; " + ancientText(left) + " left.");
+            xsChatData(lost + ". " + ancientText(left) + " left.");
             ancientShowLives(leaker);
         }
     }
@@ -787,7 +787,7 @@ int ancientCollect(int live = -1, int slice = -1) {
         }
     }
     xsSetTriggerVariable(vSurvivors, survivors);
-    // The chooser passes to the next lane still playing; a fallen solo lane stays the chooser,
+    // The chooser passes to the next lane still playing. A fallen solo lane stays the chooser,
     // so the result reads its own lives and kills.
     int chooser = xsTriggerVariable(vChooser);
     if ((chooser > 0) && (laneValue(chooser, fActive) == 0)) {
@@ -899,7 +899,7 @@ int ancientRowOffset(int count = 1, int index = 0) {
 
 // A batch of the wave's enemies for a lane, created silently and without collision checks so
 // nothing holds a wave back. The enemy's AI then sends them down the lane.
-// A boss comes alone with the attribute's limit of hit points; the rest waits in the lane's
+// A boss comes alone with the attribute's limit of hit points. The rest waits in the lane's
 // reservoir, which its unit draws on as it is hit. Returns how many enemies appeared.
 int ancientSpawnBatch(int player = 1, int pattern = 0, int hitpoints = 0) {
     int count = waveCount(pattern);
@@ -957,7 +957,7 @@ bool ancientOnPad(float x = 0.0, float y = 0.0, int pad = 0) {
     return ((x >= shopX1(pad)) && (x < shopX2(pad) + 1) && (y >= shopY1(pad)) && (y < shopY2(pad) + 1));
 }
 
-// The pad a position lies on, or 0; the pad it was last over is tried before the rest.
+// The pad a position lies on, or 0. The pad it was last over is tried before the rest.
 int ancientPadAt(float x = 0.0, float y = 0.0, int last = 0) {
     if (ancientOnPad(x, y, last)) return (last);
     for (pad = 1; <= cShopCount) {
@@ -967,7 +967,7 @@ int ancientPadAt(float x = 0.0, float y = 0.0, int last = 0) {
 }
 
 // Loose relics in the lane's pocket, which its monks have yet to collect, and in its relic
-// enclosure, which the enclosure's monks store once it is bought; one pass counts both.
+// enclosure, which the enclosure's monks store once it is bought. One pass counts both.
 int ancientLoosePocket = 0;
 int ancientLooseEnclosure = 0;
 void ancientCountLooseRelics(int player = 1) {
@@ -997,7 +997,7 @@ int ancientRelicRoom(int player = 1) {
 }
 
 // Why the relic pad refuses now: relics its monks have yet to collect, or monasteries without
-// room for the purchase's; 0 when it can sell.
+// room for the purchase's. 0 when it can sell.
 int ancientRelicRefusal(int player = 1) {
     ancientCountLooseRelics(player);
     if (ancientLoosePocket > 0) return (cMessageRelics);
@@ -1022,7 +1022,7 @@ bool ancientRaidersFull(int player = 1, int medium = 1) {
 }
 
 // Why units taking this much population cannot be bought now: the limit, or no room for
-// them; 0 when they can, and for purchases whose units take none (Kings, monks and the
+// them. 0 when they can, and for purchases whose units take none (Kings, monks and the
 // siege's trebuchets, whose population cost the lane's setup sets to zero). DE's headroom
 // runs negative once a lane is over.
 int ancientPopulationRefusal(int player = 1, int taken = 0) {
@@ -1425,7 +1425,7 @@ void ancientTick() {
     for (player = 1; <= 7) {
         if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 0)) ready = false;
         // Once the lane's own setup has run, its granted purchases are placed and its native
-        // effect set requested, once; -1 records that there is none to request.
+        // effect set requested, once. -1 records that there is none to request.
         if ((laneValue(player, fActive) == 1) && (laneValue(player, fInitialized) == 1) && (laneValue(player, fProfile) == 0)) {
             int civilization = xsGetPlayerCivilization(player);
             ancientGrant(player, civilization);
@@ -1439,7 +1439,7 @@ void ancientTick() {
     if (ready == false) return;
     if (state == sSetup) {
         xsSetTriggerVariable(vSetupElapsed, xsTriggerVariable(vSetupElapsed) + 1);
-        // A selection this second has begun preparation already; the second was the window's.
+        // A selection this second has begun preparation already. The second was the window's.
         if (xsTriggerVariable(vPhase) != sSetup) return;
     }
     if ((state == sSetup) || (state == sPreparation)) {
@@ -1499,7 +1499,7 @@ void ancientTick() {
         for (stuck = 1; <= 7) {
             if ((ancientStuckWave != wave) && (laneValue(stuck, fActive) == 1) && (xsArrayGetInt(ancientColumnCounts, stuck) > 0)) {
                 ancientStuckWave = wave;
-                xsChatData("Ancient TD: enemies stand at P%d's spawn; the enemy's AI is not walking them (its script did not load or was replaced).", stuck);
+                xsChatData("Ancient TD: enemies stand at P%d's spawn. The enemy's AI is not walking them (its script did not load or was replaced).", stuck);
             }
         }
     }

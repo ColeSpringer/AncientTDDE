@@ -56,7 +56,7 @@ def index_report(summary: Mapping[str, Any]) -> str:
     index += (
         "\nSee `waves.md`, `shop.md`, `mechanics.md`, `civilizations.md`, `objects.md`, "
         "`triggers.md` and `instructions.md`. Complete raw evidence is in `scenario.json`, "
-        "`dat.json` and `behavior.json`; `manifest.json` records all inputs and artifacts.\n\n"
+        "`dat.json` and `behavior.json`. `manifest.json` records all inputs and artifacts.\n\n"
         "This is static inspection. Timer chains exclude engine tick granularity. Native "
         "civilization differences and legacy DAT changes cannot be separated without a "
         "version-matched stock baseline. Migration decisions are in `migration.json`.\n"
@@ -98,9 +98,9 @@ def waves_report(
     )
     for w in behavior["waves"]:
         waves += (
-            f"\n## {w['key']}\n\nStart trigger: {w['start_trigger_id']}; "
-            f"stop trigger: {w['stop_trigger_id']}; "
-            f"activated IDs: {w['activated_trigger_ids']}.\n\n"
+            f"\n## {w['key']}\n\nStart trigger: {w['start_trigger_id']}. "
+            f"Stop trigger: {w['stop_trigger_id']}. "
+            f"Activated IDs: {w['activated_trigger_ids']}.\n\n"
         )
         waves += table(
             ["Owner", "Object", "X", "Y"],
@@ -264,13 +264,13 @@ def instructions_report(scenario: Mapping[str, Any]) -> str:
 
 def triggers_report(scenario: Mapping[str, Any]) -> str:
     triggers = (
-        "# Trigger evidence\n\nIDs are storage IDs; display and effect order are "
+        "# Trigger evidence\n\nIDs are storage IDs. Display and effect order are "
         "retained in `scenario.json`. Sentinel values are retained in the JSON raw fields.\n"
     )
     for t in scenario["triggers"]:
         triggers += (
             f"\n## {t['id']}: {cell(t['name'])}\n\n"
-            f"Enabled: {t['enabled']}; looping: {t['looping']}.\n\n"
+            f"Enabled: {t['enabled']}. Looping: {t['looping']}.\n\n"
         )
         triggers += table(
             ["Condition / effect", "Observed attributes"],
@@ -290,7 +290,7 @@ class ReportInputs:
     objects: Mapping[int, Mapping[str, Any]]
 
 
-# Every report's file name and renderer; the audit publishes exactly these files.
+# Every report's file name and renderer. The audit publishes exactly these files.
 RENDERERS: dict[str, Callable[[ReportInputs], str]] = {
     "README.md": lambda r: index_report(r.summary),
     "waves.md": lambda r: waves_report(r.behavior, r.objects, r.enemy),

@@ -36,7 +36,7 @@ def pvp_diplomacy(game: Game) -> None:
 
 
 def open_pvp_pads(game: Game, shop: Shop) -> None:
-    """Selecting PvP on removes the Hay Stacks that seal the raider and siege pads; only that
+    """Selecting PvP on removes the Hay Stacks that seal the raider and siege pads. Only that
     selection, which fixes the options, switches PvP on."""
     gates = [
         identifier

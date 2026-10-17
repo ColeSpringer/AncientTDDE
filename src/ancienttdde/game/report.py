@@ -51,7 +51,7 @@ def level_name(inputs: Inputs) -> str:
 
 
 def setting_text(inputs: Inputs, assumptions: Assumptions, name: str) -> str:
-    """One assumption as the table shows it; the attack investments by label and minute."""
+    """One assumption as the table shows it. The attack investments by label and minute."""
     if name == "attack_investments":
         return ", ".join(
             f"{inputs.shop.get(key).label} at minute {minute:g}"
@@ -79,11 +79,11 @@ def assumptions_section(inputs: Inputs, assumptions: Assumptions) -> str:
     levels = inputs.balance.difficulty.levels
     others = " and ".join(level.name for i, level in enumerate(levels) if i != inputs.level)
     return (
-        "The data files give the towers, enemies and technologies; these settings and constants "
+        "The data files give the towers, enemies and technologies. These settings and constants "
         f"fill the gaps. Values in Kings use the shop's prices and the {level_name(inputs)} King "
-        f"price, the default level; on {others}, a bonus paid in gold is worth a different "
+        f"price, the default level. On {others}, a bonus paid in gold is worth a different "
         "number of Kings and a bonus in Kings the same. The trade gold per trip is the least "
-        "seen in play; some civilizations bring more.\n\n" + table(["Setting", "Value"], rows)
+        "seen in play. Some civilizations bring more.\n\n" + table(["Setting", "Value"], rows)
     )
 
 
@@ -114,7 +114,7 @@ def towers_section(inputs: Inputs) -> str:
         )
     return (
         f"Damage per second against {armor:g} pierce armor (the knight line), at each "
-        "cumulative tower attack purchase; the Accursed Towers take no attack purchases.\n\n"
+        "cumulative tower attack purchase. The Accursed Towers take no attack purchases.\n\n"
         + table(headers, rows)
     )
 
@@ -137,7 +137,7 @@ def waves_section(inputs: Inputs) -> str:
         for index, need in enumerate(needs, 1)
     ]
     return (
-        f"{level_name(inputs)} hit points. Each enemy crosses the lane at its own speed; the "
+        f"{level_name(inputs)} hit points. Each enemy crosses the lane at its own speed. The "
         "required damage per second kills the whole wave before its last enemy reaches the "
         "exit.\n\n"
         + table(
@@ -223,7 +223,7 @@ def shop_section(inputs: Inputs) -> str:
     ]
     return (
         f"A King buys {exchange.stone_per_king:.0f} stone or {exchange.wood_per_king:.0f} wood, "
-        f"and {exchange.gold_per_king:.0f} gold makes one; the attack ladder sells a point of "
+        f"and {exchange.gold_per_king:.0f} gold makes one. The attack ladder sells a point of "
         f"tower attack for {exchange.kings_per_attack:.3f} Kings on average.\n\n"
         + table(["Purchase", "Kings", "Worth"], rows)
     )
@@ -284,7 +284,7 @@ def income_section(inputs: Inputs, assumptions: Assumptions) -> str:
         f"Kings one lane earns over the scheduled run on {level_name(inputs)} without buying "
         f"anything. A trade cart trained at the market costs {cost:.2f} Kings and a point of "
         f"room and brings {cart:.1f} Kings over the run on the lane's route, a trade cog "
-        f"{cog:.1f}; the lane the waves are tuned against trains none.\n\n"
+        f"{cog:.1f}. The lane the waves are tuned against trains none.\n\n"
         + table(["Source", "Kings", "Detail"], rows)
     )
 
@@ -335,7 +335,7 @@ def civilizations_section(inputs: Inputs, assumptions: Assumptions) -> str:
         "Each profile's adjustments and their worth in Kings over a run (Solo), the content's "
         "estimate of what the civilization's own bonuses are worth here (Native, with the "
         "extra with PvP on after a plus), and the two together solo and with PvP on. The "
-        "towers column lists the towers the civilization's own technology tree lacks; a flat "
+        "towers column lists the towers the civilization's own technology tree lacks. A flat "
         "attack bonus is priced at the smallest rung of its family's attack ladder, and a "
         "starting tower at its cost plus its base damage per second. Native siege bonuses are "
         "priced from the typical siege on a lane, one row's trebuchets for the siege, "
@@ -357,16 +357,16 @@ def rivals_section(inputs: Inputs, assumptions: Assumptions) -> str:
     )
     return (
         f"A {land} raider kills a trade cart in {model.cart_seconds:.0f} seconds and a "
-        f"{naval} a trade cog in {model.cog_seconds:.0f}; a lost trader costs "
+        f"{naval} a trade cog in {model.cog_seconds:.0f}. A lost trader costs "
         f"{model.trader_replacement_kings:.2f} Kings to replace. The siege costs "
         f"{model.siege_price} Kings whatever the player count and puts {model.trebuchets} "
-        f"trebuchets on the islet rows, {siege.trebuchets_per_row} per row; the "
+        f"trebuchets on the islet rows, {siege.trebuchets_per_row} per row. The "
         f"{model.flanking} flanking a lane can deal up to {model.siege_damage_per_lane:.0f} "
         f"damage in the siege's {siege.active_seconds} seconds if every shot lands on it: "
         f"{model.watch_towers_per_lane:.1f} Watch Towers or {model.keeps_per_lane:.1f} Keeps, "
         f"{kings(model.rebuild_kings_per_lane)} Kings of stone and wood to rebuild. A row "
         "between two lanes splits its fire between them. The rebuild figure is stone and wood "
-        "alone; the civilization tables price a standing tower's hit points at "
+        "alone. The civilization tables price a standing tower's hit points at "
         f"{assumptions.tower_hit_point_kings:g} Kings a point instead, for the fire and the "
         "lives they keep."
     )
@@ -388,5 +388,5 @@ def render_report(inputs: Inputs, assumptions: Assumptions) -> str:
     return (
         f"{REPORT_TITLE}\n\n"
         "Generated by `uv run ancienttdde balance` from the content and the stock data "
-        "snapshot; `tests/test_game_balance.py` keeps this copy current.\n\n" + body + "\n"
+        "snapshot. `tests/test_game_balance.py` keeps this copy current.\n\n" + body + "\n"
     )

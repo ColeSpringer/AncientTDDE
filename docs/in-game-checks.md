@@ -8,7 +8,7 @@ For every check, record the DE build, civilization, lane, player count and what 
 
 Build with `uv run ancienttdde build` and copy `.build/game/ancient-td-de.aoe2scenario`
 into DE's scenario directory. The scenario embeds its XS and the AI for every computer
-slot, so no other file needs installing; the enemy's AI walks its units down the lanes.
+slot, so no other file needs installing. The enemy's AI walks its units down the lanes.
 
 Use the standard DE data set, fixed starts, locked teams, All Visible for Reveal Map and
 Population 200, the limit the shop sells room up to (the scenario cannot lock it).
@@ -17,7 +17,7 @@ cannot set it. DE also offers a default under Options → Game → Game Speed.
 
 Put humans in any slots and at least one computer in another. DE numbers a multiplayer
 game's players by their lobby colors and skips empty slots, so a computer shown in slot 8
-plays as P3 when slots 3–7 are empty; the script takes the highest-numbered computer in the
+plays as P3 when slots 3–7 are empty. The script takes the highest-numbered computer in the
 game as the enemy and announces it ("Enemy: P3, the last computer player."). A human
 holding player number 8 has no lane and is told so. Only human-controlled defense lanes take
 part: the game clears the other computer-filled lanes at
@@ -25,22 +25,24 @@ the start and gives them no resources, enemies or say in victory. The enemy's ci
 bonuses apply to its units: the build presets Britons for slot 8, and a computer in another
 slot plays the civilization the lobby gives it. Civilization choices stay unlocked, and a solo
 player may use any defense lane. The lobby's Difficulty sets the level, solo or
-competitive; run options are selected in game, in the row of Outposts below the shop.
+competitive. Run options are selected in game, in the row of Outposts below the shop.
 
-DE applies the lobby's Victory setting, Standard by default, on top of the scenario's own;
-the enemy keeps a King and a Watch Tower on an islet no tower, trebuchet or raider reaches,
+DE applies the lobby's Victory setting, Standard by default, on top of the scenario's own.
+The enemy keeps a King and a Watch Tower on an islet no tower, trebuchet or raider reaches,
 so Conquest never counts it destroyed. A victory the chat did not announce ("Ancient TD
 victory: P<n>") comes from DE: record the wave and the lobby layout.
 
 ## Full game
 
+- The objectives panel's Instructions, Hints and Scouts tabs each show their text, with
+  the section titles on lines of their own.
 - Solo and online lobbies load with no AI Script Error dialog: the AI parses. Each batch
-  starts walking within a second or two of appearing; if the enemy's AI is not running, the
+  starts walking within a second or two of appearing. If the enemy's AI is not running, the
   chat says so once per wave, about ten seconds after a batch.
 - Solo victory and defeat, and a repeat on the first and last lane. No "has been
-  defeated" line appears at the start; a second after a solo lane's elimination line, the
+  defeated" line appears at the start. A second after a solo lane's elimination line, the
   result line and the result objective appear and DE declares its player defeated.
-- Two nonconsecutive human slots with AI filling the others; AI lanes stay unpaid, show no
+- Two nonconsecutive human slots with AI filling the others. AI lanes stay unpaid, show no
   lives line and no defeat line.
 - Two humans and one computer with the slots between them empty: the chat names the computer
   as the enemy, the waves come to both lanes with the announced hit points (select an enemy),
@@ -51,37 +53,38 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   line, and the wave and lives lines leave the objectives.
 - Automatic land/water trade startup and pairs spawning without colliding with barriers.
 - Every lumber tree holds 32,000 wood from the start (each lane swaps its placed trees for
-  created ones on the same tiles as it begins) and the lumberjacks chop without orders; record
+  created ones on the same tiles as it begins) and the lumberjacks chop without orders. Record
   a lumberjack standing idle at the start.
 - The resource villagers gather gold, berries, stone and wood from the first second
-  without orders; the build-area villagers wait.
+  without orders. The build-area villagers wait.
 - A player-owned mill beside the berries in every human lane. Computer-filled and
-  eliminated lanes are cleared completely, mills included; each keeps one King beside slot 8's
+  eliminated lanes are cleared completely, mills included. Each keeps one King beside slot 8's
   keepers on the islet below the life Outposts, frozen in place, so DE does not defeat the
   slot, and selecting that King shows "Slot keeper: P<n>'s cleared lane stays in the game".
   An enemy holding a lane slot keeps its King and Watch Tower on the islet above instead, and
   selecting that King names the enemy.
 - Visible Hay Stack boundaries, blocked expansion rows and reserved tower pads.
-- New towers and age upgrades; bonuses persist without duplication.
+- New towers and age upgrades. Bonuses persist without duplication.
 - Multiple enemies crossing exits together, and simultaneous final losses.
 - Each wave ends once its enemies are killed or reach the exit flags.
 - Before the first wave the chat says "First wave in 240", 180, 120, 60, 30 and 10 game
   seconds, the objectives read "Wave 1 arrives in N s" (between waves "Wave N arrives in",
-  during a wave "Wave N: N s of spawning left"), and the top timer counts down; record
+  during a wave "Wave N: N s of spawning left"), and the top timer counts down. Record
   which of the three shows on your HUD. After a selection the top timer reads "Wave 1:
   Villagers in N" at once, not "Run options close in".
-- A wave starts with "Wave N of 56: 30 Villagers" (a boss wave with its name alone); hit points
+- A wave starts with "Wave N of 56: 30 Villagers" (a boss wave with its name alone). Hit points
   and endless armor are told only in the "Next:" notice before it, the first wave's with
   "Prepare your towers".
 - Enemies appear in pairs side by side, one row above and one below the lane's center
   (threes fill the three rows), and walk in files to the exit.
 - Each of the ten bosses shows at most 32,767 hit points and is refilled from the total the
-  chat announces as towers hit it, so it falls only once that total is spent; its lane's
-  player is told at three quarters, half and a quarter; a boss reaching the exit costs 5
+  chat announces as towers hit it, so it falls only once that total is spent. Its lane's
+  player is told at three quarters, half and a quarter. A boss reaching the exit costs 5
   lives.
-- Enemies never attack towers, villagers or Kings (the enemy is allied to every lane; lanes
-  are its enemies), and towers still fire at them; enemies walk past firing towers at their
-  stock speed without turning, pausing or bunching (archers especially); record any pause.
+- Enemies never attack towers, villagers or Kings (the enemy is allied to every lane, and
+  lanes are its enemies), and towers still fire at them. Enemies walk past firing towers at
+  their stock speed without turning, pausing or bunching (archers especially). Record any
+  pause.
   No sound plays when enemies appear.
 - No stutter in the first second (the script fills its lookup tables then), in the choice
   window or in preparation, and late waves with 60 or more enemies alive and 30 or more idle
@@ -94,21 +97,21 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   selected Hrolf the Ganger shows 119 pierce armor, not a negative number. On Hardest,
   record which of waves 2–15 and 26–56 leak and how many lives each costs.
 - A boss is refilled from its total once a second, so a lane dealing more than 32,767 in one
-  second kills it with the total unspent; record a boss that falls within a second or two of
+  second kills it with the total unspent. Record a boss that falls within a second or two of
   reaching the towers.
-- Save/reload in preparation, mid-wave, during elimination and sudden death;
-  resource grants, spawn cadence and lives match an uninterrupted run, and purchases, pad
+- Save/reload in preparation, mid-wave, during elimination and sudden death.
+  Resource grants, spawn cadence and lives match an uninterrupted run, and purchases, pad
   counts and enemy counts keep working after the load (the script's lookup tables survive or
   are filled again).
-- A disconnected or resigned player; its waves, Kings and purchases stop.
+- A disconnected or resigned player. Its waves, Kings and purchases stop.
 - Multiplayer synchronization, spectators and a seven-human stress run.
 - A leak lowers the lane's life Outpost health and a chat line reports the lives left.
 
 ## Economy and shop
 
 - Kings standing about three seconds on a pad buy it and lose exactly its price, and Kings
-  kept shuffling for room on a crowded pad buy it after about five; Kings walking across or
-  pausing briefly on pads buy nothing; refusals keep the Kings and are
+  kept shuffling for room on a crowded pad buy it after about five. Kings walking across or
+  pausing briefly on pads buy nothing. Refusals keep the Kings and are
   explained to that player alone, including Bombard Tower attack for civilizations
   without Bombard Towers, and a different refusal is explained at once.
 - Every pad shows one flag per King of its price (castle 1, +1 attack/30 s 5, each raider
@@ -117,44 +120,44 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   the right half the 4th.
 - New Kings and bought units appear on their spots. The original's flags stay on the
   transfer arrivals and the bought villagers' spots (south rows included), and bought
-  villagers appear on their flags; a camp or mill built over a resource-area spot refuses
+  villagers appear on their flags. A camp or mill built over a resource-area spot refuses
   the purchase and keeps the Kings until it goes. A unit on another bought unit's spot in
   the lane's own areas delays that purchase without losing anything. Kings, traders and
   raiders appear even with another lane's unit, or an idle trained trader, on their spot.
-- Gold conversions and kill-reward Kings are announced only to their lane's player; wave,
+- Gold conversions and kill-reward Kings are announced only to their lane's player. Wave,
   leak and elimination messages reach everyone.
 - Selecting the unit beside a pad, a transfer label relic, a life Outpost or the hero by
   the shop shows its purchase, destination, lives or credit text from the start (a relic's
-  text fits without scrolling); the shop has no signs (DE cannot rename them) and the
+  text fits without scrolling). The shop has no signs (DE cannot rename them) and the
   row-end signs are plain markers.
 - The dock offers no Fishing Lines, Gillnets or Galleon, the blacksmith no infantry or
   archer armor, and a bought castle no unique technology that touches only units no lane
-  has; Celts see none of them.
+  has. Celts see none of them.
 - Lanes start with 750 food, 1500 wood, 1500 stone and 400 gold, no towers of their own,
   and with Ballistics, Murder Holes, Caravan, Wheelbarrow, Hand Cart and Spies and Treason
-  researched: towers hit moving targets and shoot adjacent enemies; a King buys 2000 wood or
+  researched: towers hit moving targets and shoot adjacent enemies. A King buys 2000 wood or
   1500 stone.
-- 2,000 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall;
-  every 25 wave kills pay 125 stone and 25 wood (kills count with the enemy allied to the
+- 2,000 gold, each cleared wave and every 100 wave kills bring a King to the lane's stall.
+  Every 25 wave kills pay 125 stone and 25 wood (kills count with the enemy allied to the
   lanes). Raiders killing rival traders and raiders earn nothing.
-- Investments pay on their period; the repair crew restores lives for stone.
+- Investments pay on their period. The repair crew restores lives for stone.
 - A trader's return adds at least 110 gold on the game's routes (the balance tables'
-  assumption; one civilization brought 137); record a cart's and a cog's amount for other
+  assumption, and one civilization brought 137). Record a cart's and a cog's amount for other
   civilizations.
 - Record how many trade carts and cogs each lane trains and by which wave: the balance
   tables' lane trains none beyond its starting traders.
 - Tower attack reaches existing, new and upgraded towers only and keeps rising past +255
-  (+750 shows as +750, and the periodic +1 and +3 keep climbing); Accursed Towers appear on
+  (+750 shows as +750, and the periodic +1 and +3 keep climbing). Accursed Towers appear on
   the reserved pads with 240 pierce attack.
 - Castle Age and Imperial Age add Guard Tower and Keep only for civilizations that have
   them, and the preparation message lists each lane's unavailable towers correctly.
 - The University lists the Bombard Tower research at no cost and no time once the lane is
   set up, and finishing Chemistry in the Imperial Age completes it by itself (the XS also
   completes it within a second, a queued one included), only for civilizations that have
-  it; no lane can build Bombard Towers before Chemistry, and Chinese and Bohemians, who
+  it. No lane can build Bombard Towers before Chemistry, and Chinese and Bohemians, who
   start with Chemistry, get them with Imperial Age.
 - Preparation also announces each lane's civilization line, with the lane's own King price
-  when its profile changes it; a civilization the content does not list (one newer than the
+  when its profile changes it. A civilization the content does not list (one newer than the
   build) plays the default profile and is announced as such.
 - Achaemenids, Athenians, Thracians and Puru keep the Keep: their tech-tree screens omit it
   but the data leaves it researchable, so Imperial Age should bring Keeps and the preparation
@@ -167,62 +170,62 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   of the path per pair, fire from the first wave and take the lane's tower attack and hit point
   bonuses.
 - A lane with a King price discount converts gold at its own price while the opening chat
-  names the base price; scaled kill rewards pay the scaled stone and wood.
+  names the base price. Scaled kill rewards pay the scaled stone and wood.
 - A purchase a profile grants from the start is owned before the first second ends: its
   units stand on the shop's spots (villagers walk clear, traders trade, a castle stands on
   its site, relics wait for the monks), Castle Age arrives with Guard Towers, an investment
   pays from the first period, and the pad refuses the Kings as already owned.
 - Transfer pads: every villager standing on the flag at a walkway's end is teleported to
   the flagged arrival in the other area, keeping its type and what it carries, and walks
-  clear; send several at once and check none heads back towards the pad. Record any
+  clear. Send several at once and check none heads back towards the pad. Record any
   misbehaviour of Teleport Object (the fallback is the original's remove and create, one
   villager at a time).
-- Reaching the end of each resource row pays its bonus once and adds endless deposits;
-  starting mines and bushes keep their normal amounts.
-- Starting relics produce gold; bought relics, monks, traders, villagers and the castle
+- Reaching the end of each resource row pays its bonus once and adds endless deposits.
+  Starting mines and bushes keep their normal amounts.
+- Starting relics produce gold. Bought relics, monks, traders, villagers and the castle
   appear and work. A lane starts with room for 25 more units, the Huns included, and its
   profile's population on top: villagers, traders and raiders are refused with their Kings
   kept, and the refusal explained, once that room is used until +65 population or the
-  castle adds more, and again at the 200 limit; +65 population sells again until the room
-  reaches the limit (castle plus two purchases fill a standard lane); Kings, monks and the
+  castle adds more, and again at the 200 limit. +65 population sells again until the room
+  reaches the limit (castle plus two purchases fill a standard lane). Kings, monks and the
   siege's trebuchets take none, so the population reading (DE's current population, which
   the limit check reads) does not rise as Kings arrive, relics are bought or the trebuchets
-  appear, and the siege sells with no room at all; a profile's starting traders or villagers
-  bring their own room; traders trained at the market or dock take the same room, which the
+  appear, and the siege sells with no room at all. A profile's starting traders or villagers
+  bring their own room. Traders trained at the market or dock take the same room, which the
   shop then counts. The shop's limit is the content's 200 whatever the lobby's Population
-  setting; record whether a different setting changes the lane's displayed limit.
+  setting. Record whether a different setting changes the lane's displayed limit.
 - The relic pad keeps the Kings and says the monasteries have no room once the lane's two
   cannot take three more relics: after six purchases on top of the two starting relics,
   fewer when the profile grants relics or the relic purchase, or for the Armenians' free
-  relic. Relics the monks still carry count; a relic lying anywhere in the monks' pocket
+  relic. Relics the monks still carry count. A relic lying anywhere in the monks' pocket
   holds the pad until a monk collects it.
 - An Armenian lane finds a free relic in one of its monasteries, and a Saxon lane's towers
   and Accursed Towers fire one arrow of their own after Castle Age.
-- The trade-income probe's routes are short; `trade_gold_per_trip` is the least a trip
-  brought on the game map (110; one civilization brought 137). Record a cart's and a cog's
-  amount for other civilizations.
+- The trade-income probe's routes are short. `trade_gold_per_trip` is the least a trip
+  brought on the game map (110, and one civilization brought 137). Record a cart's and a
+  cog's amount for other civilizations.
 
 ## Modes and competition
 
 - The chooser's view opens on the run options, with "Run options close in" counting down
   60 game seconds. Within the first second the row keeps only what the lobby can use, and
   on-screen lines name it left to right: Standard, Endless and Practice with the practice
-  controls beside them in a solo run; Standard and PvP on in a competitive game. DE draws
+  controls beside them in a solo run, and Standard and PvP on in a competitive game. DE draws
   each Outpost's one-word caption and each pad exhibit's short tag above it (never a
-  Sign's); every exhibit stands where the original placed it. Selecting an Outpost shows its
+  Sign's). Every exhibit stands where the original placed it. Selecting an Outpost shows its
   full option, and an exhibit its full purchase.
 - The first human lane's first selection fixes the options and begins preparation at once,
-  even when it is the default (Standard in a competitive game keeps PvP off); a later
+  even when it is the default (Standard in a competitive game keeps PvP off). A later
   selection, or one by another lane, changes nothing
   and is explained to that player. Without a selection, Standard with PvP off stands when
   the countdown ends. The run options then disappear, and the practice controls too unless
-  the run is Practice; their two lines leave the objectives box (not struck through) while
+  the run is Practice. Their two lines leave the objectives box (not struck through) while
   the wave and lives lines stay.
 - Easiest plays Easy and Hard plays Hard, solo and competitive alike (the opening chat names
-  the level and gold per King); a lobby value outside DE's range is named in the chat and
+  the level and gold per King). A lobby value outside DE's range is named in the chat and
   plays Normal, the Standard setting's level.
 - Practice: start next wave, Kings, resources and lives each work once per selection, and
-  again after selecting something else; the Practice objective appears and the result says
+  again after selecting something else. The Practice objective appears and the result says
   the run was assisted.
 - The Endless, sudden death, siege and result objectives stay hidden until they apply.
 - Endless continues past the finale with 32767 hit points and the announced total armor
@@ -230,70 +233,70 @@ victory: P<n>") comes from DE: record the wave and the lobby layout.
   falls.
 - Sudden death keeps the waves coming for every survivor, announced as sudden death waves,
   and costs lives every 30 seconds.
-- Competitive games start with PvP off and say so; PvP on, the only PvP option, makes the
-  defense lanes enemies at the first wave; without it they stay neutral and raider and siege
+- Competitive games start with PvP off and say so. PvP on, the only PvP option, makes the
+  defense lanes enemies at the first wave. Without it they stay neutral and raider and siege
   purchases keep their Kings.
 - The raider and siege pads are road blocks with Hay Stack borders on the shop's east side,
-  the land raider's in the old 4th-row block; each one's King stands centred in its
+  the land raider's in the old 4th-row block. Each one's King stands centred in its
   beach-side Hay Stack line. A line of Hay Stacks across each pad's entrance keeps Kings out
   (solo runs never open them) until PvP on is selected, which removes them at once. The
   three boxes line up on one west column and each gate line meets its box's rows squarely.
 - Raiders arrive below their market or dock, walk clear, fight rival traders and raiders,
-  and cannot leave their trade area; the third raider of a kind is refused (a fourth for
+  and cannot leave their trade area. The third raider of a kind is refused (a fourth for
   the listed civilizations) and upgraded fire ships still count.
 - Kings, markets, docks, life Outposts and yurts cannot be attacked, including from the
   channel edge by fire galleys.
-- Siege: 20 Kings whatever the player count; after the countdown two unpacked trebuchets
+- Siege: 20 Kings whatever the player count. After the countdown two unpacked trebuchets
   stand on every islet row, the first north of lane 1, the last south of lane 7 and the rest
   midway between two lanes, fire at the enemy towers and units they reach, and cannot be
-  attacked from the moment they appear or moved, packed or not; expiry removes both forms;
-  competing or cooling-down purchases keep their Kings, and the holder buying again is told it
-  holds the siege already; the holder's elimination ends it; save/load during the warning and
+  attacked from the moment they appear or moved, packed or not. Expiry removes both forms.
+  Competing or cooling-down purchases keep their Kings, and the holder buying again is told it
+  holds the siege already. The holder's elimination ends it. Save/load during the warning and
   the siege keeps both.
 - Villagers build only towers, mills, camps and farms: no houses, walls, gates, outposts,
   markets, blacksmiths, universities, barracks, docks, castles, monasteries or town
-  centers; markets train trade carts and docks only trade cogs; a bought castle trains
-  nothing and fires no arrows; monks cannot convert. All of this still holds after buying
+  centers. Markets train trade carts and docks only trade cogs. A bought castle trains
+  nothing and fires no arrows. Monks cannot convert. All of this still holds after buying
   Castle Age and Imperial Age, and the castle stays silent after Fletching, Bodkin Arrow
   and Bracer. Crenellations, Greek Fire, Yasama, Stronghold and Siege Engineers cannot be
-  researched; in competitive games neither can Eupseong or Artillery.
+  researched. In competitive games neither can Eupseong or Artillery.
 - A tower or tower foundation in the resource area disappears, and its player is told why.
 - Bought monks, castles, fire galleys and siege trebuchets still appear although their
   owners cannot train or build them.
 - The enemy's King and Watch Tower stand on the islet below the life Outposts when the enemy
-  is slot 8, and on the islet above it when the enemy holds a lane slot; the King never moves
+  is slot 8, and on the islet above it when the enemy holds a lane slot. The King never moves
   and the tower never fires.
 
 ## Map template
 
 Open `content/maps/stock-de-template.aoe2scenario` in the DE scenario editor with the
-standard data set. The template has no purchases or waves; use editor-placed units to
+standard data set. The template has no purchases or waves. Use editor-placed units to
 exercise routes.
 
 | Check | Expected result |
 | --- | --- |
 | Open and save with stock DE | 200×200 map opens without mod, missing assets or external scripts. |
-| Native blockers and expansion rows | Boundaries stop units and construction; removable row blockers retain the intended build space. |
+| Native blockers and expansion rows | Boundaries stop units and construction. Removable row blockers retain the intended build space. |
 | Every lane, including first and last | Representative infantry and cavalry can reach the exit and cannot escape the lane. |
-| Every purchase pad | A King can reach each pad; the signs' captions name the legacy purchase. |
+| Every purchase pad | A King can reach each pad. The signs' captions name the legacy purchase. |
 | Land trade, every endpoint pair | Stock carts can reach both markets and complete a trade trip. |
 | Water trade, every endpoint pair | Stock cogs can reach both docks and complete a trade trip. |
 | Economy and life displays | Stock resources, buildings and life Outposts appear correctly without overlap or unwanted attacks. |
-| Every siege islet | A placed trebuchet fits, remains isolated and can target the intended tower rows; reserve position can be tested separately. |
+| Every siege islet | A placed trebuchet fits, remains isolated and can target the intended tower rows. Reserve position can be tested separately. |
 | Editor test and save/reload | Map stays available for route inspection and retains placements after save/reload. |
 
 ## Mechanic probes
 
 `uv run ancienttdde probe` writes one scenario per probe and an `instructions.md` with
 each case's action, expected observation and test settings. Record each observation with
-`uv run ancienttdde probe record`; rebuilding keeps recorded results.
+`uv run ancienttdde probe record`. Rebuilding keeps recorded results.
 `content/probes/observations.json` archives earlier results together with their schema-1
-probe manifests; nothing reads it.
+probe manifests. Nothing reads it.
 
 The `trade-income` and `tower-damage` probes measure what `docs/balance.md` assumes: how
 trade gold grows with route length, raider kill times, tower kill times per enemy kind and
 siege damage. The gold per trip on the game's own routes comes from the game (see Economy
-and shop); put it into `Assumptions` in `src/ancienttdde/game/balance.py` and regenerate.
+and shop). Put it into `Assumptions` in `src/ancienttdde/game/balance.py` and regenerate.
 
 ```bash
 uv run ancienttdde probe --only trade-income --only tower-damage --output .build/balance-probes

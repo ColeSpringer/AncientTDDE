@@ -17,7 +17,7 @@ uv sync --frozen
 uv run ancienttdde build                           # playable game in .build/game
 uv run ancienttdde validate --build .build/game    # reload, rebuild and compare the game
 uv run ancienttdde build --map-only                # logic-free map template in .build/map
-uv run ancienttdde validate --build .build/map     # reload and check the template; no rebuild
+uv run ancienttdde validate --build .build/map     # reload and check the template, no rebuild
 uv run ancienttdde probe                           # solo mechanic scenarios in .build/probes
 uv run ancienttdde validate --probes .build/probes # check probes and recorded observations
 uv run ancienttdde probe record --help             # record an observation from a DE run
@@ -58,21 +58,21 @@ settings:
 
 ## Fresh clones
 
-The original package and its DAT exports are not committed; see
+The original package and its DAT exports are not committed. See
 [legacy inputs](legacy/README.md). Builds, probes and tests run without them. The audit
 and `validate` without options read them, and tests that compare against the original
 data skip when it is absent.
 
 ## Balance tables
 
-`docs/balance.md` is the versioned output of `uv run ancienttdde balance`; refresh it after
+`docs/balance.md` is the versioned output of `uv run ancienttdde balance`. Refresh it after
 changing `content/balance/`:
 
 ```bash
 uv run ancienttdde balance && cp .build/balance/balance.md docs/balance.md
 ```
 
-`content/balance/stock.json` holds the stock DE numbers the tables use; regenerate it after
+`content/balance/stock.json` holds the stock DE numbers the tables use. Regenerate it after
 a game update, with the tree-screen directory to cross-check which towers each civilization
 lacks:
 
@@ -81,7 +81,7 @@ uv run python tools/dat/stock_stats.py "<DE>/resources/_common/dat/empires2_x2_p
 ```
 
 The restriction tables in `src/ancienttdde/game/restricted.py` list what a lane may not train,
-build or research; check them against the same data file after a game update:
+build or research. Check them against the same data file after a game update:
 
 ```bash
 uv run python tools/dat/restricted_check.py "<DE>/resources/_common/dat/empires2_x2_p1.dat"

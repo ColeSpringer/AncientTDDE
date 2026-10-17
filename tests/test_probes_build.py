@@ -142,7 +142,7 @@ def test_probes_preserve_controlled_test_settings_after_reload(probe_suite: Prob
 COUNTED_FOR_SURVIVAL = {KING, 83, 93, 448, 539, 42, 331, 84, 45, 109, BARRACKS}
 
 
-# Stock footprints in tiles; even sizes are centered on tile corners, odd sizes on tiles.
+# Stock footprints in tiles. Even sizes are centered on tile corners, odd sizes on tiles.
 FOOTPRINTS = {84: 4, 109: 4, 45: 3, BARRACKS: 3, 79: 1, 234: 1, 235: 1, 236: 1, 1776: 1, 819: 1}
 
 
@@ -336,7 +336,7 @@ def test_validation_detects_logic_tampering_after_artifact_hash_is_updated(
 @pytest.mark.parametrize(
     ("change", "message"),
     [
-        ("schema", "rebuild with ancienttdde probe --output .+ --only payments$"),
+        ("schema", "Rebuild with ancienttdde probe --output .+ --only payments$"),
         ("parser", "was built with AoE2ScenarioParser 0.0.1, .+ --only payments$"),
         ("input", "Probe input SHA-256 mismatch: content/maps/format-seed.aoe2scenario"),
         ("artifact", "Probe artifact SHA-256 mismatch: payments.json"),
@@ -399,7 +399,7 @@ def test_validation_compares_a_suite_with_a_build_of_current_definitions(
     rehash_artifacts(directory, "payments.aoe2scenario", "payments.json")
 
     def rebuild(root: Path, expected: Path | None = None, *, only: list[str] | None = None) -> Path:
-        # The session suite is a build of the current definitions; copying it saves a rebuild.
+        # The session suite is a build of the current definitions. Copying it saves a rebuild.
         assert expected is not None and only == ["payments"]
         shutil.copytree(payments_suite, expected, dirs_exist_ok=True)
         return expected
@@ -446,7 +446,7 @@ def test_results_require_real_run_metadata_and_survive_rebuild(
         "fail",
         game_build="test-fixture",
         tester="pytest",
-        notes="Synthetic record; no engine run. Excess Kings were removed.",
+        notes="Synthetic record. No engine run. Excess Kings were removed.",
     )
     before = (directory / "results.json").read_bytes()
     # A suite from an older manifest schema and input list is rebuilt in place.
@@ -507,7 +507,7 @@ def test_probe_cli_builds_validates_and_records_a_case(tmp_path: Path) -> None:
             "--tester",
             "pytest",
             "--notes",
-            "Synthetic record; no engine run.",
+            "Synthetic record. No engine run.",
         ],
     )
     assert result.exit_code == 0, result.output
@@ -546,7 +546,7 @@ def test_result_recording_rejects_a_results_symlink_outside_the_suite(
             "fail",
             game_build="test-fixture",
             tester="pytest",
-            notes="Synthetic record; no engine run.",
+            notes="Synthetic record. No engine run.",
         )
     assert shared.read_bytes() == before
 

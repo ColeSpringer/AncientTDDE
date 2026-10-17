@@ -29,7 +29,7 @@ from ancienttdde.game.config import (
 )
 from ancienttdde.game.controls import CONTROLS
 from ancienttdde.game.economy import endless_deposits
-from ancienttdde.game.instructions import instructions
+from ancienttdde.game.instructions import hints, instructions, scouts
 from ancienttdde.game.interaction import open_pvp_pads, pvp_diplomacy, siege_countdowns
 from ancienttdde.game.labels import caption_transfers, name_objects
 from ancienttdde.game.lanes import KEEPER_KINDS, lane_actions
@@ -85,7 +85,7 @@ def clear_sites(
     islets: SiegeRows,
 ) -> None:
     """Take the map's marker flags off the tiles units are created on, the King stall, the
-    siege islets and the starting tower sites among them; the transfer arrivals and bought
+    siege islets and the starting tower sites among them. The transfer arrivals and bought
     villagers' spots keep the original's flags. Anything else on those tiles is a content
     error.
     """
@@ -130,7 +130,7 @@ def pad_rows(key: str, region: Rect, open_tiles: set[Tile], taken: set[Tile]) ->
 
 
 def far_end(rows: list[list[Tile]], kings: int) -> set[Tile]:
-    """Whole rows from the far end, then the first tiles of the next; a lone flag takes its
+    """Whole rows from the far end, then the first tiles of the next. A lone flag takes its
     row's middle tile, the first of two."""
     wanted: list[Tile] = []
     for row in rows:
@@ -177,7 +177,7 @@ def reconcile_pad_flags(
 ) -> dict[str, list[list[Tile]]]:
     """Give each pad one Gaia flag per King of its price: the map's flags were placed for the
     original's prices. As in the original, the flags fill whole rows from the end farthest
-    from the pad's entrance; a pad whose flags already do keeps them. A tile keeps one flag.
+    from the pad's entrance. A pad whose flags already do keeps them. A tile keeps one flag.
     Returns each pad's rows, the farthest first."""
     flags = marker_flags()
     placed = game.scenario.unit_manager.units
@@ -395,9 +395,10 @@ def construct_game(root: Path, map_path: Path, destination: Path, prelude: Path)
         encoding="utf-8",
     )
     add_logic(game, balance, lanes, shop, profiles, anchors, keeper)
-    scenario.message_manager.instructions = instructions(balance, shop, profiles).replace(
-        "\n", "\r"
-    )
+    messages = scenario.message_manager
+    messages.instructions = instructions(balance, shop).replace("\n", "\r")
+    messages.hints = hints(balance, shop, profiles).replace("\n", "\r")
+    messages.scouts = scouts(balance).replace("\n", "\r")
     with xs_checker(scenario):
         scenario.xs_manager.validate_scenario_xs()
         scenario.write_to_file(str(destination))

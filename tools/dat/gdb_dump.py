@@ -17,7 +17,7 @@ type JSONValue = str | int | float | bool | None | list[JSONValue] | dict[str, J
 
 
 class PrettyPrinter(Protocol):
-    """Printer methods used here; missing methods are handled by the callers."""
+    """Printer methods used here. Missing methods are handled by the callers."""
 
     def children(self) -> Iterator[tuple[str, gdb.Value]]: ...
 
@@ -162,7 +162,7 @@ def convert(value: gdb.Value, depth: int = 0) -> JSONValue:
         try:
             # libstdc++ has no array printer on some GDB versions. Its empty
             # array uses an empty struct instead of a zero-length C array.
-            # This non-type argument is a Value; GDB's stubs only list Type.
+            # This non-type argument is a Value. GDB's stubs only list Type.
             size = cast(gdb.Value, typ.template_argument(1))
             if int(size) == 0:
                 return []

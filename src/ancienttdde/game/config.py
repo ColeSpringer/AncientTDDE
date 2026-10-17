@@ -26,7 +26,7 @@ from ancienttdde.scenario.objects import technology
 # a float the engine keeps, so the XS tops a boss up after creating it.
 MAX_HIT_POINTS = 32767
 BOSS_HIT_POINTS = 5_000_000
-# The schedule may hold this many waves; every wave has a countdown trigger.
+# The schedule may hold this many waves. Every wave has a countdown trigger.
 MAX_WAVES = 60
 # A wave's own pierce armor is set with a technology-style effect, whose value packs the armor
 # class with the amount in one byte.
@@ -70,7 +70,7 @@ class WaveDefinition:
         return self.count * self.batches
 
 
-# Building definitions that tower purchases may modify; anything else is rejected.
+# Building definitions that tower purchases may modify. Anything else is rejected.
 TOWER_BUILDINGS = frozenset(
     {"WATCH_TOWER", "GUARD_TOWER", "KEEP", "BOMBARD_TOWER", "DONJON", "THE_ACCURSED_TOWER"}
 )
@@ -274,7 +274,7 @@ class Practice:
 @dataclass(frozen=True)
 class Balance:
     lives: int
-    # Lives a leaking boss costs; any other enemy costs one.
+    # Lives a leaking boss costs. Any other enemy costs one.
     boss_leak_lives: int
     # The most the game waits for the chooser's run option before preparation begins.
     choice_seconds: int

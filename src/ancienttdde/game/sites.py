@@ -18,7 +18,7 @@ RAIDER_MEDIA: tuple[RaiderMedium, ...] = ("land", "naval")
 type TradeMedium = Literal["land", "water"]
 TRADE_MEDIA: tuple[TradeMedium, ...] = ("land", "water")
 # The islet rows: one north of each of the seven lanes and one south of the last, three islets
-# each. The siege's trebuchets take the first islets of every row; the last stays free.
+# each. The siege's trebuchets take the first islets of every row. The last stays free.
 SIEGE_ROWS = 8
 SIEGE_ISLETS = 3
 SPARE_ISLET = SIEGE_ISLETS - 1

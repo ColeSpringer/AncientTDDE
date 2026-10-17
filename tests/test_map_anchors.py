@@ -79,7 +79,7 @@ def open_ground(medium: str = "land") -> frozenset[Cell]:
 
 
 # The land terrains camps, mills and towers can be built on (DE's terrain restriction 4, read
-# from the DAT); the map's ice and ice beach are walkable only.
+# from the DAT). The map's ice and ice beach are walkable only.
 BUILDABLE_TERRAIN = {0, 5, 10, 24}
 
 
@@ -181,7 +181,7 @@ def test_resource_bonuses_wait_behind_their_deposits(player: int, resource: str)
     data, _ = content()
     bonus = region(f"lane.p{player}.bonus.{resource}")
     villagers = placed(83, player, region(f"lane.p{player}.economy"))
-    # Before gathering, the end of the rows is out of reach; clearing the deposits opens it.
+    # Before gathering, the end of the rows is out of reach. Clearing the deposits opens it.
     assert not reachable(villagers) & bonus
     deposits = {66, 59, 102}
     mined = {
@@ -258,7 +258,7 @@ def test_map_validation_keeps_monks_in_their_enclosures(player: int) -> None:
     assert tuple(enclosure["region"]) == rect(f"lane.p{player}.relic_enclosure")
 
 
-# Fletching, Bodkin Arrow and Bracer bring towers to 11 tiles; competitive games rule out the
+# Fletching, Bodkin Arrow and Bracer bring towers to 11 tiles. Competitive games rule out the
 # unique technologies that add more.
 TOWER_REACH = 11
 # Grass, leaves, forest and road: the terrain towers can be built on.
@@ -427,7 +427,7 @@ def test_the_keeper_islets_lie_beyond_every_tower_trebuchet_and_raider(
     assert reachable([throne]) <= cells(islet)
     width = data["map"]["width"]
     assert data["map"]["tiles"][watch[1] * width + watch[0]][0] in BUILDABLE_TERRAIN
-    # An Accursed Tower reaches 13 tiles plus the three blacksmith ranges; a trebuchet 16.
+    # An Accursed Tower reaches 13 tiles plus the three blacksmith ranges. A trebuchet 16.
     for kx, ky in (point(king), point(tower)):
         for key in data.get("anchors", {}):
             if not any(
@@ -470,7 +470,7 @@ def test_every_cleared_lane_has_its_own_open_tile_beside_the_keepers() -> None:
 def test_only_arrivals_every_lane_reaches_or_flags_mark_ignore_units_standing_there(
     player: int,
 ) -> None:
-    """Units standing on a lane's own arrival spots are its own and can move away; trade area
+    """Units standing on a lane's own arrival spots are its own and can move away. Trade area
     spots and the King stall are open to every lane, and the original's flags mark the bought
     villagers' spots, so nothing standing there holds them."""
     from typing import cast
@@ -551,7 +551,7 @@ def outer_row(lane: int, side: str) -> int:
 @pytest.mark.parametrize("row", ISLET_ROWS)
 def test_siege_islet_rows_flank_every_lane(row: int) -> None:
     """Row 1 lies north of lane 1 and the last row south of lane 7, six tiles from that lane's
-    outer tower row; every other row lies between two lanes, seven tiles from both, so neither
+    outer tower row. Every other row lies between two lanes, seven tiles from both, so neither
     side is nearer to its trebuchets. Water rings every islet, so nothing walks on or off."""
     _, config = content()
     if row == 1:

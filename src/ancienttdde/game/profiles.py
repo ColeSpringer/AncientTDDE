@@ -1,6 +1,6 @@
 """Native triggers that apply a civilization profile's adjustments once a lane is initialized.
 
-The XS puts the lane's native effect set in its profile field at initialization; each set has
+The XS puts the lane's native effect set in its profile field at initialization. Each set has
 one trigger per lane, gated on that field, so every civilization sharing a set shares them.
 Kings, King prices, kill rewards, raider caps and tower attack are the XS's own business.
 """

@@ -1,4 +1,4 @@
-// Only DE API boundaries are substituted; the generated XS drives every transition.
+// Only DE API boundaries are substituted. The generated XS drives every transition.
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -76,7 +76,7 @@ constexpr int cModifyTech = 8;
 constexpr int cAttrSetTime = -1;
 constexpr int cAttrSetFoodCost = 0;
 constexpr int cAttrSetWoodCost = 1;
-// Each player's definition of a unit type's hit points once an effect changed them; units
+// Each player's definition of a unit type's hit points once an effect changed them. Units
 // created afterwards take them, as in DE.
 std::array<std::map<int, float>, 9> typeHitpoints{};
 void xsEffectAmount(int effect, int unit, int attribute, float amount, int player) {
@@ -120,7 +120,7 @@ int classOf(int type) {
 int enemy();
 // Queries of the enemy's units since the counter was last cleared.
 int enemyQueries = 0;
-// DE documents object and class queries only; there is no documented all-objects wildcard.
+// DE documents object and class queries only. There is no documented all-objects wildcard.
 int xsGetPlayerUnitIds(int player, int objectOrClass, int target = -1) {
     if (player > 0 && player == enemy()) ++enemyQueries;
     if (objectOrClass < 0) {
@@ -214,7 +214,7 @@ int xsGetObjectCount(int player, int type) {
 }
 // EMBEDDED_XS
 void require(bool ok, string message) { if (!ok) { std::cerr << message << '\n'; std::exit(1); } }
-// The units the shop sells each take one population; Kings, monks and trebuchets take none,
+// The units the shop sells each take one population. Kings, monks and trebuchets take none,
 // as the lane's setup makes them, and buildings and relics never did.
 int populationCost(int type) {
     switch (type) {
@@ -251,7 +251,7 @@ bool onLaneKeeper(int owner, vector pos) {
 // The keeper islet an enemy holding a lane slot uses, beyond every tower's reach.
 bool onKeeperSpot(vector pos, int x10, int y10) { return near(Unit{434, pos}, x10, y10); }
 bool onKeeperThrone(vector pos) { return onKeeperSpot(pos, cKeeperKingX10, cKeeperKingY10); }
-// A cleared lane owns nothing but its keeper King; the enemy's cleared lane keeps its King and
+// A cleared lane owns nothing but its keeper King. The enemy's cleared lane keeps its King and
 // a tower on the islet above instead, so a lobby's Standard victory never counts the enemy
 // destroyed.
 bool onlyKeepers(int player, bool enemy) {
@@ -313,7 +313,7 @@ void nativeEffects() {
         if (lane(p, fActive) && lane(p, fMessage)) { sent[p].push_back(lane(p, fMessage)); setLane(p, fMessage, 0); }
     }
 }
-// Waves clear the field each second; a lane's own Kings and life display stay.
+// Waves clear the field each second. A lane's own Kings and life display stay.
 void clearEnemies() {
     for (auto it = units.begin(); it != units.end();) {
         if (enemy() > 0 && it->second.owner == enemy()) { populationChange(it->second.owner, it->second.type, -1); it = units.erase(it); } else ++it;
@@ -369,7 +369,7 @@ void kingsOn(int player, int purchase, int count) {
     float y = (shopY1(purchase) + shopY2(purchase)) / 2 + 0.5f;
     for (int i=0; i<count; ++i) units.emplace(sequence++, Unit{cKing, {x, y, 0}, 75, player});
 }
-// Kings walk 1.32 tiles per game second in DE; the clock samples them once per second.
+// Kings walk 1.32 tiles per game second in DE. The clock samples them once per second.
 constexpr float KING_SPEED = 1.32f;
 std::vector<int> kingsAt(int player, float x, float y, int count, float spacing) {
     std::vector<int> ids;
@@ -430,7 +430,7 @@ std::vector<int> attackSteps(int player, int unit) {
     }
     return steps;
 }
-// The attack the XS added to any definition; keepers held in place are not among them.
+// The attack the XS added to any definition. Keepers held in place are not among them.
 std::vector<Applied> attackEffects() {
     std::vector<Applied> found;
     for (auto &a : applied) if (a.attribute == cAttack) found.push_back(a);
@@ -445,7 +445,7 @@ void buy(int player, int purchase) {
     for (int n=0; n<=cStillSamples; ++n) tick();
     require(bought[player].size()==before+1 && bought[player].back()==purchase, "The purchase was not made");
 }
-// The pierce armor the XS added to the enemy's definition of a unit, packed as attack is; the
+// The pierce armor the XS added to the enemy's definition of a unit, packed as attack is. The
 // armor a wave sets outright is not a step.
 int armorAdded(int unit) {
     int total = 0;
@@ -494,7 +494,7 @@ int main(int argc, char** argv) {
     if(test=="cleared_lanes") {
         // Each lane owns its berry mill (and its upgraded form) and one object from every other
         // class it starts with. A cleared lane keeps none of them, only one King beside slot 8's
-        // keepers, so DE does not defeat the slot; human lanes keep everything until they fall.
+        // keepers, so DE does not defeat the slot. Human lanes keep everything until they fall.
         std::array<std::vector<int>, 9> laneUnits{};
         for(int p=1;p<=7;++p) {
             for(int type: {68, 131, 293, 79, 128, 17, 601, 434, 50, 286}) {
@@ -603,7 +603,7 @@ int main(int argc, char** argv) {
         require(waveTimers >= 2, "Endless waves were not counted down");
     } else if(test=="endless_waves") {
         // The first endless wave sets every template enemy's hit points to the attribute's limit
-        // on the enemy's definition, once; every endless wave adds an armor step, and the notice
+        // on the enemy's definition, once. Every endless wave adds an armor step, and the notice
         // before it names the hit points and the total armor.
         start({4});
         select(4, cControlEndless); tick();
@@ -833,7 +833,7 @@ int main(int argc, char** argv) {
         require(bought[1]==std::vector<int>{pad} && kingsOnPad(1, pad)==0, "A crowd with shuffling Kings did not buy the pad");
     } else if(test=="shop_wanderer_recalled") {
         // A King sent into a pad by mistake and called back is over it for seconds as it walks
-        // in and out again; it never settles, so it never completes the purchase.
+        // in and out again. It never settles, so it never completes the purchase.
         start({1});
         int pad = cBuyAttack3Every30;
         int price = shopPrice(pad);
@@ -1008,7 +1008,7 @@ int main(int argc, char** argv) {
         tick(); tick();
         require(bought[3]==std::vector<int>{cBuyRelics}, "Collected relics did not reopen the purchase");
     } else if(test=="shop_monasteries") {
-        // DE counts the relics inside a lane's monasteries; the script adds the relics its monks
+        // DE counts the relics inside a lane's monasteries. The script adds the relics its monks
         // carry and, once the relic enclosure is bought, the enclosure's relics still lying loose,
         // against the room of every monastery the lane owns.
         start({3});
@@ -1142,7 +1142,7 @@ int main(int argc, char** argv) {
         techStates[{cKeepTech, 4}]=cTechStateDisabled;
         techStates[{cBombardTowerTech, 4}]=cTechStateDisabled;
         advanceTo(sPreparation);
-        require(mentions("P4 towers: Watch Tower, Guard Tower; unavailable: Keep, Bombard Tower")==1,
+        require(mentions("P4 towers: Watch Tower, Guard Tower. Unavailable: Keep, Bombard Tower")==1,
                 "Tower access was not explained");
     } else if(test=="shop_walk_across" || test=="shop_walk_rows" || test=="shop_single_file") {
         start({1});
@@ -1192,7 +1192,7 @@ int main(int argc, char** argv) {
                 "Cleared spawn did not deliver");
     } else if(test=="spawn_built_over") {
         // A camp or mill of the lane's over a bought villager's spot holds the purchase back,
-        // as checked creation would; one beside it does not.
+        // as checked creation would. One beside it does not.
         start({1});
         int key = cSpawnStride + cBuyResourceVillagers;
         int price = shopPrice(cBuyResourceVillagers);
@@ -1295,7 +1295,7 @@ int main(int argc, char** argv) {
         start({4});
         for(int tech : {cGuardTowerTech, cKeepTech, cBombardTowerTech}) techStates[{tech, 4}]=cTechStateDisabled;
         advanceTo(sPreparation);
-        require(mentions("P4 towers: Watch Tower; unavailable: Guard Tower, Keep, Bombard Tower")==1,
+        require(mentions("P4 towers: Watch Tower. Unavailable: Guard Tower, Keep, Bombard Tower")==1,
                 "A lane without upgrades was not told it keeps Watch Towers");
     } else if(test=="shop_requires_together") {
         // Kings on both age pads at once, or Imperial Kings waiting first: Castle Age always sells first.
@@ -1346,7 +1346,7 @@ int main(int argc, char** argv) {
         start({2,5});
         require(xsTriggerVariable(vChooser)==2 && xsTriggerVariable(vPvp)==0,
                 "Competition did not default to PvP off, chosen by the first lane");
-        require(mentions("P2: PvP is off; select PvP on below the shop within " + ancientText(cChoice) + " game seconds")==1,
+        require(mentions("P2: PvP is off. Select PvP on below the shop within " + ancientText(cChoice) + " game seconds")==1,
                 "The chooser was not invited to switch PvP on");
         require(xsTriggerVariable(vDifficulty)==lobbyLevel(5) && kingGold(xsTriggerVariable(vDifficulty))==1500,
                 "Competition did not play the lobby's Easiest setting as Easy");
@@ -1387,10 +1387,10 @@ int main(int argc, char** argv) {
         lobbyDifficulty=9;
         start({4});
         require(xsTriggerVariable(vDifficulty)==cFallbackLevel && kingGold(cFallbackLevel)==2000, "An unknown lobby setting did not play Normal");
-        require(mentions("Lobby difficulty 9 is not recognized; playing Normal.")==1, "The unrecognized setting was not reported");
+        require(mentions("Lobby difficulty 9 is not recognized. Playing Normal.")==1, "The unrecognized setting was not reported");
         restart({2,5});
         require(xsTriggerVariable(vDifficulty)==cFallbackLevel, "An unknown lobby setting did not play Normal in competition");
-        require(mentions("Lobby difficulty 9 is not recognized; playing Normal.")==1, "The unrecognized setting was not reported to the rivals");
+        require(mentions("Lobby difficulty 9 is not recognized. Playing Normal.")==1, "The unrecognized setting was not reported to the rivals");
     } else if(test=="options_choose") {
         start({3});
         select(3, cControlEndless); tick();
@@ -1432,7 +1432,7 @@ int main(int argc, char** argv) {
                 "Standard did not fix the options of a competitive game");
         require(mentions("P2 chose Standard with PvP off")==1, "The Standard choice was not announced");
     } else if(test=="options_pvp_only_its_own") {
-        // Only the PvP on control switches PvP on; a code past it changes nothing.
+        // Only the PvP on control switches PvP on. A code past it changes nothing.
         start({2,5});
         ancientChoose(2, cControlPvpOn + 1);
         require(xsTriggerVariable(vPvp)==0 && xsTriggerVariable(vLocked)==0 && phase()==sSetup,
@@ -1601,7 +1601,7 @@ int main(int argc, char** argv) {
         require(resource(4, cAttributeStone)==2 * cKillStone * 150 / 100 && resource(4, cAttributeWood)==2 * cKillWood * 150 / 100,
                 "Scaled kill rewards lost their rounding across rewards");
     } else if(test=="profile_purchase") {
-        // A granted once-only purchase is owned from the start; its units stand where a bought
+        // A granted once-only purchase is owned from the start. Its units stand where a bought
         // one's would once the lane's setup has run, its tower upgrade follows and it cannot
         // be bought again.
         civilizations[2]=100;
@@ -1645,7 +1645,7 @@ int main(int argc, char** argv) {
         civilizations[5]=100; civilizations[6]=101;
         start({5,6});
         advanceTo(sPreparation);
-        require(mentions("P5 Testone: +2 starting Kings, Kings cost 20 percent less gold, kill rewards pay 50 percent more stone and wood, Castle Age and Guard Tower from the start, Castle (+20 population, castle research) from the start, Bombard Tower attack +400 from the start, +1 land raider with PvP on; a King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100) + " gold.")==1,
+        require(mentions("P5 Testone: +2 starting Kings, Kings cost 20 percent less gold, kill rewards pay 50 percent more stone and wood, Castle Age and Guard Tower from the start, Castle (+20 population, castle research) from the start, Bombard Tower attack +400 from the start, +1 land raider with PvP on. A King per " + ancientText(kingGold(xsTriggerVariable(vDifficulty)) * 80 / 100) + " gold.")==1,
                 "The civilization line was not announced with the lane's King price");
         require(mentions("P6 Testtwo: no adjustments.")==1, "A neutral profile was not announced");
         require(lane(6, fProfile)==-1, "A neutral profile did not record that it has no native effect set");
@@ -1749,7 +1749,7 @@ int main(int argc, char** argv) {
         // never always to the lower slot.
         competitive({1,7});
         int price = shopPrice(cBuySiege);
-        // The purchase lands on the third clock after the Kings arrive; make that clock put P7 first.
+        // The purchase lands on the third clock after the Kings arrive. Make that clock put P7 first.
         auto before=[](int clock){
             for(int turn=0;turn<7;++turn) {
                 if(ancientTurn(clock, turn)==7) return true;
@@ -1863,7 +1863,7 @@ int main(int argc, char** argv) {
         setLane(1,fLives,0); setLane(2,fLives,0); tick(true); tick(true);
         require(phase()==sDefeat && xsTriggerVariable(vWinner)==3, "The defeat did not go to the enemy");
     } else if(test=="enemy_first_slot") {
-        // The computer may hold a lower number than the humans; the lanes are then the others.
+        // The computer may hold a lower number than the humans. The lanes are then the others.
         lobby({2,3}, 3);
         require(enemy()==1 && lane(2,fActive)==1 && lane(3,fActive)==1 && lane(1,fActive)==0, "The computer in the first slot was not made the enemy");
         require(cleanups[1]==1 && onlyKeepers(1, true) && grants[1]==0, "The enemy's lane was not cleared, keeping its King and tower");
@@ -1902,7 +1902,7 @@ int main(int argc, char** argv) {
         for(auto &[id, u] : units) if(u.type==waveUnit(0)) require(u.owner==7, "An enemy belonged to another player");
     } else if(test=="wave_hitpoints") {
         // Each scheduled wave sets its enemies' hit points on the enemy's definition as it
-        // starts, within the attribute's limit, so the first batch already carries them; the
+        // starts, within the attribute's limit, so the first batch already carries them. The
         // schedule's pierce armor is set the same way, and no other wave touches armor.
         start({2}); advanceTo(sWave);
         int difficulty = xsTriggerVariable(vDifficulty);
@@ -1919,7 +1919,7 @@ int main(int argc, char** argv) {
         require(hitpointsSet(enemy(), waveUnit(cWaveCount - 1)).back()==float(cHitPointCap), "A boss's definition was not capped at the attribute's limit");
     } else if(test=="shop_population") {
         // Bought villagers need population room: once a lane's starting room is used up, the
-        // refusal keeps the Kings; room for one is not room for two.
+        // refusal keeps the Kings. Room for one is not room for two.
         start({1});
         attributes[1][cAttributePopulationCap] = 0;
         int price = shopPrice(cBuyBuildingVillagers);
@@ -1950,7 +1950,7 @@ int main(int argc, char** argv) {
                 "Traders up to the limit were refused");
     } else if(test=="population_repeat") {
         // The population purchase sells again and again until the lane's room reaches the
-        // limit; the native trigger adds its room (the content's 65) each time.
+        // limit. The native trigger adds its room (the content's 65) each time.
         start({1});
         attributes[1][cAttributePopulation] = 30;
         for(int round=0; round<3; ++round) { buy(1, cBuyPopulation); attributes[1][cAttributePopulationCap] += cPopulationAmount; }
@@ -2010,7 +2010,7 @@ int main(int argc, char** argv) {
         tick();
         require(lane(1,fFallen)==1 && mentions("Result:")==1 && phase()==sDefeat, "The fallen lane was not marked once the result was posted");
     } else if(test=="fallen_competitive") {
-        // An eliminated competitor is marked a tick later; the survivors never are.
+        // An eliminated competitor is marked a tick later. The survivors never are.
         start({1,7}); advanceTo(sWave);
         setLane(1, fLives, 0);
         tick();
@@ -2027,7 +2027,7 @@ int main(int argc, char** argv) {
         for(int n=0;n<4;++n) tick();
         require(bought[1].empty() && told(1, cMessagePopulationLimit)==1 && told(1, cMessagePopulation)==0, "A lane at the limit was told to buy room");
     } else if(test=="next_line_armor") {
-        // The notice before a wave states the armor the schedule gives it; a wave that keeps
+        // The notice before a wave states the armor the schedule gives it. A wave that keeps
         // its unit's own armor says nothing of armor.
         start({2});
         int armored=-1; for(int w=1;w<cWaveCount;++w) if(wavePierceArmor(w)>=0) { armored=w; break; }

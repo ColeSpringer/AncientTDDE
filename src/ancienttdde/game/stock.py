@@ -1,6 +1,6 @@
 """The stock DE data snapshot the balance model reads: towers, enemies, raiders, siege, techs.
 
-`tools/dat/stock_stats.py` writes the snapshot from the installed game's data file; the loader
+`tools/dat/stock_stats.py` writes the snapshot from the installed game's data file. The loader
 only checks it. Attack and armor values are per damage class, as the data file keeps them.
 """
 
@@ -60,7 +60,7 @@ WATCHED_TECHNOLOGIES: dict[str, int] = {
         "IMPERIAL_AGE",
     )
 } | {"WAR_GALLEY": 34}
-# The units every snapshot holds; the wave schedule's enemies are required on top of them.
+# The units every snapshot holds. The wave schedule's enemies are required on top of them.
 REQUIRED_UNITS = frozenset(
     TOWER_BUILDINGS
     | RAIDERS["land"]
@@ -171,7 +171,7 @@ class Stock:
 
     def unit(self, name: str) -> StockUnit:
         if name not in self.units:
-            raise ValueError(f"Stock snapshot lacks a unit: {name}; regenerate it")
+            raise ValueError(f"Stock snapshot lacks a unit: {name}. Regenerate it")
         return self.units[name]
 
     def check_waves(self, balance: Balance) -> None:

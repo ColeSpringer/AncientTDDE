@@ -258,7 +258,7 @@ def validate_references(scenario: ScenarioSnapshot) -> list[dict[str, JSONValue]
 
 
 def scenario_digest(snapshot: ScenarioSnapshot) -> str:
-    # Scenario headers can carry save metadata; gameplay-relevant content is stable.
+    # Scenario headers can carry save metadata. Gameplay-relevant content is stable.
     terrain = snapshot["map"]
     if "tiles" not in terrain:
         raise ValueError("A scenario digest needs the inspected terrain tiles")

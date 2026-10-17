@@ -60,10 +60,10 @@ def instructions(probes: tuple[ProbeDefinition, ...]) -> str:
         "",
         "Open each scenario in the DE editor. " + TEST_SETTINGS + " Game-seconds govern timers. "
         "Other active slots are computers using embedded passive AI. "
-        "These are manual experiments; generated/reloaded files do not establish engine behavior.",
+        "These are manual experiments. Generated/reloaded files do not establish engine behavior.",
         "",
         "Record the game build, tester, observations and pass/fail for every case. "
-        "`results.json` starts without observations; rebuilding preserves recorded runs.",
+        "`results.json` starts without observations. Rebuilding preserves recorded runs.",
         "",
         "```bash",
         "uv run ancienttdde probe record --suite .build/probes --case payments.excess "

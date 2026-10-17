@@ -2,9 +2,9 @@
 
 DE numbers a multiplayer game's players by their lobby colors and skips closed slots, so the
 computer the host left in the last slot may hold any number. The XS takes the highest-numbered
-computer in the game as the enemy; the native diplomacy and result effects exist once per
+computer in the game as the enemy. The native diplomacy and result effects exist once per
 number it may hold, gated on the enemy variable. The XS creates the waves and sets their hit
-points and armor itself; the enemy's own AI walks them, since a computer in a lane slot
+points and armor itself. The enemy's own AI walks them, since a computer in a lane slot
 ignores native orders online.
 """
 
@@ -22,7 +22,7 @@ from ancienttdde.scenario.triggers import TriggerHandle, condition, effect
 
 # The player numbers the enemy may hold.
 ENEMY_SLOTS = range(1, 9)
-# The on-screen timers: every wave countdown shares one; the siege stages and the choice
+# The on-screen timers: every wave countdown shares one. The siege stages and the choice
 # window, which can run beside it, have their own.
 WAVE_TIMER = 0
 SIEGE_TIMER = 1
@@ -33,7 +33,7 @@ LANE_SLOTS = range(1, 8)
 # enemies are sent to.
 BAND_GOAL = 508
 WALK_GOAL = 510
-# The most units one AI search returns; a band's search stays within its lane's cap.
+# The most units one AI search returns. A band's search stays within its lane's cap.
 WALK_SEARCH = 240
 # The DE AI script constants the walk rules use, with the values DE's own scripts define.
 WALK_CONSTANTS = {
@@ -105,7 +105,7 @@ def wave_countdown(game: Game, trigger: TriggerHandle, number: int, key: str, se
 
 def wave_warnings(game: Game, balance: Balance) -> None:
     """Count down the choice window, then to each wave once its preparation or intermission
-    begins; the script asks for the window's, the first wave's and each endless wave's
+    begins. The script asks for the window's, the first wave's and each endless wave's
     countdown as it starts. The status line follows: the wait while it counts down, the wave
     once it starts."""
     # The engine asks for this countdown as it counts the window's first second off.
@@ -156,11 +156,11 @@ def wave_warnings(game: Game, balance: Balance) -> None:
 
 def game_status(game: Game, balance: Balance) -> None:
     """Two lines share the wave number and countdown: the wait for the next wave, shown from
-    the start, and the wave that is spawning; the wave triggers switch between them."""
+    the start, and the wave that is spawning. The wave triggers switch between them."""
     wave = game.names.resolve("variable", "game.display_wave")
     countdown = game.names.resolve("variable", "game.countdown")
     goal = (
-        f"Survive {len(balance.waves)} scheduled waves; Endless runs and sudden death "
+        f"Survive {len(balance.waves)} scheduled waves. Endless runs and sudden death "
         "continue past them."
     )
     objective(

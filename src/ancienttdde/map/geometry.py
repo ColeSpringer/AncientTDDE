@@ -1,4 +1,4 @@
-"""Conservative tile connectivity checks; the game remains the pathing authority."""
+"""Conservative tile connectivity checks. The game remains the pathing authority."""
 
 import math
 from collections import deque
@@ -19,7 +19,7 @@ type Cell = tuple[int, int]
 
 
 class Position(TypedDict):
-    """A stored object position; a placed unit is one."""
+    """A stored object position. A placed unit is one."""
 
     x: float
     y: float

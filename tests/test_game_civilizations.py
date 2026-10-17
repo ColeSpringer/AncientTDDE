@@ -354,14 +354,14 @@ def test_profile_worth_stays_within_the_agreed_bands(level: str) -> None:
 
     # Any lobby can play any level, so the bands hold at each. A bonus paid in gold is worth
     # more Kings on Easy and fewer on Hard, while the run's income, part of it paid in Kings,
-    # moves less; a bonus in Kings holds its worth at every level. A profile paid wholly in
+    # moves less. A bonus in Kings holds its worth at every level. A profile paid wholly in
     # gold needs about two fifths more than Normal's floor to hold on Hard.
     base = load_inputs(ROOT)
     difficulty = replace(base.balance.difficulty, default=base.balance.difficulty.index(level))
     inputs = replace(base, balance=replace(base.balance, difficulty=difficulty))
     # Slight uniqueness, measured against what a lane earns over the run without buying
     # anything: every profile is worth about 2.6 to 7.1 percent of that income (one to two
-    # Kings of the thirty-one a shorter schedule once paid); with the civilization's own
+    # Kings of the thirty-one a shorter schedule once paid). With the civilization's own
     # bonuses counted, no one holds more than 9.7 percent, and PvP adds at most 3.2 percent.
     income = baseline_income(inputs, Assumptions()).total_kings
     floor, ceiling = 0.026 * income, 0.071 * income
@@ -416,7 +416,7 @@ def test_a_known_civilization_reads_its_own_line() -> None:
     huns = profiles.by_id(17)
     assert huns is not None
     text = profiles.text(huns)
-    assert text.startswith(huns.identity + "; adjustments: ")
+    assert text.startswith(huns.identity + ". Adjustments: ")
     assert "+1 land raider with PvP on" in text
 
 
@@ -431,7 +431,7 @@ def test_the_chat_line_holds_only_the_adjustments_and_stays_short() -> None:
 
     plain = Civilization("PLAIN", 100, "a plain civilization", Profile())
     assert profiles.chat(plain) == "no adjustments"
-    # Seven lanes announce these at once; a line must not scroll the others away.
+    # Seven lanes announce these at once. A line must not scroll the others away.
     assert all(len(profiles.chat(c)) <= 150 for c in profiles.civilizations)
 
 
@@ -565,7 +565,7 @@ def test_starting_towers_come_in_mirrored_pairs_the_civilization_can_build() -> 
 
 def test_the_default_profile_has_one_display_name() -> None:
     from ancienttdde.game.civilizations import DEFAULT_NAME
-    from ancienttdde.game.instructions import instructions
+    from ancienttdde.game.instructions import hints
 
     assert DEFAULT_NAME == "Any other civilization"
-    assert f"- {DEFAULT_NAME}: " in instructions(balance(), shop(), load())
+    assert f"- {DEFAULT_NAME}: " in hints(balance(), shop(), load())

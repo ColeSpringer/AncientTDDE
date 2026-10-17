@@ -8,10 +8,10 @@ from the first second. Sign objects cannot be renamed, so the shop has none.
 import math
 from collections.abc import Iterable
 
+from ancienttdde.common.credits import CREDIT
 from ancienttdde.game.catalog import Shop, display_captions
 from ancienttdde.game.config import Balance, EngineLane
 from ancienttdde.game.controls import control_captions
-from ancienttdde.game.instructions import CREDIT
 from ancienttdde.game.sites import Tile
 from ancienttdde.game.triggers import Game
 from ancienttdde.models import Rect
@@ -73,7 +73,7 @@ def arrival_text(origin: str, arrival: Tile, bought: tuple[Tile, ...]) -> str:
     if arrival in bought:
         return text + ", and bought villagers"
     if any(math.dist(arrival, tile) <= BOUGHT_REACH for tile in bought):
-        return text + "; bought villagers nearby"
+        return text + ". Bought villagers nearby"
     return text
 
 

@@ -1,7 +1,7 @@
 """The balance model: what towers deal, what waves demand, what Kings buy and what each
 civilization profile is worth, from the content and the stock data snapshot.
 
-Everything here is arithmetic over the definitions; the in-game checks and probes measure what
+Everything here is arithmetic over the definitions. The in-game checks and probes measure what
 the model assumes. Values are expressed in Kings where they can be compared.
 """
 
@@ -47,9 +47,9 @@ from ancienttdde.map.models import MapAnchor
 
 # Caravan, a starting technology, speeds traders up by this factor (DE data).
 CARAVAN_SPEED = 1.2
-# Food has no shop price; technology costs value it at this many per King.
+# Food has no shop price. Technology costs value it at this many per King.
 FOOD_PER_KING = 3000
-# A tile of tower range covers more of the lane; its worth in Kings when a profile adds it.
+# A tile of tower range covers more of the lane. Its worth in Kings when a profile adds it.
 RANGE_KINGS = 0.25
 # A starting tower saves its cost and fires from the first wave: each point of the damage per
 # second it deals against the knight line's armor is worth this many Kings.
@@ -63,10 +63,10 @@ TOWER_FAMILY = "towers"
 
 @dataclass(frozen=True)
 class Assumptions:
-    """Numbers the data files cannot give; the trade gold per trip was measured in play."""
+    """Numbers the data files cannot give. The trade gold per trip was measured in play."""
 
     # Gold a trader brings home per trip on the map's full-length routes: the least seen in
-    # DE runs; some civilizations bring up to 137.
+    # DE runs. Some civilizations bring up to 137.
     trade_gold_per_trip: int = 110
     starting_carts: int = 8
     starting_cogs: int = 4
@@ -77,7 +77,7 @@ class Assumptions:
     villager_stone_per_minute: int = 20
     # Towers a lane builds over a run, for pricing a stone discount.
     towers_per_run: int = 24
-    # A tower hit point the siege destroys and a raider slot count with PvP on; a point of
+    # A tower hit point the siege destroys and a raider slot count with PvP on. A point of
     # population room counts in every game, near the shop's price for one.
     tower_hit_point_kings: float = 0.0005
     raider_slot_kings: float = 0.5
@@ -527,7 +527,7 @@ class ProfileValue:
 
 def attack_kings(family: str, amount: int, inputs: Inputs, exchange: Rates) -> float:
     """A flat attack bonus, held from the first wave, is worth what the shop charges for it on
-    the smallest rung of the family's ladder; a family without a ladder is priced at the
+    the smallest rung of the family's ladder. A family without a ladder is priced at the
     towers' average by its share of the tower definitions."""
     rungs: list[tuple[int, int]] = []
     for purchase in inputs.shop.purchases:

@@ -53,7 +53,7 @@ def build_probes(root: Path, output: Path | None = None, *, only: list[str] | No
     )
     previous = recorded_selection(directory)
     if previous is not None and previous != [p.id.value for p in definitions]:
-        raise ValueError("Existing probe suite uses a different selection; choose another output")
+        raise ValueError("Existing probe suite uses a different selection. Choose another output")
     inputs = current_inputs(root)
     existing = None
     if (directory / "results.json").exists():
@@ -87,7 +87,7 @@ def build_probes(root: Path, output: Path | None = None, *, only: list[str] | No
                 for r in c["runs"]
             ):
                 raise ValueError(
-                    "Recorded results refer to different probe content; choose another output"
+                    "Recorded results refer to different probe content. Choose another output"
                 )
         (staging / "instructions.md").write_text(instructions(definitions), encoding="utf-8")
         artifacts = hash_records(staging, sorted(p.name for p in staging.iterdir()))

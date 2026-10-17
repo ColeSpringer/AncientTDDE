@@ -89,7 +89,7 @@ def task_traders(
 def apply(
     game: Game, trigger: TriggerHandle, lane: EngineLane, purchase: Purchase, balance: Balance
 ) -> None:
-    """Add the native effects of a paid purchase; XS has already created its units."""
+    """Add the native effects of a paid purchase. XS has already created its units."""
     player = lane.player
     sites = lane.sites
     match purchase.effect:
@@ -191,7 +191,7 @@ def lane_purchases(game: Game, lane: EngineLane, shop: Shop, balance: Balance) -
         game.set_value(trigger, f"{prefix}.purchase", 0)
 
 
-# A shop sign stands within this many tiles of the pad it once labelled; row-end signs are far off.
+# A shop sign stands within this many tiles of the pad it once labelled. Row-end signs are far off.
 SIGN_REACH = 4
 
 
@@ -231,7 +231,7 @@ def place_displays(game: Game, shop: Shop) -> None:
 def place_gates(game: Game, shop: Shop, rows: Mapping[str, list[list[Tile]]]) -> None:
     """Gaia Hay Stacks seal the raider and siege pads until PvP is switched on, across each
     pad's open row nearest the entrance its flags were laid out from (the farthest row comes
-    first); nothing may stand where a gate goes."""
+    first). Nothing may stand where a gate goes."""
     standing = {(int(u.x), int(u.y)) for u in game.scenario.unit_manager.get_all_units()}
     for purchase in shop.purchases:
         if not isinstance(purchase.effect, Raider | SiegePowerUp):
